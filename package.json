@@ -21,6 +21,7 @@
     "should": "^10.0.0"
   },
   "dependencies": {
-    "capital-models": "git+https://git@github.com/pinkgorilla/capital-models.git"
+    "capital-models": "git+https://git@github.com/pinkgorilla/capital-models.git",
+    "should": "^10.0.0"
   }
 }
