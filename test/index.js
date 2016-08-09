@@ -4,5 +4,7 @@ var test = function (name, path) {
     })
 }
 
-test('fabric', './fabric');  
+test('@textile', './textile'); 
+test('@fabric', './fabric');  
  
+

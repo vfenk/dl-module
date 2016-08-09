@@ -5,6 +5,20 @@ else {
 
     var should = require('should');
 
+    var validateTextile = function (data) {
+        data.should.not.equal(null);
+        data.should.instanceof(Object);
+
+        data.should.have.property('code');
+        data.code.should.instanceof(String);
+
+        data.should.have.property('name');
+        data.code.should.instanceof(String);
+
+        data.should.have.property('description');
+        data.description.should.instanceof(String);
+    }
+
     var validateFabric = function (data) {
         data.should.not.equal(null);
         data.should.instanceOf(Object);
@@ -35,6 +49,8 @@ else {
     }
 
     exports.core = {
-        fabric: validateFabric
+        fabric: validateFabric,
+        textile: validateTextile
+
     }
 }
