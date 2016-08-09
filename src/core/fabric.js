@@ -1,6 +1,7 @@
 'use strict'
 
 var BaseModel = require('capital-models').BaseModel;
+var UoM = require('./UoM-docs').UoM;
 
 module.exports = class Fabric extends BaseModel {
     constructor(source) {
@@ -13,8 +14,7 @@ module.exports = class Fabric extends BaseModel {
         this.construction = '';
         this.thread = '';
         this.width = 0;
-        this.largeUnit = '';
-        this.smallUnit = '';
+        this.UoM = new UoM();
         this.copy(source);
     }
 }
