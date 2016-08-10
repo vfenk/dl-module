@@ -101,11 +101,24 @@ else {
         data.should.have.property('convertedUnit');
         data.convertedUnit.should.instanceOf(String);
     }
+    var validateAccessories = function (data) {
+        data.should.not.equal(null);
+        data.should.instanceOf(Object);
 
+        data.should.have.property('code');
+        data.code.should.be.String();
+
+        data.should.have.property('name');
+        data.name.should.be.String();
+
+        data.should.have.property('description');
+        data.description.should.be.String();
+    }
     exports.core = {
         fabric: validateFabric,
         textile: validateTextile,
         accessories: validateAccessories,
         UoMDocs: validateUoMDocs
     }
+
 }
