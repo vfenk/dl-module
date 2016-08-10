@@ -9,10 +9,9 @@ module.exports = class Buyer extends BaseModel {
         // Define properties.  
         this.code = '';
         this.name = '';
-        this.description = '';
-        this.phone='';
-        this.address='';
-        this.local= true;
+        this.address = '';
+        this.contact='';
+        this.tempo='';
 
         this.copy(source);
     }
