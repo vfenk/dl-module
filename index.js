@@ -10,4 +10,3 @@ module.exports = {
     map: require('./src/map'),
     validator: require('./test/validator')
 }
-
