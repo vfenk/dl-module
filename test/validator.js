@@ -13,10 +13,15 @@ else {
         data.code.should.instanceof(String);
 
         data.should.have.property('name');
-        data.code.should.instanceof(String);
+        data.name.should.instanceof(String);
 
         data.should.have.property('description');
         data.description.should.instanceof(String);
+        
+        data.should.have.property('UoM');
+        data.UoM.should.instanceOf(Object);
+        validateUoMDocs(data.UoM);
+        
     }
 
     var validateFabric = function (data) {
