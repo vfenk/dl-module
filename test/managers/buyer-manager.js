@@ -79,10 +79,9 @@ it(`#03. should success when update created data`, function(done) {
 
     createdData.code += '[updated]';
     createdData.name += '[updated]';
-    createdData.description += '[updated]';
-    createdData.phone += '[updated]';
     createdData.address += '[updated]';
-    createdData.local += '[updated]';
+    createdData.contact += '[updated]';
+    createdData.tempo += '[updated]';
 
     instanceManager.update(createdData)
         .then(id => {
@@ -99,7 +98,8 @@ it(`#04. should success when get updated data with id`, function(done) {
         .then(data => {
             data.code.should.equal(createdData.code);
             data.name.should.equal(createdData.name);
-            data.description.should.equal(createdData.description);
+            data.address.should.equal(createdData.address);
+           // data.contact.should.equal(createdData.contact);
             done();
         })
         .catch(e => {
