@@ -1,14 +1,16 @@
 var validate = require('./validator').core;
 
-it("#05. UoM should valid", function () {
-    var UoM = require('../src/core/UoM-docs').UoM;
+it("#04. Sparepart should valid", function(){
+    var Sparepart = require('../src/core/sparepart');
     var UoM_Template = require('../src/core/UoM-docs').UoM_Template;
+    var UoM = require('../src/core/UoM-docs').UoM;
 
+    var sparepart = new Sparepart();
     var template = new UoM_Template({
         mainUnit: 'M',
         mainValue: 1,
         convertedUnit: 'M',
-        convertedValue: 1
+        convertedValue: 1 
     });
 
     var _units = [];
@@ -18,5 +20,7 @@ it("#05. UoM should valid", function () {
         default: template,
         units: _units
     });
-    validate.UoMDocs(uom);
+
+    sparepart.UoM = uom;
+    validate.sparepart(sparepart);
 }) 
