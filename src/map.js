@@ -4,6 +4,7 @@ module.exports = {
         Textile: 'textiles',
         Accessories: 'accessories',
         Buyer: 'buyers',
-        Supplier: 'suppliers'
+        Supplier: 'suppliers',
+        UoM: 'unit-of-measurement'
     }
 }
