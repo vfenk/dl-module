@@ -1,5 +1,6 @@
 var validate = require('./validator').core;
 
+
 it("#04. Sparepart should valid", function () {
     var Sparepart = require('../src/core/sparepart');
     var UoM_Template = require('../src/core/UoM').UoM_Template;

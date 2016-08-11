@@ -20,7 +20,6 @@ else {
 
         data.should.have.property('UoM');
         data.UoM.should.instanceOf(Object);
-
         validateUoMDocs(data.UoM);
 
     }
