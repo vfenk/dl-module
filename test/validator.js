@@ -20,6 +20,7 @@ else {
 
         data.should.have.property('UoM');
         data.UoM.should.instanceOf(Object);
+
         validateUoMDocs(data.UoM);
 
     }
@@ -39,8 +40,8 @@ else {
 
         data.should.have.property('UoM');
         data.UoM.should.instanceOf(Object);
-        validateUoMDocs(data.UoM);
 
+        validateUoMDocs(data.UoM);
     }
 
     var validateFabric = function (data) {
@@ -67,6 +68,7 @@ else {
 
         data.should.have.property('UoM');
         data.UoM.should.instanceOf(Object);
+
         validateUoMDocs(data.UoM);
     }
 
@@ -85,6 +87,7 @@ else {
 
         data.should.have.property('UoM');
         data.UoM.should.instanceOf(Object);
+
         validateUoMDocs(data.UoM);
     }
 

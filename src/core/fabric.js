@@ -1,7 +1,7 @@
 'use strict'
 
 var BaseModel = require('capital-models').BaseModel;
-var UoM = require('./UoM-docs').UoM;
+var UoM = require('./UoM').UoM;
 
 module.exports = class Fabric extends BaseModel {
     constructor(source) {

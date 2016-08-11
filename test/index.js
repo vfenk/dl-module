@@ -7,5 +7,5 @@ var test = function (name, path) {
 test('@accessories', './accessories');
 test('@fabric', './fabric');
 test('@textile', './textile');
+test('@uom', './UoM');
 test('@sparepart', './sparepart');
-test('@uom', './UoM-docs');
