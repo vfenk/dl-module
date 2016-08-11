@@ -126,12 +126,54 @@ else {
         data.should.have.property('convertedUnit');
         data.convertedUnit.should.instanceOf(String);
     }
+    
+    var validateBuyer = function (data) {
+        data.should.not.equal(null);
+        data.should.instanceOf(Object);
+
+        data.should.have.property('code');
+        data.code.should.instanceOf(String);
+
+        data.should.have.property('name');
+        data.name.should.instanceOf(String);
+
+        data.should.have.property('address');
+        data.address.should.instanceOf(String);
+        
+        data.should.have.property('contact');
+        data.contact.should.instanceOf(String);
+
+        data.should.have.property('tempo');
+        data.tempo.should.instanceOf(Number);
+    }
+    
+    var validateSupplier = function (data) {
+        data.should.not.equal(null);
+        data.should.instanceOf(Object);
+
+        data.should.have.property('code');
+        data.code.should.instanceOf(String);
+
+        data.should.have.property('name');
+        data.name.should.instanceOf(String);
+
+        data.should.have.property('address');
+        data.address.should.instanceOf(String);
+        
+        data.should.have.property('contact');
+        data.contact.should.instanceOf(String);
+
+        data.should.have.property('import');
+        data.import.should.instanceOf(Boolean);
+    }
 
     exports.core = {
         fabric: validateFabric,
         textile: validateTextile,
         accessories: validateAccessories,
         sparepart: validateSparepart,
-        UoMDocs: validateUoMDocs
+        UoMDocs: validateUoMDocs,
+        buyer: validateBuyer,
+        supplier: validateSupplier
     }
 }
