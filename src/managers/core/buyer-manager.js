@@ -226,6 +226,9 @@ module.exports = class BuyerManager {
 
                     if (!valid.name || valid.name == '')
                         errors["name"] = "name is required";
+                        
+                    if(Number.isInteger(parseInt(valid.tempo))===false)
+                        errors["tempo"] = "tempo must be integer";
 
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
