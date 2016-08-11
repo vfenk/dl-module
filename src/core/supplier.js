@@ -9,7 +9,7 @@ module.exports = class Supplier extends BaseModel {
         this.code = '';
         this.name = '';
         this.address = '';
-        this.contact='';
+        this.contact = '';
         this.import = true;
 
         this.copy(source);
