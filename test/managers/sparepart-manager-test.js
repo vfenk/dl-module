@@ -1,20 +1,21 @@
 var helper = require("../helper");
-var TextileManager = require("../../src/managers/core/textile-manager");
+var SparepartManager = require("../../src/managers/core/sparepart-manager");
 var instanceManager = null;
-require("should");
+var should = require("should");
 
 function getData() {
-    var Textile = require('dl-models').core.Textile;
+    var Sparepart = require('dl-models').core.Sparepart;
     var UoM = require('dl-models').core.UoM;
     var UoM_Template = require('dl-models').core.UoM_Template;
-    var textile = new Textile();
+
+    var sparepart = new Sparepart();
     var uom_template = new UoM_Template({
         mainValue: 1,
         mainUnit: 'M',
         convertedValue: 1,
         convertedUnit: 'M'
     });
-    var _uom_units = [];
+     var _uom_units = [];
     _uom_units.push(uom_template);
 
     var uom = new UoM({
@@ -27,18 +28,18 @@ function getData() {
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
 
-    textile.code = code;
-    textile.name = `name[${code}]`;
-    textile.description = `description for ${code}`;
-    textile.UoM=uom;
+    sparepart.code = code;
+    sparepart.name = `name[${code}]`;
+    sparepart.description = `description for ${code}`;
+    sparepart.UoM = uom;
 
-    return textile;
-}
+    return sparepart;
 
-before('#00. connect db', function (done) {
+}    
+    before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new TextileManager(db, {
+            instanceManager = new SparepartManager(db, {
                 username: 'unit-test'
             });
             done();
@@ -107,6 +108,7 @@ it(`#03. should success when update created data`, function(done) {
 it(`#04. should success when get updated data with id`, function(done) {
     instanceManager.getSingleByQuery({_id:createdId})
         .then(data => {
+            // validate.product(data);
             data.code.should.equal(createdData.code);
             data.name.should.equal(createdData.name);
             data.description.should.equal(createdData.description);
@@ -131,6 +133,7 @@ it(`#05. should success when delete data`, function(done) {
 it(`#06. should _deleted=true`, function(done) {
     instanceManager.getSingleByQuery({_id:createdId})
         .then(data => {
+            // validate.product(data);
             data._deleted.should.be.Boolean();
             data._deleted.should.equal(true);
             done();

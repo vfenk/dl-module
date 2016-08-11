@@ -1,20 +1,22 @@
 'use strict'
 
+// external deps 
 var ObjectId = require("mongodb").ObjectId;
-require("mongodb-toolkit");
 
-var dlModel = require("dl-models");
-var Textile = dlModel.core.Textile;
-var map = dlModel.map;
+// internal deps
+require('mongodb-toolkit');
+var DLModels = require('dl-models');
+var map = DLModels.map;
+var Fabric = DLModels.core.Fabric;
 
-module.exports = class TextileManager {
-    constructor(db, user) {
+module.exports = class FabricManager{
+    constructor(db, user){
         this.db = db;
         this.user = user;
-        this.textileCollection = this.db.collection(map.core.Textile);
+        this.fabricCollection = this.db.use(map.core.Fabric);
     }
 
-    read(paging) {
+    read(paging){
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -22,9 +24,9 @@ module.exports = class TextileManager {
             asc: true
         }, paging);
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject)=>{
             var deleted = {
-                _deleted: false
+                _deleted : false
             };
             var query = _paging.keyword ? {
                 '$and': [deleted]
@@ -49,21 +51,22 @@ module.exports = class TextileManager {
                 query['$and'].push($or);
             }
 
-            this.textileCollection
+
+            this.fabricCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(textiles => {
-                    resolve(textiles);
+                .then(fabrics => {
+                    resolve(fabrics);
                 })
                 .catch(e => {
                     reject(e);
-                });
+            });
         });
-    }   
+    }
 
-    readByTextileId(textileId, paging) {
+    readByFabricId(fabricId, paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -75,8 +78,8 @@ module.exports = class TextileManager {
             var deleted = {
                 _deleted: false
             };
-            var textile={
-                textileId:new ObjectId(textileId)
+            var fabric = {
+                fabricId: new ObjectId(fabricId)
             };
             var query = {
                 '$and': [deleted, module]
@@ -101,127 +104,22 @@ module.exports = class TextileManager {
                 query['$and'].push($or);
             }
 
-            this.textileCollection
+
+            this.fabricCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(textile => {
-                    resolve(textile);
+                .then(fabric => {
+                    resolve(fabric);
                 })
                 .catch(e => {
                     reject(e);
                 });
         });
-    }   
-
-    create(textile) {
-        return new Promise((resolve, reject) => {
-            this._validate(textile)
-                .then(validTextile => {
-
-                    this.textileCollection.insert(validTextile)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
     }
 
-    update(textile) {
-        return new Promise((resolve, reject) => {
-            this._validate(textile)
-                .then(validTextile => {
-                    this.textileCollection.update(validTextile)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
-    }
-
-    delete(textile) {
-        return new Promise((resolve, reject) => {
-            this._validate(textile)
-                .then(validTextile => {
-                    validTextile._deleted = true;
-                    this.textileCollection.update(validTextile)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
-    }
-
-    _validate(textile) {
-        var errors = {};
-        return new Promise((resolve, reject) => {
-            var valid = textile;
-            // 1. begin: Declare promises.
-            var getTextilePromise = this.textileCollection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                        code: valid.code
-                    }]
-            });
-            // 1. end: Declare promises.
-
-            // 2. begin: Validation.
-            Promise.all([getTextilePromise])
-                .then(results => {
-                    var _textile = results[0];
-
-                    if (!valid.code || valid.code == '')
-                        errors["code"] = "code is required";
-                    else if (_textile) {
-                        errors["code"] = "code already exists";
-                    }
-                    
-                    if (!valid.name || valid.name == '')
-                        errors["name"] = "name is required";
-
-                    if (!valid.description || valid.description == '')
-                        errors["description"] = "description is required";
-
-                    // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in errors) {
-                        var ValidationError = require('../../validation-error');
-                        reject(new ValidationError('data does not pass validation', errors));
-                    }
-                    valid = new Textile(textile);
-                    valid.stamp(this.user.username, 'manager');
-                    resolve(valid);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
-    }
-
-
-
-    getById(id) {
+   getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
                 resolve(null);
@@ -238,25 +136,7 @@ module.exports = class TextileManager {
                 });
         });
     }
-    
-    getByIdOrDefault(id) {
-        return new Promise((resolve, reject) => {
-            if (id === '')
-                resolve(null);
-            var query = {
-                _id: new ObjectId(id),
-                _deleted: false
-            };
-            this.getSingleByQueryOrDefault(query)
-                .then(module => {
-                    resolve(module);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-    
+
     getByCode(code) {
         return new Promise((resolve, reject) => {
             if (code === '')
@@ -274,10 +154,28 @@ module.exports = class TextileManager {
                 });
         });
     }
-    
+
+    getByIdOrDefault(id) {
+        return new Promise((resolve, reject) => {
+            if (id === '')
+                resolve(null);
+            var query = {
+                _id: new ObjectId(id),
+                _deleted: false
+            };
+            this.getSingleOrDefaultByQuery(query)
+                .then(module => {
+                    resolve(module);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.textileCollection
+            this.fabricCollection
                 .single(query)
                 .then(module => {
                     resolve(module);
@@ -288,16 +186,117 @@ module.exports = class TextileManager {
         })
     }
 
-    getSingleByQueryOrDefault(query) {
+     getSingleOrDefaultByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.textileCollection
+            this.fabricCollection
                 .singleOrDefault(query)
-                .then(textile => {
-                    resolve(textile);
+                .then(fabric => {
+                    resolve(fabric);
                 })
                 .catch(e => {
                     reject(e);
                 });
         })
     }
-}
+
+     create(fabric) {
+        return new Promise((resolve, reject) => {
+            this._validate(fabric)
+                .then(validFabric => {
+                    this.fabricCollection.insert(validFabric)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        });
+    }
+
+    update(fabric) {
+        return new Promise((resolve, reject) => {
+            this._validate(fabric)
+                .then(validFabric => {
+                    this.fabricCollection.update(validFabric)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
+    delete(fabric) {
+        return new Promise((resolve, reject) => {
+            this._validate(fabric)
+                .then(validFabric => {
+                    validFabric._deleted = true;
+                    this.fabricCollection.update(validFabric)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
+ _validate(fabric) {
+        var errors = {};
+        return new Promise((resolve, reject) => {
+            var valid = new Fabric(fabric);
+           
+            // 1. begin: Declare promises.
+            var getFabricPromise = this.fabricCollection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        code: valid.code
+                    }]
+            });
+            // 1. end: Declare promises.
+
+            // 2. begin: Validation.
+            Promise.all([getFabricPromise])
+                   .then(results => {
+                    var _module = results[0];
+
+                    if (!valid.code || valid.code == '')
+                        errors["code"] = "code is required";
+                    else if (_module) {
+                        errors["code"] = "code already exists";
+                    }
+
+                    if (!valid.name || valid.name == '')
+                        errors["name"] = "name is required"; 
+
+                    // 2c. begin: check if data has any error, reject if it has.
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
+
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        });
+    }
+};

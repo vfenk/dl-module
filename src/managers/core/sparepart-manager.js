@@ -1,18 +1,16 @@
-'use strict'
-
 var ObjectId = require("mongodb").ObjectId;
+
 require("mongodb-toolkit");
 
-var Product = require("dl-models").core.Product;
+var Sparepart = require("dl-models").core.Sparepart;
 
-
-module.exports = class ProductManager {
+module.exports = class SparepartManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.productCollection = this.db.collection("products");
+        this.sparepartCollection = this.db.collection("sparepart");
     }
-
+    
     read(paging) {
         var _paging = Object.assign({
             page: 1,
@@ -20,15 +18,15 @@ module.exports = class ProductManager {
             order: '_id',
             asc: true
         }, paging);
-
-        return new Promise((resolve, reject) => {
+     
+     return new Promise((resolve, reject) => {
             var deleted = {
                 _deleted: false
             };
             var query = _paging.keyword ? {
                 '$and': [deleted]
             } : deleted;
-
+            
             if (_paging.keyword) {
                 var regex = new RegExp(_paging.keyword, "i");
                 var filterCode = {
@@ -47,28 +45,27 @@ module.exports = class ProductManager {
 
                 query['$and'].push($or);
             }
-
-            this.productCollection
+            
+             this.sparepartCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(products => {
-                    resolve(products);
+                .then(spareparts => {
+                    resolve(spareparts);
                 })
                 .catch(e => {
                     reject(e);
                 });
-        });
+        });    
     }
-
-
-    create(product) {
+    
+     create(sparepart) {
         return new Promise((resolve, reject) => {
-            this._validate(product)
-                .then(validProduct => {
+            this._validate(sparepart)
+                .then(validSparepart => {
 
-                    this.productCollection.insert(validProduct)
+                    this.sparepartCollection.insert(validSparepart)
                         .then(id => {
                             resolve(id);
                         })
@@ -82,11 +79,11 @@ module.exports = class ProductManager {
         });
     }
 
-    update(product) {
+    update(sparepart) {
         return new Promise((resolve, reject) => {
-            this._validate(product)
-                .then(validProduct => {
-                    this.productCollection.update(validProduct)
+            this._validate(sparepart)
+                .then(validSparepart => {
+                    this.sparepartCollection.update(validSparepart)
                         .then(id => {
                             resolve(id);
                         })
@@ -100,12 +97,12 @@ module.exports = class ProductManager {
         });
     }
 
-    delete(product) {
+    delete(sparepart) {
         return new Promise((resolve, reject) => {
-            this._validate(product)
-                .then(validProduct => {
-                    validProduct._deleted = true;
-                    this.productCollection.update(validProduct)
+            this._validate(sparepart)
+                .then(validSparepart => {
+                    validSparepart._deleted = true;
+                    this.sparepartCollection.update(validSparepart)
                         .then(id => {
                             resolve(id);
                         })
@@ -118,13 +115,13 @@ module.exports = class ProductManager {
                 })
         });
     }
-
-    _validate(product) {
+    
+    _validate(sparepart) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = product;
+            var valid = sparepart;
             // 1. begin: Declare promises.
-            var getProductPromise = this.productCollection.singleOrDefault({
+            var getSparepartPromise = this.sparepartCollection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
@@ -136,13 +133,13 @@ module.exports = class ProductManager {
             // 1. end: Declare promises.
 
             // 2. begin: Validation.
-            Promise.all([getProductPromise])
+            Promise.all([getSparepartPromise])
                 .then(results => {
-                    var _product = results[0];
+                    var _sparepart = results[0];
 
                     if (!valid.code || valid.code == '')
                         errors["code"] = "code is required";
-                    else if (_product) {
+                    else if (_sparepart) {
                         errors["code"] = "code already exists";
                     }
 
@@ -155,7 +152,7 @@ module.exports = class ProductManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-                    valid = new Product(product);
+                    valid = new Sparepart(sparepart);
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })
@@ -164,9 +161,7 @@ module.exports = class ProductManager {
                 })
         });
     }
-
-
-
+    
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -176,8 +171,8 @@ module.exports = class ProductManager {
                 _deleted: false
             };
             this.getSingleByQuery(query)
-                .then(product => {
-                    resolve(product);
+                .then(sparepart => {
+                    resolve(sparepart);
                 })
                 .catch(e => {
                     reject(e);
@@ -194,33 +189,34 @@ module.exports = class ProductManager {
                 _deleted: false
             };
             this.getSingleByQueryOrDefault(query)
-                .then(product => {
-                    resolve(product);
+                .then(sparepart => {
+                    resolve(sparepart);
                 })
                 .catch(e => {
                     reject(e);
                 });
         });
     }
+    
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.productCollection
+            this.sparepartCollection
                 .single(query)
-                .then(product => {
-                    resolve(product);
+                .then(sparepart => {
+                    resolve(sparepart);
                 })
                 .catch(e => {
                     reject(e);
                 });
         })
     }
-
-    getSingleByQueryOrDefault(query) {
+    
+     getSingleByQueryOrDefault(query) {
         return new Promise((resolve, reject) => {
-            this.productCollection
+            this.sparepartCollection
                 .singleOrDefault(query)
-                .then(product => {
-                    resolve(product);
+                .then(sparepart => {
+                    resolve(sparepart);
                 })
                 .catch(e => {
                     reject(e);
