@@ -1,6 +1,7 @@
 'use strict'
 
 var BaseModel = require('capital-models').BaseModel;
+var UoM = require('./UoM-docs').UoM;
 
 module.exports = class Buyer extends BaseModel {
     constructor(source) {
@@ -12,6 +13,7 @@ module.exports = class Buyer extends BaseModel {
         this.address = '';
         this.contact='';
         this.tempo='';
+        this.UoM = new UoM();
 
         this.copy(source);
     }
