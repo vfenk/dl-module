@@ -9,5 +9,6 @@ test('@fabric', './fabric');
 test('@textile', './textile');
 test('@uom', './UoM');
 test('@sparepart', './sparepart');
-test('@buyers', './buyers');
-test('@suppliers', './suppliers');
+test('@general-merchandise','./general-merchandise');
+test('@buyers', './buyer');
+test('@suppliers', './supplier');

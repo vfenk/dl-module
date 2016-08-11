@@ -1,11 +1,11 @@
 var validate = require('./validator').core;
 
-it("#01. Suppliers should valid", function(){
-    var Suppliers = require('../src/core/supplier');
+it("#03. General Merchandise should valid", function(){
+    var GeneralMerchandise = require('../src/core/general-merchandise');
     var UoM_Template = require('../src/core/UoM').UoM_Template;
     var UoM = require('../src/core/UoM').UoM;
 
-    var suppliers = new Suppliers();
+    var generalMerchandise = new GeneralMerchandise();
     var template = new UoM_Template({
         mainUnit: 'M',
         mainValue: 1,
@@ -21,6 +21,6 @@ it("#01. Suppliers should valid", function(){
         units: _units
     });
 
-    suppliers.UoM = uom;
-    validate.supplier(suppliers);
-})
+    generalMerchandise.UoM = uom;
+    validate.generalMerchandise(generalMerchandise);
+}) 

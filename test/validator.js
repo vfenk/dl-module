@@ -127,6 +127,24 @@ else {
         data.convertedUnit.should.instanceOf(String);
     }
     
+    var validateGeneralMerchandise = function (data) {
+        data.should.not.equal(null);
+        data.should.instanceof(Object);
+
+        data.should.have.property('code');
+        data.code.should.instanceof(String);
+
+        data.should.have.property('name');
+        data.name.should.instanceof(String);
+
+        data.should.have.property('description');
+        data.description.should.instanceof(String);
+
+        data.should.have.property('UoM');
+        data.UoM.should.instanceOf(Object);
+        validateUoMDocs(data.UoM);
+    }
+
     var validateBuyer = function (data) {
         data.should.not.equal(null);
         data.should.instanceOf(Object);
@@ -144,7 +162,7 @@ else {
         data.contact.should.instanceOf(String);
 
         data.should.have.property('tempo');
-        data.tempo.should.instanceOf(Number);
+        data.tempo.should.instanceOf(String);
     }
     
     var validateSupplier = function (data) {
@@ -173,6 +191,7 @@ else {
         accessories: validateAccessories,
         sparepart: validateSparepart,
         UoMDocs: validateUoMDocs,
+        generalMerchandise: validateGeneralMerchandise,
         buyer: validateBuyer,
         supplier: validateSupplier
     }
