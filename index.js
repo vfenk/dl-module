@@ -8,8 +8,8 @@ module.exports = {
         Textile: require('./src/core/textile'),
         Accessories: require('./src/core/accessories'),
         UoM: require('./src/core/UoM').UoM,
-        UoM_Template: require('./src/core/UoM').UoM_Template
-        Sparepart: require('./src/core/sparepart'),
+        UoM_Template: require('./src/core/UoM').UoM_Template,
+        Sparepart: require('./src/core/sparepart')
     },
     map: require('./src/map'),
     validator: require('./test/validator')
