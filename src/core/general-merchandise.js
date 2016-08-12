@@ -12,7 +12,10 @@ module.exports = class GeneralMerchandise extends BaseModel {
         this.name = '';        
         this.description = '';
         this.price=0;
-        this.supplier='';
+        
+        this.supplierId={};
+        this.supplier={};
+        
         this.UoM = new UoM();
         
         this.copy(source);
