@@ -11,6 +11,8 @@ module.exports = class GeneralMerchandise extends BaseModel {
         this.code = '';
         this.name = '';        
         this.description = '';
+        this.price=0;
+        this.supplier='';
         this.UoM = new UoM();
         
         this.copy(source);

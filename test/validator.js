@@ -138,6 +138,12 @@ else {
 
         data.should.have.property('description');
         data.description.should.instanceof(String);
+        
+        data.should.have.property('price');
+        data.price.should.instanceof(Number);
+        
+        data.should.have.property('supplier');
+        data.supplier.should.instanceof(String);
 
         data.should.have.property('UoM');
         data.UoM.should.instanceOf(Object);
