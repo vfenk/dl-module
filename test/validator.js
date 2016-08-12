@@ -312,8 +312,8 @@ else {
             data.should.have.property('PONo');
             data.PONo.should.instanceOf(String);
 
-            //  data.should.have.property('supplierId');
-            //  data.supplierId.should.instanceof(Object);
+             data.should.have.property('supplierId');
+             data.supplierId.should.instanceof(Object);
 
             data.should.have.property('supplier');
             data.supplier.should.instanceof(Object);

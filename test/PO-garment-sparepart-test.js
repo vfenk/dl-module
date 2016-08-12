@@ -1,4 +1,5 @@
 var validate = require('./validator').po;
+
 it("#06. PO Garment SparePart should valid", function () {
     var POGarmentSparepart = require('../src/po/PO-garment-sparepart');
     var Supplier = require('../src/core/supplier');
@@ -17,6 +18,7 @@ it("#06. PO Garment SparePart should valid", function () {
     pOGarmentSparepart.deliveryFeeByBuyer = true;
     pOGarmentSparepart.PODLNo = '';
     pOGarmentSparepart.description = 'SP1';
+    pOGarmentSparepart.supplierID = {};
 
     var supplier = new Supplier({
         code: '123',
@@ -64,3 +66,4 @@ it("#06. PO Garment SparePart should valid", function () {
     validate.POGarmentSparePart(pOGarmentSparepart);
 
 })
+
