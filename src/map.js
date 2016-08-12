@@ -8,5 +8,9 @@ module.exports = {
         UoM: 'unit-of-measurement',
         Sparepart:'sparepart',
         GeneralMerchandise:'general-merchandise'
+    },
+    po:{
+        SparepartValue:'sparepart-value',
+        POGarmentSparepart:'PO-garment-sparepart'
     }
 }

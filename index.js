@@ -12,6 +12,10 @@ module.exports = {
         UoM_Template: require('./src/core/UoM').UoM_Template,
         GeneralMerchandise: require('./src/core/general-merchandise')
     },
+    po: {
+        SparepartValue: require('./src/po/sparepart-value'),
+        POGarmentSparePart: require('./src/po/PO-garment-sparepart')
+    },
     map: require('./src/map'),
     validator: require('./test/validator')
 }
