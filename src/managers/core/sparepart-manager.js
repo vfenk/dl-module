@@ -1,3 +1,5 @@
+'use strict'
+
 var ObjectId = require("mongodb").ObjectId;
 
 require("mongodb-toolkit");
@@ -10,7 +12,7 @@ module.exports = class SparepartManager {
         this.user = user;
         this.sparepartCollection = this.db.collection("sparepart");
     }
-    
+
     read(paging) {
         var _paging = Object.assign({
             page: 1,
@@ -18,15 +20,15 @@ module.exports = class SparepartManager {
             order: '_id',
             asc: true
         }, paging);
-     
-     return new Promise((resolve, reject) => {
+
+        return new Promise((resolve, reject) => {
             var deleted = {
                 _deleted: false
             };
             var query = _paging.keyword ? {
                 '$and': [deleted]
             } : deleted;
-            
+
             if (_paging.keyword) {
                 var regex = new RegExp(_paging.keyword, "i");
                 var filterCode = {
@@ -45,8 +47,8 @@ module.exports = class SparepartManager {
 
                 query['$and'].push($or);
             }
-            
-             this.sparepartCollection
+
+            this.sparepartCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
@@ -57,10 +59,10 @@ module.exports = class SparepartManager {
                 .catch(e => {
                     reject(e);
                 });
-        });    
+        });
     }
-    
-     create(sparepart) {
+
+    create(sparepart) {
         return new Promise((resolve, reject) => {
             this._validate(sparepart)
                 .then(validSparepart => {
@@ -115,11 +117,12 @@ module.exports = class SparepartManager {
                 })
         });
     }
-    
+
     _validate(sparepart) {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = sparepart;
+
             // 1. begin: Declare promises.
             var getSparepartPromise = this.sparepartCollection.singleOrDefault({
                 "$and": [{
@@ -136,7 +139,7 @@ module.exports = class SparepartManager {
             Promise.all([getSparepartPromise])
                 .then(results => {
                     var _sparepart = results[0];
-
+                    
                     if (!valid.code || valid.code == '')
                         errors["code"] = "code is required";
                     else if (_sparepart) {
@@ -145,6 +148,9 @@ module.exports = class SparepartManager {
 
                     if (!valid.name || valid.name == '')
                         errors["name"] = "name is required";
+
+                    if (valid.supplierId && !valid.supplierId.length)
+                        errors["supplier"] = "supplier Id does not exists";
 
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
@@ -161,7 +167,7 @@ module.exports = class SparepartManager {
                 })
         });
     }
-    
+
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -179,7 +185,7 @@ module.exports = class SparepartManager {
                 });
         });
     }
-    
+
     getByIdOrDefault(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -197,7 +203,7 @@ module.exports = class SparepartManager {
                 });
         });
     }
-    
+
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
             this.sparepartCollection
@@ -210,8 +216,8 @@ module.exports = class SparepartManager {
                 });
         })
     }
-    
-     getSingleByQueryOrDefault(query) {
+
+    getSingleByQueryOrDefault(query) {
         return new Promise((resolve, reject) => {
             this.sparepartCollection
                 .singleOrDefault(query)

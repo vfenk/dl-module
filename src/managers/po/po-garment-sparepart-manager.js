@@ -7,66 +7,16 @@ var ObjectId = require("mongodb").ObjectId;
 require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var Accessories = DLModels.core.Accessories;
+var POGarmentSparepart = DLModels.po.POGarmentSparepart;
 
-module.exports = class AccessoriesManager{
-    constructor(db, user){
+module.export = class POGarmentSparepartManager {
+    constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.accessoriesCollection = this.db.use(map.core.Accessories);
+        this.POGarmentSparepartCollection = this.db.use(map.po.POGarmentSparepart);
     }
 
-    read(paging){
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: '_id',
-            asc: true
-        }, paging);
-
-        return new Promise((resolve, reject)=>{
-            var deleted = {
-                _deleted : false
-            };
-            var query = _paging.keyword ? {
-                '$and': [deleted]
-            } : deleted;
-
-            if (_paging.keyword) {
-                var regex = new RegExp(_paging.keyword, "i");
-                var filterCode = {
-                    'code': {
-                        '$regex': regex
-                    }
-                };
-                var filterName = {
-                    'name': {
-                        '$regex': regex
-                    }
-                };
-                var $or = {
-                    '$or': [filterCode, filterName]
-                };
-
-                query['$and'].push($or);
-            }
-
-
-            this.accessoriesCollection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
-                .execute()
-                .then(accessories => {
-                    resolve(accessories);
-                })
-                .catch(e => {
-                    reject(e);
-            });
-        });
-    }
-
-    readByAccessoriesId(accessoriesId, paging) {
+    read(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -78,40 +28,43 @@ module.exports = class AccessoriesManager{
             var deleted = {
                 _deleted: false
             };
-            var accessories = {
-                accessoriesId: new ObjectId(accessoriesId)
-            };
-            var query = {
-                '$and': [deleted, module]
-            };
+            var query = _paging.keyword ? {
+                '$and': [deleted]
+            } : deleted;
 
             if (_paging.keyword) {
                 var regex = new RegExp(_paging.keyword, "i");
-                var filterCode = {
-                    'code': {
+                var filterRONo = {
+                    'RONo': {
                         '$regex': regex
                     }
                 };
-                var filterName = {
-                    'name': {
+                var filterPRNo = {
+                    'PRNo': {
                         '$regex': regex
                     }
                 };
+                var filterPONo = {
+                    'PONo': {
+                        '$regex': regex
+                    }
+                };
+
                 var $or = {
-                    '$or': [filterCode, filterName]
+                    '$or': [filterRONo, filterPRNo, filterPONo]
                 };
 
                 query['$and'].push($or);
             }
 
 
-            this.accessoriesCollection
+            this.POGarmentSparepartCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(accessories => {
-                    resolve(accessories);
+                .then(POGarmentSpareparts => {
+                    resolve(POGarmentSpareparts);
                 })
                 .catch(e => {
                     reject(e);
@@ -119,7 +72,65 @@ module.exports = class AccessoriesManager{
         });
     }
 
-   getById(id) {
+    readByPOGarmentSparepartId(POGarmentSparepartId, paging) {
+        var _paging = Object.assign({
+            page: 1,
+            size: 20,
+            order: '_id',
+            asc: true
+        }, paging);
+
+        return new Promise((resolve, reject) => {
+            var deleted = {
+                _deleted: false
+            };
+            var POGarmentSparepart = {
+                POGarmentSparepartId: new ObjectId(POGarmentSparepartId)
+            };
+            var query = {
+                '$and': [deleted, module]
+            };
+
+            if (_paging.keyword) {
+                var regex = new RegExp(_paging.keyword, "i");
+                var filterRONo = {
+                    'RONo': {
+                        '$regex': regex
+                    }
+                };
+                var filterPRNo = {
+                    'PRNo': {
+                        '$regex': regex
+                    }
+                };
+                var filterPONo = {
+                    'PONo': {
+                        '$regex': regex
+                    }
+                };
+                var $or = {
+                    '$or': [filterRONo, filterPRNo, filterPONo]
+                };
+
+                query['$and'].push($or);
+            }
+
+
+            this.POGarmentSparepartCollection
+                .where(query)
+                .page(_paging.page, _paging.size)
+                .orderBy(_paging.order, _paging.asc)
+                .execute()
+                .then(POGarmentSparepart => {
+                    resolve(POGarmentSparepart);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
+    getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
                 resolve(null);
@@ -137,12 +148,14 @@ module.exports = class AccessoriesManager{
         });
     }
 
-    getByCode(code) {
+    getByFKPO(RONo, PRNo, PONo) {
         return new Promise((resolve, reject) => {
             if (code === '')
                 resolve(null);
             var query = {
-                code: code,
+                RONo: RONo,
+                PRNo: PRNo,
+                PONo: PONo,
                 _deleted: false
             };
             this.getSingleByQuery(query)
@@ -172,10 +185,9 @@ module.exports = class AccessoriesManager{
                 });
         });
     }
-
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.accessoriesCollection
+            this.POGarmentSparepartCollection
                 .single(query)
                 .then(module => {
                     resolve(module);
@@ -186,12 +198,12 @@ module.exports = class AccessoriesManager{
         })
     }
 
-     getSingleOrDefaultByQuery(query) {
+    getSingleOrDefaultByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.accessoriesCollection
+            this.POGarmentSparepartCollection
                 .singleOrDefault(query)
-                .then(accessories => {
-                    resolve(accessories);
+                .then(fabric => {
+                    resolve(fabric);
                 })
                 .catch(e => {
                     reject(e);
@@ -199,11 +211,11 @@ module.exports = class AccessoriesManager{
         })
     }
 
-     create(accessories) {
+    create(POGarmentSparepart) {
         return new Promise((resolve, reject) => {
-            this._validate(accessories)
-                .then(validAccessories => {
-                    this.accessoriesCollection.insert(validAccessories)
+            this._validate(POGarmentSparepart)
+                .then(validPOGarmentSparepart => {
+                    this.POGarmentSparepartCollection.insert(validPOGarmentSparepart)
                         .then(id => {
                             resolve(id);
                         })
@@ -217,30 +229,11 @@ module.exports = class AccessoriesManager{
         });
     }
 
-    update(accessories) {
+    update(POGarmentSparepart) {
         return new Promise((resolve, reject) => {
-            this._validate(accessories)
-                .then(validAccessories => {
-                    this.accessoriesCollection.update(validAccessories)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-
-    delete(accessories) {
-        return new Promise((resolve, reject) => {
-            this._validate(accessories)
-                .then(validAccessories => {
-                    validAccessories._deleted = true;
-                    this.accessoriesCollection.update(validAccessories)
+            this._validate(POGarmentSparepart)
+                .then(validPOGarmentSparepart => {
+                    this.POGarmentSparepartCollection.update(validPOGarmentSparepart)
                         .then(id => {
                             resolve(id);
                         })
@@ -254,36 +247,70 @@ module.exports = class AccessoriesManager{
         });
     }
 
- _validate(accessories) {
+    delete(POGarmentSparepart) {
+        return new Promise((resolve, reject) => {
+            this._validate(POGarmentSparepart)
+                .then(validPOGarmentSparepart => {
+                    validPOGarmentSparepart._deleted = true;
+                    this.POGarmentSparepartCollection.update(validPOGarmentSparepart)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
+    _validate(POGarmentSparepart) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = new Accessories(accessories);
-           
+            var valid = new POGarmentSparepart(POGarmentSparepart);
+
             // 1. begin: Declare promises.
-            var getAccessoriesPromise = this.accessoriesCollection.singleOrDefault({
+            var getPOGarmentSparepartPromise = this.POGarmentSparepartCollection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        code: valid.code
+                        // code: valid.code
                     }]
             });
+
             // 1. end: Declare promises.
 
+            var getByFKPOData = this.getByFKPO(POGarmentSparepart.RONo, POGarmentSparepart.PRNo, POGarmentSparepart.POGarmentSparepart)
             // 2. begin: Validation.
-            Promise.all([getAccessoriesPromise])
-                   .then(results => {
+            Promise.all([getPOGarmentSparepartPromise, getByFKPOData])
+                .then(results => {
                     var _module = results[0];
+                    var _FKPO = results[1];
 
-                    if (!valid.code || valid.code == '')
-                        errors["code"] = "code is required";
-                    else if (_module) {
-                        errors["code"] = "code already exists";
+                    if (!valid.RONo || valid.RONo == '')
+                        errors["RONo"] = "Nomor RO tidak boleh kosong";
+                    if (!valid.PRNo || valid.PRNo == '')
+                        errors["PRNo"] = "Nomor PR tidak boleh kosong";
+                    if (!valid.PONo || valid.PONo == '')
+                        errors["PONo"] = "Nomor PO tidak boleh kosong";
+                    if (!valid.supplierId || valid.supplierId == '')
+                        errors["storageId"] = "Nama Supplier tidak boleh kosong";
+                    if (!valid.deliveryDate || valid.deliveryDate == '')
+                        errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
+                    if (!valid.termOfPayment || valid.termOfPayment == '')
+                        errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
+                    if (!valid.deliveryFeeByBuyer || valid.deliveryFeeByBuyer == '')
+                        errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
+                    if (!valid.description || valid.description == '')
+                        errors["description"] = "Keterangan tidak boleh kosong";
+                    if (_FKPO) {
+                        errors["code"] = "RO, PR, da already exists";
                     }
 
-                    if (!valid.name || valid.name == '')
-                        errors["name"] = "name is required"; 
 
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
@@ -299,4 +326,5 @@ module.exports = class AccessoriesManager{
                 })
         });
     }
+
 };

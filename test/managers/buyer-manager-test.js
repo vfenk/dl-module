@@ -98,7 +98,6 @@ it(`#04. should success when get updated data with id`, function (done) {
             data.code.should.equal(createdData.code);
             data.name.should.equal(createdData.name);
             data.address.should.equal(createdData.address);
-           // data.contact.should.equal(createdData.contact);
             done();
         })
         .catch(e => {
