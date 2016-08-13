@@ -163,6 +163,9 @@ else {
         data.should.have.property('contact');
         data.contact.should.instanceOf(String);
 
+        data.should.have.property('PIC');
+        data.PIC.should.instanceOf(String);
+
         data.should.have.property('import');
         data.import.should.instanceOf(Boolean);
     }
