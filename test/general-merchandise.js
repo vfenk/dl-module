@@ -1,28 +1,26 @@
 var validate = require('./validator').core;
 
-
-it("#04. Sparepart should valid", function () {
-    var Sparepart = require('../src/core/sparepart');
+it("#03. General Merchandise should valid", function(){
+    var GeneralMerchandise = require('../src/core/general-merchandise');
     var UoM_Template = require('../src/core/UoM').UoM_Template;
     var UoM = require('../src/core/UoM').UoM;
 
-    var sparepart = new Sparepart();
+    var generalMerchandise = new GeneralMerchandise();
     var template = new UoM_Template({
         mainUnit: 'M',
         mainValue: 1,
         convertedUnit: 'M',
-        convertedValue: 1
+        convertedValue: 1 
     });
 
     var _units = [];
     _units.push(template);
-
     var uom = new UoM({
         category: 'UoM-Unit-Test',
         default: template,
         units: _units
     });
 
-    sparepart.UoM = uom;
-    validate.sparepart(sparepart);
+    generalMerchandise.UoM = uom;
+    validate.generalMerchandise(generalMerchandise);
 }) 

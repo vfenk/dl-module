@@ -7,9 +7,14 @@ module.exports = {
         Supplier: require('./src/core/supplier'),
         Textile: require('./src/core/textile'),
         Accessories: require('./src/core/accessories'),
+        Sparepart: require('./src/core/sparepart'),
         UoM: require('./src/core/UoM').UoM,
         UoM_Template: require('./src/core/UoM').UoM_Template,
-        Sparepart: require('./src/core/sparepart')
+        GeneralMerchandise: require('./src/core/general-merchandise')
+    },
+    po: {
+        SparepartValue: require('./src/po/sparepart-value'),
+        POGarmentSparePart: require('./src/po/PO-garment-sparepart')
     },
     map: require('./src/map'),
     validator: require('./test/validator')
