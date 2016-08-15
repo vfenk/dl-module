@@ -16,7 +16,7 @@ module.exports = {
         POGarmentSparePart: require('./src/po/PO-garment-sparepart')
     },
     map: require('./src/map'),
-    validator: require('./test/validator')
+    validator: require('./src/validator')
 }
 
 var uom = require('./src/core/UoM').UoM;
