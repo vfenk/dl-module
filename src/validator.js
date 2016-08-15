@@ -14,5 +14,7 @@ module.exports = {
     po: {
             POGarmentSparepart: require("./po/po-garment-sparepart-validator"),
             sparepartValue: require("./po/sparepart-value-validator"),
+            POTextileJobOrder: require("./po/po-textile-joborder-validator"),
+            TextileValue: require("./po/textile-value-validator"),
     }
 };
