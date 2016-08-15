@@ -17,12 +17,6 @@ module.exports = function (data) {
     data.should.have.property('price');
     data.price.should.instanceof(Number);
 
-    data.should.have.property('supplierId');
-    data.supplierId.should.instanceof(Object);
-
-    data.should.have.property('supplier');
-    data.supplier.should.instanceof(Object);
-
     data.should.have.property('UoM');
     data.UoM.should.instanceOf(Object);
     

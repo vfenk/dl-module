@@ -11,6 +11,7 @@ module.exports = class Textile extends BaseModel {
         this.code = '';
         this.name = '';
         this.description = '';
+        this.price=0;
         this.UoM = new UoM();
 
         this.copy(source);
