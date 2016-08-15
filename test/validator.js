@@ -165,46 +165,6 @@ else {
             validateUoMDocs(data.UoM);
         }
 
-        var validateBuyer = function (data) {
-            data.should.not.equal(null);
-            data.should.instanceOf(Object);
-
-            data.should.have.property('code');
-            data.code.should.instanceOf(String);
-
-            data.should.have.property('name');
-            data.name.should.instanceOf(String);
-
-            data.should.have.property('address');
-            data.address.should.instanceOf(String);
-
-            data.should.have.property('contact');
-            data.contact.should.instanceOf(String);
-
-            data.should.have.property('tempo');
-            data.tempo.should.instanceOf(String);
-        }
-
-        var validateSupplier = function (data) {
-            data.should.not.equal(null);
-            data.should.instanceOf(Object);
-
-            data.should.have.property('code');
-            data.code.should.instanceOf(String);
-
-            data.should.have.property('name');
-            data.name.should.instanceOf(String);
-
-            data.should.have.property('address');
-            data.address.should.instanceOf(String);
-
-            data.should.have.property('contact');
-            data.contact.should.instanceOf(String);
-
-            data.should.have.property('import');
-            data.import.should.instanceOf(Boolean);
-        }
-
         var validateGeneralMerchandise = function (data) {
             data.should.not.equal(null);
             data.should.instanceof(Object);
@@ -258,6 +218,9 @@ else {
 
             data.should.have.property('contact');
             data.contact.should.instanceOf(String);
+
+            data.should.have.property('PIC');
+            data.PIC.should.instanceOf(String);
 
             data.should.have.property('import');
             data.import.should.instanceOf(Boolean);
