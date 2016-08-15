@@ -11,6 +11,8 @@ module.exports = {
     },
     po:{
         SparepartValue:'sparepart-value',
-        POGarmentSparepart:'PO-garment-sparepart'
+        POGarmentSparepart:'PO-garment-sparepart',
+        TextileValue:'textile-value',
+        POTextileJobOrder:'PO-textile-job-order'
     }
 }
