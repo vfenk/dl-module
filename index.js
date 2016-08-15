@@ -18,6 +18,3 @@ module.exports = {
     map: require('./src/map'),
     validator: require('./src/validator')
 }
-
-var uom = require('./src/core/UoM').UoM;
-console.log((new uom()));
