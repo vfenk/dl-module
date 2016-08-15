@@ -10,8 +10,8 @@ module.exports = class Sparepart extends BaseModel {
         this.code = '';
         this.name = '';
         this.supplierId = {};
-        this.supplier={};
-        this.price=0;
+        this.supplier = {};
+        this.price = 0;
         this.description = '';
         this.UoM = new UoM();
 

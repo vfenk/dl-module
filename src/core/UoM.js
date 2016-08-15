@@ -4,10 +4,10 @@ var BaseModel = require('capital-models').BaseModel;
 
 class UoM_Template {
     constructor(source) {
-        this.mainValue = source.mainValue ? source.mainValue : 0;
-        this.mainUnit = source.mainUnit ? source.mainUnit : '';
-        this.convertedValue = source.convertedValue ? source.convertedValue : 0;
-        this.convertedUnit = source.convertedUnit ? source.convertedUnit : '';
+        this.mainValue = source ? source.mainValue : 0;
+        this.mainUnit = source ? source.mainUnit : '';
+        this.convertedValue = source ? source.convertedValue : 0;
+        this.convertedUnit = source ? source.convertedUnit : '';
     }
 }
 
@@ -16,7 +16,7 @@ class UoM extends BaseModel {
         super('UoM', '1.0.0');
 
         this.category = '';
-        this.default = {};      // To determine default value of each UoM Category, and used to validate each Unit.  
+        this.default = new UoM_Template();      // To determine default value of each UoM Category, and used to validate each Unit.  
         this.units = [];
 
         this.copy(source);

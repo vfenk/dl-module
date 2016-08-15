@@ -1,10 +1,8 @@
-var validate = require('./validator').core;
+var validate = require('../src/validator').core;
 
 it("#01. Suppliers should valid", function(){
     
-    var Supplier = require('../src/core/suppliers');
+    var Supplier = require('../src/core/supplier');
 
-    var suppliers = new Suppliers();
-    
-    validate.suppliers(suppliers);
+    validate.supplier(new Supplier());
 })
