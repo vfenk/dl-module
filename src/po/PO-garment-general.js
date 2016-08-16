@@ -1,8 +1,8 @@
 'use strict'
 var PurchaseOrder = require('./purchase-order');
-var map = require('dl-models').map.po;
+var map = require('../map');
 module.exports = class POGarmentGeneral extends PurchaseOrder {
     constructor(source) {
-        super(source, map.type.POGarmentGeneral);
+        super(source, map.po.type.POGarmentGeneral);
     }
 }
