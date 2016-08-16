@@ -8,13 +8,13 @@ module.exports = function (data) {
     data.should.instanceOf(Object);
     
     data.should.have.property('iso');
-    data.PRNo.should.instanceOf(String);
+    data.iso.should.instanceOf(String);
     
     data.should.have.property('RONo');
-    data.PRNo.should.instanceOf(String);
+    data.RONo.should.instanceOf(String);
 
     data.should.have.property('article');
-    data.PRNo.should.instanceOf(String);
+    data.article.should.instanceOf(String);
     
     data.should.have.property('PRNo');
     data.PRNo.should.instanceOf(String);
@@ -22,8 +22,8 @@ module.exports = function (data) {
     data.should.have.property('PONo');
     data.PONo.should.instanceOf(String);
     
-    data.should.have.property('RefNo');
-    data.PONo.should.instanceOf(String);
+    data.should.have.property('RefPONo');
+    data.RefPONo.should.instanceOf(String);
     
     data.should.have.property('buyerId');
     data.buyerId.should.instanceof(Object);
