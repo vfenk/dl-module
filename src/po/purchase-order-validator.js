@@ -1,5 +1,6 @@
 require("should");
 var validateSupplier = require('../core/supplier-validator');
+var validateBuyer  = require('../core/buyer-validator');
 var validatePurchaseOrderItem = require('./purchase-order-item-validator');
 
 module.exports = function (data) {
@@ -9,11 +10,24 @@ module.exports = function (data) {
     data.should.have.property('RONo');
     data.PRNo.should.instanceOf(String);
 
+    data.should.have.property('article');
+    data.PRNo.should.instanceOf(String);
+    
     data.should.have.property('PRNo');
     data.PRNo.should.instanceOf(String);
 
     data.should.have.property('PONo');
     data.PONo.should.instanceOf(String);
+    
+    data.should.have.property('RefNo');
+    data.PONo.should.instanceOf(String);
+    
+    data.should.have.property('buyerId');
+    data.buyerId.should.instanceof(Object);
+
+    data.should.have.property('buyer');
+    data.buyer.should.instanceof(Object);
+    validateBuyer(data.buyer);
 
     data.should.have.property('supplierId');
     data.supplierId.should.instanceof(Object);
