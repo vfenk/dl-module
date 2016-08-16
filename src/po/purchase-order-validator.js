@@ -1,6 +1,6 @@
 require("should");
 var validateSupplier = require('../core/supplier-validator');
-var validateSparepartValue = require('./sparepart-value-validator');
+var validatePurchaseOrderItem = require('./purchase-order-item-validator');
 
 module.exports = function (data) {
     data.should.not.equal(null);
@@ -43,6 +43,6 @@ module.exports = function (data) {
     data.should.have.property('items');
     data.items.should.instanceOf(Array);
     for (var item of data.items) {
-        validateSparepartValue(item);
+        validatePurchaseOrderItem(item);
     }
 }

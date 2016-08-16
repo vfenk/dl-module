@@ -10,7 +10,7 @@ module.exports = {
         GeneralMerchandise:'general-merchandise'
     },
     po:{
-        SparepartValue:'sparepart-value',
-        POGarmentSparepart:'PO-garment-sparepart'
+        PurchaseOrderItem:'purchase-order-item',
+        PurchaseOrder:'purchase-order'
     }
 }

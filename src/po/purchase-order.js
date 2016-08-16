@@ -1,10 +1,11 @@
 'use strict'
 var BaseModel = require('capital-models').BaseModel;
 var Supplier = require('../core/supplier');
+var PurchaseOrderItem = require('../po/purchase-order-item');
 
-module.exports = class POGarmentSparepart extends BaseModel {
+module.exports = class PurchaseOrder extends BaseModel {
     constructor(source) {
-        super('POGarmentSparepart', '1.0.0');
+        super('purchase-order', '1.0.0');
 
         //Define properties
         this.RONo = '';
@@ -13,19 +14,17 @@ module.exports = class POGarmentSparepart extends BaseModel {
         this.supplierId = {};
         this.supplier = new Supplier();
         this.ppn = 10;
-        // this.itemId = {};
         this.items = [];
-
         this.deliveryDate = new Date();
         this.termOfPayment = '';
         this.deliveryFeeByBuyer = false;
         this.PODLNo = '';
         this.description = '';
         this.copy(source);
-
+        
         var _items = [];
         for (var item of this.items) {
-            _items.push(new SparepartValue(item));
+            _items.push(new PurchaseOrderItem(item));
         }
         this.items = _items;
     }

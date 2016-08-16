@@ -12,4 +12,4 @@ test('@general-merchandise', './general-merchandise');
 test('@buyer', './buyer');
 test('@supplier', './supplier');
 test('@uom', './UoM');
-test('@POGarmentSparepart', './PO-garment-sparepart-test');
+test('@PurchaseOrder', './purchase-order-test');

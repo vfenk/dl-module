@@ -10,6 +10,7 @@ module.exports = class Accessories extends BaseModel{
         //Define properties
         this.code ='';
         this.name = '';
+        this.price = 0;
         this.description = '';
         this.UoM = new UoM();
 

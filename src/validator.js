@@ -12,7 +12,7 @@ module.exports = {
             UoMTemplate: require("./core/UoM-template-validator"),
     },
     po: {
-            POGarmentSparepart: require("./po/po-garment-sparepart-validator"),
-            sparepartValue: require("./po/sparepart-value-validator"),
+            PurchaseOrder: require("./po/purchase-order-validator"),
+            PurchaseOrderItem: require("./po/purchase-order-item-validator"),
     }
 };

@@ -11,6 +11,9 @@ module.exports = function (data) {
     data.should.have.property('name');
     data.name.should.be.String();
 
+    data.should.have.property('price');
+    data.price.should.instanceOf(Number);
+
     data.should.have.property('description');
     data.description.should.be.String();
 

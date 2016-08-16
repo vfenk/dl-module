@@ -12,8 +12,8 @@ module.exports = {
         GeneralMerchandise: require('./src/core/general-merchandise')
     },
     po: {
-        SparepartValue: require('./src/po/sparepart-value'),
-        POGarmentSparePart: require('./src/po/PO-garment-sparepart')
+        PurchaseOrderItem: require('./src/po/purchase-order-item'),
+        PurchaseOrder: require('./src/po/purchase-order')
     },
     map: require('./src/map'),
     validator: require('./src/validator')
