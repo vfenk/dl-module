@@ -4,10 +4,10 @@ module.exports = {
             buyer: require("./core/buyer-validator"),
             supplier: require("./core/supplier-validator"),
             UoM: require("./core/UoM-validator"),
-            UoMTemplate: require("./core/UoM-template-validator"),
+            UoMTemplate: require("./core/UoM-template-validator")
     },
     po: {
             PurchaseOrder: require("./po/purchase-order-validator"),
-            PurchaseOrderItem: require("./po/purchase-order-item-validator"),
+            PurchaseOrderItem: require("./po/purchase-order-item-validator")
     }
 };
