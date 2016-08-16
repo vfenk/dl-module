@@ -13,9 +13,10 @@ class ProductDetail{
 }
 
 module.exports = class Product extends BaseModel{
-    constructor(type = 'purchase-order',source)
+    constructor(type, source)
     {
-        super('purchase-order', '1.0.0');
+        type = type || 'product';
+        super(type, '1.0.0');
 
         //Define properties
         this.code ='';
