@@ -1,5 +1,5 @@
 require("should");
-var validateSparepart = require('../core/sparepart-validator');
+//var validateSparepart = require('../core/sparepart-validator');
 
 module.exports = function (data) {
     data.should.not.equal(null);
@@ -19,6 +19,6 @@ module.exports = function (data) {
 
     data.should.have.property('sparepart');
     data.sparepart.should.instanceof(Object);
-    validateSparepart(data.sparepart);
+ //   validateSparepart(data.sparepart);
     
 }

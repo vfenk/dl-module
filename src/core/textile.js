@@ -1,18 +1,10 @@
 'use strict'
 
-var BaseModel = require("capital-models").BaseModel;
-var UoM = require('./UoM').UoM;
+var ProductModel = require('./product');
+var map = require('../map');
 
-module.exports = class Textile extends BaseModel {
-    constructor(source) {
-        super('textile', '1.0.0'); // call MongoModel constructor
-
-        // Define properties
-        this.code = '';
-        this.name = '';
-        this.description = '';
-        this.UoM = new UoM();
-
-        this.copy(source);
+module.exports = class Textile extends ProductModel{
+    constructor(source){
+        super(map.core.type.Textile, source);
     }
 }

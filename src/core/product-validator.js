@@ -1,5 +1,6 @@
 require("should");
-var validateUoMDocs = require('./uom-validator');
+var validateProductDetail = require('./product-detail-validator');
+var validateUoMDocs = require('./UoM-validator');
 
 module.exports = function (data) {
     data.should.not.equal(null);
@@ -19,6 +20,9 @@ module.exports = function (data) {
 
     data.should.have.property('UoM');
     data.UoM.should.instanceOf(Object);
-
     validateUoMDocs(data.UoM);
-};
+
+    data.should.have.property('detail');
+    data.detail.should.instanceOf(Object);
+    validateProductDetail(data.detail);
+}

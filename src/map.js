@@ -13,8 +13,8 @@ module.exports = {
         collection:{
             Buyer: 'buyers',
             Supplier: 'suppliers',
-            UoM: 'unit-of-measurements',
-            Product: 'products'
+            UoM: 'unit-of-measurement',
+            Product: 'product'
         }
     },
     po:{
