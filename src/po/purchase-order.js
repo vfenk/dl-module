@@ -5,10 +5,11 @@ var Buyer = require('../core/buyer');
 var PurchaseOrderItem = require('../po/purchase-order-item');
 
 module.exports = class PurchaseOrder extends BaseModel {
-    constructor(type, source) {
+    constructor(source,type) {
         super(type!=''?type:'purchase-order', '1.0.0');
 
         //Define properties
+        this.iso='';
         this.RONo = '';
         this.article = '';
         this.PRNo = '';

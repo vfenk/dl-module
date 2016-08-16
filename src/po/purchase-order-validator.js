@@ -6,7 +6,10 @@ var validatePurchaseOrderItem = require('./purchase-order-item-validator');
 module.exports = function (data) {
     data.should.not.equal(null);
     data.should.instanceOf(Object);
-
+    
+    data.should.have.property('iso');
+    data.PRNo.should.instanceOf(String);
+    
     data.should.have.property('RONo');
     data.PRNo.should.instanceOf(String);
 
