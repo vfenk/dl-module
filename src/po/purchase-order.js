@@ -5,7 +5,7 @@ var Buyer = require('../core/buyer');
 var PurchaseOrderItem = require('../po/purchase-order-item');
 
 module.exports = class PurchaseOrder extends BaseModel {
-    constructor(source,type) {
+    constructor(type, source) {
         super(type!=''?type:'purchase-order', '1.0.0');
 
         //Define properties

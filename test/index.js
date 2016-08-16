@@ -4,13 +4,10 @@ var test = function (name, path) {
     })
 }
 
-test('@accessories', './accessories');
-test('@fabric', './fabric');
-test('@textile', './textile');
-test('@sparepart', './sparepart');
-test('@general-merchandise', './general-merchandise');
+
 test('@buyer', './buyer');
 test('@supplier', './supplier');
+test('@product', './product');
 test('@uom', './UoM');
 // test('@POGarmentSparepart', './PO-garment-sparepart-test');
 // test('@POTextileJobOrder','./PO-textile-joborder-test');
