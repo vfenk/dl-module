@@ -9,14 +9,10 @@ module.exports = {
             supplier: require("./core/supplier-validator"),
             textile: require("./core/textile-validator"),
             UoM: require("./core/UoM-validator"),
-            UoMTemplate: require("./core/UoM-template-validator"),
+            UoMTemplate: require("./core/UoM-template-validator")
     },
     po: {
-            POGarmentSparepart: require("./po/po-garment-sparepart-validator"),
-            sparepartValue: require("./po/sparepart-value-validator"),
-            POTextileJobOrder: require("./po/po-textile-joborder-validator"),
-            TextileValue: require("./po/textile-value-validator"),
             PurchaseOrder: require("./po/purchase-order-validator"),
-            PurchaseOrderItem: require("./po/purchase-order-item-validator"),
+            PurchaseOrderItem: require("./po/purchase-order-item-validator")
     }
 };

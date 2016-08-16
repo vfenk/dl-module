@@ -1,16 +1,21 @@
 'use strict'
 var BaseModel = require('capital-models').BaseModel;
 var Supplier = require('../core/supplier');
+var Buyer = require('../core/buyer');
 var PurchaseOrderItem = require('../po/purchase-order-item');
 
 module.exports = class PurchaseOrder extends BaseModel {
-    constructor(source) {
-        super('purchase-order', '1.0.0');
+    constructor(source,type) {
+        super(type!=''?type:'purchase-order', '1.0.0');
 
         //Define properties
         this.RONo = '';
+        this.article = '';
         this.PRNo = '';
         this.PONo = '';
+        this.RefNo = '';
+        this.buyerId = {};
+        this.buyer = new Buyer();
         this.supplierId = {};
         this.supplier = new Supplier();
         this.ppn = 10;
