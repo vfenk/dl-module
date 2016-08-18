@@ -8,15 +8,84 @@ require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var POGarmentGeneral = DLModels.po.POGarmentGeneral;
+var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
+
+var moduleId = 'POGG'
+
+var poType = map.po.type.POGarmentGeneral;
+
+var generateCode = require('../.././utils/code-generator');
 
 module.exports = class POGarmentGeneralManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
         this.POGarmentGeneralCollection = this.db.use(map.po.collection.PurchaseOrder);
+
+        var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
+        this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);
+        
+        this.PurchaseOrderGroupCollection = this.db.use(map.po.collection.PurchaseOrderGroup);
+    }
+
+    read(paging) {
+        var _paging = Object.assign({
+            page: 1,
+            size: 20,
+            order: '_id',
+            asc: true
+        }, paging);
+
+        return new Promise((resolve, reject) => {
+            var filter = {
+                _deleted: false,
+                _type: poType
+            };
+
+            var query = _paging.keyword ? {
+                '$and': [filter]
+            } : filter;
+
+            if (_paging.keyword) {
+                var regex = new RegExp(_paging.keyword, "i");
+                var filterRONo = {
+                    'RONo': {
+                        '$regex': regex
+                    }
+                };
+                var filterRefPONo = {
+                    'RefPONo': {
+                        '$regex': regex
+                    }
+                };
+                var filterPONo = {
+                    'PONo': {
+                        '$regex': regex
+                    }
+                };
+
+                var $or = {
+                    '$or': [filterRONo, filterRefPONo, filterPONo]
+                };
+
+                query['$and'].push($or);
+            }
+
+            this.POGarmentGeneralCollection
+                .where(query)
+                .page(_paging.page, _paging.size)
+                .orderBy(_paging.order, _paging.asc)
+                .execute()
+                .then(POGarmentGenerals => {
+                    resolve(POGarmentGenerals);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
     }
     
-    read(paging) {
+    readAllPurchaseOrderGroup(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -34,105 +103,33 @@ module.exports = class POGarmentGeneralManager {
 
             if (_paging.keyword) {
                 var regex = new RegExp(_paging.keyword, "i");
-                var filterRONo = {
-                    'RONo': {
-                        '$regex': regex
-                    }
-                };
-                var filterRefPONo = {
-                    'RefPONo': {
-                        '$regex': regex
-                    }
-                };
-                var filterPONo = {
-                    'PONo': {
+                var filterPODLNo = {
+                    'PODLNo': {
                         '$regex': regex
                     }
                 };
 
                 var $or = {
-                    '$or': [filterRONo, filterRefPONo, filterPONo]
+                    '$or': [filterPODLNo]
                 };
 
                 query['$and'].push($or);
             }
 
-            this.POGarmentGeneralCollection
+            this.PurchaseOrderGroupCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(POGarmentGenerals => {
-                    resolve(POGarmentGenerals);
+                .then(PurchaseOrderGroups => {
+                    resolve(PurchaseOrderGroups);
                 })
                 .catch(e => {
                     reject(e);
                 });
         });
     }
-    
-    readHavePODL(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: '_id',
-            asc: true
-        }, paging);
 
-        return new Promise((resolve, reject) => {
-            var deleted = {
-                _deleted: false
-            };
-            
-            var poDLNotEmpty = {
-                'PODLNo': {
-                    '$ne' : ''
-                }
-            };
-            
-            var query = {
-                '$and': [deleted, poDLNotEmpty]
-            };
-
-            if (_paging.keyword) {
-                var regex = new RegExp(_paging.keyword, "i");
-                var filterRONo = {
-                    'RONo': {
-                        '$regex': regex
-                    }
-                };
-                var filterRefPONo = {
-                    'RefPONo': {
-                        '$regex': regex
-                    }
-                };
-                var filterPONo = {
-                    'PONo': {
-                        '$regex': regex
-                    }
-                };
-
-                var $or = {
-                    '$or': [filterRONo, filterRefPONo, filterPONo]
-                };
-
-                query['$and'].push($or);
-            }
-
-            this.POGarmentGeneralCollection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
-                .execute()
-                .then(POGarmentGenerals => {
-                    resolve(POGarmentGenerals);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-    
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -150,7 +147,25 @@ module.exports = class POGarmentGeneralManager {
                 });
         });
     }
-    
+
+    getByPONo(poNo) {
+        return new Promise((resolve, reject) => {
+            if (poNo === '')
+                resolve(null);
+            var query = {
+                PONo: poNo,
+                _deleted: false
+            };
+            this.getSingleByQuery(query)
+                .then(module => {
+                    resolve(module);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
     getByIdOrDefault(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -168,7 +183,7 @@ module.exports = class POGarmentGeneralManager {
                 });
         });
     }
-    
+
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
             this.POGarmentGeneralCollection
@@ -182,7 +197,7 @@ module.exports = class POGarmentGeneralManager {
         })
     }
 
-     getSingleOrDefaultByQuery(query) {
+    getSingleOrDefaultByQuery(query) {
         return new Promise((resolve, reject) => {
             this.POGarmentGeneralCollection
                 .singleOrDefault(query)
@@ -195,12 +210,48 @@ module.exports = class POGarmentGeneralManager {
         })
     }
 
-     create(poGarmentGeneral) {
+    create(poGarmentGeneral) {
         return new Promise((resolve, reject) => {
             this._validate(poGarmentGeneral)
                 .then(validPOGarmentGeneral => {
+                    validPOGarmentGeneral.PONo = generateCode(moduleId)
                     this.POGarmentGeneralCollection.insert(validPOGarmentGeneral)
                         .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        });
+    }
+
+    createGroup(items) {
+        return new Promise((resolve, reject) => {
+            var newPOGroup = new PurchaseOrderGroup()
+
+            newPOGroup.PODLNo = generateCode('PODL/GG')
+            newPOGroup._type = poType
+
+            var _tasks = [];
+
+            for (var item of items) {
+                _tasks.push(this.getByPONo(item))
+            }
+
+            Promise.all(_tasks)
+                .then(results => {
+                    newPOGroup.items = results
+                    this.purchaseOrderGroupManager.create(newPOGroup)
+                        .then(id => {
+                            for (var data of newPOGroup.items) {
+                                data.PODLNo = newPOGroup.PODLNo
+                                this.update(data)
+                            }
+
                             resolve(id);
                         })
                         .catch(e => {
@@ -249,7 +300,7 @@ module.exports = class POGarmentGeneralManager {
                 });
         });
     }
-    
+
     _validate(poGarmentGeneral) {
         var errors = {};
         return new Promise((resolve, reject) => {
@@ -262,7 +313,7 @@ module.exports = class POGarmentGeneralManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        // code: valid.code
+                        RefPONo: valid.RefPONo
                     }]
             });
 
@@ -285,16 +336,14 @@ module.exports = class POGarmentGeneralManager {
                         errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
                     if (!valid.termOfPayment || valid.termOfPayment == '')
                         errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
-                    if (!valid.deliveryFeeByBuyer || valid.deliveryFeeByBuyer == '')
-                        errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
                     if (_module) {
-                        errors["code"] = "RO, PO already exists";
+                        errors["RefPONo"] = "PO already exists";
                     }
 
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
-                        reject(new ValidationError('data does not pass validation', errors));
+                        reject(new ValidationError('data po does not pass validation', errors));
                     }
 
                     valid.stamp(this.user.username, 'manager');
