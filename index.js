@@ -11,16 +11,11 @@ module.exports = {
             UoMManager: require('./src/managers/core/UoM-manager')
         },
         po: {
+            PurchaseOrder: require('./src/managers/po/purchase-order-manager'),
+            PurchaseOrderGroup: require('./src/managers/po/purchase-order-group-manager'),
             POGarmentSparepart: require('./src/managers/po/po-garment-sparepart-manager'),
             POGarmentGeneral: require('./src/managers/po/po-garment-general-manager'),
-            PurchaseOrderGroup: require('./src/managers/po/purchase-order-group-manager')
+            POTextileJobOrderManager: require('./src/managers/po/po-textile-joborder-manager')
         }
     }
 }
-
-
-var DLModels = require('dl-models');
-var map = DLModels.map;
-
-var poType = map.po.type.POGarmentGeneral;
-console.log(poType)
