@@ -16,9 +16,9 @@ module.exports = {
         PurchaseOrderItem: require('./src/po/purchase-order-item'),
         PurchaseOrder: require('./src/po/purchase-order'),
 
-        PurchaseOrderGroup: require('./src/po/purhcase-order-group'),
+        PurchaseOrderGroup: require('./src/po/purchase-order-group'),
         POGarmentGeneral: require('./src/po/PO-garment-general'),
-        POGroupGarmentGeneral: require('./src/po/purhcase-order-group-garment-general'),
+        POGroupGarmentGeneral: require('./src/po/purchase-order-group-garment-general'),
 
         POGarmentSparepart: require('./src/po/po-garment-sparepart')
 
