@@ -1,5 +1,5 @@
 require("should");
-var validateUoMTemplate = require('./uom-template-validator');
+var validateUoMTemplate = require('./UoM-template-validator');
 
 module.exports = function (data) {
     data.should.not.equal(null);

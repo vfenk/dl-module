@@ -15,8 +15,14 @@ module.exports = {
     po: {
         PurchaseOrderItem: require('./src/po/purchase-order-item'),
         PurchaseOrder: require('./src/po/purchase-order'),
-        POGarmentGeneral: require('./src/po/PO-garment-general')
+        PurchaseOrderGroup: require('./src/po/purchase-order-group'),
+        
+        POGarmentGeneral: require('./src/po/PO-garment-general'),
+        POGroupGarmentGeneral: require('./src/po/purchase-order-group-garment-general'),
+        
+        POGarmentSparepart: require('./src/po/po-garment-sparepart')
+
     },
     map: require('./src/map'),
-    validator: require('./src/validator') 
+    validator: require('./src/validator')
 }

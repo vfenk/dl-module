@@ -8,6 +8,7 @@ module.exports = {
     },
     po: {
             PurchaseOrder: require("./po/purchase-order-validator"),
-            PurchaseOrderItem: require("./po/purchase-order-item-validator")
+            PurchaseOrderItem: require("./po/purchase-order-item-validator"),
+            PurchaseOrderGroup: require("./po/purchase-order-group-validator")
     }
 };
