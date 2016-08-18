@@ -24,7 +24,10 @@ module.exports = class POGarmentGeneralManager {
 
         var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
         this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);
-        
+
+        var PurchaseOrderManager = require("./purchase-order-manager");
+        this.purchaseOrderManager = new PurchaseOrderManager(db, user);
+
         this.PurchaseOrderGroupCollection = this.db.use(map.po.collection.PurchaseOrderGroup);
     }
 
@@ -84,7 +87,7 @@ module.exports = class POGarmentGeneralManager {
                 });
         });
     }
-    
+
     readAllPurchaseOrderGroup(paging) {
         var _paging = Object.assign({
             page: 1,
@@ -211,21 +214,18 @@ module.exports = class POGarmentGeneralManager {
     }
 
     create(poGarmentGeneral) {
+        poGarmentGeneral = new POGarmentGeneral(poGarmentGeneral);
         return new Promise((resolve, reject) => {
-            this._validate(poGarmentGeneral)
-                .then(validPOGarmentGeneral => {
-                    validPOGarmentGeneral.PONo = generateCode(moduleId)
-                    this.POGarmentGeneralCollection.insert(validPOGarmentGeneral)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
+
+            poGarmentGeneral.PONo = generateCode(moduleId)
+            this.purchaseOrderManager.create(poGarmentGeneral)
+                .then(id => {
+                    resolve(id);
                 })
                 .catch(e => {
                     reject(e);
                 })
+
         });
     }
 
@@ -265,93 +265,87 @@ module.exports = class POGarmentGeneralManager {
     }
 
     update(poGarmentGeneral) {
+        poGarmentGeneral = new POGarmentGeneral(poGarmentGeneral);
         return new Promise((resolve, reject) => {
-            this._validate(poGarmentGeneral)
-                .then(validPOGarmentGeneral => {
-                    this.POGarmentGeneralCollection.update(validPOGarmentGeneral)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
+
+            this.purchaseOrderManager.update(poGarmentGeneral)
+                .then(id => {
+                    resolve(id);
                 })
                 .catch(e => {
                     reject(e);
                 });
+
         });
     }
 
     delete(poGarmentGeneral) {
+        poGarmentGeneral = new POGarmentGeneral(poGarmentGeneral);
         return new Promise((resolve, reject) => {
-            this._validate(poGarmentGeneral)
-                .then(validPOGarmentGeneral => {
-                    validPOGarmentGeneral._deleted = true;
-                    this.POGarmentGeneralCollection.update(validPOGarmentGeneral)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
+
+            poGarmentGeneral._deleted = true;
+            this.purchaseOrderManager.delete(poGarmentGeneral)
+                .then(id => {
+                    resolve(id);
                 })
                 .catch(e => {
                     reject(e);
                 });
+
         });
     }
 
-    _validate(poGarmentGeneral) {
-        var errors = {};
-        return new Promise((resolve, reject) => {
-            var valid = new POGarmentGeneral(poGarmentGeneral);
+    // _validate(poGarmentGeneral) {
+    //     var errors = {};
+    //     return new Promise((resolve, reject) => {
+    //         var valid = new POGarmentGeneral(poGarmentGeneral);
 
-            // 1. begin: Declare promises.
-            var getPOGarmentGeneralPromise = this.POGarmentGeneralCollection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                        RefPONo: valid.RefPONo
-                    }]
-            });
+    //         // 1. begin: Declare promises.
+    //         var getPOGarmentGeneralPromise = this.POGarmentGeneralCollection.singleOrDefault({
+    //             "$and": [{
+    //                 _id: {
+    //                     '$ne': new ObjectId(valid._id)
+    //                 }
+    //             }, {
+    //                     RefPONo: valid.RefPONo
+    //                 }]
+    //         });
 
-            // 1. end: Declare promises.
+    //         // 1. end: Declare promises.
 
-            // 2. begin: Validation.
-            // Promise.all([getPOGarmentGeneralPromise, getByFKPOData])
-            Promise.all([getPOGarmentGeneralPromise])
-                .then(results => {
-                    var _module = results[0];
-                    //  var _FKPO = results[1];
+    //         // 2. begin: Validation.
+    //         // Promise.all([getPOGarmentGeneralPromise, getByFKPOData])
+    //         Promise.all([getPOGarmentGeneralPromise])
+    //             .then(results => {
+    //                 var _module = results[0];
+    //                 //  var _FKPO = results[1];
 
-                    if (!valid.RONo || valid.RONo == '')
-                        errors["RONo"] = "Nomor RO tidak boleh kosong";
-                    if (!valid.RefPONo || valid.RefPONo == '')
-                        errors["RefPONo"] = "Nomor PO tidak boleh kosong";
-                    if (!valid.supplierId || valid.supplierId == '')
-                        errors["supplierId"] = "Nama Supplier tidak boleh kosong";
-                    if (!valid.deliveryDate || valid.deliveryDate == '')
-                        errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
-                    if (!valid.termOfPayment || valid.termOfPayment == '')
-                        errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
-                    if (_module) {
-                        errors["RefPONo"] = "PO already exists";
-                    }
+    //                 // if (!valid.RONo || valid.RONo == '')
+    //                 //     errors["RONo"] = "Nomor RO tidak boleh kosong";
+    //                 // if (!valid.RefPONo || valid.RefPONo == '')
+    //                 //     errors["RefPONo"] = "Nomor PO tidak boleh kosong";
+    //                 // if (!valid.supplierId || valid.supplierId == '')
+    //                 //     errors["supplierId"] = "Nama Supplier tidak boleh kosong";
+    //                 // if (!valid.deliveryDate || valid.deliveryDate == '')
+    //                 //     errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
+    //                 // if (!valid.termOfPayment || valid.termOfPayment == '')
+    //                 //     errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
+    //                 // if (_module) {
+    //                 //     errors["RefPONo"] = "PO already exists";
+    //                 // }
 
-                    // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in errors) {
-                        var ValidationError = require('../../validation-error');
-                        reject(new ValidationError('data po does not pass validation', errors));
-                    }
+    //                 // 2c. begin: check if data has any error, reject if it has.
+    //                 for (var prop in errors) {
+    //                     var ValidationError = require('../../validation-error');
+    //                     reject(new ValidationError('data po does not pass validation', errors));
+    //                 }
 
-                    valid.stamp(this.user.username, 'manager');
-                    resolve(valid);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
-    }
+    //                 valid.stamp(this.user.username, 'manager');
+    //                 resolve(valid);
+    //             })
+    //             .catch(e => {
+    //                 reject(e);
+    //             })
+    //     });
+    // }
 }
