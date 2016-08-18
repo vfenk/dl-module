@@ -14,7 +14,7 @@ module.exports = {
             Buyer: 'buyers',
             Supplier: 'suppliers',
             UoM: 'unit-of-measurement',
-            Product: 'product'
+            Product: 'products'
         }
     },
     po:{
