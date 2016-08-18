@@ -31,7 +31,8 @@ module.exports = {
             POTextileJobOrderExternal: 'po-textile-job-order-external'
         },
         collection:{
-            PurchaseOrder:'purchase-order'
+            PurchaseOrder:'purchase-order',
+            PurchaseOrderGroup:'purchase-order-groups'
         }
     }
 }
