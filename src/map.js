@@ -6,15 +6,15 @@ module.exports = {
             Accessories: 'accessories',
             Buyer: 'buyers',
             Supplier: 'suppliers',
-            UoM: 'unit-of-measurement',
-            Sparepart:'sparepart',
-            GeneralMerchandise:'general-merchandise'
+            UoM: 'unit-of-measurements',
+            Sparepart:'spareparts',
+            GeneralMerchandise:'general-merchandises'
         },
         collection:{
             Buyer: 'buyers',
             Supplier: 'suppliers',
-            UoM: 'unit-of-measurement',
-            Product: 'product'
+            UoM: 'unit-of-measurements',
+            Product: 'products'
         }
     },
     po:{
@@ -31,7 +31,7 @@ module.exports = {
             POTextileJobOrderExternal: 'po-textile-job-order-external'
         },
         collection:{
-            PurchaseOrder:'purchase-order',
+            PurchaseOrder:'purchase-orders',
             PurchaseOrderGroup:'purchase-order-groups'
         }
     }
