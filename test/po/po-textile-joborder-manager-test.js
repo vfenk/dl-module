@@ -11,9 +11,13 @@ function getData() {
     var Buyer = require('dl-models').core.Buyer;
     var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
-    var TextileValue = require('dl-models').po.TextileValue;
-    var Textile = require('dl-models').core.Textile;
-
+    var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
+    var Product = require('dl-models').core.Product;
+    
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
+    
     var pOTextileJobOrder = new POTextileJobOrder();
     pOTextileJobOrder.RONo = '12333';
     pOTextileJobOrder.PRNo = '12333';
