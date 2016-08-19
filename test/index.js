@@ -4,13 +4,10 @@ var test = function (name, path) {
     })
 }
 
-test('@accessories', './accessories');
-test('@fabric', './fabric');
-test('@textile', './textile');
+
+test('@buyer', './buyer');
+test('@supplier', './supplier');
+test('@product', './product');
 test('@uom', './UoM');
-test('@sparepart', './sparepart');
-test('@general-merchandise', './general-merchandise');
-test('@buyers', './buyer');
-test('@suppliers', './supplier');
-test('@uom', './UoM');
-test('@POGarmentSparepart', './PO-garment-sparepart-test');
+test('@PurchaseOrder', './purchase-order-test');
+test('@PurchaseOrderGroup', './purchase-order-group-test');

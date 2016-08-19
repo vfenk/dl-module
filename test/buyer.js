@@ -1,10 +1,7 @@
-var validate = require('./validator').core;
+var validate = require('../src/validator').core;
 
-it("#01. Buyers should valid", function(){
+it("#01. Buyer should valid", function(){
+    var Buyer = require('../src/core/buyer');
     
-    var Buyers = require('../src/core/buyers');
-
-    var buyers = new Buyers();
-    
-    validate.buyers(buyers);
+    validate.buyer(new Buyer());
 })
