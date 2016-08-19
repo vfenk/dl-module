@@ -1,27 +1,28 @@
 'use strict'
 
+// external deps 
 var ObjectId = require("mongodb").ObjectId;
-require("mongodb-toolkit");
 
+// internal deps
+require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var Supplier = DLModels.core.Supplier;
+var Product = DLModels.core.Product;
 
-module.exports = class SupplierManager {
+module.exports = class ProductManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.supplierCollection = this.db.collection(map.core.collection.Supplier);
+        this.productCollection = this.db.use(map.core.collection.Product);
     }
 
-    read(paging) {
+    readAll(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
             order: '_id',
             asc: true
         }, paging);
-
         return new Promise((resolve, reject) => {
             var deleted = {
                 _deleted: false
@@ -49,13 +50,14 @@ module.exports = class SupplierManager {
                 query['$and'].push($or);
             }
 
-            this.supplierCollection
+
+            this.productCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(suppliers => {
-                    resolve(suppliers);
+                .then(products => {
+                    resolve(products);
                 })
                 .catch(e => {
                     reject(e);
@@ -63,12 +65,11 @@ module.exports = class SupplierManager {
         });
     }
 
-    create(supplier) {
+    create(product) {
         return new Promise((resolve, reject) => {
-            this._validate(supplier)
-                .then(validSupplier => {
-
-                    this.supplierCollection.insert(validSupplier)
+            this._validate(product)
+                .then(validProduct => {
+                    this.productCollection.insert(validProduct)
                         .then(id => {
                             resolve(id);
                         })
@@ -82,49 +83,50 @@ module.exports = class SupplierManager {
         });
     }
 
-    update(supplier) {
+    update(product) {
         return new Promise((resolve, reject) => {
-            this._validate(supplier)
-                .then(validSupplier => {
-                    this.supplierCollection.update(validSupplier)
+            this._validate(product)
+                .then(validProduct => {
+                    this.productCollection.update(validProduct)
                         .then(id => {
                             resolve(id);
                         })
                         .catch(e => {
                             reject(e);
-                        })
+                        });
                 })
                 .catch(e => {
                     reject(e);
-                })
+                });
         });
     }
 
-    delete(supplier) {
+    delete(product) {
         return new Promise((resolve, reject) => {
-            this._validate(supplier)
-                .then(validSupplier => {
-                    validSupplier._deleted = true;
-                    this.supplierCollection.update(validSupplier)
+            this._validate(product)
+                .then(validProduct => {
+                    validProduct._deleted = true;
+                    this.productCollection.update(validProduct)
                         .then(id => {
                             resolve(id);
                         })
                         .catch(e => {
                             reject(e);
-                        })
+                        });
                 })
                 .catch(e => {
                     reject(e);
-                })
+                });
         });
     }
 
-    _validate(supplier) {
+    _validate(product) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = supplier;
+            var valid = product;
+
             // 1. begin: Declare promises.
-            var getSupplierPromise = this.supplierCollection.singleOrDefault({
+            var getProductPromise = this.productCollection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
@@ -136,27 +138,30 @@ module.exports = class SupplierManager {
             // 1. end: Declare promises.
 
             // 2. begin: Validation.
-            Promise.all([getSupplierPromise])
+            Promise.all([getProductPromise])
                 .then(results => {
-                    var _supplier = results[0];
+                    var _module = results[0];
 
                     if (!valid.code || valid.code == '')
-                        errors["code"] = "code is required";
-                    else if (_supplier) {
-                        errors["code"] = "code already exists";
+                        errors["code"] = "Kode tidak boleh kosong.";
+                    else if (_module) {
+                        errors["code"] = "Kode sudah terdaftar.";
                     }
 
-                    if (!valid.name || valid.name == '')
-                        errors["name"] = "name is required";
+                    if (!valid.price || valid.price == 0)
+                        errors["price"] = "Harga tidak boleh kosong atau bernilai 0";
 
+                    if (!valid.name || valid.name == '')
+                        errors["name"] = "Nama tidak boleh kosong.";
 
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
-                        reject(new ValidationError('data does not pass validation', errors));
+                        reject(new ValidationError('Product Manager : data does not pass validation', errors));
                     }
-
-                    valid = new Supplier(supplier);
+                    
+                    if (!valid.stamp)
+                        valid = new Product(valid);
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })
@@ -165,66 +170,4 @@ module.exports = class SupplierManager {
                 })
         });
     }
-
-    getById(id) {
-        return new Promise((resolve, reject) => {
-            if (id === '')
-                resolve(null);
-            var query = {
-                _id: new ObjectId(id),
-                _deleted: false
-            };
-            this.getSingleByQuery(query)
-                .then(supplier => {
-                    resolve(supplier);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-    
-    getByIdOrDefault(id) {
-        return new Promise((resolve, reject) => {
-            if (id === '')
-                resolve(null);
-            var query = {
-                _id: new ObjectId(id),
-                _deleted: false
-            };
-            this.getSingleByQueryOrDefault(query)
-                .then(supplier => {
-                    resolve(supplier);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-
-    getSingleByQuery(query) {
-        return new Promise((resolve, reject) => {
-            this.supplierCollection
-                .single(query)
-                .then(supplier => {
-                    resolve(supplier);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        })
-    }
-
-    getSingleByQueryOrDefault(query) {
-        return new Promise((resolve, reject) => {
-            this.supplierCollection
-                .singleOrDefault(query)
-                .then(supplier => {
-                    resolve(supplier);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        })
-    }
-}
+};

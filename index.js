@@ -11,7 +11,11 @@ module.exports = {
             UoMManager: require('./src/managers/core/UoM-manager')
         },
         po: {
-            POGarmentSparepart: require('./src/managers/core/po-garment-sparepart-manager')
+            PurchaseOrder: require('./src/managers/po/purchase-order-manager'),
+            PurchaseOrderGroup: require('./src/managers/po/purchase-order-group-manager'),
+            POGarmentSparepart: require('./src/managers/po/po-garment-sparepart-manager'),
+            POGarmentGeneral: require('./src/managers/po/po-garment-general-manager'),
+            POTextileJobOrderManager: require('./src/managers/po/po-textile-joborder-manager')
         }
     }
 }

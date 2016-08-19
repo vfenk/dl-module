@@ -1,19 +1,21 @@
 'use strict'
 
-var ObjectId= require("mongodb").ObjectId;
-require ("mongodb-toolkit");
+// external deps 
+var ObjectId = require("mongodb").ObjectId;
 
+// internal deps
+require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var Buyer= DLModels.core.Buyer;
+var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
 
-module.exports = class BuyerManager {
+module.exports = class PurchaseOrderGroupManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.buyerCollection = this.db.use(map.core.collection.Buyer);
+        this.PurchaseOrderGroupCollection = this.db.use(map.po.collection.PurchaseOrderGroup);
     }
-
+    
     read(paging) {
         var _paging = Object.assign({
             page: 1,
@@ -32,37 +34,33 @@ module.exports = class BuyerManager {
 
             if (_paging.keyword) {
                 var regex = new RegExp(_paging.keyword, "i");
-                var filterCode = {
-                    'code': {
+                var filterPODLNo = {
+                    'PODLNo': {
                         '$regex': regex
                     }
                 };
-                var filterName = {
-                    'name': {
-                        '$regex': regex
-                    }
-                };
+
                 var $or = {
-                    '$or': [filterCode, filterName]
+                    '$or': [filterPODLNo]
                 };
 
                 query['$and'].push($or);
             }
 
-            this.buyerCollection
+            this.PurchaseOrderGroupCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(modules => {
-                    resolve(modules);
+                .then(PurchaseOrderGroups => {
+                    resolve(PurchaseOrderGroups);
                 })
                 .catch(e => {
                     reject(e);
                 });
         });
     }
-
+    
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -80,25 +78,7 @@ module.exports = class BuyerManager {
                 });
         });
     }
-
-    getByCode(code) {
-        return new Promise((resolve, reject) => {
-            if (code === '')
-                resolve(null);
-            var query = {
-                code: code,
-                _deleted: false
-            };
-            this.getSingleByQuery(query)
-                .then(module => {
-                    resolve(module);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-
+    
     getByIdOrDefault(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -116,10 +96,10 @@ module.exports = class BuyerManager {
                 });
         });
     }
-
+    
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.buyerCollection
+            this.PurchaseOrderGroupCollection
                 .single(query)
                 .then(module => {
                     resolve(module);
@@ -130,12 +110,12 @@ module.exports = class BuyerManager {
         })
     }
 
-    getSingleOrDefaultByQuery(query) {
+     getSingleOrDefaultByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.buyerCollection
+            this.PurchaseOrderGroupCollection
                 .singleOrDefault(query)
-                .then(module => {
-                    resolve(module);
+                .then(fabric => {
+                    resolve(fabric);
                 })
                 .catch(e => {
                     reject(e);
@@ -143,12 +123,11 @@ module.exports = class BuyerManager {
         })
     }
 
-    create(module) {
+     create(purchaseOrderGroup, type) {
         return new Promise((resolve, reject) => {
-            this._validate(module)
-                .then(validModule => {
-
-                    this.buyerCollection.insert(validModule)
+            this._validate(purchaseOrderGroup)
+                .then(validPurchaseOrderGroup => {
+                    this.PurchaseOrderGroupCollection.insert(validPurchaseOrderGroup)
                         .then(id => {
                             resolve(id);
                         })
@@ -161,84 +140,46 @@ module.exports = class BuyerManager {
                 })
         });
     }
-
-    update(module) {
-        return new Promise((resolve, reject) => {
-            this._validate(module)
-                .then(validModule => {
-                    this.buyerCollection.update(validModule)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
-    }
-
-    delete(module) {
-        return new Promise((resolve, reject) => {
-            this._validate(module)
-                .then(validModule => {
-                    validModule._deleted = true;
-                    this.buyerCollection.update(validModule)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
-    }
-
-    _validate(buyer) {
+    
+    _validate(purchaseOrderGroup) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = buyer;
+            var valid = new PurchaseOrderGroup(purchaseOrderGroup);
+
             // 1. begin: Declare promises.
-            var getBuyerPromise = this.buyerCollection.singleOrDefault({
+            var getPurchaseOrderGroupPromise = this.PurchaseOrderGroupCollection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        code: valid.code
+                        PODLNo: valid.PODLNo
                     }]
             });
+
             // 1. end: Declare promises.
 
             // 2. begin: Validation.
-            Promise.all([getBuyerPromise])
+            Promise.all([getPurchaseOrderGroupPromise])
                 .then(results => {
                     var _module = results[0];
 
-                    if (!valid.code || valid.code == '')
-                        errors["code"] = "code is required";
-                    else if (_module) {
-                        errors["code"] = "code already exists";
+                    if (!valid.PODLNo || valid.PODLNo == '')
+                        errors["PODLNo"] = "Nomor PODL tidak boleh kosong";
+                    if (_module) {
+                        errors["PODLNo"] = "PODL already exists";
                     }
-
-                    if (!valid.name || valid.name == '')
-                        errors["name"] = "name is required";
-                        
-                    if(Number.isInteger(parseInt(valid.tempo))===false)
-                        errors["tempo"] = "tempo must be integer";
+                    
+                    if (valid.items.count == 0) {
+                        errors["items"] = "Harus ada minimal 1 nomor PO"
+                    }
 
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
-                        reject(new ValidationError('data does not pass validation', errors));
+                        reject(new ValidationError('data podl does not pass validation', errors));
                     }
 
-                    valid=new Buyer(buyer);
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })
@@ -247,4 +188,4 @@ module.exports = class BuyerManager {
                 })
         });
     }
-};
+}
