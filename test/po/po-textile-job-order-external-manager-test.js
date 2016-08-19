@@ -80,7 +80,7 @@ function getData() {
     var productValue = new PurchaseOrderItem({
         qty: 0,
         price: 0,
-        product: textile
+        product: product
     });
     
     var _products = [];
