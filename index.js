@@ -20,7 +20,8 @@ module.exports = {
         POGarmentGeneral: require('./src/po/PO-garment-general'),
         POGroupGarmentGeneral: require('./src/po/purchase-order-group-garment-general'),
         
-        POGarmentSparepart: require('./src/po/po-garment-sparepart')
+        POGarmentSparepart: require('./src/po/po-garment-sparepart'),
+        POTextileJobOrder: require('./src/po/po-textile-job-order-external')
 
     },
     map: require('./src/map'),
