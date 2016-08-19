@@ -8,6 +8,7 @@ require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var POTextileJobOrder = DLModels.po.POTextileJobOrder;
+var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
 var moduleId = 'POTJ'
 var poType = map.po.type.POTextileJobOrderExternal;
 var generateCode = require('../.././utils/code-generator');
@@ -135,8 +136,7 @@ module.exports = class POTextileJobOrderManager {
                 resolve(null);
             var query = {
                 _id: new ObjectId(id),
-                _deleted: false,
-                _type: poType
+                _deleted: false
             };
             this.getSingleByQuery(query)
                 .then(module => {
@@ -218,11 +218,17 @@ module.exports = class POTextileJobOrderManager {
         poTextileJobOrder = new POTextileJobOrder(poTextileJobOrder);
         return new Promise((resolve, reject) => {
             poTextileJobOrder.PONo = generateCode(moduleId)
-            this.purchaseOrderManager.create(poTextileJobOrder)
+            this._validate(poTextileJobOrder)
+            .then(validpoTextileJobOrder => {
+                this.purchaseOrderManager.create(validpoTextileJobOrder)
                 .then(id => {
                     resolve(id);
                 })
                 .catch(e => {
+                    reject(e);
+                });
+            })
+            .catch(e => {
                     reject(e);
                 });
         })
@@ -263,30 +269,64 @@ module.exports = class POTextileJobOrderManager {
         });
     }
 
-    update(POTextileJobOrder) {
+    update(poTextileJobOrder) {
          poTextileJobOrder = new POTextileJobOrder(poTextileJobOrder);
         return new Promise((resolve, reject) => {
-            this.purchaseOrderManager.update(poTextileJobOrder)
+            this._validate(poTextileJobOrder)
+            .then(validpoTextileJobOrder => {
+                this.purchaseOrderManager.update(validpoTextileJobOrder)
                 .then(id => {
                     resolve(id);
                 })
                 .catch(e => {
                     reject(e);
                 });
+            })
+            .catch(e => {
+                    reject(e);
+                });
         })
     }
 
-    delete(POTextileJobOrder) {
+    delete(poTextileJobOrder) {
         poTextileJobOrder = new POTextileJobOrder(poTextileJobOrder);
         return new Promise((resolve, reject) => {
-            this.purchaseOrderManager.delete(poTextileJobOrder)
+            this._validate(poTextileJobOrder)
+            .then(validpoTextileJobOrder => {
+                this.purchaseOrderManager.delete(validpoTextileJobOrder)
                 .then(id => {
                     resolve(id);
                 })
                 .catch(e => {
                     reject(e);
                 });
+            })
+            .catch(e => {
+                    reject(e);
+                });
         })
     }
+    
+    _validate(purchaseOrder) {
+        var errors = {};
+        return new Promise((resolve, reject) => {
+            var valid = purchaseOrder;
+                    if (!valid.RONo || valid.RONo == '')
+                        errors["RONo"] = "Nomor RO tidak boleh kosong";
+                    if (!valid.article || valid.article == '')
+                        errors["article"] = "Article tidak boleh kosong";
+                    if (!valid.buyerId || valid.buyerId == '')
+                        errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
 
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
+
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+        });
+    }
 };
