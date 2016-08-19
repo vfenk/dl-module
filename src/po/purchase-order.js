@@ -28,6 +28,7 @@ module.exports = class PurchaseOrder extends BaseModel {
         this.deliveryFeeByBuyer = false;
         this.PODLNo = '';
         this.description = '';
+        this.isPosted=false;
         this.copy(source);
         
         var _items = [];
