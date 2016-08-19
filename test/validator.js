@@ -83,6 +83,25 @@ else {
             validateUoMDocs(data.UoM);
         }
 
+        var validateAccessoriesValue = function (data) {
+            data.should.not.equal(null);
+            data.should.instanceOf(Object);
+
+            data.should.have.property('qty');
+            data.qty.should.instanceOf(Number);
+
+            data.should.have.property('unit');
+            data.unit.should.instanceOf(String);
+
+            data.should.have.property('price');
+            data.price.should.instanceOf(Number);
+
+            data.should.have.property('accessories');
+            data.accessories.should.instanceof(Object);
+            validateAccessories(data.accessories);
+
+        }
+
         var validateAccessories = function (data) {
             data.should.not.equal(null);
             data.should.instanceOf(Object);
@@ -100,6 +119,61 @@ else {
             data.UoM.should.instanceOf(Object);
 
             validateUoMDocs(data.UoM);
+        }
+
+        var validatePOGarmentAccessories = function (data) {
+            data.should.not.equal(null);
+            data.should.instanceOf(Object);
+
+            data.should.have.property('RONo');
+            data.PRNo.should.instanceOf(String);
+
+            data.should.have.property('PRNo');
+            data.PRNo.should.instanceOf(String);
+
+            data.should.have.property('PONo');
+            data.PONo.should.instanceOf(String);
+
+            data.should.have.property('Article');
+            data.Article.should.instanceOf(String);
+
+             data.should.have.property('supplierId');
+             data.supplierId.should.instanceof(Object);
+
+             data.should.have.property('buyerId');
+             data.buyerId.should.instanceof(Object);
+
+            data.should.have.property('supplier');
+            data.supplier.should.instanceof(Object);
+            validateSupplier(data.supplier);
+
+            data.should.have.property('buyer');
+            data.buyer.should.instanceof(Object);
+            validateBuyer(data.buyer);
+
+            data.should.have.property('ppn');
+            data.ppn.should.instanceOf(Number);
+
+            data.should.have.property('deliveryDate');
+            data.deliveryDate.should.instanceOf(Date);
+
+            data.should.have.property('termOfPayment');
+            data.termOfPayment.should.instanceOf(String);
+
+            data.should.have.property('deliveryFee');
+            data.deliveryFee.should.instanceOf(Number);
+
+            data.should.have.property('PODLNo');
+            data.PODLNo.should.instanceOf(String);
+
+            data.should.have.property('description');
+            data.description.should.instanceOf(String);
+
+            data.should.have.property('items');
+            data.items.should.instanceOf(Array);
+            for (var item of data.items) {
+                validateAccessoriesValue(item);
+            }
         }
 
         var validateUoMDocs = function (data) {
@@ -244,6 +318,7 @@ else {
             validateSparepart(data.sparepart);
 
         }
+
         var validateSparepart = function (data) {
             data.should.not.equal(null);
             data.should.instanceof(Object);
@@ -262,6 +337,7 @@ else {
             validateUoMDocs(data.UoM);
 
         }
+
         var validatePOGarmentSparePart = function (data) {
             data.should.not.equal(null);
             data.should.instanceOf(Object);
