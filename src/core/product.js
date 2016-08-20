@@ -23,6 +23,7 @@ module.exports = class Product extends BaseModel{
         this.name = '';
         this.price = 0;
         this.description = '';
+        this.UoMID = {};
         this.UoM = new UoM();
         this.detail = new ProductDetail();
 
