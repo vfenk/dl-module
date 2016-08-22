@@ -6,7 +6,7 @@ module.exports = class PurchaseOrderItem {
     constructor(source) {
         this.qty = 0;
         this.price = 0;
-        this.product = new Product();
+        this.product = new Product( );
         // this.copy(source);
     }
 }
