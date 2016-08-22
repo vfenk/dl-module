@@ -311,10 +311,10 @@ module.exports = class POTextileJobOrderManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = purchaseOrder;
-                    // if (!valid.RONo || valid.RONo == '')
-                    //     errors["RONo"] = "Nomor RO tidak boleh kosong";
-                    // if (!valid.article || valid.article == '')
-                    //     errors["article"] = "Article tidak boleh kosong";
+                    if (!valid.RONo || valid.RONo == '')
+                        errors["RONo"] = "Nomor RO tidak boleh kosong";
+                    if (!valid.article || valid.article == '')
+                        errors["article"] = "Article tidak boleh kosong";
                     if (!valid.buyerId || valid.buyerId == '')
                         errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
                     for (var prop in errors) {

@@ -13,6 +13,7 @@ function getData() {
     var UoM = require('dl-models').core.UoM;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Product = require('dl-models').core.Product;
+    var Textile = require('dl-models').core.Textile;
     
     var now = new Date();
     var stamp = now / 1000 | 0;
