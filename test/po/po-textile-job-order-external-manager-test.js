@@ -2,7 +2,7 @@
 
 var should = require('should');
 var helper = require("../helper");
-var POTextileJobOrderManager = require("../../src/managers/po/po-textile-joborder-manager");
+var POTextileJobOrderManager = require("../../src/managers/po/po-textile-job-order-external-manager");
 var instanceManager = null;
 
 function getData() {
@@ -11,13 +11,18 @@ function getData() {
     var Buyer = require('dl-models').core.Buyer;
     var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
-    var TextileValue = require('dl-models').po.TextileValue;
+    var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
+    var Product = require('dl-models').core.Product;
     var Textile = require('dl-models').core.Textile;
-
+    
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
+    
     var pOTextileJobOrder = new POTextileJobOrder();
-    pOTextileJobOrder.RONo = '12333';
-    pOTextileJobOrder.PRNo = '12333';
-    pOTextileJobOrder.PONo = '126666';
+    pOTextileJobOrder.RONo =  '1' + code + stamp;
+    pOTextileJobOrder.RefPONo =  '2' + code + stamp;
+    pOTextileJobOrder.PRNo =  '3' + code + stamp;
     pOTextileJobOrder.ppn = 10;
     pOTextileJobOrder.deliveryDate = new Date();
     pOTextileJobOrder.termOfPayment = 'Tempo 2 bulan';
@@ -26,6 +31,7 @@ function getData() {
     pOTextileJobOrder.description = 'SP1';
     pOTextileJobOrder.supplierID = {};
     pOTextileJobOrder.buyerID = {};
+    pOTextileJobOrder.article = "Test Article";
 
     var buyer = new Buyer({
         code: '123',
@@ -62,26 +68,27 @@ function getData() {
         units: _units
     });
 
-    var textile = new Textile({
+     var product = new Product({
         code: '22',
         name: 'hotline',
+        price: 0,
         description: 'hotline123',
-        price:0,
-        UoM: _uom
+        UoM: _uom,
+        detail: {}
     });
 
-    var textileValue = new TextileValue({
+    var productValue = new PurchaseOrderItem({
         qty: 0,
-        unit: '',
         price: 0,
-        textile: textile
+        product: textile
     });
-    var _textiles = [];
-    _textiles.push(textileValue);
+    
+    var _products = [];
+    _products.push(productValue);
 
     pOTextileJobOrder.supplier = supplier;
     pOTextileJobOrder.buyer=buyer;
-    pOTextileJobOrder.items = _textiles;
+    pOTextileJobOrder.items = _products;
     return pOTextileJobOrder;
 }
 
@@ -139,7 +146,7 @@ it(`#03. should success when get created data with id`, function (done) {
         })
 });
 
-it(`#03. should success when update created data`, function (done) {
+it(`#04. should success when update created data`, function (done) {
     createdData.RONo += '[updated]';
     createdData.PRNo += '[updated]';
     createdData.PONo += '[updated]';
@@ -158,12 +165,13 @@ it(`#03. should success when update created data`, function (done) {
         });
 });
 
-it(`#04. should success when get updated data with id`, function (done) {
+it(`#05. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             data.RONo.should.equal(createdData.RONo);
             data.PRNo.should.equal(createdData.PRNo);
             data.PONo.should.equal(createdData.PONo);
+            data.RefPONo.should.equal(createdData.RefPONo);
             data.termOfPayment.should.equal(createdData.termOfPayment);
             data.PODLNo.should.equal(createdData.PODLNo);
             data.description.should.equal(createdData.description);
@@ -176,7 +184,7 @@ it(`#04. should success when get updated data with id`, function (done) {
 });
 
 
-it(`#05. should success when delete data`, function (done) {
+it(`#06. should success when delete data`, function (done) {
     instanceManager.delete(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -187,7 +195,7 @@ it(`#05. should success when delete data`, function (done) {
         });
 });
 
-it(`#06. should _deleted=true`, function (done) {
+it(`#07. should _deleted=true`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             // validate.product(data);
@@ -197,36 +205,5 @@ it(`#06. should _deleted=true`, function (done) {
         })
         .catch(e => {
             done(e);
-        })
-});
-
-it('#07. should error when create new data with same code', function (done) {
-    var data = Object.assign({}, createdData);
-    delete data._id;
-    instanceManager.create(data)
-        .then(id => {
-            id.should.be.Object();
-            createdId = id;
-            done("Should not be able to create data with same code");
-        })
-        .catch(e => {
-            e.errors.should.have.property('code');
-            done();
-        })
-});
-
-it('#08. should error with property code and name ', function (done) {
-    instanceManager.create({})
-        .then(id => {
-            done("Should not be error with property code and name");
-        })
-        .catch(e => {
-            try {
-                e.errors.should.have.property('code');
-                e.errors.should.have.property('name');
-                done();
-            } catch (ex) {
-                done(ex);
-            }
         })
 });
