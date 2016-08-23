@@ -57,6 +57,12 @@ module.exports = function (data) {
     data.should.have.property('description');
     data.description.should.instanceOf(String);
 
+    data.should.have.property('currency');
+    data.currency.should.instanceOf(String);
+
+    data.should.have.property('kurs');
+    data.kurs.should.instanceOf(Number);
+
     data.should.have.property('isPosted');
     data.isPosted.should.instanceOf(Boolean);
 
