@@ -28,6 +28,8 @@ function getData() {
     pOGarmentSparepart.deliveryFeeByBuyer = true;
     pOGarmentSparepart.PODLNo = '';
     pOGarmentSparepart.description = 'SP1';
+    pOGarmentSparepart.kurs = 13000;
+    pOGarmentSparepart.currency = 'dollar';
     pOGarmentSparepart.supplierID = {};
     pOGarmentSparepart.article = "Test Article";
 
