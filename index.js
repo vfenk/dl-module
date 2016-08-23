@@ -19,7 +19,8 @@ module.exports = {
         POGarmentGeneral: require('./src/po/PO-garment-general'),
         POGroupGarmentGeneral: require('./src/po/purchase-order-group-garment-general'),
         POGarmentSparepart: require('./src/po/po-garment-sparepart'),
-        POTextileJobOrder: require('./src/po/po-textile-job-order-external')
+        POTextileJobOrder: require('./src/po/po-textile-job-order-external'),
+        POGarmentAccessories: require('./src/po/po-garment-accessories'),
     },
     map: require('./src/map'),
     validator: require('./src/validator')
