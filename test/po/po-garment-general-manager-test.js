@@ -26,11 +26,13 @@ function getData() {
     poGarmentGeneral.deliveryFeeByBuyer = true;
     poGarmentGeneral.PODLNo = '';
     poGarmentGeneral.description = 'SP1';
+    poGarmentGeneral.kurs = 13000;
+    poGarmentGeneral.currency = 'dollar';
     poGarmentGeneral.supplierID = {};
 
     var supplier = new Supplier({
         code: '123',
-        name: 'hot',
+        name: 'Toko Stationery',
         description: 'hotline',
         phone: '0812....',
         address: 'test',

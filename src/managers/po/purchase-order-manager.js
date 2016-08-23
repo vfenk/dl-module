@@ -90,8 +90,10 @@ module.exports = class PurchaseOrderManager {
                 .then(results => {
                     var _module = results[0];
 
-                    if (!valid.PRNo || valid.PRNo == '')
-                        errors["PRNo"] = "Nomor PR tidak boleh kosong";
+                    // if (!valid.PRNo || valid.PRNo == '')
+                    //     errors["PRNo"] = "Nomor PR tidak boleh kosong";
+                    if (!valid.RefPONo || valid.RefPONo == '')
+                        errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
                     if (!valid.supplierId || valid.supplierId == '')
                         errors["supplierId"] = "Nama Supplier tidak boleh kosong";
                     if (!valid.deliveryDate || valid.deliveryDate == '')
