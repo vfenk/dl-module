@@ -5,13 +5,13 @@ var Buyer = require('../core/buyer');
 var PurchaseOrderItem = require('../po/purchase-order-item');
 
 module.exports = class PurchaseOrder extends BaseModel {
-    constructor(source,type) {
+    constructor(source, type) {
         type = type || 'purchase-order';
-        
+
         super(type, '1.0.0');
 
         //Define properties
-        this.iso='';
+        this.iso = '';
         this.RONo = '';
         this.article = '';
         this.PRNo = '';
@@ -28,9 +28,11 @@ module.exports = class PurchaseOrder extends BaseModel {
         this.deliveryFeeByBuyer = false;
         this.PODLNo = '';
         this.description = '';
-        this.isPosted=false;
+        this.currency = '';
+        this.kurs = 1;
+        this.isPosted = false;
         this.copy(source);
-        
+
         var _items = [];
         for (var item of this.items) {
             _items.push(new PurchaseOrderItem(item));
