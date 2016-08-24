@@ -21,7 +21,7 @@ module.exports = {
         type:{
             POGarmentJobOrderFabric: 'po-garment-job-order-fabric',
             POGarmentJobOrderAccessories: 'po-garment-job-order-accessories',
-            POGarmentMasterFabric: 'po-garment-master-fabric',
+            POGarmentFabric: 'po-garment-fabric',
             POGarmentAccessories: 'po-garment-accessories',
             POGarmentSparepart: 'po-garment-sparepart',
             POGarmentGeneral: 'po-garment-general',
