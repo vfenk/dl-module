@@ -222,9 +222,9 @@ module.exports = class POTextileGeneralATKManager {
         return new Promise((resolve, reject) => {
 
             poTextileGeneralATK.PONo = generateCode(moduleId)
-            this._validate(poTextileJobOrder)
-                .then(validpoTextileJobOrder => {
-                    this.purchaseOrderManager.create(validpoTextileJobOrder)
+            this._validate(poTextileGeneralATK)
+                .then(validpoTextileGeneralATK => {
+                    this.purchaseOrderManager.create(validpoTextileGeneralATK)
                         .then(id => {
                             resolve(id);
                         })
@@ -241,7 +241,7 @@ module.exports = class POTextileGeneralATKManager {
         return new Promise((resolve, reject) => {
             var newPOGroup = new PurchaseOrderGroup()
 
-            newPOGroup.PODLNo = generateCode('PODL/GG')
+            newPOGroup.PODLNo = generateCode('PODL/TGA')
             newPOGroup._type = poType
 
             var _tasks = [];
@@ -276,9 +276,9 @@ module.exports = class POTextileGeneralATKManager {
     update(poTextileGeneralATK) {
         poTextileGeneralATK = new POTextileGeneralATK(poTextileGeneralATK);
         return new Promise((resolve, reject) => {
-            his._validate(poTextileJobOrder)
-                .then(validpoTextileJobOrder => {
-                    this.purchaseOrderManager.update(validpoTextileJobOrder)
+            this._validate(poTextileGeneralATK)
+                .then(validpoTextileGeneralATK => {
+                    this.purchaseOrderManager.update(validpoTextileGeneralATK)
                         .then(id => {
                             resolve(id);
                         })
@@ -287,6 +287,7 @@ module.exports = class POTextileGeneralATKManager {
                         });
                 })
                 .catch(e => {
+                    reject(e);
                 })
         });
     }
@@ -429,7 +430,7 @@ module.exports = class POTextileGeneralATKManager {
         return new Promise((resolve, reject) => {
             var newPOGroup = new PurchaseOrderGroup()
 
-            newPOGroup.PODLNo = generateCode('PODL/GG')
+            newPOGroup.PODLNo = generateCode('PODL/TGA')
             newPOGroup._type = poType
 
             var _tasks = [];

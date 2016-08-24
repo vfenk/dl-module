@@ -286,6 +286,7 @@ module.exports = class POTextileJobOrderManager {
                  });
              })
              .catch(e => {
+                    reject(e);
                  })
  
          });
