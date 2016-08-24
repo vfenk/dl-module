@@ -226,12 +226,14 @@ module.exports = class POGarmentGeneralManager {
         }, paging);
 
         return new Promise((resolve, reject) => {
-            var deleted = {
-                _deleted: false
+            var filter = {
+                _deleted: false,
+                _type: poType
             };
+            
             var query = _paging.keyword ? {
-                '$and': [deleted]
-            } : deleted;
+                '$and': [filter]
+            } : filter;
 
             if (_paging.keyword) {
                 var regex = new RegExp(_paging.keyword, "i");
