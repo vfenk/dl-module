@@ -89,51 +89,6 @@ module.exports = class POGarmentSparepartManager {
         });
     }
 
-    readAllPurchaseOrderGroup(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: '_id',
-            asc: true
-        }, paging);
-
-        return new Promise((resolve, reject) => {
-            var deleted = {
-                _deleted: false
-            };
-            var query = _paging.keyword ? {
-                '$and': [deleted]
-            } : deleted;
-
-            if (_paging.keyword) {
-                var regex = new RegExp(_paging.keyword, "i");
-                var filterPODLNo = {
-                    'PODLNo': {
-                        '$regex': regex
-                    }
-                };
-
-                var $or = {
-                    '$or': [filterPODLNo]
-                };
-
-                query['$and'].push($or);
-            }
-
-            this.PurchaseOrderGroupCollection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
-                .execute()
-                .then(PurchaseOrderGroups => {
-                    resolve(PurchaseOrderGroups);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -251,6 +206,114 @@ module.exports = class POGarmentSparepartManager {
         })
     }
 
+    update(poGarmentSparepart) {
+        poGarmentSparepart = new POGarmentSparepart(poGarmentSparepart);
+        return new Promise((resolve, reject) => {
+            this.purchaseOrderManager.update(poGarmentSparepart)
+                .then(id => {
+                    resolve(id);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        })
+    }
+
+    delete(poGarmentSparepart) {
+        poGarmentSparepart = new POGarmentSparepart(poGarmentSparepart);
+        return new Promise((resolve, reject) => {
+
+            poGarmentSparepart._deleted = true;
+            this.purchaseOrderManager.delete(poGarmentSparepart)
+                .then(id => {
+                    resolve(id);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        })
+    }
+    
+    // ====================================PO DL===========================================
+
+    readAllPurchaseOrderGroup(paging) {
+        var _paging = Object.assign({
+            page: 1,
+            size: 20,
+            order: '_id',
+            asc: true
+        }, paging);
+
+        return new Promise((resolve, reject) => {
+           var filter = {
+                _deleted: false,
+                _type: poType
+            };
+            
+            var query = _paging.keyword ? {
+                '$and': [filter]
+            } : filter;
+
+            if (_paging.keyword) {
+                var regex = new RegExp(_paging.keyword, "i");
+                var filterPODLNo = {
+                    'PODLNo': {
+                        '$regex': regex
+                    }
+                };
+
+                var $or = {
+                    '$or': [filterPODLNo]
+                };
+
+                query['$and'].push($or);
+            }
+
+            this.PurchaseOrderGroupCollection
+                .where(query)
+                .page(_paging.page, _paging.size)
+                .orderBy(_paging.order, _paging.asc)
+                .execute()
+                .then(PurchaseOrderGroups => {
+                    resolve(PurchaseOrderGroups);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+    
+    getPurchaseOrderGroupById(id) {
+        return new Promise((resolve, reject) => {
+            if (id === '')
+                resolve(null);
+            var query = {
+                _id: new ObjectId(id),
+                _deleted: false
+            };
+            this.getSingleByQuery(query)
+                .then(module => {
+                    resolve(module);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
+    getSinglePurchaseOrderGroupByQuery(query) {
+        return new Promise((resolve, reject) => {
+            this.PurchaseOrderGroupCollection
+                .single(query)
+                .then(module => {
+                    resolve(module);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        })
+    }
+
     createGroup(items) {
         return new Promise((resolve, reject) => {
             var newPOGroup = new PurchaseOrderGroup()
@@ -284,33 +347,5 @@ module.exports = class POGarmentSparepartManager {
                     reject(e);
                 })
         });
-    }
-
-    update(poGarmentSparepart) {
-        poGarmentSparepart = new POGarmentSparepart(poGarmentSparepart);
-        return new Promise((resolve, reject) => {
-            this.purchaseOrderManager.update(poGarmentSparepart)
-                .then(id => {
-                    resolve(id);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        })
-    }
-
-    delete(poGarmentSparepart) {
-        poGarmentSparepart = new POGarmentSparepart(poGarmentSparepart);
-        return new Promise((resolve, reject) => {
-
-            poGarmentSparepart._deleted = true;
-            this.purchaseOrderManager.delete(poGarmentSparepart)
-                .then(id => {
-                    resolve(id);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        })
     }
 }

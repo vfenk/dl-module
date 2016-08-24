@@ -17,7 +17,8 @@ module.exports = {
             POGarmentGeneral: require('./src/managers/po/po-garment-general-manager'),
             POTextileJobOrderManager: require('./src/managers/po/po-textile-job-order-external-manager'),
             POGarmentAccessories: require('./src/managers/po/po-garment-accessories-manager'),
-            POTextileGeneralATK: require('./src/managers/po/po-textile-atk-manager')
+            POTextileGeneralATK: require('./src/managers/po/po-textile-atk-manager'),
+            POGarmentFabric: require('./src/managers/po/po-garment-fabric-manager')
         }
     }
 }

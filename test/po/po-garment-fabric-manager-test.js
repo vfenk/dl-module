@@ -2,41 +2,43 @@
 
 var should = require('should');
 var helper = require("../helper");
-var POGarmentGeneralManager = require("../../src/managers/po/po-garment-general-manager");
+var POGarmentFabricManager = require("../../src/managers/po/po-garment-fabric-manager");
 var instanceManager = null;
 
 function getData() {
-    var POGarmentGeneral = require('dl-models').po.POGarmentGeneral;
+    var POGarmentFabric = require('dl-models').po.POGarmentFabric;
     var Supplier = require('dl-models').core.Supplier;
     var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Product = require('dl-models').core.Product;
+    var StandardQualityTestPercentage = require('dl-models').po.StandardQualityTestPercentage;
 
     var now = new Date();
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
 
-    var poGarmentGeneral = new POGarmentGeneral();
-    poGarmentGeneral.RONo = '1' + code + stamp;
-    poGarmentGeneral.RefPONo = '2' + code + stamp;
-    poGarmentGeneral.ppn = 10;
-    poGarmentGeneral.deliveryDate = new Date();
-    poGarmentGeneral.termOfPayment = 'Tempo 2 bulan';
-    poGarmentGeneral.deliveryFeeByBuyer = true;
-    poGarmentGeneral.PODLNo = '';
-    poGarmentGeneral.description = 'SP1';
-    poGarmentGeneral.kurs = 13000;
-    poGarmentGeneral.currency = 'dollar';
-    poGarmentGeneral.supplierID = {};
+    var poGarmentFabric = new POGarmentFabric();
+    poGarmentFabric.PRNo = '1' + code + stamp;
+    poGarmentFabric.RONo = '2' + code + stamp;
+    poGarmentFabric.RefPONo = '3' + code + stamp;
+    poGarmentFabric.ppn = 10;
+    poGarmentFabric.deliveryDate = new Date();
+    poGarmentFabric.termOfPayment = 'Tempo 2 bulan';
+    poGarmentFabric.deliveryFeeByBuyer = true;
+    poGarmentFabric.PODLNo = '';
+    poGarmentFabric.description = 'SP1';
+    poGarmentFabric.kurs = 13000;
+    poGarmentFabric.currency = 'dollar';
+    poGarmentFabric.supplierID = {};
 
     var supplier = new Supplier({
         _id: '123',
-        code: '123',
-        name: 'Toko Stationery',
-        description: 'hotline',
+        code: 'TS0001',
+        name: 'Toko Kain',
+        description: 'toko kain',
         phone: '0812....',
-        address: 'test',
+        address: 'jakarta',
         local: true
     });
 
@@ -57,10 +59,10 @@ function getData() {
     });
 
     var product = new Product({
-        code: '22',
-        name: 'hotline',
+        code: 'FF0001',
+        name: 'kain',
         price: 0,
-        description: 'hotline123',
+        description: 'kain putih',
         UoM: _uom,
         detail: {}
     });
@@ -73,16 +75,26 @@ function getData() {
 
     var _products = [];
     _products.push(productValue);
-
-    poGarmentGeneral.supplier = supplier;
-    poGarmentGeneral.items = _products;
-    return poGarmentGeneral;
+    
+    var _stdQtyTest = new StandardQualityTestPercentage({
+        shrinkage : 10,
+        wetRubbing : 20,
+        dryRubbing : 30,
+        washing : 40,
+        darkPrespiration : 50,
+        lightMedPrespiration : 60,
+    })
+    
+    poGarmentFabric.standardQuality = _stdQtyTest;
+    poGarmentFabric.supplier = supplier;
+    poGarmentFabric.items = _products;
+    return poGarmentFabric;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new POGarmentGeneralManager(db, {
+            instanceManager = new POGarmentFabricManager(db, {
                 username: 'unit-test'
             });
             done();
