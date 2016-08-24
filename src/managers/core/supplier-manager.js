@@ -141,13 +141,13 @@ module.exports = class SupplierManager {
                     var _supplier = results[0];
 
                     if (!valid.code || valid.code == '')
-                        errors["code"] = "code is required";
+                        errors["code"] = "Kode harus diisi ";
                     else if (_supplier) {
-                        errors["code"] = "code already exists";
+                        errors["code"] = "Kode sudah ada";
                     }
 
                     if (!valid.name || valid.name == '')
-                        errors["name"] = "name is required";
+                        errors["name"] = "Nama harus diisi";
 
 
                     // 2c. begin: check if data has any error, reject if it has.

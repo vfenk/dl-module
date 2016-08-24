@@ -13,9 +13,9 @@ function getData() {
 
     supplier.code = code;
     supplier.name = `name[${code}]`;
-    supplier.description = `description for ${code}`;
-    supplier.contact = `phone[${code}]`;
     supplier.address = `Solo [${code}]`;
+    supplier.contact = `phone[${code}]`;
+    this.PIC=`PIC[${code}]`;
     supplier.import = true;
 
     return supplier;
@@ -81,6 +81,7 @@ it(`#03. should success when update created data`, function (done) {
     createdData.name += '[updated]';
     createdData.address += '[updated]';
     createdData.contact += '[updated]';
+    createdData.PIC += '[updated]';
     createdData.import += '[updated]';
 
     instanceManager.update(createdData)
@@ -101,6 +102,7 @@ it(`#04. should success when get updated data with id`, function (done) {
             data.name.should.equal(createdData.name);
             data.contact.should.equal(createdData.contact);
             data.address.should.equal(createdData.address);
+            data.PIC.should.equal(createdData.PIC);
             data.import.should.equal(createdData.import);
             done();
         })
