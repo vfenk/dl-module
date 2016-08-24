@@ -215,19 +215,25 @@ module.exports = class POTextileJobOrderManager {
     }
 
     create(poTextileJobOrder) {
+        
         poTextileJobOrder = new POTextileJobOrder(poTextileJobOrder);
         return new Promise((resolve, reject) => {
 
             poTextileJobOrder.PONo = generateCode(moduleId)
-            this.purchaseOrderManager.create(poTextileJobOrder)
-                .then(id => {
-                    resolve(id);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-
-        });
+            this._validate(poTextileJobOrder)
+            .then(validpoTextileJobOrder => {
+             this.purchaseOrderManager.create(validpoTextileJobOrder)
+                  .then(id => {
+                      resolve(id);
+                  })
+                  .catch(e => {
+                      reject(e);
+                 });
+             })
+             .catch(e => {
+                 })
+ 
+         });
     }
 
     createGroup(items) {
@@ -269,16 +275,20 @@ module.exports = class POTextileJobOrderManager {
     update(poTextileJobOrder) {
         poTextileJobOrder = new POTextileJobOrder(poTextileJobOrder);
         return new Promise((resolve, reject) => {
-
-            this.purchaseOrderManager.update(poTextileJobOrder)
-                .then(id => {
-                    resolve(id);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-
-        });
+            this._validate(poTextileJobOrder)
+            .then(validpoTextileJobOrder => {
+             this.purchaseOrderManager.update(validpoTextileJobOrder)
+                  .then(id => {
+                      resolve(id);
+                  })
+                  .catch(e => {
+                      reject(e);
+                 });
+             })
+             .catch(e => {
+                 })
+ 
+         });
     }
 
     delete(poTextileJobOrder) {
@@ -294,6 +304,28 @@ module.exports = class POTextileJobOrderManager {
                     reject(e);
                 });
 
+        });
+    }
+     _validate(purchaseOrder) {
+        var errors = {};
+        return new Promise((resolve, reject) => {
+            var valid = purchaseOrder;
+                     if (!valid.PRNo || valid.PRNo == '')
+                         errors["PRNo"] = "Nomor RO tidak boleh kosong";
+                    if (!valid.article || valid.article == '')
+                        errors["article"] = "Article tidak boleh kosong";
+                    if (!valid.buyer._id || valid.buyer._id == '')
+                        errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
+
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
+
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
         });
     }
     
