@@ -100,7 +100,7 @@ module.exports = class PurchaseOrderManager {
                         errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
                     if (!valid.termOfPayment || valid.termOfPayment == '')
                         errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
-                    if (valid.deliveryFeeByBuyer == '')
+                    if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
                         errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
                     // if (_module) {
                     //     errors["code"] = "RO, PR, PO already exists";
