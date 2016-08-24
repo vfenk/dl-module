@@ -42,6 +42,9 @@ module.exports = function (data) {
     data.should.have.property('ppn');
     data.ppn.should.instanceOf(Number);
 
+    data.should.have.property('usePPn');
+    data.usePPn.should.instanceOf(Boolean);
+
     data.should.have.property('deliveryDate');
     data.deliveryDate.should.instanceOf(Date);
 

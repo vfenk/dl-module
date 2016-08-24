@@ -22,6 +22,7 @@ module.exports = class PurchaseOrder extends BaseModel {
         this.supplierId = {};
         this.supplier = new Supplier();
         this.ppn = 10;
+        this.usePPn = false;
         this.items = [];
         this.deliveryDate = new Date();
         this.termOfPayment = '';
