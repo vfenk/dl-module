@@ -29,6 +29,8 @@ function getData() {
     pOTextileJobOrder.deliveryFeeByBuyer = true;
     pOTextileJobOrder.PODLNo = '';
     pOTextileJobOrder.description = 'SP1';
+    pOTextileJobOrder.kurs = 13000;
+    pOTextileJobOrder.currency = 'dollar';
     pOTextileJobOrder.supplierID = {};
     pOTextileJobOrder.buyerID = {};
     pOTextileJobOrder.article = "Test Article";
@@ -68,7 +70,7 @@ function getData() {
         units: _units
     });
 
-     var product = new Product({
+     var textile = new Product({
         code: '22',
         name: 'hotline',
         price: 0,
@@ -80,7 +82,7 @@ function getData() {
     var productValue = new PurchaseOrderItem({
         qty: 0,
         price: 0,
-        product: product
+        product: textile
     });
     
     var _products = [];

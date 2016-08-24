@@ -221,13 +221,16 @@ module.exports = class BuyerManager {
                     var _module = results[0];
 
                     if (!valid.code || valid.code == '')
-                        errors["code"] = "code is required";
+                        errors["code"] = "Kode harus diisi";
                     else if (_module) {
-                        errors["code"] = "code already exists";
+                        errors["code"] = "Kode sudah ada";
                     }
 
                     if (!valid.name || valid.name == '')
-                        errors["name"] = "name is required";
+                        errors["name"] = "Nama Harus diisi";
+                        
+                    if(Number.isInteger(parseInt(valid.tempo))===false)
+                        errors["tempo"] = "Tempo harus berupa angka";
 
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {

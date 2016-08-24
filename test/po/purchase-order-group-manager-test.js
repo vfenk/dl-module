@@ -31,6 +31,8 @@ function getData() {
     purchaseOrder.deliveryFeeByBuyer = true;
     purchaseOrder.PODLNo = '';
     purchaseOrder.description = 'SP1';
+    purchaseOrder.kurs = 13000;
+    purchaseOrder.currency = 'dollar';
     purchaseOrder.supplierID = {};
 
     var supplier = new Supplier({
