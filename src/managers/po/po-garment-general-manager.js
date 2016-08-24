@@ -170,12 +170,18 @@ module.exports = class POGarmentGeneralManager {
 
     create(poGarmentGeneral) {
         poGarmentGeneral = new POGarmentGeneral(poGarmentGeneral);
+        poGarmentGeneral.PONo = generateCode(moduleId)
+        
         return new Promise((resolve, reject) => {
-
-            poGarmentGeneral.PONo = generateCode(moduleId)
-            this.purchaseOrderManager.create(poGarmentGeneral)
-                .then(id => {
-                    resolve(id);
+            this._validate(poGarmentGeneral)
+                .then(validPOGarmentGeneral => {
+                    this.purchaseOrderManager.create(validPOGarmentGeneral)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
                 })
                 .catch(e => {
                     reject(e);
@@ -212,6 +218,48 @@ module.exports = class POGarmentGeneralManager {
                     reject(e);
                 });
 
+        });
+    }
+    
+    _validate(poGarmentGeneral) {
+        var errors = {};
+        return new Promise((resolve, reject) => {
+            var valid = poGarmentGeneral;
+
+            var getPOGarmentGeneralPromise = this.POGarmentGeneralCollection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        // code: valid.code
+                    }]
+            });
+            // 1. end: Declare promises.
+
+            // 2. begin: Validation.
+            Promise.all([getPOGarmentGeneralPromise])
+                .then(results => {
+                    var _module = results[0];
+                    
+                    if (!valid.RONo || valid.RONo == '')
+                        errors["RONo"] = "Nomor RO tidak boleh kosong";
+                        
+                    // 2c. begin: check if data has any error, reject if it has.
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
+
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
+
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
         });
     }
     

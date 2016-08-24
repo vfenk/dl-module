@@ -23,6 +23,7 @@ function getData() {
     poGarmentFabric.RONo = '2' + code + stamp;
     poGarmentFabric.RefPONo = '3' + code + stamp;
     poGarmentFabric.ppn = 10;
+    poGarmentFabric.usePPn = true;
     poGarmentFabric.deliveryDate = new Date();
     poGarmentFabric.termOfPayment = 'Tempo 2 bulan';
     poGarmentFabric.deliveryFeeByBuyer = true;
@@ -30,7 +31,8 @@ function getData() {
     poGarmentFabric.description = 'SP1';
     poGarmentFabric.kurs = 13000;
     poGarmentFabric.currency = 'dollar';
-    poGarmentFabric.supplierID = {};
+    poGarmentFabric.supplierId = {};
+    poGarmentFabric.buyerId = {};
 
     var supplier = new Supplier({
         _id: '123',
@@ -42,6 +44,14 @@ function getData() {
         local: true
     });
 
+    var buyer = new Buyer({
+        _id: '123',
+        name : `name[${code}]`,
+        address : `Solo [${code}]`,
+        contact : `phone[${code}]`,
+        tempo : 0
+    });
+    
     var template = new UoM_Template({
         mainUnit: 'M',
         mainValue: 1,
@@ -86,6 +96,7 @@ function getData() {
     })
     
     poGarmentFabric.standardQuality = _stdQtyTest;
+    poGarmentFabric.buyer = buyer;
     poGarmentFabric.supplier = supplier;
     poGarmentFabric.items = _products;
     return poGarmentFabric;
