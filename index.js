@@ -17,11 +17,13 @@ module.exports = {
         PurchaseOrder: require('./src/po/purchase-order'),
         PurchaseOrderGroup: require('./src/po/purchase-order-group'),
         POGarmentGeneral: require('./src/po/purchase-order-garment-general'),
-        POGroupGarmentGeneral: require('./src/po/purchase-order-group-garment-general'),
         POGarmentSparepart: require('./src/po/purchase-order-garment-sparepart'),
         POTextileJobOrder: require('./src/po/purchase-order-textile-job-order-external'),
         POGarmentAccessories: require('./src/po/purchase-order-garment-accessories'),
+        POGarmentFabric: require('./src/po/purchase-order-garment-fabric'),
+        StandardQualityTestPercentage: require('./src/po/standard-quality-test-percentage'),
         POTextileGeneralATK: require('./src/po/purchase-order-textile-general-atk')
+
     },
     map: require('./src/map'),
     validator: require('./src/validator')
