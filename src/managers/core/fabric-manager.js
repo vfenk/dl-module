@@ -268,7 +268,8 @@ module.exports = class FabricManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = new Fabric(fabric);
-
+            if (!valid.detail.composition || valid.detail.composition == '')
+                        errors["composition"] = "Komposisi tidak boleh kosong";
             // Get existing documents if needed.
             // var getFabricPromise = this.fabricCollection.singleOrDefault({
             //     "$and": [{
