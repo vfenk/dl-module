@@ -136,7 +136,7 @@ module.exports = class POTextileGeneralATKManager {
                 });
         });
     }
-    
+
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -222,14 +222,18 @@ module.exports = class POTextileGeneralATKManager {
         return new Promise((resolve, reject) => {
 
             poTextileGeneralATK.PONo = generateCode(moduleId)
-            this.purchaseOrderManager.create(poTextileGeneralATK)
-                .then(id => {
-                    resolve(id);
+            this._validate(poTextileJobOrder)
+                .then(validpoTextileJobOrder => {
+                    this.purchaseOrderManager.create(validpoTextileJobOrder)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
                 })
                 .catch(e => {
-                    reject(e);
                 })
-
         });
     }
 
@@ -272,15 +276,18 @@ module.exports = class POTextileGeneralATKManager {
     update(poTextileGeneralATK) {
         poTextileGeneralATK = new POTextileGeneralATK(poTextileGeneralATK);
         return new Promise((resolve, reject) => {
-
-            this.purchaseOrderManager.update(poTextileGeneralATK)
-                .then(id => {
-                    resolve(id);
+            his._validate(poTextileJobOrder)
+                .then(validpoTextileJobOrder => {
+                    this.purchaseOrderManager.update(validpoTextileJobOrder)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 })
                 .catch(e => {
-                    reject(e);
-                });
-
+                })
         });
     }
 
@@ -299,8 +306,26 @@ module.exports = class POTextileGeneralATKManager {
 
         });
     }
-    
-// ====================================PO DL===========================================
+    _validate(purchaseOrder) {
+        var errors = {};
+        return new Promise((resolve, reject) => {
+            var valid = purchaseOrder;
+            if (!valid.PRNo || valid.PRNo == '')
+                errors["PRNo"] = "Nomor RO tidak boleh kosong";
+            for (var prop in errors) {
+                var ValidationError = require('../../validation-error');
+                reject(new ValidationError('data does not pass validation', errors));
+            }
+
+            if (!valid.stamp)
+                valid = new PurchaseOrder(valid);
+
+            valid.stamp(this.user.username, 'manager');
+            resolve(valid);
+        });
+    }
+
+    // ====================================PO DL===========================================
 
     readAllPurchaseOrderGroup(paging) {
         var _paging = Object.assign({
@@ -350,7 +375,7 @@ module.exports = class POTextileGeneralATKManager {
                 });
         });
     }
-    
+
     getPurchaseOrderGroupById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
