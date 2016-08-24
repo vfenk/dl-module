@@ -7,20 +7,20 @@ var ObjectId = require("mongodb").ObjectId;
 require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var POGarmentGeneral = DLModels.po.POGarmentGeneral;
+var POGarmentFabric = DLModels.po.POGarmentFabric;
 var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
 
-var moduleId = 'POGG'
+var moduleId = 'POGF'
 
-var poType = map.po.type.POGarmentGeneral;
+var poType = map.po.type.POGarmentFabric;
 
 var generateCode = require('../.././utils/code-generator');
 
-module.exports = class POGarmentGeneralManager {
+module.exports = class POGarmentFabricManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.POGarmentGeneralCollection = this.db.use(map.po.collection.PurchaseOrder);
+        this.POGarmentFabricCollection = this.db.use(map.po.collection.PurchaseOrder);
 
         var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
         this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);
@@ -66,21 +66,26 @@ module.exports = class POGarmentGeneralManager {
                         '$regex': regex
                     }
                 };
+                var filterPRNo = {
+                    'PRNo': {
+                        '$regex': regex
+                    }
+                };
 
                 var $or = {
-                    '$or': [filterRONo, filterRefPONo, filterPONo]
+                    '$or': [filterRONo, filterRefPONo, filterPONo, filterPRNo]
                 };
 
                 query['$and'].push($or);
             }
 
-            this.POGarmentGeneralCollection
+            this.POGarmentFabricCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(POGarmentGenerals => {
-                    resolve(POGarmentGenerals);
+                .then(POGarmentFabrics => {
+                    resolve(POGarmentFabrics);
                 })
                 .catch(e => {
                     reject(e);
@@ -144,7 +149,7 @@ module.exports = class POGarmentGeneralManager {
 
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.POGarmentGeneralCollection
+            this.POGarmentFabricCollection
                 .single(query)
                 .then(module => {
                     resolve(module);
@@ -157,7 +162,7 @@ module.exports = class POGarmentGeneralManager {
 
     getSingleOrDefaultByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.POGarmentGeneralCollection
+            this.POGarmentFabricCollection
                 .singleOrDefault(query)
                 .then(fabric => {
                     resolve(fabric);
@@ -168,27 +173,26 @@ module.exports = class POGarmentGeneralManager {
         })
     }
 
-    create(poGarmentGeneral) {
-        poGarmentGeneral = new POGarmentGeneral(poGarmentGeneral);
+    create(poGarmentFabric) {
+        poGarmentFabric = new POGarmentFabric(poGarmentFabric);
         return new Promise((resolve, reject) => {
 
-            poGarmentGeneral.PONo = generateCode(moduleId)
-            this.purchaseOrderManager.create(poGarmentGeneral)
+            poGarmentFabric.PONo = generateCode(moduleId)
+            this.purchaseOrderManager.create(poGarmentFabric)
                 .then(id => {
                     resolve(id);
                 })
                 .catch(e => {
                     reject(e);
                 })
-
         });
     }
 
-    update(poGarmentGeneral) {
-        poGarmentGeneral = new POGarmentGeneral(poGarmentGeneral);
+    update(poGarmentFabric) {
+        poGarmentFabric = new POGarmentFabric(poGarmentFabric);
         return new Promise((resolve, reject) => {
 
-            this.purchaseOrderManager.update(poGarmentGeneral)
+            this.purchaseOrderManager.update(poGarmentFabric)
                 .then(id => {
                     resolve(id);
                 })
@@ -199,12 +203,12 @@ module.exports = class POGarmentGeneralManager {
         });
     }
 
-    delete(poGarmentGeneral) {
-        poGarmentGeneral = new POGarmentGeneral(poGarmentGeneral);
+    delete(poGarmentFabric) {
+        poGarmentFabric = new POGarmentFabric(poGarmentFabric);
         return new Promise((resolve, reject) => {
 
-            poGarmentGeneral._deleted = true;
-            this.purchaseOrderManager.delete(poGarmentGeneral)
+            poGarmentFabric._deleted = true;
+            this.purchaseOrderManager.delete(poGarmentFabric)
                 .then(id => {
                     resolve(id);
                 })
@@ -292,12 +296,12 @@ module.exports = class POGarmentGeneralManager {
                 });
         })
     }
-
+    
     createGroup(items) {
         return new Promise((resolve, reject) => {
             var newPOGroup = new PurchaseOrderGroup()
 
-            newPOGroup.PODLNo = generateCode('PODL/GG')
+            newPOGroup.PODLNo = generateCode('PODL/GF')
             newPOGroup._type = poType
 
             var _tasks = [];
@@ -314,13 +318,9 @@ module.exports = class POGarmentGeneralManager {
                             for (var data of newPOGroup.items) {
                                 data.PODLNo = newPOGroup.PODLNo
                                 this.update(data)
-                                    .then(id => {
-                                        resolve(id);
-                                    })
-                                    .catch(e => {
-                                        reject(e);
-                                    });
                             }
+
+                            resolve(id);
                         })
                         .catch(e => {
                             reject(e);
@@ -329,6 +329,7 @@ module.exports = class POGarmentGeneralManager {
                 .catch(e => {
                     reject(e);
                 })
+
         });
     }
 }
