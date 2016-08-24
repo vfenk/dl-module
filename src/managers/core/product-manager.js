@@ -204,8 +204,9 @@ module.exports = class ProductManager {
                         errors["code"] = "Kode sudah terdaftar.";
                     }
 
-                    if (!valid.price || valid.price == 0)
-                        errors["price"] = "Harga tidak boleh kosong atau bernilai 0";
+                    if (valid.price)
+                        if(valid.price.length>17)
+                            errors["price"] = "Harga maksimum 17 digit";
 
                     if (!valid.name || valid.name == '')
                         errors["name"] = "Nama tidak boleh kosong.";
