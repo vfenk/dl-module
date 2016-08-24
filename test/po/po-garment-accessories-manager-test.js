@@ -35,7 +35,7 @@ function getData() {
 
     var supplier = new Supplier({
         code: '123',
-        name: 'hot',
+        name: 'Supplier01',
         contact: '0812....',
         PIC:'Suppy',
         address: 'test',
@@ -44,7 +44,7 @@ function getData() {
 
     var buyer = new Buyer({
         code: '123',
-        name: 'hot',
+        name: 'Buyer01',
         contact: '0812....',
         address: 'test',
         tempo: 0
@@ -86,6 +86,7 @@ function getData() {
     _products.push(productValue);
 
     pOGarmentAccessories.supplier = supplier;
+    pOGarmentAccessories.buyer = buyer;
     pOGarmentAccessories.items = _products;
     return pOGarmentAccessories;
 }
