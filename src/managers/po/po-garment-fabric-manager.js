@@ -173,18 +173,25 @@ module.exports = class POGarmentFabricManager {
         })
     }
 
-    create(poGarmentFabric) {
+    create(poGarmentFabric) {            
         poGarmentFabric = new POGarmentFabric(poGarmentFabric);
+        poGarmentFabric.PONo = generateCode(moduleId);
+        
         return new Promise((resolve, reject) => {
-
-            poGarmentFabric.PONo = generateCode(moduleId)
-            this.purchaseOrderManager.create(poGarmentFabric)
-                .then(id => {
-                    resolve(id);
+            this._validate(poGarmentFabric)
+                .then(validPOGarmentFabric => {
+                    this.purchaseOrderManager.create(validPOGarmentFabric)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
                 })
                 .catch(e => {
                     reject(e);
                 })
+            
         });
     }
 
@@ -216,6 +223,56 @@ module.exports = class POGarmentFabricManager {
                     reject(e);
                 });
 
+        });
+    }
+    
+    _validate(poGarmentFabric) {
+        var errors = {};
+        return new Promise((resolve, reject) => {
+            var valid = poGarmentFabric;
+
+            var getPOGarmentFabricPromise = this.POGarmentFabricCollection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        // code: valid.code
+                    }]
+            });
+            // 1. end: Declare promises.
+
+            // 2. begin: Validation.
+            Promise.all([getPOGarmentFabricPromise])
+                .then(results => {
+                    var _module = results[0];
+                    
+                    if (!valid.PRNo || valid.PRNo == '')
+                        errors["PRNo"] = "Nomor PR tidak boleh kosong";
+                    if (!valid.RONo || valid.RONo == '')
+                        errors["RONo"] = "Nomor RO tidak boleh kosong";
+                    if (!valid.article || valid.article == '')
+                        errors["article"] = "Artikel tidak boleh kosong";
+                    
+                    if (!valid.buyer._id || valid.buyer._id == '')
+                        errors["buyerId"] = "Nama Buyer tidak boleh kosong";
+                    
+
+                    // 2c. begin: check if data has any error, reject if it has.
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
+
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
+
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
         });
     }
     

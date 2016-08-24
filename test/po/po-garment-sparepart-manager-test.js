@@ -22,6 +22,7 @@ function getData() {
     pOGarmentSparepart.RefPONo = '2' + code + stamp;
     pOGarmentSparepart.PRNo = '3' + code + stamp;
     pOGarmentSparepart.ppn = 10;
+    pOGarmentSparepart.usePPn = true;
     pOGarmentSparepart.deliveryDate = new Date();
     pOGarmentSparepart.termOfPayment = 'Tempo 2 bulan';
     pOGarmentSparepart.deliveryFeeByBuyer = true;

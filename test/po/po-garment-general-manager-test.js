@@ -21,6 +21,7 @@ function getData() {
     poGarmentGeneral.RONo = '1' + code + stamp;
     poGarmentGeneral.RefPONo = '2' + code + stamp;
     poGarmentGeneral.ppn = 10;
+    poGarmentGeneral.usePPn = true;
     poGarmentGeneral.deliveryDate = new Date();
     poGarmentGeneral.termOfPayment = 'Tempo 2 bulan';
     poGarmentGeneral.deliveryFeeByBuyer = true;
