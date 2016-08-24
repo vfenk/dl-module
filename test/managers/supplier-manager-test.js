@@ -13,15 +13,9 @@ function getData() {
 
     supplier.code = code;
     supplier.name = `name[${code}]`;
-<<<<<<< HEAD
-    supplier.address = 'Solo [${code}]';
-    supplier.contact = 'phone[${code}]';
-    this.PIC='PIC[${code}]';
-=======
-    supplier.description = `description for ${code}`;
-    supplier.contact = `phone[${code}]`;
     supplier.address = `Solo [${code}]`;
->>>>>>> 5eab0c6c8c551420795741239ee82e6be7b832ba
+    supplier.contact = `phone[${code}]`;
+    this.PIC=`PIC[${code}]`;
     supplier.import = true;
 
     return supplier;

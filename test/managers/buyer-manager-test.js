@@ -13,8 +13,8 @@ function getData() {
 
     buyer.code = code;
     buyer.name = `name[${code}]`;
-    buyer.address = 'Solo [${code}]';
-    buyer.contact = 'phone[${code}]';
+    buyer.address = `Solo [${code}]`;
+    buyer.contact = `phone[${code}]`;
     buyer.tempo= 0;
     return buyer;
 }
