@@ -126,6 +126,9 @@ module.exports = class UoMManager {
 
     create(UoM) {
         return new Promise((resolve, reject) => {
+            UoM.default.convertedValue=UoM.default.mainValue;
+            UoM.default.convertedUnit=UoM.default.mainUnit;
+            
             this._validate(UoM)
                 .then(validUoM => {
 
@@ -145,6 +148,8 @@ module.exports = class UoMManager {
 
     update(UoM) {
         return new Promise((resolve, reject) => {
+            UoM.default.convertedValue=UoM.default.mainValue;
+            UoM.default.convertedUnit=UoM.default.mainUnit;
             this._validate(UoM)
                 .then(validUoM => {
                     this.UoMCollection.update(validUoM)
