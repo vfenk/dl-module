@@ -87,51 +87,6 @@ module.exports = class POGarmentGeneralManager {
                 });
         });
     }
-
-    readAllPurchaseOrderGroup(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: '_id',
-            asc: true
-        }, paging);
-
-        return new Promise((resolve, reject) => {
-            var deleted = {
-                _deleted: false
-            };
-            var query = _paging.keyword ? {
-                '$and': [deleted]
-            } : deleted;
-
-            if (_paging.keyword) {
-                var regex = new RegExp(_paging.keyword, "i");
-                var filterPODLNo = {
-                    'PODLNo': {
-                        '$regex': regex
-                    }
-                };
-
-                var $or = {
-                    '$or': [filterPODLNo]
-                };
-
-                query['$and'].push($or);
-            }
-
-            this.PurchaseOrderGroupCollection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
-                .execute()
-                .then(PurchaseOrderGroups => {
-                    resolve(PurchaseOrderGroups);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
     
     getById(id) {
         return new Promise((resolve, reject) => {
@@ -221,42 +176,6 @@ module.exports = class POGarmentGeneralManager {
             this.purchaseOrderManager.create(poGarmentGeneral)
                 .then(id => {
                     resolve(id);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-
-        });
-    }
-
-    createGroup(items) {
-        return new Promise((resolve, reject) => {
-            var newPOGroup = new PurchaseOrderGroup()
-
-            newPOGroup.PODLNo = generateCode('PODL/GG')
-            newPOGroup._type = poType
-
-            var _tasks = [];
-
-            for (var item of items) {
-                _tasks.push(this.getByPONo(item))
-            }
-
-            Promise.all(_tasks)
-                .then(results => {
-                    newPOGroup.items = results
-                    this.purchaseOrderGroupManager.create(newPOGroup)
-                        .then(id => {
-                            for (var data of newPOGroup.items) {
-                                data.PODLNo = newPOGroup.PODLNo
-                                this.update(data)
-                            }
-
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
                 })
                 .catch(e => {
                     reject(e);
@@ -372,24 +291,6 @@ module.exports = class POGarmentGeneralManager {
                     reject(e);
                 });
         })
-    }
-
-    getByPONo(poNo) {
-        return new Promise((resolve, reject) => {
-            if (poNo === '')
-                resolve(null);
-            var query = {
-                PONo: poNo,
-                _deleted: false
-            };
-            this.getSingleByQuery(query)
-                .then(module => {
-                    resolve(module);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
     }
 
     createGroup(items) {

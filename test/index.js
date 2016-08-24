@@ -26,4 +26,5 @@ describe('#dl-module', function (done) {
     test('@po/po-textile-job-order-external-manager', './po/po-textile-job-order-external-manager-test');
     test('@po/purchase-order-group-manager', './po/purchase-order-group-manager-test');
     test('@po/po-garment-accessories-manager', './po/po-garment-accessories-manager-test');
+    test('@po/po-garment-accessories-manager', './po/po-garment-fabric-manager-test');
 })

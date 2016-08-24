@@ -31,6 +31,7 @@ function getData() {
     poGarmentGeneral.supplierID = {};
 
     var supplier = new Supplier({
+        _id: '123',
         code: '123',
         name: 'Toko Stationery',
         description: 'hotline',

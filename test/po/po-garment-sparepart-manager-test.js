@@ -21,7 +21,6 @@ function getData() {
     pOGarmentSparepart.RONo = '1' + code + stamp;
     pOGarmentSparepart.RefPONo = '2' + code + stamp;
     pOGarmentSparepart.PRNo = '3' + code + stamp;
-    // pOGarmentSparepart.PONo = '3' + code + stamp;
     pOGarmentSparepart.ppn = 10;
     pOGarmentSparepart.deliveryDate = new Date();
     pOGarmentSparepart.termOfPayment = 'Tempo 2 bulan';
@@ -34,6 +33,7 @@ function getData() {
     pOGarmentSparepart.article = "Test Article";
 
     var supplier = new Supplier({
+        _id: '123',
         code: '123',
         name: 'hot',
         description: 'hotline',
