@@ -2,6 +2,7 @@
 
 // external deps 
 var ObjectId = require("mongodb").ObjectId;
+var UoMManager = require('./UoM-manager');
 
 // internal deps
 require('mongodb-toolkit');
@@ -13,6 +14,7 @@ module.exports = class ProductManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
+        this.uomManager = new UoMManager(db, user);
         this.productCollection = this.db.use(map.core.collection.Product);
     }
 
@@ -69,13 +71,40 @@ module.exports = class ProductManager {
         return new Promise((resolve, reject) => {
             this._validate(product)
                 .then(validProduct => {
-                    this.productCollection.insert(validProduct)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
+                    if (!validProduct.UoM._id) {
+                        this.uomManager.create(validProduct.UoM)
+                            .then(id => {
+                                validProduct.UoMID = id;
+                                this.uomManager.getById(id)
+                                    .then(UoM => {
+                                        validProduct.UoM = UoM
+
+                                        this.productCollection.insert(validProduct)
+                                            .then(id => {
+                                                resolve(id);
+                                            })
+                                            .catch(e => {
+                                                reject(e);
+                                            })
+                                    })
+                                    .catch(e => {
+                                        reject(e)
+                                    })
+
+                            })
+                            .catch(e => {
+                                reject(e);
+                            })
+                    }
+                    else {
+                        this.productCollection.insert(validProduct)
+                            .then(id => {
+                                resolve(id);
+                            })
+                            .catch(e => {
+                                reject(e);
+                            })
+                    }
                 })
                 .catch(e => {
                     reject(e);
@@ -87,17 +116,44 @@ module.exports = class ProductManager {
         return new Promise((resolve, reject) => {
             this._validate(product)
                 .then(validProduct => {
-                    this.productCollection.update(validProduct)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
+                    if (!validProduct.UoM._id) {
+                        this.uomManager.create(validProduct.UoM)
+                            .then(id => {
+                                validProduct.UoMID = id;
+                                this.uomManager.getById(id)
+                                    .then(UoM => {
+                                        validProduct.UoM = UoM
+
+                                        this.productCollection.update(validProduct)
+                                            .then(id => {
+                                                resolve(id);
+                                            })
+                                            .catch(e => {
+                                                reject(e);
+                                            })
+                                    })
+                                    .catch(e => {
+                                        reject(e)
+                                    })
+
+                            })
+                            .catch(e => {
+                                reject(e);
+                            })
+                    }
+                    else {
+                        this.productCollection.update(validProduct)
+                            .then(id => {
+                                resolve(id);
+                            })
+                            .catch(e => {
+                                reject(e);
+                            })
+                    }
                 })
                 .catch(e => {
                     reject(e);
-                });
+                })
         });
     }
 
@@ -159,7 +215,7 @@ module.exports = class ProductManager {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('Product Manager : data does not pass validation', errors));
                     }
-                    
+
                     if (!valid.stamp)
                         valid = new Product(valid);
                     valid.stamp(this.user.username, 'manager');
