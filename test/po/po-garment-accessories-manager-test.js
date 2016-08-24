@@ -8,6 +8,7 @@ var instanceManager = null;
 function getData() {
     var POGarmentAccessories = require('dl-models').po.POGarmentAccessories;
     var Supplier = require('dl-models').core.Supplier;
+    var Buyer = require('dl-models').core.Buyer;
     var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
@@ -41,7 +42,7 @@ function getData() {
         import: true
     });
 
-    var supplier = new Supplier({
+    var buyer = new Buyer({
         code: '123',
         name: 'hot',
         contact: '0812....',
