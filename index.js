@@ -16,11 +16,11 @@ module.exports = {
         PurchaseOrderItem: require('./src/po/purchase-order-item'),
         PurchaseOrder: require('./src/po/purchase-order'),
         PurchaseOrderGroup: require('./src/po/purchase-order-group'),
-        POGarmentGeneral: require('./src/po/PO-garment-general'),
+        POGarmentGeneral: require('./src/po/purchase-order-garment-general'),
         POGroupGarmentGeneral: require('./src/po/purchase-order-group-garment-general'),
         POGarmentSparepart: require('./src/po/po-garment-sparepart'),
         POTextileJobOrder: require('./src/po/po-textile-job-order-external'),
-        POGarmentAccessories: require('./src/po/po-garment-accessories'),
+        POGarmentAccessories: require('./src/po/po-garment-accessories')
     },
     map: require('./src/map'),
     validator: require('./src/validator')
