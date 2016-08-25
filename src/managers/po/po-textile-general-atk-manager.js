@@ -313,6 +313,9 @@ module.exports = class POTextileGeneralATKManager {
             var valid = purchaseOrder;
             if (!valid.PRNo || valid.PRNo == '')
                 errors["PRNo"] = "Nomor RO tidak boleh kosong";
+                                    
+            this.purchaseOrderManager._validatePO(valid, errors);
+
             for (var prop in errors) {
                 var ValidationError = require('../../validation-error');
                 reject(new ValidationError('data does not pass validation', errors));

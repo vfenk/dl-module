@@ -264,7 +264,9 @@ module.exports = class POGarmentSparepartManager {
                     
                     if (!valid.PRNo || valid.PRNo == '')
                         errors["PRNo"] = "Nomor PR tidak boleh kosong";
-                        
+                    
+                    this.purchaseOrderManager._validatePO(valid, errors);
+    
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
