@@ -245,6 +245,8 @@ module.exports = class POGarmentGeneralManager {
                     if (!valid.RONo || valid.RONo == '')
                         errors["RONo"] = "Nomor RO tidak boleh kosong";
                         
+                    this.purchaseOrderManager._validatePO(valid, errors);
+                    
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');

@@ -333,10 +333,10 @@ module.exports = class POTextileJobOrderManager {
                         errors["article"] = "Artikel tidak boleh kosong";
 
                     if (!valid.buyer._id || valid.buyer._id == '')
-                        errors["buyerId"] = "Nama Buyer tidak boleh kosong";
+                        errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
 
+                    this.purchaseOrderManager._validatePO(valid, errors);
 
-                    // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
