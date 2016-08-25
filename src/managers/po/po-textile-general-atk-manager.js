@@ -233,6 +233,7 @@ module.exports = class POTextileGeneralATKManager {
                         })
                 })
                 .catch(e => {
+                    reject(e);
                 })
         });
     }
@@ -307,13 +308,13 @@ module.exports = class POTextileGeneralATKManager {
 
         });
     }
-    _validate(purchaseOrder) {
+    _validate(poTextileGeneralATK) {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = purchaseOrder;
             if (!valid.PRNo || valid.PRNo == '')
                 errors["PRNo"] = "Nomor RO tidak boleh kosong";
-                                    
+
             this.purchaseOrderManager._validatePO(valid, errors);
 
             for (var prop in errors) {
@@ -326,7 +327,10 @@ module.exports = class POTextileGeneralATKManager {
 
             valid.stamp(this.user.username, 'manager');
             resolve(valid);
-        });
+        })
+            .catch(e => {
+                reject(e);
+            })
     }
 
     // ====================================PO DL===========================================

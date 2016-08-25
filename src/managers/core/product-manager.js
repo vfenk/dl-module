@@ -203,7 +203,7 @@ module.exports = class ProductManager {
                     else if (_module) {
                         errors["code"] = "Kode sudah terdaftar.";
                     }
-
+                    
                     if (valid.price)
                         if(valid.price.length>17)
                             errors["price"] = "Harga maksimum 17 digit";

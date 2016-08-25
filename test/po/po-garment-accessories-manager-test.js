@@ -34,6 +34,7 @@ function getData() {
     pOGarmentAccessories.article = "Test Article";
 
     var supplier = new Supplier({
+        _id:code,
         code: '123',
         name: 'Supplier01',
         contact: '0812....',
@@ -43,6 +44,7 @@ function getData() {
     });
 
     var buyer = new Buyer({
+        _id:code,
         code: '123',
         name: 'Buyer01',
         contact: '0812....',

@@ -49,8 +49,34 @@ module.exports = class FabricManager {
                         '$regex': regex
                     }
                 };
+                var filterComposition = {
+                    'detail.composition': {
+                        '$regex': regex
+                    }
+                };
+                var filterConstruction = {
+                    'detail.construction': {
+                        '$regex': regex
+                    }
+                };
+                var filterWidth = {
+                    'detail.width': {
+                        '$regex': regex
+                    }
+                };
+                var filterYarn = {
+                    'detail.yarn': {
+                        '$regex': regex
+                    }
+                };
+                var filterUoM = {
+                    'UoM.category': {
+                        '$regex': regex
+                    }
+                };
+                
                 var $or = {
-                    '$or': [filterCode, filterName]
+                    '$or': [filterCode, filterName, filterComposition, filterConstruction, filterWidth, filterYarn, filterUoM]
                 };
 
                 query['$and'].push($or);

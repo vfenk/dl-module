@@ -133,7 +133,7 @@ module.exports = class POTextileJobOrderManager {
                 });
         });
     }
-    
+
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -215,25 +215,25 @@ module.exports = class POTextileJobOrderManager {
     }
 
     create(poTextileJobOrder) {
-        
+
         poTextileJobOrder = new POTextileJobOrder(poTextileJobOrder);
         return new Promise((resolve, reject) => {
-
             poTextileJobOrder.PONo = generateCode(moduleId)
             this._validate(poTextileJobOrder)
-            .then(validpoTextileJobOrder => {
-             this.purchaseOrderManager.create(validpoTextileJobOrder)
-                  .then(id => {
-                      resolve(id);
-                  })
-                  .catch(e => {
-                      reject(e);
-                 });
-             })
-             .catch(e => {
-                 })
- 
-         });
+                .then(validpoTextileJobOrder => {
+                    this.purchaseOrderManager.create(validpoTextileJobOrder)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                })
+
+        });
     }
 
     createGroup(items) {
@@ -276,20 +276,19 @@ module.exports = class POTextileJobOrderManager {
         poTextileJobOrder = new POTextileJobOrder(poTextileJobOrder);
         return new Promise((resolve, reject) => {
             this._validate(poTextileJobOrder)
-            .then(validpoTextileJobOrder => {
-             this.purchaseOrderManager.update(validpoTextileJobOrder)
-                  .then(id => {
-                      resolve(id);
-                  })
-                  .catch(e => {
-                      reject(e);
-                 });
-             })
-             .catch(e => {
+                .then(validpoTextileJobOrder => {
+                    this.purchaseOrderManager.update(validpoTextileJobOrder)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
+                })
+                .catch(e => {
                     reject(e);
-                 })
- 
-         });
+                })
+        })
     }
 
     delete(poTextileJobOrder) {
@@ -307,14 +306,32 @@ module.exports = class POTextileJobOrderManager {
 
         });
     }
-     _validate(purchaseOrder) {
+    _validate(poTextileJobOrder) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = purchaseOrder;
-                     if (!valid.PRNo || valid.PRNo == '')
-                         errors["PRNo"] = "Nomor RO tidak boleh kosong";
+            var valid = poTextileJobOrder;
+
+            var getPOTextileJobOrderPromise = this.POTextileJobOrderCollection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        // code: valid.code
+                    }]
+            });
+            // 1. end: Declare promises.
+
+            // 2. begin: Validation.
+            Promise.all([getPOTextileJobOrderPromise])
+                .then(results => {
+                    var _module = results[0];
+
+                    if (!valid.PRNo || valid.PRNo == '')
+                        errors["PRNo"] = "Nomor PR tidak boleh kosong";
                     if (!valid.article || valid.article == '')
-                        errors["article"] = "Article tidak boleh kosong";
+                        errors["article"] = "Artikel tidak boleh kosong";
+
                     if (!valid.buyer._id || valid.buyer._id == '')
                         errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
 
@@ -330,10 +347,13 @@ module.exports = class POTextileJobOrderManager {
 
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
         });
     }
-    
-// ====================================PO DL===========================================
+    // ====================================PO DL===========================================
 
     readAllPurchaseOrderGroup(paging) {
         var _paging = Object.assign({
@@ -383,7 +403,7 @@ module.exports = class POTextileJobOrderManager {
                 });
         });
     }
-    
+
     getPurchaseOrderGroupById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
