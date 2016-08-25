@@ -95,8 +95,8 @@ module.exports = class PurchaseOrderManager {
                     if (!valid.RefPONo || valid.RefPONo == '')
                         errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
                     
-                    if (!valid.supplier._id || valid.supplier._id == '')
-                        errors["supplierId"] = "Nama Supplier tidak boleh kosong";
+                    // if (!valid.supplier._id || valid.supplier._id == '')
+                    //     errors["supplierId"] = "Nama Supplier tidak boleh kosong";
                     if (!valid.deliveryDate || valid.deliveryDate == '')
                         errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
                     if (!valid.termOfPayment || valid.termOfPayment == '')

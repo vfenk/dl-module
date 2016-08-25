@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moonlay/dl-module.git"
+    "url": "git+https://github.com/danliris/dl-module.git"
   },
   "author": "Moonlay",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/moonlay/dl-module/issues"
+    "url": "https://github.com/danliris/dl-module/issues"
   },
-  "homepage": "https://github.com/moonlay/dl-module#readme",
+  "homepage": "https://github.com/danliris/dl-module#readme",
   "dependencies": {
-    "dl-models": "git+https://github.com/moonlay/dl-models.git",
+    "dl-models": "git+https://github.com/danliris/dl-models.git",
     "hashids": "^1.1.0",
     "moment": "^2.14.1",
     "mongo-factory": "^1.0.0",
