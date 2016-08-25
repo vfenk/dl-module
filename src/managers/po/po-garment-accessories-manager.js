@@ -237,17 +237,45 @@ module.exports = class POGarmentAccessoriesManager {
         });
     }
 
+    _validate(purchaseOrder) {
+        var errors = {};
+        return new Promise((resolve, reject) => {
+            var valid = purchaseOrder;
+            if (!valid.PRNo || valid.PRNo == '')
+                errors["PRNo"] = "Nomor RO tidak boleh kosong";
+            if (!valid.article || valid.article == '')
+                errors["article"] = "Article tidak boleh kosong";
+            if (!valid.buyer._id || valid.buyer._id == '')
+                errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
+            for (var prop in errors) {
+                var ValidationError = require('../../validation-error');
+                reject(new ValidationError('data does not pass validation', errors));
+            }
+
+            if (!valid.stamp)
+                valid = new PurchaseOrder(valid);
+
+            valid.stamp(this.user.username, 'manager');
+            resolve(valid);
+        });
+    }
     create(poGarmentAccessories) {
         poGarmentAccessories = new POGarmentAccessories(poGarmentAccessories);
         return new Promise((resolve, reject) => {
             poGarmentAccessories.PONo = generateCode(moduleId)
-            this.purchaseOrderManager.create(poGarmentAccessories)
-                .then(id => {
-                    resolve(id);
+            this._validate(poGarmentAccessories)
+                .then(validpoGarmentAccessories => {
+                    this.purchaseOrderManager.create(validpoGarmentAccessories)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
                 })
                 .catch(e => {
                     reject(e);
-                });
+                })
         })
     }
 
@@ -289,9 +317,15 @@ module.exports = class POGarmentAccessoriesManager {
     update(poGarmentAccessories) {
         poGarmentAccessories = new POGarmentAccessories(poGarmentAccessories);
         return new Promise((resolve, reject) => {
-            this.purchaseOrderManager.update(poGarmentAccessories)
-                .then(id => {
-                    resolve(id);
+            this._validate(poGarmentAccessories)
+                .then(validpoGarmentAccessories => {
+                    this.purchaseOrderManager.update(validpoGarmentAccessories)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
                 })
                 .catch(e => {
                     reject(e);
