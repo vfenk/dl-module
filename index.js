@@ -19,10 +19,12 @@ module.exports = {
         POGarmentGeneral: require('./src/po/purchase-order-garment-general'),
         POGarmentSparepart: require('./src/po/purchase-order-garment-sparepart'),
         POTextileJobOrder: require('./src/po/purchase-order-textile-job-order-external'),
+        POTextileSparepart: require('./src/po/purchase-order-textile-sparepart'),
         POGarmentAccessories: require('./src/po/purchase-order-garment-accessories'),
         POGarmentFabric: require('./src/po/purchase-order-garment-fabric'),
         StandardQualityTestPercentage: require('./src/po/standard-quality-test-percentage'),
-        POTextileGeneralATK: require('./src/po/purchase-order-textile-general-atk')
+        POTextileGeneralATK: require('./src/po/purchase-order-textile-general-atk'),
+        POGarmentJobOrderAccessories: require('./src/po/purchase-order-garment-job-order-accessories')
 
     },
     map: require('./src/map'),
