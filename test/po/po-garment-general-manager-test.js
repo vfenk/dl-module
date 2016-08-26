@@ -21,6 +21,7 @@ function getData() {
     poGarmentGeneral.RONo = '1' + code + stamp;
     poGarmentGeneral.RefPONo = '2' + code + stamp;
     poGarmentGeneral.ppn = 10;
+    poGarmentGeneral.usePPn = true;
     poGarmentGeneral.deliveryDate = new Date();
     poGarmentGeneral.termOfPayment = 'Tempo 2 bulan';
     poGarmentGeneral.deliveryFeeByBuyer = true;
@@ -31,6 +32,7 @@ function getData() {
     poGarmentGeneral.supplierID = {};
 
     var supplier = new Supplier({
+        _id: '123',
         code: '123',
         name: 'Toko Stationery',
         description: 'hotline',

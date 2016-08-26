@@ -31,9 +31,9 @@ module.exports = class SparepartManager {
                 _type: map.core.type.Sparepart
             };
 
-            var query = _paging.keyword ? {
+            var query = {
                 '$and': [deleted, type]
-            } : deleted;
+            };
 
             if (_paging.keyword) {
                 var regex = new RegExp(_paging.keyword, "i");

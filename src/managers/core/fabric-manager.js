@@ -49,8 +49,34 @@ module.exports = class FabricManager {
                         '$regex': regex
                     }
                 };
+                var filterComposition = {
+                    'detail.composition': {
+                        '$regex': regex
+                    }
+                };
+                var filterConstruction = {
+                    'detail.construction': {
+                        '$regex': regex
+                    }
+                };
+                var filterWidth = {
+                    'detail.width': {
+                        '$regex': regex
+                    }
+                };
+                var filterYarn = {
+                    'detail.yarn': {
+                        '$regex': regex
+                    }
+                };
+                var filterUoM = {
+                    'UoM.category': {
+                        '$regex': regex
+                    }
+                };
+                
                 var $or = {
-                    '$or': [filterCode, filterName]
+                    '$or': [filterCode, filterName, filterComposition, filterConstruction, filterWidth, filterYarn, filterUoM]
                 };
 
                 query['$and'].push($or);
@@ -268,7 +294,8 @@ module.exports = class FabricManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = new Fabric(fabric);
-
+            if (!valid.detail.composition || valid.detail.composition == '')
+                        errors["composition"] = "Komposisi tidak boleh kosong";
             // Get existing documents if needed.
             // var getFabricPromise = this.fabricCollection.singleOrDefault({
             //     "$and": [{

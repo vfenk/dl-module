@@ -32,6 +32,19 @@ module.exports = class PurchaseOrderManager {
         });
     }
 
+    // create(purchaseOrder) {
+    //     return new Promise((resolve, reject) => {
+    //         this.PurchaseOrderCollection.insert(purchaseOrder)
+    //             .then(id => {
+    //                 resolve(id);
+    //             })
+    //             .catch(e => {
+    //                 reject(e);
+    //             })
+    //         });
+        
+    // }
+
     update(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrder)
@@ -89,18 +102,19 @@ module.exports = class PurchaseOrderManager {
             Promise.all([getPurchaseOrderPromise])
                 .then(results => {
                     var _module = results[0];
-
+                    
                     // if (!valid.PRNo || valid.PRNo == '')
                     //     errors["PRNo"] = "Nomor PR tidak boleh kosong";
                     if (!valid.RefPONo || valid.RefPONo == '')
                         errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
-                    if (!valid.supplierId || valid.supplierId == '')
+                    
+                    if (!valid.supplier._id || valid.supplier._id == '')
                         errors["supplierId"] = "Nama Supplier tidak boleh kosong";
                     if (!valid.deliveryDate || valid.deliveryDate == '')
                         errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
                     if (!valid.termOfPayment || valid.termOfPayment == '')
                         errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
-                    if (valid.deliveryFeeByBuyer == '')
+                    if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
                         errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
                     // if (_module) {
                     //     errors["code"] = "RO, PR, PO already exists";
@@ -122,6 +136,24 @@ module.exports = class PurchaseOrderManager {
                     reject(e);
                 })
         });
+    }
+    
+    _validatePO(purchaseOrder, errors) {
+        var valid = purchaseOrder;
+        
+         if (!valid.RefPONo || valid.RefPONo == '')
+            errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
+                    
+         if (!valid.supplier._id || valid.supplier._id == '')
+            errors["supplierId"] = "Nama Supplier tidak boleh kosong";
+         if (!valid.deliveryDate || valid.deliveryDate == '')
+            errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
+         if (!valid.termOfPayment || valid.termOfPayment == '')
+            errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
+         if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
+            errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
+            
+         return errors;
     }
 
 }

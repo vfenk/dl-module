@@ -87,51 +87,6 @@ module.exports = class POGarmentGeneralManager {
                 });
         });
     }
-
-    readAllPurchaseOrderGroup(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: '_id',
-            asc: true
-        }, paging);
-
-        return new Promise((resolve, reject) => {
-            var deleted = {
-                _deleted: false
-            };
-            var query = _paging.keyword ? {
-                '$and': [deleted]
-            } : deleted;
-
-            if (_paging.keyword) {
-                var regex = new RegExp(_paging.keyword, "i");
-                var filterPODLNo = {
-                    'PODLNo': {
-                        '$regex': regex
-                    }
-                };
-
-                var $or = {
-                    '$or': [filterPODLNo]
-                };
-
-                query['$and'].push($or);
-            }
-
-            this.PurchaseOrderGroupCollection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
-                .execute()
-                .then(PurchaseOrderGroups => {
-                    resolve(PurchaseOrderGroups);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
     
     getById(id) {
         return new Promise((resolve, reject) => {
@@ -215,43 +170,13 @@ module.exports = class POGarmentGeneralManager {
 
     create(poGarmentGeneral) {
         poGarmentGeneral = new POGarmentGeneral(poGarmentGeneral);
+        poGarmentGeneral.PONo = generateCode(moduleId)
+        
         return new Promise((resolve, reject) => {
-
-            poGarmentGeneral.PONo = generateCode(moduleId)
-            this.purchaseOrderManager.create(poGarmentGeneral)
-                .then(id => {
-                    resolve(id);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-
-        });
-    }
-
-    createGroup(items) {
-        return new Promise((resolve, reject) => {
-            var newPOGroup = new PurchaseOrderGroup()
-
-            newPOGroup.PODLNo = generateCode('PODL/GG')
-            newPOGroup._type = poType
-
-            var _tasks = [];
-
-            for (var item of items) {
-                _tasks.push(this.getByPONo(item))
-            }
-
-            Promise.all(_tasks)
-                .then(results => {
-                    newPOGroup.items = results
-                    this.purchaseOrderGroupManager.create(newPOGroup)
+            this._validate(poGarmentGeneral)
+                .then(validPOGarmentGeneral => {
+                    this.purchaseOrderManager.create(validPOGarmentGeneral)
                         .then(id => {
-                            for (var data of newPOGroup.items) {
-                                data.PODLNo = newPOGroup.PODLNo
-                                this.update(data)
-                            }
-
                             resolve(id);
                         })
                         .catch(e => {
@@ -296,6 +221,50 @@ module.exports = class POGarmentGeneralManager {
         });
     }
     
+    _validate(poGarmentGeneral) {
+        var errors = {};
+        return new Promise((resolve, reject) => {
+            var valid = poGarmentGeneral;
+
+            var getPOGarmentGeneralPromise = this.POGarmentGeneralCollection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        // code: valid.code
+                    }]
+            });
+            // 1. end: Declare promises.
+
+            // 2. begin: Validation.
+            Promise.all([getPOGarmentGeneralPromise])
+                .then(results => {
+                    var _module = results[0];
+                    
+                    if (!valid.RONo || valid.RONo == '')
+                        errors["RONo"] = "Nomor RO tidak boleh kosong";
+                        
+                    this.purchaseOrderManager._validatePO(valid, errors);
+                    
+                    // 2c. begin: check if data has any error, reject if it has.
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
+
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
+
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        });
+    }
+    
 // ====================================PO DL===========================================
 
     readAllPurchaseOrderGroup(paging) {
@@ -307,12 +276,14 @@ module.exports = class POGarmentGeneralManager {
         }, paging);
 
         return new Promise((resolve, reject) => {
-            var deleted = {
-                _deleted: false
+            var filter = {
+                _deleted: false,
+                _type: poType
             };
+            
             var query = _paging.keyword ? {
-                '$and': [deleted]
-            } : deleted;
+                '$and': [filter]
+            } : filter;
 
             if (_paging.keyword) {
                 var regex = new RegExp(_paging.keyword, "i");
@@ -372,24 +343,6 @@ module.exports = class POGarmentGeneralManager {
                     reject(e);
                 });
         })
-    }
-
-    getByPONo(poNo) {
-        return new Promise((resolve, reject) => {
-            if (poNo === '')
-                resolve(null);
-            var query = {
-                PONo: poNo,
-                _deleted: false
-            };
-            this.getSingleByQuery(query)
-                .then(module => {
-                    resolve(module);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
     }
 
     createGroup(items) {

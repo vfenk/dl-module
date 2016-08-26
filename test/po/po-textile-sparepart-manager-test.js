@@ -2,11 +2,11 @@
 
 var should = require('should');
 var helper = require("../helper");
-var POGarmentSparepartManager = require("../../src/managers/po/po-garment-sparepart-manager");
+var POTextileSparepartManager = require("../../src/managers/po/po-textile-sparepart-manager");
 var instanceManager = null;
 
 function getData() {
-    var POGarmentSparepart = require('dl-models').po.POGarmentSparepart;
+    var POTextileSparepart = require('dl-models').po.POTextileSparepart;
     var Supplier = require('dl-models').core.Supplier;
     var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
@@ -17,21 +17,21 @@ function getData() {
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
 
-    var pOGarmentSparepart = new POGarmentSparepart();
-    pOGarmentSparepart.RONo = '1' + code + stamp;
-    pOGarmentSparepart.RefPONo = '2' + code + stamp;
-    pOGarmentSparepart.PRNo = '3' + code + stamp;
-    pOGarmentSparepart.ppn = 10;
-    pOGarmentSparepart.usePPn = true;
-    pOGarmentSparepart.deliveryDate = new Date();
-    pOGarmentSparepart.termOfPayment = 'Tempo 2 bulan';
-    pOGarmentSparepart.deliveryFeeByBuyer = true;
-    pOGarmentSparepart.PODLNo = '';
-    pOGarmentSparepart.description = 'SP1';
-    pOGarmentSparepart.kurs = 13000;
-    pOGarmentSparepart.currency = 'dollar';
-    pOGarmentSparepart.supplierID = {};
-    pOGarmentSparepart.article = "Test Article";
+    var pOTextileSparepart = new POTextileSparepart();
+    pOTextileSparepart.RONo = '1' + code + stamp;
+    pOTextileSparepart.RefPONo = '2' + code + stamp;
+    pOTextileSparepart.PRNo = '3' + code + stamp;
+    pOTextileSparepart.ppn = 10;
+    pOTextileSparepart.usePPn = true;
+    pOTextileSparepart.deliveryDate = new Date();
+    pOTextileSparepart.termOfPayment = 'Tempo 2 bulan';
+    pOTextileSparepart.deliveryFeeByBuyer = true;
+    pOTextileSparepart.PODLNo = '';
+    pOTextileSparepart.description = 'SP1';
+    pOTextileSparepart.kurs = 13000;
+    pOTextileSparepart.currency = 'dollar';
+    pOTextileSparepart.supplierID = {};
+    pOTextileSparepart.article = "Test Article";
 
     var supplier = new Supplier({
         _id: '123',
@@ -78,15 +78,15 @@ function getData() {
     var _products = [];
     _products.push(productValue);
 
-    pOGarmentSparepart.supplier = supplier;
-    pOGarmentSparepart.items = _products;
-    return pOGarmentSparepart;
+    pOTextileSparepart.supplier = supplier;
+    pOTextileSparepart.items = _products;
+    return pOTextileSparepart;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new POGarmentSparepartManager(db, {
+            instanceManager = new POTextileSparepartManager(db, {
                 username: 'unit-test'
             });
             done();
