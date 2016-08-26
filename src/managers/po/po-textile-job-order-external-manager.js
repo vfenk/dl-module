@@ -306,35 +306,54 @@ module.exports = class POTextileJobOrderManager {
 
         });
     }
+    
     _validate(poTextileJobOrder) {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = poTextileJobOrder;
 
-            if (!valid.PRNo || valid.PRNo == '')
-                errors["PRNo"] = "Nomor PR tidak boleh kosong";
-            if (!valid.article || valid.article == '')
-                errors["article"] = "Artikel tidak boleh kosong";
+            var getPOTextileJobOrderPromise = this.POTextileJobOrderCollection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        // code: valid.code
+                    }]
+            });
+            // 1. end: Declare promises.
 
-            if (!valid.buyer._id || valid.buyer._id == '')
-                errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
+            // 2. begin: Validation.
+            Promise.all([getPOTextileJobOrderPromise])
+                .then(results => {
+                    var _module = results[0];
 
-            this.purchaseOrderManager._validatePO(valid, errors);
+                    if (!valid.PRNo || valid.PRNo == '')
+                        errors["PRNo"] = "Nomor PR tidak boleh kosong";
+                    if (!valid.article || valid.article == '')
+                        errors["article"] = "Artikel tidak boleh kosong";
 
-            for (var prop in errors) {
-                var ValidationError = require('../../validation-error');
-                reject(new ValidationError('data does not pass validation', errors));
-            }
+                    if (!valid.buyer._id || valid.buyer._id == '')
+                        errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
 
-            if (!valid.stamp)
-                valid = new PurchaseOrder(valid);
+                    this.purchaseOrderManager._validatePO(valid, errors);
 
-            valid.stamp(this.user.username, 'manager');
-            resolve(valid);
-        })
-            .catch(e => {
-                reject(e);
-            })
+                    // 2c. begin: check if data has any error, reject if it has.
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
+
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
+
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        });
     }
     // ====================================PO DL===========================================
 

@@ -12,7 +12,7 @@ var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
 
 var moduleId = 'POGG'
 
-var poType = map.po.type.POTekstilGeneralOtherATK;
+var poType = map.po.type.POTextileGeneralOtherATK;
 
 var generateCode = require('../.././utils/code-generator');
 
@@ -264,25 +264,44 @@ module.exports = class POTextileGeneralOtherTKManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = poTextileGeneralOtherATK;
-            if (!valid.PRNo || valid.PRNo == '')
-                errors["PRNo"] = "Nomor PR tidak boleh kosong";
 
-            this.purchaseOrderManager._validatePO(valid, errors);
+            var getPOTextileGeneralOtherATKPromise = this.POTextileGeneralOtherATKCollection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        // code: valid.code
+                    }]
+            });
+            // 1. end: Declare promises.
 
-            for (var prop in errors) {
-                var ValidationError = require('../../validation-error');
-                reject(new ValidationError('data does not pass validation', errors));
-            }
+            // 2. begin: Validation.
+            Promise.all([getPOTextileGeneralOtherATKPromise])
+                .then(results => {
+                    var _module = results[0];
+                    
+                    if (!valid.PRNo || valid.PRNo == '')
+                        errors["PRNo"] = "Nomor PR tidak boleh kosong";
+                    
+                    this.purchaseOrderManager._validatePO(valid, errors);
+    
+                    // 2c. begin: check if data has any error, reject if it has.
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
 
-            if (!valid.stamp)
-                valid = new PurchaseOrder(valid);
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
 
-            valid.stamp(this.user.username, 'manager');
-            resolve(valid);
-        })
-            .catch(e => {
-                reject(e);
-            })
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        });
     }
 
     // ====================================PO DL===========================================

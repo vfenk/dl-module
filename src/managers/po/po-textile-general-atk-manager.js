@@ -170,9 +170,8 @@ module.exports = class POTextileGeneralATKManager {
 
     create(poTextileGeneralATK) {
         poTextileGeneralATK = new POTextileGeneralATK(poTextileGeneralATK);
+        poTextileGeneralATK.PONo = generateCode(moduleId)
         return new Promise((resolve, reject) => {
-
-            poTextileGeneralATK.PONo = generateCode(moduleId)
             this._validate(poTextileGeneralATK)
                 .then(validpoTextileGeneralATK => {
                     this.purchaseOrderManager.create(validpoTextileGeneralATK)
@@ -259,30 +258,49 @@ module.exports = class POTextileGeneralATKManager {
 
         });
     }
-    
+
     _validate(poTextileGeneralATK) {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = poTextileGeneralATK;
-            if (!valid.PRNo || valid.PRNo == '')
-                errors["PRNo"] = "Nomor PR tidak boleh kosong";
 
-            this.purchaseOrderManager._validatePO(valid, errors);
+            var getPOTextileGeneralATKPromise = this.POTextileGeneralATKCollection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        // code: valid.code
+                    }]
+            });
+            // 1. end: Declare promises.
 
-            for (var prop in errors) {
-                var ValidationError = require('../../validation-error');
-                reject(new ValidationError('data does not pass validation', errors));
-            }
+            // 2. begin: Validation.
+            Promise.all([getPOTextileGeneralATKPromise])
+                .then(results => {
+                    var _module = results[0];
+                    
+                    if (!valid.PRNo || valid.PRNo == '')
+                        errors["PRNo"] = "Nomor PR tidak boleh kosong";
+                    
+                    this.purchaseOrderManager._validatePO(valid, errors);
+    
+                    // 2c. begin: check if data has any error, reject if it has.
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
 
-            if (!valid.stamp)
-                valid = new PurchaseOrder(valid);
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
 
-            valid.stamp(this.user.username, 'manager');
-            resolve(valid);
-        })
-            .catch(e => {
-                reject(e);
-            })
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        });
     }
 
     // ====================================PO DL===========================================
