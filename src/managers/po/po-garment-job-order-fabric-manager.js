@@ -290,7 +290,7 @@ module.exports = class POGarmentJobOrderFabricManager {
     }
 
     delete(poGarmentJobOrderFabric) {
-        poGarmentJobOrderFabric = new POGarmentJobOrder(poGarmentJobOrderFabric);
+        poGarmentJobOrderFabric = new POGarmentJobOrderFabric(poGarmentJobOrderFabric);
         return new Promise((resolve, reject) => {
 
             poGarmentJobOrderFabric._deleted = true;
