@@ -245,9 +245,9 @@ module.exports = class POTextileGeneralOtherTKManager {
     }
 
     delete(poTextileGeneralOtherATK) {
-        poTextileGeneralOtherATK = new POTextileGeneralOtherATK(poTextileGeneralOtherATK);
+        poTextileGeneralOtherATK = new POTekstilGeneralOtherATK(poTextileGeneralOtherATK);
         return new Promise((resolve, reject) => {
-
+            
             poTextileGeneralOtherATK._deleted = true;
             this.purchaseOrderManager.delete(poTextileGeneralOtherATK)
                 .then(id => {
