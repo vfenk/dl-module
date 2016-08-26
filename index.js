@@ -24,7 +24,9 @@ module.exports = {
         POGarmentFabric: require('./src/po/purchase-order-garment-fabric'),
         StandardQualityTestPercentage: require('./src/po/standard-quality-test-percentage'),
         POTextileGeneralATK: require('./src/po/purchase-order-textile-general-atk'),
-        POGarmentJobOrderAccessories: require('./src/po/purchase-order-garment-job-order-accessories')
+        POGarmentJobOrderAccessories: require('./src/po/purchase-order-garment-job-order-accessories'),
+        POTekstilGeneralOtherATK: require('./src/po/purchase-order-textile-general-other-atk'),
+        POGarmentJobOrderFabric: require('./src/po/purchase-order-garment-job-order-fabric')
 
     },
     map: require('./src/map'),
