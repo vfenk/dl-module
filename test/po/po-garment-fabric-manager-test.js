@@ -8,6 +8,7 @@ var instanceManager = null;
 function getData() {
     var POGarmentFabric = require('dl-models').po.POGarmentFabric;
     var Supplier = require('dl-models').core.Supplier;
+    var Buyer = require('dl-models').core.Buyer;
     var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
@@ -33,6 +34,7 @@ function getData() {
     poGarmentFabric.currency = 'dollar';
     poGarmentFabric.supplierId = {};
     poGarmentFabric.buyerId = {};
+    poGarmentFabric.article = "Test Article";
 
     var supplier = new Supplier({
         _id: '123',
@@ -63,7 +65,7 @@ function getData() {
     _units.push(template);
 
     var _uom = new UoM({
-        category: 'UoM-Unit-Test',
+        category: `UoM-Unit-Test[${code}]`,
         default: template,
         units: _units
     });

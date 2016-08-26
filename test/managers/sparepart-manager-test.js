@@ -9,6 +9,10 @@ function getData() {
     var UoM = require('dl-models').core.UoM;
     var UoM_Template = require('dl-models').core.UoM_Template;
 
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
+
     var sparepart = new Sparepart();
     var uom_template = new UoM_Template({
         mainValue: 1,
@@ -20,7 +24,7 @@ function getData() {
     _uom_units.push(uom_template);
 
     var uom = new UoM({
-        category: 'UoM_Unit_Test',
+        category: `UoM_Unit_Test[${code}]`,
         default: uom_template,
         units: _uom_units
     });

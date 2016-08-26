@@ -39,14 +39,6 @@ module.exports = class UoMManager {
                         '$regex': regex
                     }
                 };
-                // var filterName = {
-                //     'name': {
-                //         '$regex': regex
-                //     }
-                // };
-                // var $or = {
-                //     '$or': [filterCode, filterName]
-                // };
 
                 query['$and'].push(filterCategory);
             }
@@ -88,14 +80,6 @@ module.exports = class UoMManager {
                         '$regex': regex
                     }
                 };
-                // var filterName = {
-                //     'name': {
-                //         '$regex': regex
-                //     }
-                // };
-                // var $or = {
-                //     '$or': [filterCode, filterName]
-                // };
 
                 query['$and'].push(filterCategory);
             }

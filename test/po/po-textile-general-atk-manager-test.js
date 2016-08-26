@@ -20,6 +20,7 @@ function getData() {
     var poTextileGeneralATK = new POTextileGeneralATK();
     poTextileGeneralATK.RONo = '1' + code + stamp;
     poTextileGeneralATK.RefPONo = '2' + code + stamp;
+    poTextileGeneralATK.PRNo = '3' + code + stamp;
     poTextileGeneralATK.ppn = 10;
     poTextileGeneralATK.deliveryDate = new Date();
     poTextileGeneralATK.termOfPayment = 'Tempo 2 bulan';
@@ -31,6 +32,7 @@ function getData() {
     poTextileGeneralATK.supplierID = {};
 
     var supplier = new Supplier({
+        _id: '123',
         code: '123',
         name: 'Toko Stationery',
         description: 'hotline',
@@ -50,7 +52,7 @@ function getData() {
     _units.push(template);
 
     var _uom = new UoM({
-        category: 'UoM-Unit-Test',
+        category: `UoM_Unit_Test[${code}]`,
         default: template,
         units: _units
     });

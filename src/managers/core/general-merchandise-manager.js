@@ -267,20 +267,6 @@ module.exports = class GeneralMerchandiseManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = new GeneralMerchandise(generalMerchandise);
-
-            // Get existing documents if needed.
-            // var getGeneralMerchandisePromise = this.generalMerchandiseCollection.singleOrDefault({
-            //     "$and": [{
-            //         _id: {
-            //             '$ne': new ObjectId(valid._id)
-            //         }
-            //     }, {
-            //             code: valid.code
-            //         }]
-            // });
-
-            // if (!valid.name || valid.name == '')
-            //     errors["name"] = "name is required";
             for (var prop in errors) {
                 var ValidationError = require('../../validation-error');
                 reject(new ValidationError('General Merchandise Manager : data does not pass validation', errors));

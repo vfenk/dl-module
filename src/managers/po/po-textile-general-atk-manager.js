@@ -88,55 +88,6 @@ module.exports = class POTextileGeneralATKManager {
         });
     }
 
-    readAllPurchaseOrderGroup(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: '_id',
-            asc: true
-        }, paging);
-
-        return new Promise((resolve, reject) => {
-            var deleted = {
-                _deleted: false
-            };
-            var type = {
-                _type: poType
-            }
-
-            var query = {
-                '$and': [deleted, type]
-            };
-
-            if (_paging.keyword) {
-                var regex = new RegExp(_paging.keyword, "i");
-                var filterPODLNo = {
-                    'PODLNo': {
-                        '$regex': regex
-                    }
-                };
-
-                var $or = {
-                    '$or': [filterPODLNo]
-                };
-
-                query['$and'].push($or);
-            }
-
-            this.PurchaseOrderGroupCollection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
-                .execute()
-                .then(PurchaseOrderGroups => {
-                    resolve(PurchaseOrderGroups);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -308,12 +259,13 @@ module.exports = class POTextileGeneralATKManager {
 
         });
     }
+    
     _validate(poTextileGeneralATK) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = purchaseOrder;
+            var valid = poTextileGeneralATK;
             if (!valid.PRNo || valid.PRNo == '')
-                errors["PRNo"] = "Nomor RO tidak boleh kosong";
+                errors["PRNo"] = "Nomor PR tidak boleh kosong";
 
             this.purchaseOrderManager._validatePO(valid, errors);
 

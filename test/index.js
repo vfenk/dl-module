@@ -29,4 +29,6 @@ describe('#dl-module', function (done) {
     test('@po/po-garment-accessories-manager', './po/po-garment-accessories-manager-test');
     test('@po/po-textile-general-atk-manager', './po/po-textile-general-atk-manager-test');
     test('@po/po-garment-fabric-manager', './po/po-garment-fabric-manager-test');
+    test('@po/po-textile-general-other-atk-manager', './po/po-textile-general-other-atk-manager-test');
+    test('@po/po-garment-job-order-fabric-manager', './po/po-garment-job-order-fabric-manager-test');    
 })

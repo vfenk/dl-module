@@ -32,19 +32,6 @@ module.exports = class PurchaseOrderManager {
         });
     }
 
-    // create(purchaseOrder) {
-    //     return new Promise((resolve, reject) => {
-    //         this.PurchaseOrderCollection.insert(purchaseOrder)
-    //             .then(id => {
-    //                 resolve(id);
-    //             })
-    //             .catch(e => {
-    //                 reject(e);
-    //             })
-    //         });
-        
-    // }
-
     update(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrder)
