@@ -260,21 +260,6 @@ module.exports = class TextileManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = new Textile(textile);
-
-            // Get existing documents if needed.
-            // var getFabricPromise = this.fabricCollection.singleOrDefault({
-            //     "$and": [{
-            //         _id: {
-            //             '$ne': new ObjectId(valid._id)
-            //         }
-            //     }, {
-            //             code: valid.code
-            //         }]
-            // });
-
-            // if (!valid.price || valid.price == 0)
-            //     errors["price"] = "Harga tidak boleh kosong dan bernilai 0";
-
             for (var prop in errors) {
                 var ValidationError = require('../../validation-error');
                 reject(new ValidationError('Textile Manager : data does not pass validation', errors));

@@ -198,14 +198,17 @@ module.exports = class ProductManager {
                 .then(results => {
                     var _module = results[0];
 
+                    if (valid._type == map.core.type.Fabric)
+                        if (!valid.detail.composition || valid.detail.composition == '')
+                            errors["composition"] = "Komposisi tidak boleh kosong";
                     if (!valid.code || valid.code == '')
                         errors["code"] = "Kode tidak boleh kosong.";
                     else if (_module) {
                         errors["code"] = "Kode sudah terdaftar.";
                     }
-                    
+
                     if (valid.price)
-                        if(valid.price.length>17)
+                        if (valid.price.length > 17)
                             errors["price"] = "Harga maksimum 17 digit";
 
                     if (!valid.name || valid.name == '')

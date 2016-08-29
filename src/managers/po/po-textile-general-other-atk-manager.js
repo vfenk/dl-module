@@ -7,20 +7,20 @@ var ObjectId = require("mongodb").ObjectId;
 require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var POTextileGeneralATK = DLModels.po.POTextileGeneralATK;
+var POTekstilGeneralOtherATK = DLModels.po.POTekstilGeneralOtherATK;
 var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
 
 var moduleId = 'POGG'
 
-var poType = map.po.type.POTextileGeneralATK;
+var poType = map.po.type.POTextileGeneralOtherATK;
 
 var generateCode = require('../.././utils/code-generator');
 
-module.exports = class POTextileGeneralATKManager {
+module.exports = class POTextileGeneralOtherTKManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.POTextileGeneralATKCollection = this.db.use(map.po.collection.PurchaseOrder);
+        this.POTextileGeneralOtherATKCollection = this.db.use(map.po.collection.PurchaseOrder);
 
         var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
         this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);
@@ -74,13 +74,13 @@ module.exports = class POTextileGeneralATKManager {
                 query['$and'].push($or);
             }
 
-            this.POTextileGeneralATKCollection
+            this.POTextileGeneralOtherATKCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(POTextileGeneralATKs => {
-                    resolve(POTextileGeneralATKs);
+                .then(POTextileGeneralOtherATKs => {
+                    resolve(POTextileGeneralOtherATKs);
                 })
                 .catch(e => {
                     reject(e);
@@ -144,7 +144,7 @@ module.exports = class POTextileGeneralATKManager {
 
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.POTextileGeneralATKCollection
+            this.POTextileGeneralOtherATKCollection
                 .single(query)
                 .then(module => {
                     resolve(module);
@@ -157,7 +157,7 @@ module.exports = class POTextileGeneralATKManager {
 
     getSingleOrDefaultByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.POTextileGeneralATKCollection
+            this.POTextileGeneralOtherATKCollection
                 .singleOrDefault(query)
                 .then(fabric => {
                     resolve(fabric);
@@ -168,13 +168,14 @@ module.exports = class POTextileGeneralATKManager {
         })
     }
 
-    create(poTextileGeneralATK) {
-        poTextileGeneralATK = new POTextileGeneralATK(poTextileGeneralATK);
-        poTextileGeneralATK.PONo = generateCode(moduleId)
+    create(poTextileGeneralOtherATK) {
+        poTextileGeneralOtherATK = new POTekstilGeneralOtherATK(poTextileGeneralOtherATK);
         return new Promise((resolve, reject) => {
-            this._validate(poTextileGeneralATK)
-                .then(validpoTextileGeneralATK => {
-                    this.purchaseOrderManager.create(validpoTextileGeneralATK)
+
+            poTextileGeneralOtherATK.PONo = generateCode(moduleId)
+            this._validate(poTextileGeneralOtherATK)
+                .then(validpoTextileGeneralOtherATK => {
+                    this.purchaseOrderManager.create(validpoTextileGeneralOtherATK)
                         .then(id => {
                             resolve(id);
                         })
@@ -192,7 +193,7 @@ module.exports = class POTextileGeneralATKManager {
         return new Promise((resolve, reject) => {
             var newPOGroup = new PurchaseOrderGroup()
 
-            newPOGroup.PODLNo = generateCode('PODL/TGA')
+            newPOGroup.PODLNo = generateCode('PODL/TGOA')
             newPOGroup._type = poType
 
             var _tasks = [];
@@ -224,12 +225,12 @@ module.exports = class POTextileGeneralATKManager {
         });
     }
 
-    update(poTextileGeneralATK) {
-        poTextileGeneralATK = new POTextileGeneralATK(poTextileGeneralATK);
+    update(poTextileGeneralOtherATK) {
+        poTextileGeneralOtherATK = new POTekstilGeneralOtherATK(poTextileGeneralOtherATK);
         return new Promise((resolve, reject) => {
-            this._validate(poTextileGeneralATK)
-                .then(validpoTextileGeneralATK => {
-                    this.purchaseOrderManager.update(validpoTextileGeneralATK)
+            this._validate(poTextileGeneralOtherATK)
+                .then(validpoTextileGeneralOtherATK => {
+                    this.purchaseOrderManager.update(validpoTextileGeneralOtherATK)
                         .then(id => {
                             resolve(id);
                         })
@@ -243,12 +244,12 @@ module.exports = class POTextileGeneralATKManager {
         });
     }
 
-    delete(poTextileGeneralATK) {
-        poTextileGeneralATK = new POTextileGeneralATK(poTextileGeneralATK);
+    delete(poTextileGeneralOtherATK) {
+        poTextileGeneralOtherATK = new POTekstilGeneralOtherATK(poTextileGeneralOtherATK);
         return new Promise((resolve, reject) => {
-
-            poTextileGeneralATK._deleted = true;
-            this.purchaseOrderManager.delete(poTextileGeneralATK)
+            
+            poTextileGeneralOtherATK._deleted = true;
+            this.purchaseOrderManager.delete(poTextileGeneralOtherATK)
                 .then(id => {
                     resolve(id);
                 })
@@ -258,13 +259,13 @@ module.exports = class POTextileGeneralATKManager {
 
         });
     }
-
-    _validate(poTextileGeneralATK) {
+    
+    _validate(poTextileGeneralOtherATK) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = poTextileGeneralATK;
+            var valid = poTextileGeneralOtherATK;
 
-            var getPOTextileGeneralATKPromise = this.POTextileGeneralATKCollection.singleOrDefault({
+            var getPOTextileGeneralOtherATKPromise = this.POTextileGeneralOtherATKCollection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
@@ -276,7 +277,7 @@ module.exports = class POTextileGeneralATKManager {
             // 1. end: Declare promises.
 
             // 2. begin: Validation.
-            Promise.all([getPOTextileGeneralATKPromise])
+            Promise.all([getPOTextileGeneralOtherATKPromise])
                 .then(results => {
                     var _module = results[0];
                     
@@ -407,7 +408,7 @@ module.exports = class POTextileGeneralATKManager {
         return new Promise((resolve, reject) => {
             var newPOGroup = new PurchaseOrderGroup()
 
-            newPOGroup.PODLNo = generateCode('PODL/TGA')
+            newPOGroup.PODLNo = generateCode('PODL/TGOA')
             newPOGroup._type = poType
 
             var _tasks = [];

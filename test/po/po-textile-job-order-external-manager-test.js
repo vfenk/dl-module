@@ -36,6 +36,7 @@ function getData() {
     pOTextileJobOrder.article = "Test Article";
 
     var buyer = new Buyer({
+        _id:'123',
         code: '123',
         name: 'hot',
         description: 'hotline',
@@ -46,6 +47,7 @@ function getData() {
     });
     
     var supplier = new Supplier({
+        _id:'123',        
         code: '123',
         name: 'hot',
         description: 'hotline',
@@ -65,7 +67,7 @@ function getData() {
     _units.push(template);
 
     var _uom = new UoM({
-        category: 'UoM-Unit-Test',
+        category: `UoM_Unit_Test[${code}]`,
         default: template,
         units: _units
     });

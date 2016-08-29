@@ -242,8 +242,8 @@ module.exports = class POGarmentGeneralManager {
                 .then(results => {
                     var _module = results[0];
                     
-                    if (!valid.RONo || valid.RONo == '')
-                        errors["RONo"] = "Nomor RO tidak boleh kosong";
+                    if (!valid.PRNo || valid.PRNo == '')
+                        errors["PRNo"] = "Nomor PR tidak boleh kosong";
                         
                     this.purchaseOrderManager._validatePO(valid, errors);
                     

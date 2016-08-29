@@ -123,7 +123,7 @@ module.exports = class PurchaseOrderGroupManager {
         })
     }
 
-     create(purchaseOrderGroup, type) {
+     create(purchaseOrderGroup) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrderGroup)
                 .then(validPurchaseOrderGroup => {
@@ -171,7 +171,7 @@ module.exports = class PurchaseOrderGroupManager {
                     if (!valid.supplierId || valid.supplierId == '')
                         errors["supplierId"] = "Nama Supplier tidak terdaftar";
                     if (!valid.termOfPayment || valid.termOfPayment == '')
-                        errors["supplierId"] = "Nama Supplier tidak boleh kosong";
+                        errors["termOfPayment"] = "Term Pembayaran harus dipilih";
                         
                     if (_module) {
                         errors["PODLNo"] = "PODL already exists";

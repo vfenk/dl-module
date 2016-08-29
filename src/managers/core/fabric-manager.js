@@ -74,7 +74,7 @@ module.exports = class FabricManager {
                         '$regex': regex
                     }
                 };
-                
+
                 var $or = {
                     '$or': [filterCode, filterName, filterComposition, filterConstruction, filterWidth, filterYarn, filterUoM]
                 };
@@ -294,21 +294,6 @@ module.exports = class FabricManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = new Fabric(fabric);
-            if (!valid.detail.composition || valid.detail.composition == '')
-                        errors["composition"] = "Komposisi tidak boleh kosong";
-            // Get existing documents if needed.
-            // var getFabricPromise = this.fabricCollection.singleOrDefault({
-            //     "$and": [{
-            //         _id: {
-            //             '$ne': new ObjectId(valid._id)
-            //         }
-            //     }, {
-            //             code: valid.code
-            //         }]
-            // });
-
-            // if (!valid.price || valid.price == 0)
-            //     errors["price"] = "Harga tidak boleh kosong dan bernilai 0";
 
             for (var prop in errors) {
                 var ValidationError = require('../../validation-error');

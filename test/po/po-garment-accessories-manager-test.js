@@ -20,28 +20,12 @@ function getData() {
 
     var pOGarmentAccessories = new POGarmentAccessories();
     pOGarmentAccessories.RONo = '1' + code + stamp;
-    pOGarmentAccessories.RefPONo = '2' + code + stamp;
-    pOGarmentAccessories.PRNo = '3' + code + stamp;
+    pOGarmentAccessories.PRNo = '2' + code + stamp;
     pOGarmentAccessories.PONo = '3' + code + stamp;
-    pOGarmentAccessories.ppn = 10;
-    pOGarmentAccessories.deliveryDate = new Date();
-    pOGarmentAccessories.termOfPayment = 'Tempo 2 bulan';
-    pOGarmentAccessories.deliveryFeeByBuyer = true;
-    pOGarmentAccessories.PODLNo = '';
-    pOGarmentAccessories.description = 'SP1';
-    pOGarmentAccessories.supplierID = {};
-    pOGarmentAccessories.buyerID = {};
+    pOGarmentAccessories.RefPONo = '4' + code + stamp;
     pOGarmentAccessories.article = "Test Article";
-
-    var supplier = new Supplier({
-        _id:code,
-        code: '123',
-        name: 'Supplier01',
-        contact: '0812....',
-        PIC:'Suppy',
-        address: 'test',
-        import: true
-    });
+    pOGarmentAccessories.buyerID = {};
+    pOGarmentAccessories.PODLNo = '';
 
     var buyer = new Buyer({
         _id:code,
@@ -63,7 +47,7 @@ function getData() {
     _units.push(template);
 
     var _uom = new UoM({
-        category: 'UoM-Unit-Test',
+        category: `UoM_Unit_Test[${code}]`,
         default: template,
         units: _units
     });
@@ -79,18 +63,27 @@ function getData() {
     });
 
     var productValue = new PurchaseOrderItem({
-        qty: 0,
-        price: 0,
+        quantity: 2,
+        price: 10000,
+        description = 'warna merah',
+        dealQuantity = 2,
+        dealMeasurement = 'Meter',
+        defaultQuantity = 200,
+        defaultMeasurementQuantity = 'Centimeter',
         product: product
     });
 
     var _products = [];
     _products.push(productValue);
 
-    pOGarmentAccessories.supplier = supplier;
     pOGarmentAccessories.buyer = buyer;
     pOGarmentAccessories.items = _products;
     return pOGarmentAccessories;
+}
+
+function createPODL() {
+    
+    
 }
 
 before('#00. connect db', function (done) {
