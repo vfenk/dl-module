@@ -9,6 +9,7 @@ module.exports = class POGarmentFabric extends PurchaseOrder {
         this.iso = 'FM-00-PJ-02-004';
         
         this.standardQuality = new StandardQualityTestPercentage();
+        this.otherTest = '';
         
         this.copy(source);
     }

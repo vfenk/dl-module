@@ -13,25 +13,14 @@ module.exports = class PurchaseOrder extends BaseModel {
         //Define properties
         this.iso = '';
         this.RONo = '';
-        this.article = '';
         this.PRNo = '';
         this.PONo = '';
         this.RefPONo = '';
+        this.article = '';
         this.buyerId = {};
         this.buyer = new Buyer();
-        this.supplierId = {};
-        this.supplier = new Supplier();
-        this.ppn = 10;
-        this.usePPn = false;
-        this.items = [];
-        this.deliveryDate = new Date();
-        this.termOfPayment = '';
-        this.deliveryFeeByBuyer = false;
         this.PODLNo = '';
-        this.description = '';
-        this.currency = '';
-        this.kurs = 1;
-        this.isPosted = false;
+        this.items = [];
         this.copy(source);
 
         var _items = [];
