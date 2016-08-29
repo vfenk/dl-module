@@ -2,11 +2,11 @@
 
 var should = require('should');
 var helper = require("../helper");
-var POGarmentAccessoriesManager = require("../../src/managers/po/po-garment-accessories-manager");
+var POGarmentJobOrderAccessoriesManager = require("../../src/managers/po/po-garment-job-order-accessories-manager");
 var instanceManager = null;
 
 function getData() {
-    var POGarmentAccessories = require('dl-models').po.POGarmentAccessories;
+    var POGarmentJobOrderAccessories = require('dl-models').po.POGarmentJobOrderAccessories;
     var Supplier = require('dl-models').core.Supplier;
     var Buyer = require('dl-models').core.Buyer;
     var UoM_Template = require('dl-models').core.UoM_Template;
@@ -18,23 +18,22 @@ function getData() {
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
 
-    var pOGarmentAccessories = new POGarmentAccessories();
-    pOGarmentAccessories.RONo = '1' + code + stamp;
-    pOGarmentAccessories.RefPONo = '2' + code + stamp;
-    pOGarmentAccessories.PRNo = '3' + code + stamp;
-    pOGarmentAccessories.PONo = '3' + code + stamp;
-    pOGarmentAccessories.ppn = 10;
-    pOGarmentAccessories.deliveryDate = new Date();
-    pOGarmentAccessories.termOfPayment = 'Tempo 2 bulan';
-    pOGarmentAccessories.deliveryFeeByBuyer = true;
-    pOGarmentAccessories.PODLNo = '';
-    pOGarmentAccessories.description = 'SP1';
-    pOGarmentAccessories.supplierID = {};
-    pOGarmentAccessories.buyerID = {};
-    pOGarmentAccessories.article = "Test Article";
+    var poGarmentJobOrderAccessories = new POGarmentJobOrderAccessories();
+    poGarmentJobOrderAccessories.RONo = '1' + code + stamp;
+    poGarmentJobOrderAccessories.RefPONo = '2' + code + stamp;
+    poGarmentJobOrderAccessories.PRNo = '3' + code + stamp;
+    poGarmentJobOrderAccessories.PONo = '3' + code + stamp;
+    poGarmentJobOrderAccessories.ppn = 10;
+    poGarmentJobOrderAccessories.deliveryDate = new Date();
+    poGarmentJobOrderAccessories.termOfPayment = 'Tempo 2 bulan';
+    poGarmentJobOrderAccessories.deliveryFeeByBuyer = true;
+    poGarmentJobOrderAccessories.PODLNo = '';
+    poGarmentJobOrderAccessories.description = 'SP1';
+    poGarmentJobOrderAccessories.supplierID = {};
+    poGarmentJobOrderAccessories.buyerID = {};
+    poGarmentJobOrderAccessories.article = "Test Article";
 
     var supplier = new Supplier({
-        _id:code,
         code: '123',
         name: 'Supplier01',
         contact: '0812....',
@@ -44,7 +43,6 @@ function getData() {
     });
 
     var buyer = new Buyer({
-        _id:code,
         code: '123',
         name: 'Buyer01',
         contact: '0812....',
@@ -63,7 +61,7 @@ function getData() {
     _units.push(template);
 
     var _uom = new UoM({
-        category: `UoM_Unit_Test[${code}]`,
+        category: 'UoM-Unit-Test',
         default: template,
         units: _units
     });
@@ -87,16 +85,16 @@ function getData() {
     var _products = [];
     _products.push(productValue);
 
-    pOGarmentAccessories.supplier = supplier;
-    pOGarmentAccessories.buyer = buyer;
-    pOGarmentAccessories.items = _products;
-    return pOGarmentAccessories;
+    poGarmentJobOrderAccessories.supplier = supplier;
+    poGarmentJobOrderAccessories.buyer = buyer;
+    poGarmentJobOrderAccessories.items = _products;
+    return poGarmentJobOrderAccessories;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new POGarmentAccessoriesManager(db, {
+            instanceManager = new POGarmentJobOrderAccessoriesManager(db, {
                 username: 'unit-test'
             });
             done();

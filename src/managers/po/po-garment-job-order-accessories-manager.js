@@ -7,20 +7,20 @@ var ObjectId = require("mongodb").ObjectId;
 require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var POGarmentAccessories = DLModels.po.POGarmentAccessories;
+var POGarmentJobOrderAccessories = DLModels.po.POGarmentJobOrderAccessories;
 var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
-var poType = map.po.type.POGarmentAccessories;
+var poType = map.po.type.POGarmentJobOrderAccessories;
 
 var moduleId = 'POGA'
 
 var generateCode = require('../.././utils/code-generator');
 
-module.exports = class POGarmentAccessoriesManager {
+module.exports = class POGarmentJobOrderAccessoriesManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
 
-        this.POGarmentAccessoriesCollection = this.db.use(map.po.collection.PurchaseOrder);
+        this.POGarmentJobOrderAccessoriesCollection = this.db.use(map.po.collection.PurchaseOrder);
 
         var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
         this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);
@@ -75,13 +75,13 @@ module.exports = class POGarmentAccessoriesManager {
                 query['$and'].push($or);
             }
 
-            this.POGarmentAccessoriesCollection
+            this.POGarmentJobOrderAccessoriesCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(POGarmentAccessoriess => {
-                    resolve(POGarmentAccessoriess);
+                .then(POGarmentJobOrderAccessoriess => {
+                    resolve(POGarmentJobOrderAccessoriess);
                 })
                 .catch(e => {
                     reject(e);
@@ -195,7 +195,7 @@ module.exports = class POGarmentAccessoriesManager {
 
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.POGarmentAccessoriesCollection
+            this.POGarmentJobOrderAccessoriesCollection
                 .single(query)
                 .then(module => {
                     resolve(module);
@@ -208,10 +208,10 @@ module.exports = class POGarmentAccessoriesManager {
 
     getSingleOrDefaultByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.POGarmentAccessoriesCollection
+            this.POGarmentJobOrderAccessoriesCollection
                 .singleOrDefault(query)
-                .then(POGarmentAccessoriess => {
-                    resolve(POGarmentAccessoriess);
+                .then(POGarmentJobOrderAccessoriess => {
+                    resolve(POGarmentJobOrderAccessoriess);
                 })
                 .catch(e => {
                     reject(e);
@@ -237,45 +237,17 @@ module.exports = class POGarmentAccessoriesManager {
         });
     }
 
-    _validate(purchaseOrder) {
-        var errors = {};
+    create(poGarmentJobOrderAccessories) {
+        poGarmentJobOrderAccessories = new POGarmentJobOrderAccessories(poGarmentJobOrderAccessories);
         return new Promise((resolve, reject) => {
-            var valid = purchaseOrder;
-            if (!valid.PRNo || valid.PRNo == '')
-                errors["PRNo"] = "Nomor RO tidak boleh kosong";
-            if (!valid.article || valid.article == '')
-                errors["article"] = "Article tidak boleh kosong";
-            if (!valid.buyer._id || valid.buyer._id == '')
-                errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
-            for (var prop in errors) {
-                var ValidationError = require('../../validation-error');
-                reject(new ValidationError('data does not pass validation', errors));
-            }
-
-            if (!valid.stamp)
-                valid = new PurchaseOrder(valid);
-
-            valid.stamp(this.user.username, 'manager');
-            resolve(valid);
-        });
-    }
-    create(poGarmentAccessories) {
-        poGarmentAccessories = new POGarmentAccessories(poGarmentAccessories);
-        return new Promise((resolve, reject) => {
-            poGarmentAccessories.PONo = generateCode(moduleId)
-            this._validate(poGarmentAccessories)
-                .then(validpoGarmentAccessories => {
-                    this.purchaseOrderManager.create(validpoGarmentAccessories)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
+            poGarmentJobOrderAccessories.PONo = generateCode(moduleId)
+            this.purchaseOrderManager.create(poGarmentJobOrderAccessories)
+                .then(id => {
+                    resolve(id);
                 })
                 .catch(e => {
                     reject(e);
-                })
+                });
         })
     }
 
@@ -314,18 +286,12 @@ module.exports = class POGarmentAccessoriesManager {
         });
     }
 
-    update(poGarmentAccessories) {
-        poGarmentAccessories = new POGarmentAccessories(poGarmentAccessories);
+    update(poGarmentJobOrderAccessories) {
+        poGarmentJobOrderAccessories = new POGarmentJobOrderAccessories(poGarmentJobOrderAccessories);
         return new Promise((resolve, reject) => {
-            this._validate(poGarmentAccessories)
-                .then(validpoGarmentAccessories => {
-                    this.purchaseOrderManager.update(validpoGarmentAccessories)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
+            this.purchaseOrderManager.update(poGarmentJobOrderAccessories)
+                .then(id => {
+                    resolve(id);
                 })
                 .catch(e => {
                     reject(e);
@@ -333,12 +299,12 @@ module.exports = class POGarmentAccessoriesManager {
         })
     }
 
-    delete(poGarmentAccessories) {
-        poGarmentAccessories = new POGarmentAccessories(poGarmentAccessories);
+    delete(poGarmentJobOrderAccessories) {
+        poGarmentJobOrderAccessories = new POGarmentJobOrderAccessories(poGarmentJobOrderAccessories);
         return new Promise((resolve, reject) => {
 
-            poGarmentAccessories._deleted = true;
-            this.purchaseOrderManager.delete(poGarmentAccessories)
+            poGarmentJobOrderAccessories._deleted = true;
+            this.purchaseOrderManager.delete(poGarmentJobOrderAccessories)
                 .then(id => {
                     resolve(id);
                 })
