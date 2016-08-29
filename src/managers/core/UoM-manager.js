@@ -34,13 +34,18 @@ module.exports = class UoMManager {
 
             if (_paging.keyword) {
                 var regex = new RegExp(_paging.keyword, "i");
-                var filterCategory = {
-                    'category': {
+                // var filterCategory = {
+                //     'category': {
+                //         '$regex': regex
+                //     }
+                // };
+                var filterUnit = {
+                    'unit': {
                         '$regex': regex
                     }
                 };
 
-                query['$and'].push(filterCategory);
+                query['$and'].push(filterUnit);
             }
 
             this.UoMCollection
@@ -57,7 +62,7 @@ module.exports = class UoMManager {
         });
     }
 
-    readListCategory(paging) {
+    /*readListCategory(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -106,12 +111,12 @@ module.exports = class UoMManager {
                     reject(e);
                 });
         });
-    }
+    }*/
 
     create(UoM) {
         return new Promise((resolve, reject) => {
-            UoM.default.convertedValue=UoM.default.mainValue;
-            UoM.default.convertedUnit=UoM.default.mainUnit;
+            // UoM.default.convertedValue=UoM.default.mainValue;
+            // UoM.default.convertedUnit=UoM.default.mainUnit;
             
             this._validate(UoM)
                 .then(validUoM => {
@@ -132,8 +137,8 @@ module.exports = class UoMManager {
 
     update(UoM) {
         return new Promise((resolve, reject) => {
-            UoM.default.convertedValue=UoM.default.mainValue;
-            UoM.default.convertedUnit=UoM.default.mainUnit;
+            // UoM.default.convertedValue=UoM.default.mainValue;
+            // UoM.default.convertedUnit=UoM.default.mainUnit;
             this._validate(UoM)
                 .then(validUoM => {
                     this.UoMCollection.update(validUoM)
@@ -180,7 +185,7 @@ module.exports = class UoMManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        category: valid.category
+                        unit: valid.unit
                     }]
             });
             // 1. end: Declare promises.
@@ -189,8 +194,14 @@ module.exports = class UoMManager {
             Promise.all([getUoMPromise])
                 .then(results => {
                     var _UoM = results[0];
-
-                    if (!valid.category || valid.category == '')
+                    
+                    if (!valid.unit || valid.unit == '')
+                        errors["unit"] = "Satuan Tidak Boleh Kosong";
+                    else if (_UoM) {
+                        errors["unit"] = "Satuan sudah terdaftar";
+                    }
+                    
+                    /*if (!valid.category || valid.category == '')
                         errors["category"] = "category is required";
                     else if (_UoM) {
                         errors["category"] = "category already exists";
@@ -224,7 +235,7 @@ module.exports = class UoMManager {
                                 }
                             }
                         }
-                    }
+                    }*/
 
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
