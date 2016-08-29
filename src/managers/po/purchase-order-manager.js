@@ -31,20 +31,7 @@ module.exports = class PurchaseOrderManager {
                 })
         });
     }
-
-    // create(purchaseOrder) {
-    //     return new Promise((resolve, reject) => {
-    //         this.PurchaseOrderCollection.insert(purchaseOrder)
-    //             .then(id => {
-    //                 resolve(id);
-    //             })
-    //             .catch(e => {
-    //                 reject(e);
-    //             })
-    //         });
-        
-    // }
-
+    
     update(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrder)
@@ -108,8 +95,6 @@ module.exports = class PurchaseOrderManager {
                     if (!valid.RefPONo || valid.RefPONo == '')
                         errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
                     
-                    if (!valid.supplier._id || valid.supplier._id == '')
-                        errors["supplierId"] = "Nama Supplier tidak boleh kosong";
                     if (!valid.deliveryDate || valid.deliveryDate == '')
                         errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
                     if (!valid.termOfPayment || valid.termOfPayment == '')
@@ -144,8 +129,6 @@ module.exports = class PurchaseOrderManager {
          if (!valid.RefPONo || valid.RefPONo == '')
             errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
                     
-         if (!valid.supplier._id || valid.supplier._id == '')
-            errors["supplierId"] = "Nama Supplier tidak boleh kosong";
          if (!valid.deliveryDate || valid.deliveryDate == '')
             errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
          if (!valid.termOfPayment || valid.termOfPayment == '')

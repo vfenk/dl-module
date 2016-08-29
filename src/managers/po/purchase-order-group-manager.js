@@ -166,6 +166,13 @@ module.exports = class PurchaseOrderGroupManager {
 
                     if (!valid.PODLNo || valid.PODLNo == '')
                         errors["PODLNo"] = "Nomor PODL tidak boleh kosong";
+                    if (!valid.supplier.name || valid.supplier.name == '')
+                        errors["supplierId"] = "Nama Supplier tidak boleh kosong";
+                    if (!valid.supplierId || valid.supplierId == '')
+                        errors["supplierId"] = "Nama Supplier tidak terdaftar";
+                    if (!valid.termOfPayment || valid.termOfPayment == '')
+                        errors["supplierId"] = "Nama Supplier tidak boleh kosong";
+                        
                     if (_module) {
                         errors["PODLNo"] = "PODL already exists";
                     }
