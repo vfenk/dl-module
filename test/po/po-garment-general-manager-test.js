@@ -52,7 +52,7 @@ function getData() {
     _units.push(template);
 
     var _uom = new UoM({
-        category: 'UoM-Unit-Test',
+        category: `UoM-Unit-Test[${code}]`,
         default: template,
         units: _units
     });

@@ -2,13 +2,12 @@
 
 var should = require('should');
 var helper = require("../helper");
-var POGarmentAccessoriesManager = require("../../src/managers/po/po-garment-accessories-manager");
+var POTextileGeneralOtherATKManager = require("../../src/managers/po/po-textile-general-other-atk-manager");
 var instanceManager = null;
 
 function getData() {
-    var POGarmentAccessories = require('dl-models').po.POGarmentAccessories;
+    var POTekstilGeneralOtherATK = require('dl-models').po.POTekstilGeneralOtherATK;
     var Supplier = require('dl-models').core.Supplier;
-    var Buyer = require('dl-models').core.Buyer;
     var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
@@ -18,38 +17,28 @@ function getData() {
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
 
-    var pOGarmentAccessories = new POGarmentAccessories();
-    pOGarmentAccessories.RONo = '1' + code + stamp;
-    pOGarmentAccessories.RefPONo = '2' + code + stamp;
-    pOGarmentAccessories.PRNo = '3' + code + stamp;
-    pOGarmentAccessories.PONo = '3' + code + stamp;
-    pOGarmentAccessories.ppn = 10;
-    pOGarmentAccessories.deliveryDate = new Date();
-    pOGarmentAccessories.termOfPayment = 'Tempo 2 bulan';
-    pOGarmentAccessories.deliveryFeeByBuyer = true;
-    pOGarmentAccessories.PODLNo = '';
-    pOGarmentAccessories.description = 'SP1';
-    pOGarmentAccessories.supplierID = {};
-    pOGarmentAccessories.buyerID = {};
-    pOGarmentAccessories.article = "Test Article";
+    var poTextileGeneralOtherATK = new POTekstilGeneralOtherATK();
+    poTextileGeneralOtherATK.RONo = '1' + code + stamp;
+    poTextileGeneralOtherATK.RefPONo = '2' + code + stamp;
+    poTextileGeneralOtherATK.PRNo = '3' + code + stamp;
+    poTextileGeneralOtherATK.ppn = 10;
+    poTextileGeneralOtherATK.deliveryDate = new Date();
+    poTextileGeneralOtherATK.termOfPayment = 'Tempo 2 bulan';
+    poTextileGeneralOtherATK.deliveryFeeByBuyer = true;
+    poTextileGeneralOtherATK.PODLNo = '';
+    poTextileGeneralOtherATK.description = 'SP1';
+    poTextileGeneralOtherATK.kurs = 13000;
+    poTextileGeneralOtherATK.currency = 'dollar';
+    poTextileGeneralOtherATK.supplierID = {};
 
     var supplier = new Supplier({
-        _id:code,
+        _id: '123',
         code: '123',
-        name: 'Supplier01',
-        contact: '0812....',
-        PIC:'Suppy',
+        name: 'Toko Stationery',
+        description: 'hotline',
+        phone: '0812....',
         address: 'test',
-        import: true
-    });
-
-    var buyer = new Buyer({
-        _id:code,
-        code: '123',
-        name: 'Buyer01',
-        contact: '0812....',
-        address: 'test',
-        tempo: 0
+        local: true
     });
 
     var template = new UoM_Template({
@@ -67,7 +56,6 @@ function getData() {
         default: template,
         units: _units
     });
-
 
     var product = new Product({
         code: '22',
@@ -87,16 +75,15 @@ function getData() {
     var _products = [];
     _products.push(productValue);
 
-    pOGarmentAccessories.supplier = supplier;
-    pOGarmentAccessories.buyer = buyer;
-    pOGarmentAccessories.items = _products;
-    return pOGarmentAccessories;
+    poTextileGeneralOtherATK.supplier = supplier;
+    poTextileGeneralOtherATK.items = _products;
+    return poTextileGeneralOtherATK;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new POGarmentAccessoriesManager(db, {
+            instanceManager = new POTextileGeneralOtherATKManager(db, {
                 username: 'unit-test'
             });
             done();
@@ -129,6 +116,7 @@ it('#02. should success when read all podl data', function (done) {
             done(e);
         })
 });
+
 
 var createdId;
 it('#03. should success when create new data', function (done) {
@@ -181,11 +169,8 @@ it(`#05. should success when get created data with id`, function (done) {
 
 it(`#06. should success when update created data`, function (done) {
     createdData.RONo += '[updated]';
-    createdData.PRNo += '[updated]';
-    createdData.PONo += '[updated]';
-    createdData.RefPONo += '[updated]';
+    createdData.ReffPONo += '[updated]';
     createdData.termOfPayment += '[updated]';
-    createdData.PODLNo += '[updated]';
     createdData.description += '[updated]';
 
     instanceManager.update(createdData)
@@ -202,9 +187,8 @@ it(`#07. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             data.RONo.should.equal(createdData.RONo);
-            data.PRNo.should.equal(createdData.PRNo);
-            data.PONo.should.equal(createdData.PONo);
             data.RefPONo.should.equal(createdData.RefPONo);
+            data.PONo.should.equal(createdData.PONo);
             data.termOfPayment.should.equal(createdData.termOfPayment);
             data.PODLNo.should.equal(createdData.PODLNo);
             data.description.should.equal(createdData.description);
@@ -215,4 +199,3 @@ it(`#07. should success when get updated data with id`, function (done) {
             done(e);
         })
 });
-

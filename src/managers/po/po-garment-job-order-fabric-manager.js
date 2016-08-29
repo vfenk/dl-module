@@ -7,20 +7,17 @@ var ObjectId = require("mongodb").ObjectId;
 require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var POTextileGeneralATK = DLModels.po.POTextileGeneralATK;
+var POGarmentJobOrderFabric = DLModels.po.POGarmentJobOrderFabric;
 var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
-
-var moduleId = 'POGG'
-
-var poType = map.po.type.POTextileGeneralATK;
-
+var moduleId = 'POTJ'
+var poType = map.po.type.POGarmentJobOrderFabric;
 var generateCode = require('../.././utils/code-generator');
 
-module.exports = class POTextileGeneralATKManager {
+module.exports = class POGarmentJobOrderFabricManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.POTextileGeneralATKCollection = this.db.use(map.po.collection.PurchaseOrder);
+        this.POGarmentJobOrderFabricCollection = this.db.use(map.po.collection.PurchaseOrder);
 
         var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
         this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);
@@ -74,13 +71,62 @@ module.exports = class POTextileGeneralATKManager {
                 query['$and'].push($or);
             }
 
-            this.POTextileGeneralATKCollection
+            this.POGarmentJobOrderFabricCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(POTextileGeneralATKs => {
-                    resolve(POTextileGeneralATKs);
+                .then(POGarmentJobOrderFabrics => {
+                    resolve(POGarmentJobOrderFabrics);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
+    readAllPurchaseOrderGroup(paging) {
+        var _paging = Object.assign({
+            page: 1,
+            size: 20,
+            order: '_id',
+            asc: true
+        }, paging);
+
+        return new Promise((resolve, reject) => {
+            var deleted = {
+                _deleted: false
+            };
+            var type = {
+                _type: poType
+            }
+
+            var query = {
+                '$and': [deleted, type]
+            };
+
+            if (_paging.keyword) {
+                var regex = new RegExp(_paging.keyword, "i");
+                var filterPODLNo = {
+                    'PODLNo': {
+                        '$regex': regex
+                    }
+                };
+
+                var $or = {
+                    '$or': [filterPODLNo]
+                };
+
+                query['$and'].push($or);
+            }
+
+            this.PurchaseOrderGroupCollection
+                .where(query)
+                .page(_paging.page, _paging.size)
+                .orderBy(_paging.order, _paging.asc)
+                .execute()
+                .then(PurchaseOrderGroups => {
+                    resolve(PurchaseOrderGroups);
                 })
                 .catch(e => {
                     reject(e);
@@ -144,7 +190,7 @@ module.exports = class POTextileGeneralATKManager {
 
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.POTextileGeneralATKCollection
+            this.POGarmentJobOrderFabricCollection
                 .single(query)
                 .then(module => {
                     resolve(module);
@@ -157,7 +203,7 @@ module.exports = class POTextileGeneralATKManager {
 
     getSingleOrDefaultByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.POTextileGeneralATKCollection
+            this.POGarmentJobOrderFabricCollection
                 .singleOrDefault(query)
                 .then(fabric => {
                     resolve(fabric);
@@ -168,31 +214,31 @@ module.exports = class POTextileGeneralATKManager {
         })
     }
 
-    create(poTextileGeneralATK) {
-        poTextileGeneralATK = new POTextileGeneralATK(poTextileGeneralATK);
-        poTextileGeneralATK.PONo = generateCode(moduleId)
+    create(poGarmentJobOrderFabric) {
+        poGarmentJobOrderFabric = new POGarmentJobOrderFabric(poGarmentJobOrderFabric);
         return new Promise((resolve, reject) => {
-            this._validate(poTextileGeneralATK)
-                .then(validpoTextileGeneralATK => {
-                    this.purchaseOrderManager.create(validpoTextileGeneralATK)
+            poGarmentJobOrderFabric.PONo = generateCode(moduleId)
+            this._validate(poGarmentJobOrderFabric)
+                .then(validpoGarmentJobOrderFabric => {
+                    this.purchaseOrderManager.create(validpoGarmentJobOrderFabric)
                         .then(id => {
                             resolve(id);
                         })
                         .catch(e => {
                             reject(e);
-                        })
+                        });
                 })
                 .catch(e => {
                     reject(e);
                 })
+
         });
     }
 
     createGroup(items) {
         return new Promise((resolve, reject) => {
             var newPOGroup = new PurchaseOrderGroup()
-
-            newPOGroup.PODLNo = generateCode('PODL/TGA')
+            newPOGroup.PODLNo = generateCode('PODL/GJOF')
             newPOGroup._type = poType
 
             var _tasks = [];
@@ -224,31 +270,31 @@ module.exports = class POTextileGeneralATKManager {
         });
     }
 
-    update(poTextileGeneralATK) {
-        poTextileGeneralATK = new POTextileGeneralATK(poTextileGeneralATK);
+    update(poGarmentJobOrderFabric) {
+        poGarmentJobOrderFabric = new POGarmentJobOrderFabric(poGarmentJobOrderFabric);
         return new Promise((resolve, reject) => {
-            this._validate(poTextileGeneralATK)
-                .then(validpoTextileGeneralATK => {
-                    this.purchaseOrderManager.update(validpoTextileGeneralATK)
+            this._validate(poGarmentJobOrderFabric)
+                .then(validpoGarmentJobOrderFabric => {
+                    this.purchaseOrderManager.update(validpoGarmentJobOrderFabric)
                         .then(id => {
                             resolve(id);
                         })
                         .catch(e => {
                             reject(e);
-                        });
+                        })
                 })
                 .catch(e => {
                     reject(e);
                 })
-        });
+        })
     }
 
-    delete(poTextileGeneralATK) {
-        poTextileGeneralATK = new POTextileGeneralATK(poTextileGeneralATK);
+    delete(poGarmentJobOrderFabric) {
+        poGarmentJobOrderFabric = new POGarmentJobOrderFabric(poGarmentJobOrderFabric);
         return new Promise((resolve, reject) => {
 
-            poTextileGeneralATK._deleted = true;
-            this.purchaseOrderManager.delete(poTextileGeneralATK)
+            poGarmentJobOrderFabric._deleted = true;
+            this.purchaseOrderManager.delete(poGarmentJobOrderFabric)
                 .then(id => {
                     resolve(id);
                 })
@@ -258,13 +304,13 @@ module.exports = class POTextileGeneralATKManager {
 
         });
     }
-
-    _validate(poTextileGeneralATK) {
+    
+    _validate(poGarmentJobOrderFabric) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = poTextileGeneralATK;
+            var valid = poGarmentJobOrderFabric;
 
-            var getPOTextileGeneralATKPromise = this.POTextileGeneralATKCollection.singleOrDefault({
+            var getPOGarmentJobOrderFabricPromise = this.POGarmentJobOrderFabricCollection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
@@ -276,15 +322,22 @@ module.exports = class POTextileGeneralATKManager {
             // 1. end: Declare promises.
 
             // 2. begin: Validation.
-            Promise.all([getPOTextileGeneralATKPromise])
+            Promise.all([getPOGarmentJobOrderFabricPromise])
                 .then(results => {
                     var _module = results[0];
-                    
+
                     if (!valid.PRNo || valid.PRNo == '')
                         errors["PRNo"] = "Nomor PR tidak boleh kosong";
-                    
+                    if (!valid.PRNo || valid.PRNo == '')
+                        errors["RONo"] = "Nomor RO tidak boleh kosong";
+                    if (!valid.article || valid.article == '')
+                        errors["article"] = "Artikel tidak boleh kosong";
+
+                    if (!valid.buyer._id || valid.buyer._id == '')
+                        errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
+
                     this.purchaseOrderManager._validatePO(valid, errors);
-    
+
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
@@ -302,7 +355,6 @@ module.exports = class POTextileGeneralATKManager {
                 })
         });
     }
-
     // ====================================PO DL===========================================
 
     readAllPurchaseOrderGroup(paging) {
@@ -407,7 +459,7 @@ module.exports = class POTextileGeneralATKManager {
         return new Promise((resolve, reject) => {
             var newPOGroup = new PurchaseOrderGroup()
 
-            newPOGroup.PODLNo = generateCode('PODL/TGA')
+            newPOGroup.PODLNo = generateCode('PODL/GJOF')
             newPOGroup._type = poType
 
             var _tasks = [];

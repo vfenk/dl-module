@@ -306,6 +306,7 @@ module.exports = class POTextileJobOrderManager {
 
         });
     }
+    
     _validate(poTextileJobOrder) {
         var errors = {};
         return new Promise((resolve, reject) => {
@@ -337,6 +338,7 @@ module.exports = class POTextileJobOrderManager {
 
                     this.purchaseOrderManager._validatePO(valid, errors);
 
+                    // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));

@@ -9,7 +9,11 @@ function getData() {
     var Fabric = require('dl-models').core.Fabric;
     var UoM = require('dl-models').core.UoM;
     var UoM_Template = require('dl-models').core.UoM_Template;
-
+    
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
+    
     var fabric = new Fabric();
     var uom_template = new UoM_Template({
         mainValue: 1,
@@ -21,14 +25,10 @@ function getData() {
     _uom_units.push(uom_template);
 
     var uom = new UoM({
-        category: 'UoM_Unit_Test',
+        category: `UoM_Unit_Test[${code}]`,
         default: uom_template,
         units: _uom_units
     });
-
-    var now = new Date();
-    var stamp = now / 1000 | 0;
-    var code = stamp.toString(36);
 
     fabric.code = code;
     fabric.name = `name[${code}]`;
@@ -182,6 +182,7 @@ it('#08. should error with property code and name ', function (done) {
             try {
                 e.errors.should.have.property('code');
                 e.errors.should.have.property('name');
+                e.errors.should.have.property('composition');
                 done();
             } catch (ex) {
                 done(ex);

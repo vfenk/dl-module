@@ -92,7 +92,7 @@ module.exports = class POGarmentFabricManager {
                 });
         });
     }
-    
+
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -173,10 +173,10 @@ module.exports = class POGarmentFabricManager {
         })
     }
 
-    create(poGarmentFabric) {            
+    create(poGarmentFabric) {
         poGarmentFabric = new POGarmentFabric(poGarmentFabric);
         poGarmentFabric.PONo = generateCode(moduleId);
-        
+
         return new Promise((resolve, reject) => {
             this._validate(poGarmentFabric)
                 .then(validPOGarmentFabric => {
@@ -191,7 +191,7 @@ module.exports = class POGarmentFabricManager {
                 .catch(e => {
                     reject(e);
                 })
-            
+
         });
     }
 
@@ -225,59 +225,42 @@ module.exports = class POGarmentFabricManager {
 
         });
     }
-    
+
     _validate(poGarmentFabric) {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = poGarmentFabric;
 
-            var getPOGarmentFabricPromise = this.POGarmentFabricCollection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                        // code: valid.code
-                    }]
-            });
-            // 1. end: Declare promises.
+            if (!valid.PRNo || valid.PRNo == '')
+                errors["PRNo"] = "Nomor PR tidak boleh kosong";
+            if (!valid.RONo || valid.RONo == '')
+                errors["RONo"] = "Nomor RO tidak boleh kosong";
+            if (!valid.article || valid.article == '')
+                errors["article"] = "Artikel tidak boleh kosong";
 
-            // 2. begin: Validation.
-            Promise.all([getPOGarmentFabricPromise])
-                .then(results => {
-                    var _module = results[0];
-                    
-                    if (!valid.PRNo || valid.PRNo == '')
-                        errors["PRNo"] = "Nomor PR tidak boleh kosong";
-                    if (!valid.RONo || valid.RONo == '')
-                        errors["RONo"] = "Nomor RO tidak boleh kosong";
-                    if (!valid.article || valid.article == '')
-                        errors["article"] = "Artikel tidak boleh kosong";
-                    
-                    if (!valid.buyer._id || valid.buyer._id == '')
-                        errors["buyerId"] = "Nama Buyer tidak boleh kosong";
-                    
-                    this.purchaseOrderManager._validatePO(valid, errors);
-                    
-                    // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in errors) {
-                        var ValidationError = require('../../validation-error');
-                        reject(new ValidationError('data does not pass validation', errors));
-                    }
+            if (!valid.buyer._id || valid.buyer._id == '')
+                errors["buyerId"] = "Nama Buyer tidak boleh kosong";
 
-                    if (!valid.stamp)
-                        valid = new PurchaseOrder(valid);
+            this.purchaseOrderManager._validatePO(valid, errors);
 
-                    valid.stamp(this.user.username, 'manager');
-                    resolve(valid);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
+            // 2c. begin: check if data has any error, reject if it has.
+            for (var prop in errors) {
+                var ValidationError = require('../../validation-error');
+                reject(new ValidationError('data does not pass validation', errors));
+            }
+
+            if (!valid.stamp)
+                valid = new PurchaseOrder(valid);
+
+            valid.stamp(this.user.username, 'manager');
+            resolve(valid);
+        })
+            .catch(e => {
+                reject(e);
+            })
     }
-    
-// ====================================PO DL===========================================
+
+    // ====================================PO DL===========================================
 
     readAllPurchaseOrderGroup(paging) {
         var _paging = Object.assign({
@@ -288,11 +271,11 @@ module.exports = class POGarmentFabricManager {
         }, paging);
 
         return new Promise((resolve, reject) => {
-           var filter = {
+            var filter = {
                 _deleted: false,
                 _type: poType
             };
-            
+
             var query = _paging.keyword ? {
                 '$and': [filter]
             } : filter;
@@ -325,7 +308,7 @@ module.exports = class POGarmentFabricManager {
                 });
         });
     }
-    
+
     getPurchaseOrderGroupById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -356,7 +339,7 @@ module.exports = class POGarmentFabricManager {
                 });
         })
     }
-    
+
     createGroup(items) {
         return new Promise((resolve, reject) => {
             var newPOGroup = new PurchaseOrderGroup()
