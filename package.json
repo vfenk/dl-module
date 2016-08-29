@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moonlay/dl-models.git"
+    "url": "git+https://github.com/danliris/dl-models.git"
   },
   "author": "Moonlay.Tech",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/moonlay/dl-models/issues"
+    "url": "https://github.com/danliris/dl-models/issues"
   },
-  "homepage": "https://github.com/moonlay/dl-models#readme",
+  "homepage": "https://github.com/danliris/dl-models#readme",
   "devDependencies": {
     "mocha": "^2.5.3",
     "should": "^10.0.0"
