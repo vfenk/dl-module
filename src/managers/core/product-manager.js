@@ -213,7 +213,9 @@ module.exports = class ProductManager {
 
                     if (!valid.name || valid.name == '')
                         errors["name"] = "Nama tidak boleh kosong.";
-
+                        
+                    if (!valid.UoM._id || valid.UoM._id == '' || valid.UoM.unit == '')
+                        errors["UoM"] = "Satuan tidak boleh kosong";
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
