@@ -166,10 +166,6 @@ module.exports = class PurchaseOrderGroupManager {
             if (valid.usePPh == undefined || valid.usePPh.toString() === '')
                 errors["usePPh"] = "Pengenaan PPh harus dipilih";
 
-            if (_module) {
-                errors["PODLNo"] = "PODL already exists";
-            }
-
             if (valid.items.count == 0) {
                 errors["items"] = "Harus ada minimal 1 nomor PO"
             }
