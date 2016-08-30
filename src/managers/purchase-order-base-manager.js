@@ -151,7 +151,7 @@ module.exports = class PurchaseOrderBaseManager {
             var query = {
                 _id: new ObjectId(id),
                 _deleted: false,
-                _type: poType
+                _type: this.poType
             };
             this.getSingleByQuery(query)
                 .then(module => {
@@ -183,7 +183,7 @@ module.exports = class PurchaseOrderBaseManager {
             var query = {
                 _id: new ObjectId(id),
                 _deleted: false,
-                _type: poType
+                _type: this.poType
             };
             this.getSingleOrDefaultByQuery(query)
                 .then(module => {
