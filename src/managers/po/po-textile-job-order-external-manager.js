@@ -27,8 +27,12 @@ module.exports = class POTextileJobOrderManager extends PurchaseOrderBaseManager
             if (!valid.article || valid.article == '')
                 errors["article"] = "Artikel tidak boleh kosong";
 
-            if (!valid.buyer._id || valid.buyer._id == '')
-                errors["buyerId"] = "Nama Pembeli tidak boleh kosong";
+            if (valid.buyer) {
+                if (!valid.buyerId || valid.buyerId == '')
+                    errors["buyerId"] = "Nama Buyer tidak terdaftar";
+            }
+            else 
+                errors["buyerId"] = "Nama Buyer tidak boleh kosong";
 
             this.purchaseOrderManager._validatePO(valid, errors);
 

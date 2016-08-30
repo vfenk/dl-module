@@ -208,7 +208,7 @@ module.exports = class PurchaseOrderBaseManager {
     }
     
     createGroup(purchaseOrderGroup) {
-        purchaseOrderGroup = new PurchaseOrderGroup(purchaseOrderGroup)
+        // purchaseOrderGroup = new PurchaseOrderGroup(purchaseOrderGroup)
         purchaseOrderGroup.PODLNo = generateCode('PODL/GA')
         purchaseOrderGroup._type = this.poType
             
