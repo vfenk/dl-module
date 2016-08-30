@@ -37,35 +37,7 @@ module.exports = class PurchaseOrderBaseManager {
     }
     
     _getQueryPurchaseOrderGroup(_paging) {
-        var deleted = {
-            _deleted: false
-        };
-        var query = _paging.keyword ? {
-            '$and': [deleted]
-        } : deleted;
-
-        if (_paging.keyword) {
-            var regex = new RegExp(_paging.keyword, "i");
-            var filterPODLNo = {
-                'PODLNo': {
-                    '$regex': regex
-                }
-            };
-
-            var filterSupplierName = {
-                'supplier.name': {
-                    '$regex': regex
-                }
-            };
-
-            var $or = {
-                '$or': [filterPODLNo, filterSupplierName]
-            };
-
-            query['$and'].push($or);
-        }
-
-        return query;
+        
     }
     
     read(paging) {
