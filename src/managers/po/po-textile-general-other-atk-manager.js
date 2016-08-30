@@ -77,6 +77,40 @@ module.exports = class POTextileGeneralOtherTKManager extends PurchaseOrderBaseM
 
         return query;
     }
+    
+    _getQueryPurchaseOrderGroup(_paging) {
+        var filter = {
+            _deleted: false,
+            _type: this.poType
+        };
+        
+        var query = _paging.keyword ? {
+            '$and': [filter]
+        } : filter;
+
+        if (_paging.keyword) {
+            var regex = new RegExp(_paging.keyword, "i");
+            var filterPODLNo = {
+                'PODLNo': {
+                    '$regex': regex
+                }
+            };
+
+            var filterSupplierName = {
+                'supplier.name': {
+                    '$regex': regex
+                }
+            };
+
+            var $or = {
+                '$or': [filterPODLNo, filterSupplierName]
+            };
+
+            query['$and'].push($or);
+        }
+
+        return query;
+    }
 
     create(purchaseOrder) {
         purchaseOrder = new POTekstilGeneralOtherATK(purchaseOrder);
