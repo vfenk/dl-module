@@ -13,6 +13,7 @@ module.exports = class PurchaseOrderGroupManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
+        
         this.PurchaseOrderGroupCollection = this.db.use(map.po.collection.PurchaseOrderGroup);
     }
     
@@ -170,8 +171,12 @@ module.exports = class PurchaseOrderGroupManager {
                         errors["supplierId"] = "Nama Supplier tidak boleh kosong";
                     if (!valid.supplierId || valid.supplierId == '')
                         errors["supplierId"] = "Nama Supplier tidak terdaftar";
+                    if (!valid.deliveryDate || valid.deliveryDate == '')
+                        errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
                     if (!valid.termOfPayment || valid.termOfPayment == '')
-                        errors["termOfPayment"] = "Term Pembayaran harus dipilih";
+                        errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
+                    if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
+                        errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
                         
                     if (_module) {
                         errors["PODLNo"] = "PODL already exists";
