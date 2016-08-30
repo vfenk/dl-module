@@ -31,7 +31,7 @@ module.exports = class PurchaseOrderManager {
                 })
         });
     }
-    
+
     update(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrder)
@@ -74,56 +74,29 @@ module.exports = class PurchaseOrderManager {
         return new Promise((resolve, reject) => {
             var valid = purchaseOrder;
 
-            var getPurchaseOrderPromise = this.PurchaseOrderCollection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                        // code: valid.code
-                    }]
-            });
-            // 1. end: Declare promises.
+            if (!valid.RefPONo || valid.RefPONo == '')
+                errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
 
-            // 2. begin: Validation.
-            Promise.all([getPurchaseOrderPromise])
-                .then(results => {
-                    var _module = results[0];
-                    
-                    // if (!valid.PRNo || valid.PRNo == '')
-                    //     errors["PRNo"] = "Nomor PR tidak boleh kosong";
-                    if (!valid.RefPONo || valid.RefPONo == '')
-                        errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
-                        
-                    // if (_module) {
-                    //     errors["code"] = "RO, PR, PO already exists";
-                    // }
+            for (var prop in errors) {
+                var ValidationError = require('../../validation-error');
+                reject(new ValidationError('data does not pass validation', errors));
+            }
 
-                    // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in errors) {
-                        var ValidationError = require('../../validation-error');
-                        reject(new ValidationError('data does not pass validation', errors));
-                    }
+            if (!valid.stamp)
+                valid = new PurchaseOrder(valid);
 
-                    if (!valid.stamp)
-                        valid = new PurchaseOrder(valid);
-
-                    valid.stamp(this.user.username, 'manager');
-                    resolve(valid);
-                })
-                .catch(e => {
-                    reject(e);
-                })
+            valid.stamp(this.user.username, 'manager');
+            resolve(valid);
         });
     }
-    
+
     _validatePO(purchaseOrder, errors) {
         var valid = purchaseOrder;
-        
-         if (!valid.RefPONo || valid.RefPONo == '')
+
+        if (!valid.RefPONo || valid.RefPONo == '')
             errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
-            
-         return errors;
+
+        return errors;
     }
 
 }
