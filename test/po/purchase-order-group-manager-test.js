@@ -10,7 +10,6 @@ function getData() {
     var PurchaseOrder = require('dl-models').po.PurchaseOrder;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Supplier = require('dl-models').core.Supplier;
-    var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
     var Product = require('dl-models').core.Product;
 
@@ -25,17 +24,8 @@ function getData() {
     purchaseOrder.RONo = '1' + code + stamp;
     purchaseOrder.PRNo = '2' + code + stamp;
     purchaseOrder.PONo = '3' + code + stamp;
-    purchaseOrder.ppn = 10;
-    purchaseOrder.deliveryDate = new Date();
-    purchaseOrder.termOfPayment = 'Tempo 2 bulan';
-    purchaseOrder.deliveryFeeByBuyer = true;
-    purchaseOrder.PODLNo = '';
-    purchaseOrder.description = 'SP1';
-    purchaseOrder.kurs = 13000;
-    purchaseOrder.currency = 'dollar';
-    purchaseOrder.supplierID = {};
 
-    var supplier = new Supplier({
+    var _supplier = new Supplier({
         code: '123',
         name: 'hot',
         description: 'hotline',
@@ -44,23 +34,11 @@ function getData() {
         local: true
     });
 
-    var template = new UoM_Template({
-        mainUnit: 'M',
-        mainValue: 1,
-        convertedUnit: 'M',
-        convertedValue: 1
-    });
-
-    var _units = [];
-    _units.push(template);
-
     var _uom = new UoM({
-        category: 'UoM-Unit-Test',
-        default: template,
-        units: _units
+        unit: `Meter`
     });
 
-    var product = new Product ({
+    var product = new Product({
         code: '22',
         name: 'hotline',
         price: 0,
@@ -69,22 +47,37 @@ function getData() {
         detail: {}
     });
 
-    var productValue = new PurchaseOrderItem ({
-        qty: 0,
-        price: 0,
+    var productValue = new PurchaseOrderItem({
+        quantity: 10,
+        price: 10000,
+        description: 'test desc',
+        dealQuantity: 10,
+        dealMeasurement: 'Meter',
+        defaultQuantity: 1000,
+        defaultMeasurementQuantity: 'Centimeter',
         product: product
     });
     
     var _products = [];
     _products.push(productValue);
 
-    purchaseOrder.supplier = supplier;
     purchaseOrder.items = _products;
     
     var _purchaseOrders = [];
     _purchaseOrders.push(purchaseOrder);
     
     purchaseOrderGroup.items = _purchaseOrders
+    purchaseOrderGroup.usePPn = true;
+    purchaseOrderGroup.usePPh = true;
+    purchaseOrderGroup.deliveryDate = new Date();
+    purchaseOrderGroup.termOfPayment = 'Cash';
+    purchaseOrderGroup.deliveryFeeByBuyer = true;
+    purchaseOrderGroup.description = 'SP1';
+    purchaseOrderGroup.currency = 'dollar';
+    purchaseOrderGroup.paymentDue = 2;
+    purchaseOrderGroup.supplierId = {};
+    purchaseOrderGroup.supplier = _supplier;
+    
     return purchaseOrderGroup;
 }
 

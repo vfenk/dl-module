@@ -31,7 +31,7 @@ module.exports = class PurchaseOrderManager {
                 })
         });
     }
-
+    
     update(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrder)
@@ -94,15 +94,7 @@ module.exports = class PurchaseOrderManager {
                     //     errors["PRNo"] = "Nomor PR tidak boleh kosong";
                     if (!valid.RefPONo || valid.RefPONo == '')
                         errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
-                    
-                    if (!valid.supplier._id || valid.supplier._id == '')
-                        errors["supplierId"] = "Nama Supplier tidak boleh kosong";
-                    if (!valid.deliveryDate || valid.deliveryDate == '')
-                        errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
-                    if (!valid.termOfPayment || valid.termOfPayment == '')
-                        errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
-                    if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
-                        errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
+                        
                     // if (_module) {
                     //     errors["code"] = "RO, PR, PO already exists";
                     // }
@@ -130,15 +122,6 @@ module.exports = class PurchaseOrderManager {
         
          if (!valid.RefPONo || valid.RefPONo == '')
             errors["RefPONo"] = "Nomor Referensi PO tidak boleh kosong";
-                    
-         if (!valid.supplier._id || valid.supplier._id == '')
-            errors["supplierId"] = "Nama Supplier tidak boleh kosong";
-         if (!valid.deliveryDate || valid.deliveryDate == '')
-            errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
-         if (!valid.termOfPayment || valid.termOfPayment == '')
-            errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
-         if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
-            errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
             
          return errors;
     }

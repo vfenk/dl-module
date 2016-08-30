@@ -7,9 +7,7 @@ var instanceManager = null;
 
 function getData() {
     var POGarmentJobOrderAccessories = require('dl-models').po.POGarmentJobOrderAccessories;
-    var Supplier = require('dl-models').core.Supplier;
     var Buyer = require('dl-models').core.Buyer;
-    var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Product = require('dl-models').core.Product;
@@ -20,54 +18,27 @@ function getData() {
 
     var poGarmentJobOrderAccessories = new POGarmentJobOrderAccessories();
     poGarmentJobOrderAccessories.RONo = '1' + code + stamp;
-    poGarmentJobOrderAccessories.RefPONo = '2' + code + stamp;
-    poGarmentJobOrderAccessories.PRNo = '3' + code + stamp;
-    poGarmentJobOrderAccessories.PONo = '3' + code + stamp;
-    poGarmentJobOrderAccessories.ppn = 10;
-    poGarmentJobOrderAccessories.deliveryDate = new Date();
-    poGarmentJobOrderAccessories.termOfPayment = 'Tempo 2 bulan';
-    poGarmentJobOrderAccessories.deliveryFeeByBuyer = true;
-    poGarmentJobOrderAccessories.PODLNo = '';
-    poGarmentJobOrderAccessories.description = 'SP1';
-    poGarmentJobOrderAccessories.supplierID = {};
-    poGarmentJobOrderAccessories.buyerID = {};
+    poGarmentJobOrderAccessories.PRNo = '2' + code + stamp;
+    poGarmentJobOrderAccessories.RefPONo = '3' + code + stamp;
     poGarmentJobOrderAccessories.article = "Test Article";
-
-    var supplier = new Supplier({
-        code: '123',
-        name: 'Supplier01',
-        contact: '0812....',
-        PIC:'Suppy',
-        address: 'test',
-        import: true
-    });
+    poGarmentJobOrderAccessories.PODLNo = '';
+    poGarmentJobOrderAccessories.buyerId = {};
+    poGarmentJobOrderAccessories.otherTest = 'test test test';
 
     var buyer = new Buyer({
+        _id:code,
         code: '123',
         name: 'Buyer01',
         contact: '0812....',
         address: 'test',
         tempo: 0
     });
-
-    var template = new UoM_Template({
-        mainUnit: 'M',
-        mainValue: 1,
-        convertedUnit: 'M',
-        convertedValue: 1
-    });
-
-    var _units = [];
-    _units.push(template);
-
+    
     var _uom = new UoM({
-        category: 'UoM-Unit-Test',
-        default: template,
-        units: _units
+        unit: `Meter`
     });
-
-
-    var product = new Product({
+    
+    var product = new Product("accessories", {
         code: '22',
         name: 'hotline',
         price: 0,
@@ -77,18 +48,57 @@ function getData() {
     });
 
     var productValue = new PurchaseOrderItem({
-        qty: 0,
-        price: 0,
+        quantity: 10,
+        price: 10000,
+        description : 'test desc',
+        dealQuantity : 10,
+        dealMeasurement : 'Meter',
+        defaultQuantity : 1000,
+        defaultMeasurementQuantity : 'Centimeter',
         product: product
     });
 
     var _products = [];
     _products.push(productValue);
-
-    poGarmentJobOrderAccessories.supplier = supplier;
+    
     poGarmentJobOrderAccessories.buyer = buyer;
     poGarmentJobOrderAccessories.items = _products;
+    
     return poGarmentJobOrderAccessories;
+}
+
+function getPODL(poJobOrderAccessories) {
+    
+    var PurchaseOrderGroup = require('dl-models').po.PurchaseOrderGroup;
+    var Supplier = require('dl-models').core.Supplier;
+    
+    var poGroupGarmentJobOrderAccessories = new PurchaseOrderGroup();
+    poGroupGarmentJobOrderAccessories.usePPn = true;
+    poGroupGarmentJobOrderAccessories.usePPh = true;
+    poGroupGarmentJobOrderAccessories.deliveryDate = new Date();
+    poGroupGarmentJobOrderAccessories.termOfPayment = 'Cash';
+    poGroupGarmentJobOrderAccessories.deliveryFeeByBuyer = true;
+    poGroupGarmentJobOrderAccessories.description = 'SP1';
+    poGroupGarmentJobOrderAccessories.currency = 'dollar';
+    poGroupGarmentJobOrderAccessories.paymentDue = 2;
+    poGroupGarmentJobOrderAccessories.supplierId = {};
+    
+    var _supplier = new Supplier({
+        code: '123',
+        name: 'Supplier01',
+        contact: '0812....',
+        PIC:'Suppy',
+        address: 'test',
+        import: true
+    });
+    
+    var _items = [];
+    _items.push(poJobOrderAccessories);
+    
+    poGroupGarmentJobOrderAccessories.supplier = _supplier;
+    poGroupGarmentJobOrderAccessories.items = _items;
+    
+    return poGroupGarmentJobOrderAccessories;
 }
 
 before('#00. connect db', function (done) {
@@ -146,9 +156,8 @@ var createdPODLId;
 it('#04. should success when create podl data', function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(result => {
-            var _poNumbers = []
-            _poNumbers.push(result.PONo)
-            instanceManager.createGroup(_poNumbers)
+            var data = getPODL(result)
+            instanceManager.createGroup(data)
                 .then(id => {
                     id.should.be.Object();
                     createdPODLId = id;
@@ -181,10 +190,7 @@ it(`#06. should success when update created data`, function (done) {
     createdData.RONo += '[updated]';
     createdData.PRNo += '[updated]';
     createdData.PONo += '[updated]';
-    createdData.RefPONo += '[updated]';
-    createdData.termOfPayment += '[updated]';
     createdData.PODLNo += '[updated]';
-    createdData.description += '[updated]';
 
     instanceManager.update(createdData)
         .then(id => {
@@ -202,10 +208,7 @@ it(`#07. should success when get updated data with id`, function (done) {
             data.RONo.should.equal(createdData.RONo);
             data.PRNo.should.equal(createdData.PRNo);
             data.PONo.should.equal(createdData.PONo);
-            data.RefPONo.should.equal(createdData.RefPONo);
-            data.termOfPayment.should.equal(createdData.termOfPayment);
             data.PODLNo.should.equal(createdData.PODLNo);
-            data.description.should.equal(createdData.description);
 
             done();
         })

@@ -7,8 +7,6 @@ var instanceManager = null;
 
 function getData() {
     var POGarmentSparepart = require('dl-models').po.POGarmentSparepart;
-    var Supplier = require('dl-models').core.Supplier;
-    var UoM_Template = require('dl-models').core.UoM_Template;
     var UoM = require('dl-models').core.UoM;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Product = require('dl-models').core.Product;
@@ -18,49 +16,16 @@ function getData() {
     var code = stamp.toString(36);
 
     var pOGarmentSparepart = new POGarmentSparepart();
-    pOGarmentSparepart.RONo = '1' + code + stamp;
+    pOGarmentSparepart.PRNo = '1' + code + stamp;
     pOGarmentSparepart.RefPONo = '2' + code + stamp;
-    pOGarmentSparepart.PRNo = '3' + code + stamp;
-    pOGarmentSparepart.ppn = 10;
-    pOGarmentSparepart.usePPn = true;
-    pOGarmentSparepart.deliveryDate = new Date();
-    pOGarmentSparepart.termOfPayment = 'Tempo 2 bulan';
-    pOGarmentSparepart.deliveryFeeByBuyer = true;
     pOGarmentSparepart.PODLNo = '';
-    pOGarmentSparepart.description = 'SP1';
-    pOGarmentSparepart.kurs = 13000;
-    pOGarmentSparepart.currency = 'dollar';
-    pOGarmentSparepart.supplierID = {};
-    pOGarmentSparepart.article = "Test Article";
-
-    var supplier = new Supplier({
-        _id: '123',
-        code: '123',
-        name: 'hot',
-        description: 'hotline',
-        phone: '0812....',
-        address: 'test',
-        local: true
-    });
-
-    var template = new UoM_Template({
-        mainUnit: 'M',
-        mainValue: 1,
-        convertedUnit: 'M',
-        convertedValue: 1
-    });
-
-    var _units = [];
-    _units.push(template);
+    pOGarmentSparepart.buyerId = {};
 
     var _uom = new UoM({
-        category: `UoM_Unit_Test[${code}]`,
-        default: template,
-        units: _units
+        unit: `Meter`
     });
 
-
-    var product = new Product({
+    var product = new Product("sparepart", {
         code: '22',
         name: 'hotline',
         price: 0,
@@ -70,18 +35,58 @@ function getData() {
     });
 
     var productValue = new PurchaseOrderItem({
-        qty: 0,
-        price: 0,
+        quantity: 10,
+        price: 10000,
+        description: 'test desc',
+        dealQuantity: 10,
+        dealMeasurement: 'Meter',
+        defaultQuantity: 1000,
+        defaultMeasurementQuantity: 'Centimeter',
         product: product
     });
 
     var _products = [];
     _products.push(productValue);
 
-    pOGarmentSparepart.supplier = supplier;
     pOGarmentSparepart.items = _products;
+
     return pOGarmentSparepart;
 }
+
+function getPODL(poGarmentSparepart) {
+
+    var PurchaseOrderGroup = require('dl-models').po.PurchaseOrderGroup;
+    var Supplier = require('dl-models').core.Supplier;
+
+    var poGroupGarmentSparepart = new PurchaseOrderGroup();
+    poGroupGarmentSparepart.usePPn = true;
+    poGroupGarmentSparepart.usePPh = true;
+    poGroupGarmentSparepart.deliveryDate = new Date();
+    poGroupGarmentSparepart.termOfPayment = 'Cash';
+    poGroupGarmentSparepart.deliveryFeeByBuyer = true;
+    poGroupGarmentSparepart.description = 'SP1';
+    poGroupGarmentSparepart.currency = 'dollar';
+    poGroupGarmentSparepart.paymentDue = 2;
+    poGroupGarmentSparepart.supplierId = {};
+
+    var _supplier = new Supplier({
+        code: '123',
+        name: 'Supplier01',
+        contact: '0812....',
+        PIC: 'Suppy',
+        address: 'test',
+        import: true
+    });
+
+    var _items = [];
+    _items.push(poGarmentSparepart);
+
+    poGroupGarmentSparepart.supplier = _supplier;
+    poGroupGarmentSparepart.items = _items;
+
+    return poGroupGarmentSparepart;
+}
+
 
 before('#00. connect db', function (done) {
     helper.getDb()
@@ -138,9 +143,8 @@ var createdPODLId;
 it('#04. should success when create podl data', function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(result => {
-            var _poNumbers = []
-            _poNumbers.push(result.PONo)
-            instanceManager.createGroup(_poNumbers)
+            var data = getPODL(result)
+            instanceManager.createGroup(data)
                 .then(id => {
                     id.should.be.Object();
                     createdPODLId = id;
@@ -170,13 +174,8 @@ it(`#05. should success when get created data with id`, function (done) {
 });
 
 it(`#06. should success when update created data`, function (done) {
-    createdData.RONo += '[updated]';
     createdData.PRNo += '[updated]';
-    createdData.PONo += '[updated]';
-    createdData.RefPONo += '[updated]';
-    createdData.termOfPayment += '[updated]';
     createdData.PODLNo += '[updated]';
-    createdData.description += '[updated]';
 
     instanceManager.update(createdData)
         .then(id => {
@@ -191,13 +190,8 @@ it(`#06. should success when update created data`, function (done) {
 it(`#07. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
-            data.RONo.should.equal(createdData.RONo);
             data.PRNo.should.equal(createdData.PRNo);
-            data.PONo.should.equal(createdData.PONo);
-            data.RefPONo.should.equal(createdData.RefPONo);
-            data.termOfPayment.should.equal(createdData.termOfPayment);
             data.PODLNo.should.equal(createdData.PODLNo);
-            data.description.should.equal(createdData.description);
 
             done();
         })
