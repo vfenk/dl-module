@@ -13,10 +13,10 @@ module.exports = class PurchaseOrderGroupManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        
+
         this.PurchaseOrderGroupCollection = this.db.use(map.po.collection.PurchaseOrderGroup);
     }
-    
+
     read(paging) {
         var _paging = Object.assign({
             page: 1,
@@ -61,7 +61,7 @@ module.exports = class PurchaseOrderGroupManager {
                 });
         });
     }
-    
+
     getById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -79,7 +79,7 @@ module.exports = class PurchaseOrderGroupManager {
                 });
         });
     }
-    
+
     getByIdOrDefault(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
@@ -97,7 +97,7 @@ module.exports = class PurchaseOrderGroupManager {
                 });
         });
     }
-    
+
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
             this.PurchaseOrderGroupCollection
@@ -111,7 +111,7 @@ module.exports = class PurchaseOrderGroupManager {
         })
     }
 
-     getSingleOrDefaultByQuery(query) {
+    getSingleOrDefaultByQuery(query) {
         return new Promise((resolve, reject) => {
             this.PurchaseOrderGroupCollection
                 .singleOrDefault(query)
@@ -124,7 +124,7 @@ module.exports = class PurchaseOrderGroupManager {
         })
     }
 
-     create(purchaseOrderGroup) {
+    create(purchaseOrderGroup) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrderGroup)
                 .then(validPurchaseOrderGroup => {
@@ -141,63 +141,47 @@ module.exports = class PurchaseOrderGroupManager {
                 })
         });
     }
-    
+
     _validate(purchaseOrderGroup) {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = new PurchaseOrderGroup(purchaseOrderGroup);
 
-            // 1. begin: Declare promises.
-            var getPurchaseOrderGroupPromise = this.PurchaseOrderGroupCollection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                        PODLNo: valid.PODLNo
-                    }]
-            });
+            if (!valid.PODLNo || valid.PODLNo == '')
+                errors["PODLNo"] = "Nomor PODL tidak boleh kosong";
+            if (!valid.supplier.name || valid.supplier.name == '')
+                errors["supplierId"] = "Nama Supplier tidak boleh kosong";
+            if (!valid.supplierId || valid.supplierId == '')
+                errors["supplierId"] = "Nama Supplier tidak terdaftar";
+            if (!valid.deliveryDate || valid.deliveryDate == '')
+                errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
+            if (!valid.termOfPayment || valid.termOfPayment == '')
+                errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
+            if (!valid.paymentDue || valid.paymentDue == '')
+                errors["paymentDue"] = "Tempo Pembayaran tidak boleh kosong";
+            if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
+                errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
+            if (valid.usePPn == undefined || valid.usePPn.toString() === '')
+                errors["usePPn"] = "Pengenaan PPn harus dipilih";
+            if (valid.usePPh == undefined || valid.usePPh.toString() === '')
+                errors["usePPh"] = "Pengenaan PPh harus dipilih";
 
-            // 1. end: Declare promises.
+            if (_module) {
+                errors["PODLNo"] = "PODL already exists";
+            }
 
-            // 2. begin: Validation.
-            Promise.all([getPurchaseOrderGroupPromise])
-                .then(results => {
-                    var _module = results[0];
+            if (valid.items.count == 0) {
+                errors["items"] = "Harus ada minimal 1 nomor PO"
+            }
 
-                    if (!valid.PODLNo || valid.PODLNo == '')
-                        errors["PODLNo"] = "Nomor PODL tidak boleh kosong";
-                    if (!valid.supplier.name || valid.supplier.name == '')
-                        errors["supplierId"] = "Nama Supplier tidak boleh kosong";
-                    if (!valid.supplierId || valid.supplierId == '')
-                        errors["supplierId"] = "Nama Supplier tidak terdaftar";
-                    if (!valid.deliveryDate || valid.deliveryDate == '')
-                        errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
-                    if (!valid.termOfPayment || valid.termOfPayment == '')
-                        errors["termOfPayment"] = "Pembayaran tidak boleh kosong";
-                    if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
-                        errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
-                        
-                    if (_module) {
-                        errors["PODLNo"] = "PODL already exists";
-                    }
-                    
-                    if (valid.items.count == 0) {
-                        errors["items"] = "Harus ada minimal 1 nomor PO"
-                    }
+            // 2c. begin: check if data has any error, reject if it has.
+            for (var prop in errors) {
+                var ValidationError = require('../../validation-error');
+                reject(new ValidationError('data podl does not pass validation', errors));
+            }
 
-                    // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in errors) {
-                        var ValidationError = require('../../validation-error');
-                        reject(new ValidationError('data podl does not pass validation', errors));
-                    }
-
-                    valid.stamp(this.user.username, 'manager');
-                    resolve(valid);
-                })
-                .catch(e => {
-                    reject(e);
-                })
+            valid.stamp(this.user.username, 'manager');
+            resolve(valid);
         });
     }
 }
