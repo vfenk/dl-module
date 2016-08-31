@@ -215,13 +215,21 @@ module.exports = class PurchaseOrderBaseManager {
         return new Promise((resolve, reject) => {
             this.purchaseOrderGroupManager.create(purchaseOrderGroup)
                 .then(id => {
+                    
+                    var tasks = [];
                     for (var data of purchaseOrderGroup.items) {
                         data.PODLNo = purchaseOrderGroup.PODLNo
-                        this.update(data)
+                        data.supplier = purchaseOrderGroup.supplier;
+                        data.supplierId = purchaseOrderGroup.supplierId;
+                        data.paymentDue = purchaseOrderGroup.paymentDue;
+                        data.currency = purchaseOrderGroup.currency;
+                        tasks.push(this.update(data));
                     }
-
-                    resolve(id);
                     
+                    Promise.all([tasks])
+                        .then(results => {
+                            resolve(id);
+                        })
                 })
                 .catch(e => {
                     reject(e);
