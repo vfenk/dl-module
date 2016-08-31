@@ -1,6 +1,6 @@
 'use strict'
 
-var PurchaseOrderBaseManager = require('../purchase-order-base-manager');
+var PurchaseOrderBaseManager = require('./purchase-order-base-manager');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var PurchaseOrder = DLModels.po.PurchaseOrder;

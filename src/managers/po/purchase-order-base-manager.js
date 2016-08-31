@@ -7,7 +7,7 @@ var map = DLModels.map;
 var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
 var PurchaseOrder = DLModels.po.PurchaseOrder;
 
-var generateCode = require('../utils/code-generator');
+var generateCode = require('../../utils/code-generator');
 
 module.exports = class PurchaseOrderBaseManager {
     constructor(db, user) {
@@ -17,10 +17,10 @@ module.exports = class PurchaseOrderBaseManager {
         this.poType = '';
         this.moduleId = '';
         
-        var PurchaseOrderGroupManager = require('./po/purchase-order-group-manager');
+        var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
         this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);
 
-        var PurchaseOrderManager = require("./po/purchase-order-manager");
+        var PurchaseOrderManager = require("./purchase-order-manager");
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
         
         this.PurchaseOrderCollection = this.db.use(map.po.collection.PurchaseOrder);
@@ -209,7 +209,7 @@ module.exports = class PurchaseOrderBaseManager {
     
     createGroup(purchaseOrderGroup) {
         // purchaseOrderGroup = new PurchaseOrderGroup(purchaseOrderGroup)
-        purchaseOrderGroup.PODLNo = generateCode('PODL/GA')
+        purchaseOrderGroup.PODLNo = generateCode('PO/DL')
         purchaseOrderGroup._type = this.poType
             
         return new Promise((resolve, reject) => {
