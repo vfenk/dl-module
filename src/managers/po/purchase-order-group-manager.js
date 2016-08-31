@@ -180,6 +180,8 @@ module.exports = class PurchaseOrderGroupManager {
                 reject(new ValidationError('data podl does not pass validation', errors));
             }
 
+            valid = new PurchaseOrderGroup(valid);
+            
             valid.stamp(this.user.username, 'manager');
             resolve(valid);
         });
