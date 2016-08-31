@@ -23,6 +23,9 @@ module.exports = {
             POGarmentFabric: require('./src/managers/po/po-garment-fabric-manager'),
             POTextileGeneralOtherATK: require('./src/managers/po/po-textile-general-other-atk-manager'),
             POGarmentJobOrderFabric: require('./src/managers/po/po-garment-job-order-fabric-manager')
-        }
+        },
+        suratJalan: {
+            SuratJalan: require("./src/manager/surat-jalan/surat-jalan-manager")
+        },
     }
 }
