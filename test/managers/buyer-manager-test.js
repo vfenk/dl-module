@@ -14,6 +14,7 @@ function getData() {
     buyer.code = code;
     buyer.name = `name[${code}]`;
     buyer.address = `Solo [${code}]`;
+    buyer.country = `Ireland [${code}]`;
     buyer.contact = `phone[${code}]`;
     buyer.tempo= 0;
     return buyer;
@@ -79,6 +80,7 @@ it(`#03. should success when update created data`, function (done) {
     createdData.code += '[updated]';
     createdData.name += '[updated]';
     createdData.address += '[updated]';
+    createdData.country += '[updated]';
     createdData.contact += '[updated]';
     createdData.tempo += '[updated]';
 
