@@ -149,12 +149,14 @@ module.exports = class PurchaseOrderGroupManager {
 
             if (!valid.PODLNo || valid.PODLNo == '')
                 errors["PODLNo"] = "Nomor PODL tidak boleh kosong";
+                
             if (valid.supplier) {
                 if (!valid.supplierId || valid.supplierId == '')
                     errors["supplierId"] = "Nama Supplier tidak terdaftar";
             }
             else 
                 errors["supplierId"] = "Nama Supplier tidak boleh kosong";
+                
             if (!valid.deliveryDate || valid.deliveryDate == '')
                 errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
             if (!valid.termOfPayment || valid.termOfPayment == '')
@@ -168,7 +170,7 @@ module.exports = class PurchaseOrderGroupManager {
             if (valid.usePPh == undefined || valid.usePPh.toString() === '')
                 errors["usePPh"] = "Pengenaan PPh harus dipilih";
 
-            if (valid.items) {
+            if (!valid.items) {
                 errors["items"] = "Harus ada minimal 1 nomor PO"
             }
 
