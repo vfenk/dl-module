@@ -232,6 +232,9 @@ module.exports = class BuyerManager {
                     if(Number.isInteger(parseInt(valid.tempo))===false)
                         errors["tempo"] = "Tempo harus berupa angka";
 
+                    if (!valid.country || valid.country == '')
+                        errors["country"] = "Silakan pilih salah satu negara";
+
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
