@@ -13,7 +13,7 @@ module.exports = class POGarmentAccessoriesManager extends PurchaseOrderBaseMana
     constructor(db, user) {
         super(db, user);
 
-        this.moduleId = 'POGA'
+        this.moduleId = 'PA'
         this.poType = map.po.type.POGarmentAccessories;
     }
 
@@ -130,9 +130,12 @@ module.exports = class POGarmentAccessoriesManager extends PurchaseOrderBaseMana
 
     create(purchaseOrder) {
         purchaseOrder = new POGarmentAccessories(purchaseOrder);
+        
+        var konveksi = purchaseOrder.RONo.substring(3,4);
+        var year = (new Date()).getFullYear().toString().substring(2,4);
 
         return new Promise((resolve, reject) => {
-            purchaseOrder.PONo = generateCode(this.moduleId)
+            purchaseOrder.PONo = `${this.moduleId}${year}${konveksi}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
                     this.purchaseOrderManager.create(validPurchaseOrder)
