@@ -2,7 +2,7 @@ var ObjectId = require('mongodb').ObjectId;
 var Hashids = require("hashids");
 var moment = require("moment");
 
-module.exports = function(moduleId) {
+module.exports = function() {
 
 
     var salt = new ObjectId().toString();
@@ -11,7 +11,8 @@ module.exports = function(moduleId) {
     var now = moment();
     var begin = now.clone().startOf("month");
     var diff = now.diff(begin);
-    var code = `${hashids.encode(diff)}/${moduleId}/${now.format("MM/YYYY")}`;
-
+//     var code = `${hashids.encode(diff)}/${moduleId}/${now.format("MM/YYYY")}`;
+    var code = `${hashids.encode(diff)}`;
+    
     return code;
 }

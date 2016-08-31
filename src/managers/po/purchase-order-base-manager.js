@@ -209,7 +209,11 @@ module.exports = class PurchaseOrderBaseManager {
     
     createGroup(purchaseOrderGroup) {
         // purchaseOrderGroup = new PurchaseOrderGroup(purchaseOrderGroup)
-        purchaseOrderGroup.PODLNo = generateCode('PO/DL')
+        
+        var year = (new Date()).getFullYear().toString().substring(2,4);
+        var moduleId = 'PO/DL';
+        
+        purchaseOrderGroup.PODLNo = `${moduleId}/${year}${generateCode()}`;
         purchaseOrderGroup._type = this.poType
             
         return new Promise((resolve, reject) => {

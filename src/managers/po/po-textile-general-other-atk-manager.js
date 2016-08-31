@@ -114,9 +114,12 @@ module.exports = class POTextileGeneralOtherTKManager extends PurchaseOrderBaseM
 
     create(purchaseOrder) {
         purchaseOrder = new POTekstilGeneralOtherATK(purchaseOrder);
-        return new Promise((resolve, reject) => {
+        
+        var konveksi = purchaseOrder.RONo.substring(3,4);
+        var year = (new Date()).getFullYear().toString().substring(2,4);
 
-            purchaseOrder.PONo = generateCode(this.moduleId)
+        return new Promise((resolve, reject) => {
+            purchaseOrder.PONo = `${this.moduleId}${year}${konveksi}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
                     this.purchaseOrderManager.create(validPurchaseOrder)

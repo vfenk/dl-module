@@ -13,7 +13,7 @@ module.exports = class POGarmentJobOrderFabricManager extends PurchaseOrderBaseM
     constructor(db, user) {
         super(db, user);
 
-        this.moduleId = 'POJOF'
+        this.moduleId = 'PM'
         this.poType = map.po.type.POGarmentJobOrderFabric;
     }
     
@@ -130,9 +130,13 @@ module.exports = class POGarmentJobOrderFabricManager extends PurchaseOrderBaseM
 
     create(purchaseOrder) {
         purchaseOrder = new POGarmentJobOrderFabric(purchaseOrder);
+        
+        var konveksi = purchaseOrder.RONo.substring(3,4);
+        var year = (new Date()).getFullYear().toString().substring(2,4);
 
         return new Promise((resolve, reject) => {
-            purchaseOrder.PONo = generateCode(this.moduleId);
+            purchaseOrder.PONo = `${this.moduleId}${year}${konveksi}${generateCode()}`;
+            
             this._validate(purchaseOrder)
                 .then(validPurchaseOrderc => {
                     this.purchaseOrderManager.create(validPurchaseOrderc)
