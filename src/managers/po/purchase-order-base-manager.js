@@ -7,8 +7,6 @@ var map = DLModels.map;
 var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
 var PurchaseOrder = DLModels.po.PurchaseOrder;
 
-var generateCode = require('../../utils/code-generator');
-
 module.exports = class PurchaseOrderBaseManager {
     constructor(db, user) {
         this.db = db;
@@ -16,6 +14,7 @@ module.exports = class PurchaseOrderBaseManager {
         
         this.poType = '';
         this.moduleId = '';
+        this.year = (new Date()).getFullYear().toString().substring(2,4);
         
         var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
         this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);
@@ -204,40 +203,6 @@ module.exports = class PurchaseOrderBaseManager {
                 .catch(e => {
                     reject(e);
                 });
-        });
-    }
-    
-    createGroup(purchaseOrderGroup) {
-        // purchaseOrderGroup = new PurchaseOrderGroup(purchaseOrderGroup)
-        
-        var year = (new Date()).getFullYear().toString().substring(2,4);
-        var moduleId = 'PO/DL';
-        
-        purchaseOrderGroup.PODLNo = `${moduleId}/${year}${generateCode()}`;
-        purchaseOrderGroup._type = this.poType
-            
-        return new Promise((resolve, reject) => {
-            this.purchaseOrderGroupManager.create(purchaseOrderGroup)
-                .then(id => {
-                    
-                    var tasks = [];
-                    for (var data of purchaseOrderGroup.items) {
-                        data.PODLNo = purchaseOrderGroup.PODLNo
-                        data.supplier = purchaseOrderGroup.supplier;
-                        data.supplierId = purchaseOrderGroup.supplierId;
-                        data.paymentDue = purchaseOrderGroup.paymentDue;
-                        data.currency = purchaseOrderGroup.currency;
-                        tasks.push(this.update(data));
-                    }
-                    
-                    Promise.all([tasks])
-                        .then(results => {
-                            resolve(id);
-                        })
-                })
-                .catch(e => {
-                    reject(e);
-                })
         });
     }
     

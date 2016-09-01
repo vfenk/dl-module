@@ -132,10 +132,9 @@ module.exports = class POGarmentFabricManager extends PurchaseOrderBaseManager {
         purchaseOrder = new POGarmentFabric(purchaseOrder);
         
         var konveksi = purchaseOrder.RONo.substring(3,4);
-        var year = (new Date()).getFullYear().toString().substring(2,4);
 
         return new Promise((resolve, reject) => {
-            purchaseOrder.PONo = `${this.moduleId}${year}${konveksi}${generateCode()}`;
+            purchaseOrder.PONo = `${this.moduleId}${this.year}${konveksi}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
                     this.purchaseOrderManager.create(validPurchaseOrder)
@@ -150,6 +149,43 @@ module.exports = class POGarmentFabricManager extends PurchaseOrderBaseManager {
                     reject(e);
                 })
 
+        });
+    }
+    
+    createGroup(purchaseOrderGroup) {
+        
+        purchaseOrderGroup.PODLNo = `PO/DL/${this.year}${generateCode()}`;
+        purchaseOrderGroup._type = this.poType
+            
+        return new Promise((resolve, reject) => {
+            this.purchaseOrderGroupManager.create(purchaseOrderGroup)
+                .then(id => {
+                    
+                    var tasks = [];
+                    for (var data of purchaseOrderGroup.items) {
+                        data.PODLNo = purchaseOrderGroup.PODLNo
+                        data.supplier = purchaseOrderGroup.supplier;
+                        data.supplierId = purchaseOrderGroup.supplierId;
+                        data.paymentDue = purchaseOrderGroup.paymentDue;
+                        data.currency = purchaseOrderGroup.currency;
+                        data.usePPn = purchaseOrderGroup.usePPn;
+                        data.usePPh = purchaseOrderGroup.usePPh;
+                        data.deliveryDate = purchaseOrderGroup.deliveryDate;
+                        data.deliveryFeeByBuyer = purchaseOrderGroup.deliveryFeeByBuyer;
+                        data.standardQuality = purchaseOrderGroup.standardQuality;
+                        data.otherTest = purchaseOrderGroup.otherTest;
+                        
+                        tasks.push(this.update(data));
+                    }
+                    
+                    Promise.all([tasks])
+                        .then(results => {
+                            resolve(id);
+                        })
+                })
+                .catch(e => {
+                    reject(e);
+                })
         });
     }
 }
