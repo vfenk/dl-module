@@ -151,4 +151,36 @@ module.exports = class POGarmentAccessoriesManager extends PurchaseOrderBaseMana
                 })
         });
     }
+    
+    createGroup(purchaseOrderGroup) {
+        
+        purchaseOrderGroup.PODLNo = `PO/DL/${year}${generateCode()}`;
+        purchaseOrderGroup._type = this.poType
+            
+        return new Promise((resolve, reject) => {
+            this.purchaseOrderGroupManager.create(purchaseOrderGroup)
+                .then(id => {
+                    
+                    var tasks = [];
+                    for (var data of purchaseOrderGroup.items) {
+                        data.PODLNo = purchaseOrderGroup.PODLNo
+                        data.supplier = purchaseOrderGroup.supplier;
+                        data.supplierId = purchaseOrderGroup.supplierId;
+                        data.paymentDue = purchaseOrderGroup.paymentDue;
+                        data.currency = purchaseOrderGroup.currency;
+                        data.otherTest = purchaseOrderGroup.otherTest;
+                        
+                        tasks.push(this.update(data));
+                    }
+                    
+                    Promise.all([tasks])
+                        .then(results => {
+                            resolve(id);
+                        })
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        });
+    }
 }
