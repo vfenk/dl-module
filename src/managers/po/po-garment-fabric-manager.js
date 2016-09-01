@@ -169,6 +169,10 @@ module.exports = class POGarmentFabricManager extends PurchaseOrderBaseManager {
                         data.supplierId = purchaseOrderGroup.supplierId;
                         data.paymentDue = purchaseOrderGroup.paymentDue;
                         data.currency = purchaseOrderGroup.currency;
+                        data.usePPn = purchaseOrderGroup.usePPn;
+                        data.usePPh = purchaseOrderGroup.usePPh;
+                        data.deliveryDate = purchaseOrderGroup.deliveryDate;
+                        data.deliveryFeeByBuyer = purchaseOrderGroup.deliveryFeeByBuyer;
                         data.standardQuality = purchaseOrderGroup.standardQuality;
                         data.otherTest = purchaseOrderGroup.otherTest;
                         

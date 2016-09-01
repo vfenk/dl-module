@@ -169,6 +169,10 @@ module.exports = class POGarmentJobOrderAccessoriesManager extends PurchaseOrder
                         data.supplierId = purchaseOrderGroup.supplierId;
                         data.paymentDue = purchaseOrderGroup.paymentDue;
                         data.currency = purchaseOrderGroup.currency;
+                        data.usePPn = purchaseOrderGroup.usePPn;
+                        data.usePPh = purchaseOrderGroup.usePPh;
+                        data.deliveryDate = purchaseOrderGroup.deliveryDate;
+                        data.deliveryFeeByBuyer = purchaseOrderGroup.deliveryFeeByBuyer;
                         data.otherTest = purchaseOrderGroup.otherTest;
                         
                         tasks.push(this.update(data));
