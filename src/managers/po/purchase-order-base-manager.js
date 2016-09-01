@@ -14,6 +14,7 @@ module.exports = class PurchaseOrderBaseManager {
         
         this.poType = '';
         this.moduleId = '';
+        this.year = (new Date()).getFullYear().toString().substring(2,4);
         
         var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
         this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);

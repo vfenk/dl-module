@@ -8,8 +8,6 @@ var PurchaseOrder = DLModels.po.PurchaseOrder;
 var generateCode = require('../../utils/code-generator');
 
 var POGarmentJobOrderFabric = DLModels.po.POGarmentJobOrderFabric;
-        
-var year = (new Date()).getFullYear().toString().substring(2,4);
 
 module.exports = class POGarmentJobOrderFabricManager extends PurchaseOrderBaseManager {
     constructor(db, user) {
@@ -136,7 +134,7 @@ module.exports = class POGarmentJobOrderFabricManager extends PurchaseOrderBaseM
         var konveksi = purchaseOrder.RONo.substring(3,4);
 
         return new Promise((resolve, reject) => {
-            purchaseOrder.PONo = `${this.moduleId}${year}${konveksi}${generateCode()}`;
+            purchaseOrder.PONo = `${this.moduleId}${this.year}${konveksi}${generateCode()}`;
             
             this._validate(purchaseOrder)
                 .then(validPurchaseOrderc => {
@@ -157,7 +155,7 @@ module.exports = class POGarmentJobOrderFabricManager extends PurchaseOrderBaseM
     
     createGroup(purchaseOrderGroup) {
         
-        purchaseOrderGroup.PODLNo = `PO/DL/${year}${generateCode()}`;
+        purchaseOrderGroup.PODLNo = `PO/DL/${this.year}${generateCode()}`;
         purchaseOrderGroup._type = this.poType
             
         return new Promise((resolve, reject) => {

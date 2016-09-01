@@ -125,10 +125,9 @@ module.exports = class POTextileJobOrderManager extends PurchaseOrderBaseManager
         purchaseOrder = new POTextileJobOrder(purchaseOrder);
         
         var konveksi = purchaseOrder.RONo.substring(3,4);
-        var year = (new Date()).getFullYear().toString().substring(2,4);
 
         return new Promise((resolve, reject) => {
-            purchaseOrder.PONo = `${this.moduleId}${year}${konveksi}${generateCode()}`;
+            purchaseOrder.PONo = `${this.moduleId}${this.year}${konveksi}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
                     this.purchaseOrderManager.create(validPurchaseOrder)
@@ -148,7 +147,7 @@ module.exports = class POTextileJobOrderManager extends PurchaseOrderBaseManager
     
     createGroup(purchaseOrderGroup) {
         
-        purchaseOrderGroup.PODLNo = `PO/DL/${year}${generateCode()}`;
+        purchaseOrderGroup.PODLNo = `PO/DL/${this.year}${generateCode()}`;
         purchaseOrderGroup._type = this.poType
             
         return new Promise((resolve, reject) => {
