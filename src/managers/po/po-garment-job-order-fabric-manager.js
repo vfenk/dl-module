@@ -166,17 +166,16 @@ module.exports = class POGarmentJobOrderFabricManager extends PurchaseOrderBaseM
                     this.purchaseOrderManager.create(validPurchaseOrder)
                         .then(id => {
                             this.getByPONo(validPurchaseOrder.linkedPONo).then(po => {
-                                    
-                                // for (var index in po.items) {
-                                //     po.items[index].dealQuantity = po.items[index].dealQuantity - validPurchaseOrder.items[index].dealQuantity;
-                                //     po.items[index].defaultQuantity = po.items[index].defaultQuantity - validPurchaseOrder.items[index].defaultQuantity;
-                                // }
                                 
                                 for (var item of validPurchaseOrder.items) {
-                                    var index = po.items.indexOf(item);
-                                    
-                                    po.items[index].dealQuantity = po.items[index].dealQuantity - item.dealQuantity
-                                    po.items[index].defaultQuantity = po.items[index].defaultQuantity - item.defaultQuantity
+                                    for (var product of po.items) {
+                                        if (item.product.code == product.product.code) {
+                                            product.dealQuantity = product.dealQuantity - item.dealQuantity
+                                            product.defaultQuantity = product.defaultQuantity - item.defaultQuantity
+                                            
+                                            break;
+                                        }
+                                    } 
                                 }
                                 
                                 this.update(po)
