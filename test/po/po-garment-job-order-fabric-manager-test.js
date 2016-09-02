@@ -26,12 +26,12 @@ function getData() {
 
     var buyer = new Buyer({
         _id: '123',
-        name : `Buyer [${code}]`,
-        address : `Solo [${code}]`,
-        contact : `phone[${code}]`,
-        tempo : 0
+        name: `Buyer [${code}]`,
+        address: `Solo [${code}]`,
+        contact: `phone[${code}]`,
+        tempo: 0
     });
-    
+
     var _uom = new UoM({
         unit: `Meter`
     });
@@ -46,31 +46,52 @@ function getData() {
     });
 
     var productValue = new PurchaseOrderItem({
-        quantity: 10,
         price: 10000,
-        description : 'test desc',
-        dealQuantity : 10,
-        dealMeasurement : 'Meter',
-        defaultQuantity : 1000,
-        defaultMeasurementQuantity : 'Centimeter',
+        description: 'test desc',
+        dealQuantity: 10,
+        dealMeasurement: 'Meter',
+        defaultQuantity: 1000,
+        defaultMeasurementQuantity: 'Centimeter',
         product: product
     });
 
     var _products = [];
     _products.push(productValue);
-    
+
     poGarmentJobOrderFabric.buyer = buyer;
     poGarmentJobOrderFabric.items = _products;
-    
+
     return poGarmentJobOrderFabric;
 }
 
-function getPODL(poJobOrderFabric) {
+function updateForSplit(purchaseOrder) {
+
+    var newPurchaseOrder = {};
+    newPurchaseOrder.iso = purchaseOrder.iso;
+    newPurchaseOrder.RONo = purchaseOrder.RONo;
+    newPurchaseOrder.PRNo = purchaseOrder.PRNo;
+    newPurchaseOrder.RefPONo = purchaseOrder.PRNo;
+    newPurchaseOrder.linkedPONo = purchaseOrder.PONo;
+    newPurchaseOrder.article = purchaseOrder.article;
+    newPurchaseOrder.buyerId = purchaseOrder.buyerId;
+    newPurchaseOrder.buyer = purchaseOrder.buyer;
+    newPurchaseOrder.shipmentDate = purchaseOrder.shipmentDate;
+    newPurchaseOrder.items = purchaseOrder.items;
     
+    for(var item of newPurchaseOrder.items) {
+        item.dealQuantity = 1;
+        item.defaultQuantity = 10;
+    }
+
+    return newPurchaseOrder;
+}
+
+function getPODL(poJobOrderFabric) {
+
     var PurchaseOrderGroup = require('dl-models').po.PurchaseOrderGroup;
     var Supplier = require('dl-models').core.Supplier;
     var StandardQualityTestPercentage = require('dl-models').po.StandardQualityTestPercentage;
-    
+
     var poGroupGarmentJobOrderFabric = new PurchaseOrderGroup();
     poGroupGarmentJobOrderFabric.usePPn = true;
     poGroupGarmentJobOrderFabric.usePPh = true;
@@ -82,32 +103,32 @@ function getPODL(poJobOrderFabric) {
     poGroupGarmentJobOrderFabric.paymentDue = 2;
     poGroupGarmentJobOrderFabric.supplierId = {};
     poGroupGarmentJobOrderFabric.otherTest = 'test test test';
-    
+
     var _supplier = new Supplier({
         code: '123',
         name: 'Supplier01',
         contact: '0812....',
-        PIC:'Suppy',
+        PIC: 'Suppy',
         address: 'test',
         import: true
     });
-    
+
     var _items = [];
     _items.push(poJobOrderFabric);
-    
+
     var _stdQtyTest = new StandardQualityTestPercentage({
-        shrinkage : 10,
-        wetRubbing : 20,
-        dryRubbing : 30,
-        washing : 40,
-        darkPrespiration : 50,
-        lightMedPrespiration : 60,
+        shrinkage: 10,
+        wetRubbing: 20,
+        dryRubbing: 30,
+        washing: 40,
+        darkPrespiration: 50,
+        lightMedPrespiration: 60,
     })
-    
+
     poGroupGarmentJobOrderFabric.supplier = _supplier;
     poGroupGarmentJobOrderFabric.items = _items;
     poGroupGarmentJobOrderFabric.standardQuality = _stdQtyTest;
-    
+
     return poGroupGarmentJobOrderFabric;
 }
 
@@ -163,8 +184,27 @@ it('#03. should success when create new data', function (done) {
         })
 });
 
+it('#04. should success when split po', function (done) {
+    instanceManager.getSingleByQuery({ _id: createdId })
+        .then(result => {
+            var data = updateForSplit(result);
+            instanceManager.split(data)
+                .then(id => {
+                    id.should.be.Object();
+                    done();
+                })
+                .catch(e => {
+                    done(e);
+                })
+
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
 var createdPODLId;
-it('#04. should success when create podl data', function (done) {
+it('#05. should success when create podl data', function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(result => {
             var data = getPODL(result)
@@ -185,7 +225,7 @@ it('#04. should success when create podl data', function (done) {
 });
 
 var createdData;
-it(`#05. should success when get created data with id`, function (done) {
+it(`#06. should success when get created data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             data.should.instanceof(Object);
@@ -197,7 +237,7 @@ it(`#05. should success when get created data with id`, function (done) {
         })
 });
 
-it(`#06. should success when update created data`, function (done) {
+it(`#07. should success when update created data`, function (done) {
     createdData.RONo += '[updated]';
 
     instanceManager.update(createdData)
@@ -210,7 +250,7 @@ it(`#06. should success when update created data`, function (done) {
         });
 });
 
-it(`#07. should success when get updated data with id`, function (done) {
+it(`#08. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             data.RONo.should.equal(createdData.RONo);

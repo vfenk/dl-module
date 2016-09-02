@@ -177,7 +177,7 @@ module.exports = class POGarmentJobOrderAccessoriesManager extends PurchaseOrder
                         tasks.push(this.update(data));
                     }
                     
-                    Promise.all([tasks])
+                    Promise.all(tasks)
                         .then(results => {
                             resolve(id);
                         })
@@ -185,6 +185,43 @@ module.exports = class POGarmentJobOrderAccessoriesManager extends PurchaseOrder
                 .catch(e => {
                     reject(e);
                 })
+        });
+    }
+    
+    split(purchaseOrder) {
+        purchaseOrder = new POGarmentJobOrderAccessories(purchaseOrder);
+        
+        var konveksi = purchaseOrder.RONo.substring(3,4);
+
+        return new Promise((resolve, reject) => {
+            purchaseOrder.PONo = `${this.moduleId}${this.year}${konveksi}${generateCode()}`;
+            
+            this._validate(purchaseOrder)
+                .then(validPurchaseOrder => {
+                    this.purchaseOrderManager.create(validPurchaseOrder)
+                        .then(id => {
+                            this.getByPONo(validPurchaseOrder.linkedPONo).then(po => {
+                                    
+                                for (var index in po.items) {
+                                    po.items[index].dealQuantity = po.items[index].dealQuantity - validPurchaseOrder.items[index].dealQuantity;
+                                    po.items[index].defaultQuantity = po.items[index].defaultQuantity - validPurchaseOrder.items[index].defaultQuantity;
+                                }
+                                
+                                this.update(po)
+                                    .then(results => {
+                                        console.log(8);
+                                        resolve(id);
+                                    })
+                            })
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                })
+
         });
     }
 

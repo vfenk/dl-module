@@ -67,10 +67,13 @@ module.exports = class PurchaseOrderBaseManager {
     
     update(purchaseOrder) {
         return new Promise((resolve, reject) => {
+            console.log(purchaseOrder);
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
+                console.log(6);
                     this.purchaseOrderManager.update(validPurchaseOrder)
                         .then(id => {
+                            console.log(7);
                             resolve(id);
                         })
                         .catch(e => {
