@@ -185,10 +185,16 @@ module.exports = class POGarmentGeneralManager extends PurchaseOrderBaseManager 
                     this.purchaseOrderManager.create(validPurchaseOrder)
                         .then(id => {
                             this.getByPONo(validPurchaseOrder.linkedPONo).then(po => {
-                                    
-                                for (var index in po.items) {
-                                    po.items[index].dealQuantity = po.items[index].dealQuantity - validPurchaseOrder.items[index].dealQuantity;
-                                    po.items[index].defaultQuantity = po.items[index].defaultQuantity - validPurchaseOrder.items[index].defaultQuantity;
+                                
+                                for (var item of validPurchaseOrder.items) {
+                                    for (var product of po.items) {
+                                        if (item.product.code == product.product.code) {
+                                            product.dealQuantity = product.dealQuantity - item.dealQuantity
+                                            product.defaultQuantity = product.defaultQuantity - item.defaultQuantity
+                                            
+                                            break;
+                                        }
+                                    } 
                                 }
                                 
                                 this.update(po)
