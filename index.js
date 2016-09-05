@@ -25,7 +25,7 @@ module.exports = {
             POGarmentJobOrderFabric: require('./src/managers/po/po-garment-job-order-fabric-manager')
         },
         suratJalan: {
-            SuratJalan: require("./src/manager/surat-jalan/surat-jalan-manager")
+            SuratJalan: require("./src/managers/surat-jalan/surat-jalan-manager")
         },
     }
 }
