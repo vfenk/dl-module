@@ -72,8 +72,8 @@ function getData() {
     suratJalan.SJDate= new Date();
     suratJalan.productArriveDate= new Date();
     suratJalan.supplier=_supplier;
-    suratJalan.deliveryNo='Lokal';
-    suratJalan.deliveryType='123456789';
+    suratJalan.deliveryType='Lokal';
+    suratJalan.deliveryNo='123456789';
     //suratJalan.isPosted=false;
     suratJalan.items=_POItems;
     
