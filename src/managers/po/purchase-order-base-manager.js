@@ -7,8 +7,6 @@ var map = DLModels.map;
 var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
 var PurchaseOrder = DLModels.po.PurchaseOrder;
 
-var generateCode = require('../utils/code-generator');
-
 module.exports = class PurchaseOrderBaseManager {
     constructor(db, user) {
         this.db = db;
@@ -16,11 +14,12 @@ module.exports = class PurchaseOrderBaseManager {
         
         this.poType = '';
         this.moduleId = '';
+        this.year = (new Date()).getFullYear().toString().substring(2,4);
         
-        var PurchaseOrderGroupManager = require('./po/purchase-order-group-manager');
+        var PurchaseOrderGroupManager = require('./purchase-order-group-manager');
         this.purchaseOrderGroupManager = new PurchaseOrderGroupManager(db, user);
 
-        var PurchaseOrderManager = require("./po/purchase-order-manager");
+        var PurchaseOrderManager = require("./purchase-order-manager");
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
         
         this.PurchaseOrderCollection = this.db.use(map.po.collection.PurchaseOrder);
@@ -68,10 +67,13 @@ module.exports = class PurchaseOrderBaseManager {
     
     update(purchaseOrder) {
         return new Promise((resolve, reject) => {
+            console.log(purchaseOrder);
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
+                console.log(6);
                     this.purchaseOrderManager.update(validPurchaseOrder)
                         .then(id => {
+                            console.log(7);
                             resolve(id);
                         })
                         .catch(e => {
@@ -204,28 +206,6 @@ module.exports = class PurchaseOrderBaseManager {
                 .catch(e => {
                     reject(e);
                 });
-        });
-    }
-    
-    createGroup(purchaseOrderGroup) {
-        // purchaseOrderGroup = new PurchaseOrderGroup(purchaseOrderGroup)
-        purchaseOrderGroup.PODLNo = generateCode('PODL/GA')
-        purchaseOrderGroup._type = this.poType
-            
-        return new Promise((resolve, reject) => {
-            this.purchaseOrderGroupManager.create(purchaseOrderGroup)
-                .then(id => {
-                    for (var data of purchaseOrderGroup.items) {
-                        data.PODLNo = purchaseOrderGroup.PODLNo
-                        this.update(data)
-                    }
-
-                    resolve(id);
-                    
-                })
-                .catch(e => {
-                    reject(e);
-                })
         });
     }
     

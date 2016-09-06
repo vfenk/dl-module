@@ -101,6 +101,28 @@ function getPODL(pOTextileJobOrder) {
     return poGroupTextileJobOrder;
 }
 
+function updateForSplit(purchaseOrder) {
+
+    var newPurchaseOrder = {};
+    newPurchaseOrder.iso = purchaseOrder.iso;
+    newPurchaseOrder.RONo = purchaseOrder.RONo;
+    newPurchaseOrder.PRNo = purchaseOrder.PRNo;
+    newPurchaseOrder.RefPONo = purchaseOrder.PRNo;
+    newPurchaseOrder.linkedPONo = purchaseOrder.PONo;
+    newPurchaseOrder.article = purchaseOrder.article;
+    newPurchaseOrder.buyerId = purchaseOrder.buyerId;
+    newPurchaseOrder.buyer = purchaseOrder.buyer;
+    newPurchaseOrder.shipmentDate = purchaseOrder.shipmentDate;
+    newPurchaseOrder.items = purchaseOrder.items;
+    
+    for(var item of newPurchaseOrder.items) {
+        item.dealQuantity = 1;
+        item.defaultQuantity = 10;
+    }
+
+    return newPurchaseOrder;
+}
+
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
@@ -152,8 +174,27 @@ it('#03. should success when create new data', function (done) {
         })
 });
 
+it('#04. should success when split po', function (done) {
+    instanceManager.getSingleByQuery({ _id: createdId })
+        .then(result => {
+            var data = updateForSplit(result);
+            instanceManager.split(data)
+                .then(id => {
+                    id.should.be.Object();
+                    done();
+                })
+                .catch(e => {
+                    done(e);
+                })
+
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
 var createdPODLId;
-it('#04. should success when create podl data', function (done) {
+it('#05. should success when create podl data', function (done) {
      instanceManager.getSingleByQuery({ _id: createdId })
         .then(result => {
             var data = getPODL(result)
@@ -174,7 +215,7 @@ it('#04. should success when create podl data', function (done) {
 });
 
 var createdData;
-it(`#05. should success when get created data with id`, function (done) {
+it(`#06. should success when get created data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             // validate.product(data);
@@ -187,7 +228,7 @@ it(`#05. should success when get created data with id`, function (done) {
         })
 });
 
-it(`#06. should success when update created data`, function (done) {
+it(`#07. should success when update created data`, function (done) {
     createdData.RONo += '[updated]';
     createdData.PRNo += '[updated]';
 
@@ -201,7 +242,7 @@ it(`#06. should success when update created data`, function (done) {
         });
 });
 
-it(`#07. should success when get updated data with id`, function (done) {
+it(`#08. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             data.RONo.should.equal(createdData.RONo);
@@ -218,7 +259,7 @@ it(`#07. should success when get updated data with id`, function (done) {
 });
 
 
-// it(`#08. should success when delete data`, function (done) {
+// it(`#09. should success when delete data`, function (done) {
 //     instanceManager.delete(createdData)
 //         .then(id => {
 //             createdId.toString().should.equal(id.toString());
@@ -229,7 +270,7 @@ it(`#07. should success when get updated data with id`, function (done) {
 //         });
 // });
 
-// it(`#09. should _deleted=true`, function (done) {
+// it(`#10. should _deleted=true`, function (done) {
 //     instanceManager.getSingleByQuery({ _id: createdId })
 //         .then(data => {
 //             // validate.product(data);

@@ -1,6 +1,6 @@
 'use strict'
 
-var PurchaseOrderBaseManager = require('../purchase-order-base-manager');
+var PurchaseOrderBaseManager = require('./purchase-order-base-manager');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var PurchaseOrder = DLModels.po.PurchaseOrder;
@@ -13,7 +13,7 @@ module.exports = class POGarmentJobOrderAccessoriesManager extends PurchaseOrder
     constructor(db, user) {
         super(db, user);
 
-        this.moduleId = 'POJOA'
+        this.moduleId = 'PA'
         this.poType = map.po.type.POGarmentJobOrderAccessories;
     }
     
@@ -131,9 +131,11 @@ module.exports = class POGarmentJobOrderAccessoriesManager extends PurchaseOrder
 
     create(purchaseOrder) {
         purchaseOrder = new POGarmentJobOrderAccessories(purchaseOrder);
+        
+        var konveksi = purchaseOrder.RONo.substring(3,4);
 
         return new Promise((resolve, reject) => {
-            purchaseOrder.PONo = generateCode(this.moduleId);
+            purchaseOrder.PONo = `${this.moduleId}${this.year}${konveksi}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
                     this.purchaseOrderManager.create(validPurchaseOrder)
@@ -148,6 +150,85 @@ module.exports = class POGarmentJobOrderAccessoriesManager extends PurchaseOrder
                     reject(e);
                 })
         })
+    }
+    
+    createGroup(purchaseOrderGroup) {
+        
+        purchaseOrderGroup.PODLNo = `PO/DL/${this.year}${generateCode()}`;
+        purchaseOrderGroup._type = this.poType
+            
+        return new Promise((resolve, reject) => {
+            this.purchaseOrderGroupManager.create(purchaseOrderGroup)
+                .then(id => {
+                    
+                    var tasks = [];
+                    for (var data of purchaseOrderGroup.items) {
+                        data.PODLNo = purchaseOrderGroup.PODLNo
+                        data.supplier = purchaseOrderGroup.supplier;
+                        data.supplierId = purchaseOrderGroup.supplierId;
+                        data.paymentDue = purchaseOrderGroup.paymentDue;
+                        data.currency = purchaseOrderGroup.currency;
+                        data.usePPn = purchaseOrderGroup.usePPn;
+                        data.usePPh = purchaseOrderGroup.usePPh;
+                        data.deliveryDate = purchaseOrderGroup.deliveryDate;
+                        data.deliveryFeeByBuyer = purchaseOrderGroup.deliveryFeeByBuyer;
+                        data.otherTest = purchaseOrderGroup.otherTest;
+                        
+                        tasks.push(this.update(data));
+                    }
+                    
+                    Promise.all(tasks)
+                        .then(results => {
+                            resolve(id);
+                        })
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        });
+    }
+    
+    split(purchaseOrder) {
+        purchaseOrder = new POGarmentJobOrderAccessories(purchaseOrder);
+        
+        var konveksi = purchaseOrder.RONo.substring(3,4);
+
+        return new Promise((resolve, reject) => {
+            purchaseOrder.PONo = `${this.moduleId}${this.year}${konveksi}${generateCode()}`;
+            
+            this._validate(purchaseOrder)
+                .then(validPurchaseOrder => {
+                    this.purchaseOrderManager.create(validPurchaseOrder)
+                        .then(id => {
+                            this.getByPONo(validPurchaseOrder.linkedPONo).then(po => {
+                                
+                                for (var item of validPurchaseOrder.items) {
+                                    for (var product of po.items) {
+                                        if (item.product.code == product.product.code) {
+                                            product.dealQuantity = product.dealQuantity - item.dealQuantity
+                                            product.defaultQuantity = product.defaultQuantity - item.defaultQuantity
+                                            
+                                            break;
+                                        }
+                                    } 
+                                }
+                                
+                                this.update(po)
+                                    .then(results => {
+                                        console.log(8);
+                                        resolve(id);
+                                    })
+                            })
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                })
+
+        });
     }
 
 }
