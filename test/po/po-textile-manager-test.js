@@ -2,11 +2,12 @@
 
 var should = require('should');
 var helper = require("../helper");
-var POTextileGeneralOtherATKManager = require("../../src/managers/po/po-textile-general-other-atk-manager");
+var POTextileManager = require("../../src/managers/po/po-textile-manager");
 var instanceManager = null;
 
 function getData() {
-    var POTekstilGeneralOtherATK = require('dl-models').po.POTekstilGeneralOtherATK;
+    var POTextile = require('dl-models').po.POTextile;
+    var Buyer = require('dl-models').core.Buyer;
     var UoM = require('dl-models').core.UoM;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Product = require('dl-models').core.Product;
@@ -15,26 +16,31 @@ function getData() {
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
 
-    var poTextileGeneralOtherATK = new POTekstilGeneralOtherATK();
-    poTextileGeneralOtherATK.PRNo = '1' + code + stamp;
-    poTextileGeneralOtherATK.RefPONo = '2' + code + stamp;
-    poTextileGeneralOtherATK.PODLNo = '';
+    var poTextile = new POTextile();
+    poTextile.PRNo = '1' + code + stamp;
+    poTextile.RefPONo = '2' + code + stamp;
+    poTextile.PODLNo = '';
+    poTextile.unit = 'unit';
+    poTextile.PRDate = new Date();
+    poTextile.category = 'category';
+    poTextile.requestDate = new Date();
+    poTextile.staffName = 'staff';
+    poTextile.receivedDate = new Date();
 
     var _uom = new UoM({
         unit: `Meter`
     });
 
-    var product = new Product({
-        code: '22',
-        name: 'hotline',
+    var product = new Product("fabric", {
+        code: 'FF0001',
+        name: 'kain',
         price: 0,
-        description: 'hotline123',
+        description: 'kain putih',
         UoM: _uom,
         detail: {}
     });
 
     var productValue = new PurchaseOrderItem({
-        quantity: 10,
         price: 10000,
         description: 'test desc',
         dealQuantity: 10,
@@ -47,26 +53,55 @@ function getData() {
     var _products = [];
     _products.push(productValue);
 
-    poTextileGeneralOtherATK.items = _products;
+    poTextile.items = _products;
 
-    return poTextileGeneralOtherATK;
+    return poTextile;
 }
 
-function getPODL(poTextileGeneralOtherATK) {
+function updateForSplit(purchaseOrder) {
+
+    var newPurchaseOrder = {};
+    newPurchaseOrder.iso = purchaseOrder.iso;
+    newPurchaseOrder.PRNo = purchaseOrder.PRNo;
+    newPurchaseOrder.RefPONo = purchaseOrder.PRNo;
+    newPurchaseOrder.linkedPONo = purchaseOrder.PONo;
+    newPurchaseOrder.PODLNo = purchaseOrder.PODLNo;
+    newPurchaseOrder.unit = purchaseOrder.unit;
+    newPurchaseOrder.PRDate = purchaseOrder.PRDate;
+    newPurchaseOrder.category = purchaseOrder.category;
+    newPurchaseOrder.rate = purchaseOrder.rate;
+    newPurchaseOrder.requestDate = purchaseOrder.requestDate;
+    newPurchaseOrder.staffName = purchaseOrder.staffName;
+    newPurchaseOrder.receivedDate = purchaseOrder.receivedDate;
+    newPurchaseOrder.items = purchaseOrder.items;
+
+    for (var item of newPurchaseOrder.items) {
+        item.dealQuantity = 1;
+        item.defaultQuantity = 10;
+    }
+
+    return newPurchaseOrder;
+}
+
+function getPODL(poTextile) {
 
     var PurchaseOrderGroup = require('dl-models').po.PurchaseOrderGroup;
     var Supplier = require('dl-models').core.Supplier;
+    var StandardQualityTestPercentage = require('dl-models').po.StandardQualityTestPercentage;
 
-    var poGroupTextileGeneralOtherATK = new PurchaseOrderGroup();
-    poGroupTextileGeneralOtherATK.usePPn = true;
-    poGroupTextileGeneralOtherATK.usePPh = true;
-    poGroupTextileGeneralOtherATK.deliveryDate = new Date();
-    poGroupTextileGeneralOtherATK.termOfPayment = 'Cash';
-    poGroupTextileGeneralOtherATK.deliveryFeeByBuyer = true;
-    poGroupTextileGeneralOtherATK.description = 'SP1';
-    poGroupTextileGeneralOtherATK.currency = 'dollar';
-    poGroupTextileGeneralOtherATK.paymentDue = 2;
-    poGroupTextileGeneralOtherATK.supplierId = {};
+    var poGroupTextile = new PurchaseOrderGroup();
+    poGroupTextile.usePPn = true;
+    poGroupTextile.usePPh = true;
+    poGroupTextile.deliveryDate = new Date();
+    poGroupTextile.termOfPayment = 'Cash';
+    poGroupTextile.deliveryFeeByBuyer = true;
+    poGroupTextile.description = 'SP1';
+    poGroupTextile.currency = 'dollar';
+    poGroupTextile.rate = 100;
+    poGroupTextile.planDeliveryDate = new Date();
+    poGroupTextile.paymentDue = 2;
+    poGroupTextile.supplierId = {};
+    poGroupTextile.otherTest = 'test test test';
 
     var _supplier = new Supplier({
         code: '123',
@@ -78,40 +113,18 @@ function getPODL(poTextileGeneralOtherATK) {
     });
 
     var _items = [];
-    _items.push(poTextileGeneralOtherATK);
+    _items.push(poTextile);
 
-    poGroupTextileGeneralOtherATK.supplier = _supplier;
-    poGroupTextileGeneralOtherATK.items = _items;
+    poGroupTextile.supplier = _supplier;
+    poGroupTextile.items = _items;
 
-    return poGroupTextileGeneralOtherATK;
-}
-
-function updateForSplit(purchaseOrder) {
-
-    var newPurchaseOrder = {};
-    newPurchaseOrder.iso = purchaseOrder.iso;
-    newPurchaseOrder.RONo = purchaseOrder.RONo;
-    newPurchaseOrder.PRNo = purchaseOrder.PRNo;
-    newPurchaseOrder.RefPONo = purchaseOrder.PRNo;
-    newPurchaseOrder.linkedPONo = purchaseOrder.PONo;
-    newPurchaseOrder.article = purchaseOrder.article;
-    newPurchaseOrder.buyerId = purchaseOrder.buyerId;
-    newPurchaseOrder.buyer = purchaseOrder.buyer;
-    newPurchaseOrder.shipmentDate = purchaseOrder.shipmentDate;
-    newPurchaseOrder.items = purchaseOrder.items;
-    
-    for(var item of newPurchaseOrder.items) {
-        item.dealQuantity = 1;
-        item.defaultQuantity = 10;
-    }
-
-    return newPurchaseOrder;
+    return poGroupTextile;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new POTextileGeneralOtherATKManager(db, {
+            instanceManager = new POTextileManager(db, {
                 username: 'unit-test'
             });
             done();
@@ -214,7 +227,7 @@ it(`#06. should success when get created data with id`, function (done) {
 });
 
 it(`#07. should success when update created data`, function (done) {
-    createdData.PRNo += '[updated]';
+    createdData.unit += '[updated]';
 
     instanceManager.update(createdData)
         .then(id => {
@@ -229,7 +242,6 @@ it(`#07. should success when update created data`, function (done) {
 it(`#08. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
-            data.PRNo.should.equal(createdData.PRNo);
             data.RefPONo.should.equal(createdData.RefPONo);
             data.PONo.should.equal(createdData.PONo);
             data.PODLNo.should.equal(createdData.PODLNo);
