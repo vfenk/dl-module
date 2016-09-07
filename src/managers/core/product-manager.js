@@ -71,40 +71,13 @@ module.exports = class ProductManager {
         return new Promise((resolve, reject) => {
             this._validate(product)
                 .then(validProduct => {
-                    if (!validProduct.UoM._id) {
-                        this.uomManager.create(validProduct.UoM)
-                            .then(id => {
-                                validProduct.UoMID = id;
-                                this.uomManager.getById(id)
-                                    .then(UoM => {
-                                        validProduct.UoM = UoM
-
-                                        this.productCollection.insert(validProduct)
-                                            .then(id => {
-                                                resolve(id);
-                                            })
-                                            .catch(e => {
-                                                reject(e);
-                                            })
-                                    })
-                                    .catch(e => {
-                                        reject(e)
-                                    })
-
-                            })
-                            .catch(e => {
-                                reject(e);
-                            })
-                    }
-                    else {
-                        this.productCollection.insert(validProduct)
-                            .then(id => {
-                                resolve(id);
-                            })
-                            .catch(e => {
-                                reject(e);
-                            })
-                    }
+                    this.productCollection.insert(validProduct)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
                 })
                 .catch(e => {
                     reject(e);
@@ -116,40 +89,13 @@ module.exports = class ProductManager {
         return new Promise((resolve, reject) => {
             this._validate(product)
                 .then(validProduct => {
-                    if (!validProduct.UoM._id) {
-                        this.uomManager.create(validProduct.UoM)
-                            .then(id => {
-                                validProduct.UoMID = id;
-                                this.uomManager.getById(id)
-                                    .then(UoM => {
-                                        validProduct.UoM = UoM
-
-                                        this.productCollection.update(validProduct)
-                                            .then(id => {
-                                                resolve(id);
-                                            })
-                                            .catch(e => {
-                                                reject(e);
-                                            })
-                                    })
-                                    .catch(e => {
-                                        reject(e)
-                                    })
-
-                            })
-                            .catch(e => {
-                                reject(e);
-                            })
-                    }
-                    else {
-                        this.productCollection.update(validProduct)
-                            .then(id => {
-                                resolve(id);
-                            })
-                            .catch(e => {
-                                reject(e);
-                            })
-                    }
+                    this.productCollection.update(validProduct)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
                 })
                 .catch(e => {
                     reject(e);
@@ -207,14 +153,14 @@ module.exports = class ProductManager {
                         errors["code"] = "Kode sudah terdaftar.";
                     }
 
-                    if (valid.price)
-                        if (valid.price.length > 17)
-                            errors["price"] = "Harga maksimum 17 digit";
+                    // if (valid.price)
+                    //     if (valid.price.length > 17)
+                    //         errors["price"] = "Harga maksimum 17 digit";
 
                     if (!valid.name || valid.name == '')
                         errors["name"] = "Nama tidak boleh kosong.";
-                        
-                    if (!valid.UoM._id || valid.UoM._id == '' || valid.UoM.unit == '')
+
+                    if (!valid.UoM.unit || valid.UoM.unit == '')
                         errors["UoM"] = "Satuan tidak boleh kosong";
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {

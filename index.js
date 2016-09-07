@@ -23,7 +23,7 @@ module.exports = {
             POGarmentFabric: require('./src/managers/po/po-garment-fabric-manager'),
             POTextileGeneralOtherATK: require('./src/managers/po/po-textile-general-other-atk-manager'),
             POGarmentJobOrderFabric: require('./src/managers/po/po-garment-job-order-fabric-manager'),
-            POTextile: require('./src/managers/po/po-textile')
+            POTextile: require('./src/managers/po/po-textile-manager')
         },
         suratJalan: {
             SuratJalan: require("./src/managers/surat-jalan/surat-jalan-manager")

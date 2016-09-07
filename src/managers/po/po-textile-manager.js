@@ -213,7 +213,7 @@ module.exports = class POTextileManager extends PurchaseOrderBaseManager {
 
                                 this.update(po)
                                     .then(results => {
-                                        console.log(8);
+                                        // console.log(8);
                                         resolve(id);
                                     })
                             })

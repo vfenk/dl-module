@@ -215,7 +215,7 @@ module.exports = class POGarmentJobOrderAccessoriesManager extends PurchaseOrder
                                 
                                 this.update(po)
                                     .then(results => {
-                                        console.log(8);
+                                        // console.log(8);
                                         resolve(id);
                                     })
                             })
