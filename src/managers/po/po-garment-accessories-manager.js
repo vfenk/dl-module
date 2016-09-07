@@ -214,7 +214,7 @@ module.exports = class POGarmentAccessoriesManager extends PurchaseOrderBaseMana
                                 
                                 this.update(po)
                                     .then(results => {
-                                        console.log(8);
+                                        // console.log(8);
                                         resolve(id);
                                     })
                             })

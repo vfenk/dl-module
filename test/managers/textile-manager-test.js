@@ -14,19 +14,22 @@ function getData() {
     var code = stamp.toString(36);
 
     var textile = new Textile();
-    var uom_template = new UoM_Template({
-        mainValue: 1,
-        mainUnit: 'M',
-        convertedValue: 1,
-        convertedUnit: 'M'
-    });
-    var _uom_units = [];
-    _uom_units.push(uom_template);
+    // var uom_template = new UoM_Template({
+    //     mainValue: 1,
+    //     mainUnit: 'M',
+    //     convertedValue: 1,
+    //     convertedUnit: 'M'
+    // });
+    // var _uom_units = [];
+    // _uom_units.push(uom_template);
 
+    // var uom = new UoM({
+    //     category: `UoM_Unit_Test[${code}]`,
+    //     default: uom_template,
+    //     units: _uom_units
+    // });
     var uom = new UoM({
-        category: `UoM_Unit_Test[${code}]`,
-        default: uom_template,
-        units: _uom_units
+        unit: `Meter`
     });
 
     textile.code = code;

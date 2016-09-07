@@ -21,7 +21,7 @@ describe('#dl-module', function (done) {
     test('@manager/sparepart-manager', './managers/sparepart-manager-test');
     test('@manager/general-merchandise-manager', './managers/general-merchandise-manager-test');
 
-    // //PO
+    //PO
     test('@po/po-garment-sparepart-manager', './po/po-garment-sparepart-manager-test');
     test('@po/po-textile-sparepart-manager', './po/po-textile-sparepart-manager-test');
     test('@po/po-garment-general-manager', './po/po-garment-general-manager-test');
@@ -34,4 +34,5 @@ describe('#dl-module', function (done) {
     test('@po/po-textile-general-other-atk-manager', './po/po-textile-general-other-atk-manager-test');
     test('@po/po-garment-job-order-fabric-manager', './po/po-garment-job-order-fabric-manager-test');
     test('@SuratJalan', './surat-jalan/surat-jalan-test');    
+    test('@po/po-textile-manager', './po/po-textile-manager-test');
 })

@@ -197,7 +197,7 @@ module.exports = class POTextileGeneralATKManager extends PurchaseOrderBaseManag
                                 
                                 this.update(po)
                                     .then(results => {
-                                        console.log(8);
+                                        // console.log(8);
                                         resolve(id);
                                     })
                             })

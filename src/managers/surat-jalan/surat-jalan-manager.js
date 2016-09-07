@@ -155,6 +155,8 @@ module.exports = class SuratJalanManager {
                         else if (item.items.length == 0) {
                             errors["po"] = "Harus ada minimal 1 barang setiap PO"
                         }
+                        
+                        
 
                         for (var poItem of item.items) {
                             if (poItem.dealQuantity < poItem.realizationQuantity)
