@@ -98,7 +98,6 @@ function getPODL(poTextile) {
     poGroupTextile.description = 'SP1';
     poGroupTextile.currency = 'dollar';
     poGroupTextile.rate = 100;
-    poGroupTextile.planDeliveryDate = new Date();
     poGroupTextile.paymentDue = 2;
     poGroupTextile.supplierId = {};
     poGroupTextile.otherTest = 'test test test';
