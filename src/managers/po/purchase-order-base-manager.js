@@ -39,6 +39,34 @@ module.exports = class PurchaseOrderBaseManager {
         
     }
     
+    _getQueryPurchaseOrderHasPODL (_paging){
+        
+    }
+    
+    readPOhasPODL(paging) {
+        var _paging = Object.assign({
+            order: '_id',
+            asc: true
+        }, paging);
+
+        return new Promise((resolve, reject) => {
+            
+            var query = this._getQueryPurchaseOrderHasPODL(_paging);
+
+            this.PurchaseOrderCollection
+                .where(query)
+                .page(_paging.page, _paging.size)
+                .orderBy(_paging.order, _paging.asc)
+                .execute()
+                .then(PurchaseOrders => {
+                    resolve(PurchaseOrders);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+    
     read(paging) {
         var _paging = Object.assign({
             page: 1,
@@ -67,13 +95,13 @@ module.exports = class PurchaseOrderBaseManager {
     
     update(purchaseOrder) {
         return new Promise((resolve, reject) => {
-            console.log(purchaseOrder);
+            // console.log(purchaseOrder);
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
-                console.log(6);
+                // console.log(6);
                     this.purchaseOrderManager.update(validPurchaseOrder)
                         .then(id => {
-                            console.log(7);
+                            // console.log(7);
                             resolve(id);
                         })
                         .catch(e => {

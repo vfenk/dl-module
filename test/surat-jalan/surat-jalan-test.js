@@ -36,7 +36,7 @@ function getData() {
         dealMeasurement: 'Meter',
         defaultQuantity: 1000,
         defaultMeasurement: 'Centimeter',
-        realizationQuantity: 1000,
+        realizationQuantity: 10,
         product: _product
     });
 
@@ -72,8 +72,8 @@ function getData() {
     suratJalan.SJDate= new Date();
     suratJalan.productArriveDate= new Date();
     suratJalan.supplier=_supplier;
-    suratJalan.deliveryNo='Lokal';
-    suratJalan.deliveryType='123456789';
+    suratJalan.deliveryType='Lokal';
+    suratJalan.deliveryNo='123456789';
     //suratJalan.isPosted=false;
     suratJalan.items=_POItems;
     
@@ -208,25 +208,5 @@ it('#08. should error when create new data with same code', function (done) {
         .catch(e => {
             e.errors.should.have.property('SJNo');
             done();
-        })
-});
-
-it('#09. should error when create blank data ', function (done) {
-    instanceManager.create({})
-        .then(id => {
-            done("Should not be error when create blank data");
-        })
-        .catch(e => {
-            try {
-                e.errors.should.have.property('SJNo');
-                e.errors.should.have.property('SJDate');
-                e.errors.should.have.property('productArriveDate');
-                e.errors.should.have.property('supplier');
-                e.errors.should.have.property('deliveryType');
-                e.errors.should.have.property('items');
-                done();
-            } catch (ex) {
-                done(ex);
-            }
         })
 });

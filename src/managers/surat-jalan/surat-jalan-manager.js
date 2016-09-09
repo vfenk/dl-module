@@ -140,13 +140,30 @@ module.exports = class SuratJalanManager {
                     if (valid.deliveryType != 'Lokal')
                         if (!valid.deliveryNo || valid.deliveryNo == '')
                             errors["deliveryNo"] = "Nomor Penggiriman tidak boleh kosong";
-                    
+
                     if (!valid.items) {
-                        errors["items"] = "Harus ada minimal 1 nomor PO"
+                        errors["po"] = "Harus ada minimal 1 nomor PO"
                     }
                     else if (valid.items.length == 0) {
-                        errors["items"] = "Harus ada minimal 1 nomor PO"
+                        errors["po"] = "Harus ada minimal 1 nomor PO"
                     }
+
+                    for (var item of valid.items) {
+                        if (!item.items) {
+                            errors["po"] = "Harus ada minimal 1 barang setiap PO"
+                        }
+                        else if (item.items.length == 0) {
+                            errors["po"] = "Harus ada minimal 1 barang setiap PO"
+                        }
+                        
+                        
+
+                        for (var poItem of item.items) {
+                            if (poItem.dealQuantity < poItem.realizationQuantity)
+                                errors["poItem"] = "Jumlah barang di SJ tidak boleh lebih besar dari jumlah barang di PO"
+                        }
+                    }
+
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
