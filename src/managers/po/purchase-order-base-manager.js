@@ -43,8 +43,14 @@ module.exports = class PurchaseOrderBaseManager {
         
     }
     
+    _getQueryPurchaseOrdernoHasPODL (_paging){
+        
+    }
+    
     readPOhasPODL(paging) {
         var _paging = Object.assign({
+            page: 1,
+            size: 20,
             order: '_id',
             asc: true
         }, paging);
@@ -67,6 +73,31 @@ module.exports = class PurchaseOrderBaseManager {
         });
     }
     
+    readPOnohasPODL(paging) {
+        var _paging = Object.assign({
+            page: 1,
+            size: 20,
+            order: '_id',
+            asc: true
+        }, paging);
+
+        return new Promise((resolve, reject) => {
+            
+            var query = this._getQueryPurchaseOrdernoHasPODL(_paging);
+
+            this.PurchaseOrderCollection
+                .where(query)
+                .page(_paging.page, _paging.size)
+                .orderBy(_paging.order, _paging.asc)
+                .execute()
+                .then(PurchaseOrders => {
+                    resolve(PurchaseOrders);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
     read(paging) {
         var _paging = Object.assign({
             page: 1,
@@ -245,7 +276,7 @@ module.exports = class PurchaseOrderBaseManager {
                 _id: new ObjectId(id),
                 _deleted: false
             };
-            this.getSingleByQuery(query)
+            this.getSinglePurchaseOrderGroupByQuery(query)
                 .then(module => {
                     resolve(module);
                 })

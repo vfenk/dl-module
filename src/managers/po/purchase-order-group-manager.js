@@ -165,10 +165,10 @@ module.exports = class PurchaseOrderGroupManager {
                 errors["paymentDue"] = "Tempo Pembayaran tidak boleh kosong";
             if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
                 errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
-            if (valid.usePPn == undefined || valid.usePPn.toString() === '')
-                errors["usePPn"] = "Pengenaan PPn harus dipilih";
-            if (valid.usePPh == undefined || valid.usePPh.toString() === '')
-                errors["usePPh"] = "Pengenaan PPh harus dipilih";
+            // if (valid.usePPn == undefined || valid.usePPn.toString() === '')
+            //     errors["usePPn"] = "Pengenaan PPn harus dipilih";
+            // if (valid.usePPh == undefined || valid.usePPh.toString() === '')
+            //     errors["usePPh"] = "Pengenaan PPh harus dipilih";
 
             if (!valid.items) {
                 errors["items"] = "Harus ada minimal 1 nomor PO"
@@ -186,5 +186,23 @@ module.exports = class PurchaseOrderGroupManager {
             valid.stamp(this.user.username, 'manager');
             resolve(valid);
         });
+    }
+    
+    update(purchaseOrderGroup) {
+        return new Promise((resolve, reject) => {
+            this._validate(purchaseOrderGroup)
+                .then(validPurchaseOrderGroup => {
+                    this.PurchaseOrderGroupCollection.update(validPurchaseOrderGroup)
+                        .then(id => {
+                            resolve(id);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        })
     }
 }
