@@ -39,6 +39,18 @@ module.exports = class POTextileManager extends PurchaseOrderBaseManager {
             if (!valid.receivedDate || valid.receivedDate == '')
                 errors["receiveDate"] = "Tanggal terima PR tidak boleh kosong";
 
+            if (valid.items.length < 1)
+                errors["items"] = "Harus ada minimal 1 barang";
+
+            for (var item of valid.items) {
+                if (!item.dealQuantity || item.dealQuantity == 0 || item.dealQuantity == '')
+                    errors["dealQuantity"] = "Kwantum kesepakatan tidak boleh kosong";
+                if (!item.dealMeasurement || item.dealMeasurement == 0 || item.dealMeasurement == '')
+                    errors["dealMeasurement"] = "Satuan kesepakatan tidak boleh kosong";
+                if (!item.defaultQuantity || item.defaultQuantity == 0 || item.defaultQuantity == '')
+                    errors["defaultQuantity"] = "Kwantum tidak boleh kosong";
+            }
+
             this.purchaseOrderManager._validatePO(valid, errors);
 
             for (var prop in errors) {
@@ -122,7 +134,41 @@ module.exports = class POTextileManager extends PurchaseOrderBaseManager {
             };
 
             var $or = {
-                '$or': [filterRefPONo, filterPONo, filterBuyerName]
+                '$or': [filterRefPONo, filterPONo]
+            };
+
+            query['$and'].push($or);
+        }
+
+        return query;
+    }
+
+    _getQueryPurchaseOrdernoHasPODL(_paging) {
+        var filter = {
+            _deleted: false,
+            _type: this.poType,
+            PODLNo: ''
+        };
+
+        var query = _paging.keyword ? {
+            '$and': [filter]
+        } : filter;
+
+        if (_paging.keyword) {
+            var regex = new RegExp(_paging.keyword, "i");
+            var filterRefPONo = {
+                'RefPONo': {
+                    '$regex': regex
+                }
+            };
+            var filterPONo = {
+                'PONo': {
+                    '$regex': regex
+                }
+            };
+
+            var $or = {
+                '$or': [filterRefPONo, filterPONo]
             };
 
             query['$and'].push($or);
@@ -264,5 +310,17 @@ module.exports = class POTextileManager extends PurchaseOrderBaseManager {
                     reject(e);
                 })
         });
+    }
+
+    updateGroup(purchaseOrderGroup) {
+        return new Promise((resolve, reject) => {
+            this.purchaseOrderGroupManager.update(purchaseOrderGroup)
+                .then(id => {
+                    resolve(id);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        })
     }
 }
