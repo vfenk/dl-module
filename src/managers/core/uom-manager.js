@@ -6,14 +6,14 @@ require("mongodb-toolkit");
 
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var UoM = DLModels.core.UoM;
+var Uom = DLModels.core.Uom;
 
-module.exports = class UoMManager {
+module.exports = class UomManager {
 
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.UoMCollection = this.db.use(map.core.collection.UoM);
+        this.uomCollection = this.db.use(map.core.collection.uom);
     }
 
     read(paging) {
@@ -48,13 +48,13 @@ module.exports = class UoMManager {
                 query['$and'].push(filterUnit);
             }
 
-            this.UoMCollection
+            this.uomCollection
                 .where(query)
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(UoMs => {
-                    resolve(UoMs);
+                .then(uoms => {
+                    resolve(uoms);
                 })
                 .catch(e => {
                     reject(e);
@@ -89,19 +89,19 @@ module.exports = class UoMManager {
                 query['$and'].push(filterCategory);
             }
 
-            this.UoMCollection
+            this.uomCollection
                 .where(query, { users: 0 })
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(UoMs => {
+                .then(uoms => {
                     var listCategory = [];
 
-                    for (var i = 0; i < UoMs.length; i++) {
+                    for (var i = 0; i < uoms.length; i++) {
                         var category = {};
-                        category._id = UoMs[i]._id;
-                        category.category = UoMs[i].category;
-                        category.default = UoMs[i].default;
+                        category._id = uoms[i]._id;
+                        category.category = uoms[i].category;
+                        category.default = uoms[i].default;
                         listCategory.push(category);
                     }
 
@@ -113,15 +113,15 @@ module.exports = class UoMManager {
         });
     }*/
 
-    create(UoM) {
+    create(uom) {
         return new Promise((resolve, reject) => {
-            // UoM.default.convertedValue=UoM.default.mainValue;
-            // UoM.default.convertedUnit=UoM.default.mainUnit;
+            // uom.default.convertedValue=uom.default.mainValue;
+            // uom.default.convertedUnit=uom.default.mainUnit;
             
-            this._validate(UoM)
-                .then(validUoM => {
+            this._validate(uom)
+                .then(validuom => {
 
-                    this.UoMCollection.insert(validUoM)
+                    this.uomCollection.insert(validuom)
                         .then(id => {
                             resolve(id);
                         })
@@ -135,13 +135,13 @@ module.exports = class UoMManager {
         });
     }
 
-    update(UoM) {
+    update(uom) {
         return new Promise((resolve, reject) => {
-            // UoM.default.convertedValue=UoM.default.mainValue;
-            // UoM.default.convertedUnit=UoM.default.mainUnit;
-            this._validate(UoM)
-                .then(validUoM => {
-                    this.UoMCollection.update(validUoM)
+            // uom.default.convertedValue=uom.default.mainValue;
+            // uom.default.convertedUnit=uom.default.mainUnit;
+            this._validate(uom)
+                .then(validuom => {
+                    this.uomCollection.update(validuom)
                         .then(id => {
                             resolve(id);
                         })
@@ -155,12 +155,12 @@ module.exports = class UoMManager {
         });
     }
 
-    delete(UoM) {
+    delete(uom) {
         return new Promise((resolve, reject) => {
-            this._validate(UoM)
-                .then(validUoM => {
-                    validUoM._deleted = true;
-                    this.UoMCollection.update(validUoM)
+            this._validate(uom)
+                .then(validuom => {
+                    validuom._deleted = true;
+                    this.uomCollection.update(validuom)
                         .then(id => {
                             resolve(id);
                         })
@@ -179,7 +179,7 @@ module.exports = class UoMManager {
         return new Promise((resolve, reject) => {
             var valid = uom;
             // 1. begin: Declare promises.
-            var getUoMPromise = this.UoMCollection.singleOrDefault({
+            var getuomPromise = this.uomCollection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
@@ -191,19 +191,19 @@ module.exports = class UoMManager {
             // 1. end: Declare promises.
 
             // 2. begin: Validation.
-            Promise.all([getUoMPromise])
+            Promise.all([getuomPromise])
                 .then(results => {
-                    var _UoM = results[0];
+                    var _uom = results[0];
                     
                     if (!valid.unit || valid.unit == '')
                         errors["unit"] = "Satuan Tidak Boleh Kosong";
-                    else if (_UoM) {
+                    else if (_uom) {
                         errors["unit"] = "Satuan sudah terdaftar";
                     }
                     
                     /*if (!valid.category || valid.category == '')
                         errors["category"] = "category is required";
-                    else if (_UoM) {
+                    else if (_uom) {
                         errors["category"] = "category already exists";
                     }
 
@@ -242,7 +242,7 @@ module.exports = class UoMManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-                    valid = new UoM(uom);
+                    valid = new Uom(uom);
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })
@@ -261,8 +261,8 @@ module.exports = class UoMManager {
                 _deleted: false
             };
             this.getSingleByQuery(query)
-                .then(UoM => {
-                    resolve(UoM);
+                .then(uom => {
+                    resolve(uom);
                 })
                 .catch(e => {
                     reject(e);
@@ -279,8 +279,8 @@ module.exports = class UoMManager {
                 _deleted: false
             };
             this.getSingleByQueryOrDefault(query)
-                .then(UoM => {
-                    resolve(UoM);
+                .then(uom => {
+                    resolve(uom);
                 })
                 .catch(e => {
                     reject(e);
@@ -290,10 +290,10 @@ module.exports = class UoMManager {
 
     getSingleByQuery(query) {
         return new Promise((resolve, reject) => {
-            this.UoMCollection
+            this.uomCollection
                 .single(query)
-                .then(UoM => {
-                    resolve(UoM);
+                .then(uom => {
+                    resolve(uom);
                 })
                 .catch(e => {
                     reject(e);
@@ -303,10 +303,10 @@ module.exports = class UoMManager {
 
     getSingleByQueryOrDefault(query) {
         return new Promise((resolve, reject) => {
-            this.UoMCollection
+            this.uomCollection
                 .singleOrDefault(query)
-                .then(UoM => {
-                    resolve(UoM);
+                .then(uom => {
+                    resolve(uom);
                 })
                 .catch(e => {
                     reject(e);

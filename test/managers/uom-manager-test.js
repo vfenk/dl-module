@@ -1,20 +1,20 @@
 var helper = require("../helper");
-var UoMManager = require("../../src/managers/core/UoM-manager");
+var UomManager = require("../../src/managers/core/uom-manager");
 var instanceManager = null;
 var validator = require('dl-models').validator.core;
 
 require("should");
 
 function getData() {
-    var UoM = require('dl-models').core.UoM;
+    var Uom = require('dl-models').core.Uom;
 
-    // var UoM_Template = require('dl-models').core.UoM_Template;
+    // var uom_Template = require('dl-models').core.Uom_Template;
     
     var now = new Date();
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
 
-    // var uom_template = new UoM_Template({
+    // var uom_template = new Uom_Template({
     //     mainValue: 1,
     //     mainUnit: 'M',
     //     convertedValue: 1,
@@ -24,12 +24,12 @@ function getData() {
     // var _uom_units = [];
     // _uom_units.push(uom_template);
 
-    // var uom = new UoM({
-    //     category: code+'UoM_Unit_Test',
+    // var uom = new Uom({
+    //     category: code+'uom_Unit_Test',
     //     default: uom_template,
     //     units: _uom_units
     // });
-    var uom = new UoM();
+    var uom = new Uom();
     uom.unit= `Satuan [${code}]`;
     return uom;
 }
@@ -37,7 +37,7 @@ function getData() {
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new UoMManager(db, {
+            instanceManager = new UomManager(db, {
                 username: 'unit-test'
             });
             done();
@@ -77,7 +77,7 @@ var createdData;
 it(`#03. should success when get created data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
-            validator.UoM(data);
+            validator.uom(data);
             data.should.instanceof(Object);
             createdData = data;
             done();

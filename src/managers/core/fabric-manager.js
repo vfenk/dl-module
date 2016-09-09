@@ -69,14 +69,14 @@ module.exports = class FabricManager {
                         '$regex': regex
                     }
                 };
-                var filterUoM = {
-                    'UoM.category': {
+                var filterUom = {
+                    'uom.category': {
                         '$regex': regex
                     }
                 };
 
                 var $or = {
-                    '$or': [filterCode, filterName, filterComposition, filterConstruction, filterWidth, filterYarn, filterUoM]
+                    '$or': [filterCode, filterName, filterComposition, filterConstruction, filterWidth, filterYarn, filterUom]
                 };
 
                 query['$and'].push($or);

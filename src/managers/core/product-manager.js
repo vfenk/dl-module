@@ -2,7 +2,7 @@
 
 // external deps 
 var ObjectId = require("mongodb").ObjectId;
-var UoMManager = require('./UoM-manager');
+var UomManager = require('./uom-manager');
 
 // internal deps
 require('mongodb-toolkit');
@@ -14,7 +14,7 @@ module.exports = class ProductManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.uomManager = new UoMManager(db, user);
+        this.uomManager = new UomManager(db, user);
         this.productCollection = this.db.use(map.core.collection.Product);
     }
 
@@ -160,8 +160,8 @@ module.exports = class ProductManager {
                     if (!valid.name || valid.name == '')
                         errors["name"] = "Nama tidak boleh kosong.";
 
-                    if (!valid.UoM.unit || valid.UoM.unit == '')
-                        errors["UoM"] = "Satuan tidak boleh kosong";
+                    if (!valid.uom.unit || valid.uom.unit == '')
+                        errors["uom"] = "Satuan tidak boleh kosong";
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');

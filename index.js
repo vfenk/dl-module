@@ -8,7 +8,7 @@ module.exports = {
             TextileManager: require('./src/managers/core/textile-manager'),
             FabricManager: require('./src/managers/core/fabric-manager'),
             GeneralMerchandiseManager: require('./src/managers/core/general-merchandise-manager'),
-            UoMManager: require('./src/managers/core/UoM-manager')
+            UoMManager: require('./src/managers/core/uom-manager')
         },
         po: {
             PurchaseOrder: require('./src/managers/po/purchase-order-manager'),

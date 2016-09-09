@@ -12,7 +12,7 @@ describe('#dl-module', function (done) {
 
     //Master
 
-    test('@manager/UoM-manager', './managers/UoM-manager-test');
+    test('@manager/uom-manager', './managers/uom-manager-test');
     test('@manager/supplier-manager', './managers/supplier-manager-test');
     test('@manager/buyer-manager', './managers/buyer-manager-test');
     test('@manager/accessories-manager', './managers/accessories-manager-test');

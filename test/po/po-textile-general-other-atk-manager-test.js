@@ -7,7 +7,7 @@ var instanceManager = null;
 
 function getData() {
     var POTekstilGeneralOtherATK = require('dl-models').po.POTekstilGeneralOtherATK;
-    var UoM = require('dl-models').core.UoM;
+    var Uom = require('dl-models').core.Uom;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Product = require('dl-models').core.Product;
 
@@ -20,7 +20,7 @@ function getData() {
     poTextileGeneralOtherATK.RefPONo = '2' + code + stamp;
     poTextileGeneralOtherATK.PODLNo = '';
 
-    var _uom = new UoM({
+    var _uom = new Uom({
         unit: `Meter`
     });
 
@@ -29,7 +29,7 @@ function getData() {
         name: 'hotline',
         price: 0,
         description: 'hotline123',
-        UoM: _uom,
+        uom: _uom,
         detail: {}
     });
 

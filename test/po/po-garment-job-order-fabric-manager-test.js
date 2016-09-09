@@ -8,7 +8,7 @@ var instanceManager = null;
 function getData() {
     var POGarmentJobOrderFabric = require('dl-models').po.POGarmentJobOrderFabric;
     var Buyer = require('dl-models').core.Buyer;
-    var UoM = require('dl-models').core.UoM;
+    var Uom = require('dl-models').core.Uom;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Product = require('dl-models').core.Product;
 
@@ -32,7 +32,7 @@ function getData() {
         tempo: 0
     });
 
-    var _uom = new UoM({
+    var _uom = new Uom({
         unit: `Meter`
     });
 
@@ -41,7 +41,7 @@ function getData() {
         name: 'kain',
         price: 0,
         description: 'kain putih',
-        UoM: _uom,
+        uom: _uom,
         detail: {}
     });
 

@@ -8,7 +8,7 @@ var instanceManager = null;
 function getData() {
     var POGarmentJobOrderAccessories = require('dl-models').po.POGarmentJobOrderAccessories;
     var Buyer = require('dl-models').core.Buyer;
-    var UoM = require('dl-models').core.UoM;
+    var Uom = require('dl-models').core.Uom;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Product = require('dl-models').core.Product;
 
@@ -34,7 +34,7 @@ function getData() {
         tempo: 0
     });
     
-    var _uom = new UoM({
+    var _uom = new Uom({
         unit: `Meter`
     });
     
@@ -43,7 +43,7 @@ function getData() {
         name: 'hotline',
         price: 0,
         description: 'hotline123',
-        UoM: _uom,
+        uom: _uom,
         detail: {}
     });
 

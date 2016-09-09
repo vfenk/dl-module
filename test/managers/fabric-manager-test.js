@@ -7,15 +7,14 @@ var instanceManager = null;
 
 function getData() {
     var Fabric = require('dl-models').core.Fabric;
-    var UoM = require('dl-models').core.UoM;
-    var UoM_Template = require('dl-models').core.UoM_Template;
+    var Uom = require('dl-models').core.Uom; 
     
     var now = new Date();
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
     
     var fabric = new Fabric();
-    // var uom_template = new UoM_Template({
+    // var uom_template = new Uom_Template({
     //     mainValue: 1,
     //     mainUnit: 'M',
     //     convertedValue: 1,
@@ -24,12 +23,12 @@ function getData() {
     // var _uom_units = [];
     // _uom_units.push(uom_template);
 
-    // var uom = new UoM({
-    //     category: `UoM_Unit_Test[${code}]`,
+    // var uom = new Uom({
+    //     category: `uom_Unit_Test[${code}]`,
     //     default: uom_template,
     //     units: _uom_units
     // });
-    var uom = new UoM({
+    var uom = new Uom({
         unit: `Meter`
     });
 
@@ -41,7 +40,7 @@ function getData() {
     fabric.detail.construction = `construction for ${code}`;
     fabric.detail.yarn = `yarn for ${code}`;
     fabric.detail.width = 5;
-    fabric.UoM = uom;
+    fabric.uom = uom;
     return fabric;
 }
 

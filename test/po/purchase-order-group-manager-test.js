@@ -10,7 +10,7 @@ function getData() {
     var PurchaseOrder = require('dl-models').po.PurchaseOrder;
     var PurchaseOrderItem = require('dl-models').po.PurchaseOrderItem;
     var Supplier = require('dl-models').core.Supplier;
-    var UoM = require('dl-models').core.UoM;
+    var Uom = require('dl-models').core.Uom;
     var Product = require('dl-models').core.Product;
 
     var now = new Date();
@@ -34,7 +34,7 @@ function getData() {
         local: true
     });
 
-    var _uom = new UoM({
+    var _uom = new Uom({
         unit: `Meter`
     });
 
@@ -43,7 +43,7 @@ function getData() {
         name: 'hotline',
         price: 0,
         description: 'hotline123',
-        UoM: _uom,
+        uom: _uom,
         detail: {}
     });
 
