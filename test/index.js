@@ -32,6 +32,7 @@ describe('#dl-module', function (done) {
     // test('@po/po-textile-general-atk-manager', './po/po-textile-general-atk-manager-test');
     // test('@po/po-garment-fabric-manager', './po/po-garment-fabric-manager-test');
     // test('@po/po-textile-general-other-atk-manager', './po/po-textile-general-other-atk-manager-test');
-    test('@po/po-garment-job-order-fabric-manager', './po/po-garment-job-order-fabric-manager-test');
+    //test('@po/po-garment-job-order-fabric-manager', './po/po-garment-job-order-fabric-manager-test');
     // test('@SuratJalan', './surat-jalan/surat-jalan-test');    
+    test('@CostCalculation', './cost-calculation/cost-calculation-manager-test');
 })

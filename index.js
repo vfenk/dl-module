@@ -10,6 +10,9 @@ module.exports = {
             GeneralMerchandiseManager: require('./src/managers/core/general-merchandise-manager'),
             UoMManager: require('./src/managers/core/UoM-manager')
         },
+        costCalculation:{
+            CostCalculationManager: require("./src/managers/cost-calculation/cost-calculation-manager")
+        },
         po: {
             PurchaseOrder: require('./src/managers/po/purchase-order-manager'),
             PurchaseOrderGroup: require('./src/managers/po/purchase-order-group-manager'),
