@@ -134,12 +134,12 @@ module.exports = class SuratJalanManager {
                     else if (!valid.supplier.name || valid.supplier.name == '')
                         errors["supplier"] = "Supplier tidak boleh kosong";
 
-                    if (!valid.deliveryType || valid.deliveryType == '')
-                        errors["deliveryType"] = "Jenis Pengiriman tidak boleh kosong";
+                    // if (!valid.deliveryType || valid.deliveryType == '')
+                    //     errors["deliveryType"] = "Jenis Pengiriman tidak boleh kosong";
 
-                    if (valid.deliveryType != 'Lokal')
-                        if (!valid.deliveryNo || valid.deliveryNo == '')
-                            errors["deliveryNo"] = "Nomor Penggiriman tidak boleh kosong";
+                    // if (valid.deliveryType != 'Lokal')
+                    //     if (!valid.deliveryNo || valid.deliveryNo == '')
+                    //         errors["deliveryNo"] = "Nomor Penggiriman tidak boleh kosong";
 
                     if (!valid.items) {
                         errors["po"] = "Harus ada minimal 1 nomor PO"
