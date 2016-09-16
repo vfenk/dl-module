@@ -171,7 +171,7 @@ module.exports = class SuratJalanManager {
                         for (var item of valid.items) {
                             var itemError = {};
 
-                            if (poItem.dealQuantity < poItem.realizationQuantity)
+                            if (item.fulfillments.quantity < poItem.realizationQuantity)
                                 itemError["realizationQuantity"] = "Jumlah barang di SJ tidak boleh lebih besar dari jumlah barang di PO"
                             itemErrors.push(itemError);
                         }
