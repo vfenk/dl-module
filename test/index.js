@@ -18,7 +18,10 @@ describe('#dl-module', function (done) {
     test('@master/product-manager', './master/product-manager-test');
     test('@master/unit-manager', './master/unit-manager-test');
     test('@master/category-manager', './master/category-manager-test');
- 
+
+    //purchasing
+    test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
+
 
     //PO
     // test('@po/po-garment-sparepart-manager', './po/po-garment-sparepart-manager-test');
