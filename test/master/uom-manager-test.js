@@ -1,30 +1,24 @@
 var helper = require("../helper");
-var SupplierManager = require("../../src/managers/core/supplier-manager");
+var UomManager = require("../../src/managers/master/uom-manager");
 var instanceManager = null;
+var validator = require('dl-models').validator.master;
+
 require("should");
 
 function getData() {
-    var Supplier = require('dl-models').core.Supplier;
-    var supplier = new Supplier();
-
+    var Uom = require('dl-models').master.Uom;
     var now = new Date();
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
-
-    supplier.code = code;
-    supplier.name = `name[${code}]`;
-    supplier.address = `Solo [${code}]`;
-    supplier.contact = `phone[${code}]`;
-    this.PIC=`PIC[${code}]`;
-    supplier.import = true;
-
-    return supplier;
+    var uom = new Uom();
+    uom.unit= `Satuan [${code}]`;
+    return uom;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new SupplierManager(db, {
+            instanceManager = new UomManager(db, {
                 username: 'unit-test'
             });
             done();
@@ -64,7 +58,7 @@ var createdData;
 it(`#03. should success when get created data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
-            // validate.product(data);
+            validator.uom(data);
             data.should.instanceof(Object);
             createdData = data;
             done();
@@ -74,16 +68,9 @@ it(`#03. should success when get created data with id`, function (done) {
         })
 });
 
+it(`#04. should success when update created data`, function (done) {
 
-it(`#03. should success when update created data`, function (done) {
-
-    createdData.code += '[updated]';
-    createdData.name += '[updated]';
-    createdData.address += '[updated]';
-    createdData.contact += '[updated]';
-    createdData.PIC += '[updated]';
-    createdData.import += '[updated]';
-
+    createdData.unit += '[updated]';
     instanceManager.update(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -94,16 +81,10 @@ it(`#03. should success when update created data`, function (done) {
         });
 });
 
-it(`#04. should success when get updated data with id`, function (done) {
+it(`#05. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
-            // validate.product(data);
-            data.code.should.equal(createdData.code);
-            data.name.should.equal(createdData.name);
-            data.contact.should.equal(createdData.contact);
-            data.address.should.equal(createdData.address);
-            data.PIC.should.equal(createdData.PIC);
-            data.import.should.equal(createdData.import);
+            data.unit.should.equal(createdData.unit);
             done();
         })
         .catch(e => {
@@ -111,7 +92,8 @@ it(`#04. should success when get updated data with id`, function (done) {
         })
 });
 
-it(`#05. should success when delete data`, function (done) {
+
+it(`#06. should success when delete data`, function(done) { 
     instanceManager.delete(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -122,8 +104,9 @@ it(`#05. should success when delete data`, function (done) {
         });
 });
 
-it(`#06. should _deleted=true`, function (done) {
-    instanceManager.getSingleByQuery({ _id: createdId })
+
+it(`#07. should _deleted=true`, function(done) {
+    instanceManager.getSingleByQuery({_id:createdId})
         .then(data => {
             // validate.product(data);
             data._deleted.should.be.Boolean();
@@ -135,34 +118,46 @@ it(`#06. should _deleted=true`, function (done) {
         })
 });
 
-
-it('#07. should error when create new data with same code', function (done) {
+it('#08. should error when create new data with same unit', function(done) {
     var data = Object.assign({}, createdData);
     delete data._id;
     instanceManager.create(data)
         .then(id => {
             id.should.be.Object();
             createdId = id;
-            done("Should not be able to create data with same code");
+            done("Should not be able to create data with same unit");
         })
         .catch(e => {
-            e.errors.should.have.property('code');
+            e.errors.should.have.property('unit');
             done();
         })
 });
 
-it('#08. should error with property code and name ', function (done) {
-    instanceManager.create({})
-        .then(id => {
-            done("Should not be error with property code and name");
-        })
-        .catch(e => {
-            try {
-                e.errors.should.have.property('code');
-                e.errors.should.have.property('name');
-                done();
-            } catch (ex) {
-                done(ex);
-            }
-        })
+it('#09. should error with property unit ', function(done) { 
+   instanceManager.create({})
+       .then(id => { 
+           done("Should not be error with unit");
+       })
+       .catch(e => { 
+          try
+          {
+              e.errors.should.have.property('unit');
+              done();
+          }catch(ex)
+          {
+              done(ex);
+          } 
+       })
 });
+
+// it('#10. should success when read unit list', function (done) {
+//     instanceManager.readListCategory()
+//         .then(documents => {
+//             //process documents
+//             documents.should.be.instanceof(Array);
+//             done();
+//         })
+//         .catch(e => {
+//             done(e);
+//         })
+// });
