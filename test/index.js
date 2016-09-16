@@ -10,12 +10,18 @@ describe('#dl-module', function (done) {
     this.timeout(2 * 60000);
     //console.log(path);
 
-    // Master
+    // Master 
 
     test('@master/uom-manager', './master/uom-manager-test');
     test('@master/supplier-manager', './master/supplier-manager-test');
     test('@master/buyer-manager', './master/buyer-manager-test');
     test('@master/product-manager', './master/product-manager-test');
+    test('@master/unit-manager', './master/unit-manager-test');
+    test('@master/category-manager', './master/category-manager-test');
+
+    //purchasing
+    test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
+
 
     //PO
     // test('@po/po-garment-sparepart-manager', './po/po-garment-sparepart-manager-test');
@@ -32,7 +38,7 @@ describe('#dl-module', function (done) {
     // test('@po/po-garment-job-order-fabric-manager', './po/po-garment-job-order-fabric-manager-test');
     // test('@SuratJalan', './surat-jalan/surat-jalan-test');    
     // test('@po/po-textile-manager', './po/po-textile-manager-test');
-    
+
     // test('@po/purchase-order-base-manager', './po/purchase-order-base-manager-test');
     // test('@po/purchase-order-test-percentage-manager', './po/purchase-order-test-percentage-manager-test');
 })
