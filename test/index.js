@@ -20,6 +20,8 @@ describe('#dl-module', function (done) {
     test('@manager/textile-manager', './managers/textile-manager-test');
     test('@manager/sparepart-manager', './managers/sparepart-manager-test');
     test('@manager/general-merchandise-manager', './managers/general-merchandise-manager-test');
+    test('@manager/unit-manager', './managers/unit-manager-test');
+     test('@manager/category-manager', './managers/category-manager-test');
 
     //PO
     test('@po/po-garment-sparepart-manager', './po/po-garment-sparepart-manager-test');
