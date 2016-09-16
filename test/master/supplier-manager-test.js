@@ -1,54 +1,30 @@
-'use strict';
-
-var should = require('should');
 var helper = require("../helper");
-var GeneralMerchandiseManager = require("../../src/managers/core/general-merchandise-manager");
+var SupplierManager = require("../../src/managers/master/supplier-manager");
 var instanceManager = null;
+require("should");
 
 function getData() {
-    var GeneralMerchandise = require('dl-models').core.GeneralMerchandise;
-    var Uom = require('dl-models').core.Uom; 
+    var Supplier = require('dl-models').master.Supplier;
+    var supplier = new Supplier();
 
     var now = new Date();
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
 
-    var generalMerchandise = new GeneralMerchandise();
-    // var uom_template = new Uom_Template({
-    //     mainValue: 1,
-    //     mainUnit: 'M',
-    //     convertedValue: 1,
-    //     convertedUnit: 'M'
-    // });
-    // var _uom_units = [];
-    // _uom_units.push(uom_template);
+    supplier.code = code;
+    supplier.name = `name[${code}]`;
+    supplier.address = `Solo [${code}]`;
+    supplier.contact = `phone[${code}]`;
+    this.PIC=`PIC[${code}]`;
+    supplier.import = true;
 
-    // var uom = new Uom({
-    //     category: `uom_Unit_Test[${code}]`,
-    //     default: uom_template,
-    //     units: _uom_units
-    // });
-
-    var uom = new Uom({
-        unit: `Meter`
-    });
-    
-    var now = new Date();
-    var stamp = now / 1000 | 0;
-    var code = stamp.toString(36);
-
-    generalMerchandise.code = code;
-    generalMerchandise.name = `name[${code}]`;
-    generalMerchandise.description = `description for ${code}`;
-    generalMerchandise.price = 50;
-    generalMerchandise.uom = uom;
-    return generalMerchandise;
+    return supplier;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new GeneralMerchandiseManager(db, {
+            instanceManager = new SupplierManager(db, {
                 username: 'unit-test'
             });
             done();
@@ -98,11 +74,16 @@ it(`#03. should success when get created data with id`, function (done) {
         })
 });
 
+
 it(`#03. should success when update created data`, function (done) {
+
     createdData.code += '[updated]';
     createdData.name += '[updated]';
-    createdData.description += '[updated]';
-    
+    createdData.address += '[updated]';
+    createdData.contact += '[updated]';
+    createdData.PIC += '[updated]';
+    createdData.import += '[updated]';
+
     instanceManager.update(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -116,9 +97,13 @@ it(`#03. should success when update created data`, function (done) {
 it(`#04. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
+            // validate.product(data);
             data.code.should.equal(createdData.code);
             data.name.should.equal(createdData.name);
-            data.description.should.equal(createdData.description);
+            data.contact.should.equal(createdData.contact);
+            data.address.should.equal(createdData.address);
+            data.PIC.should.equal(createdData.PIC);
+            data.import.should.equal(createdData.import);
             done();
         })
         .catch(e => {

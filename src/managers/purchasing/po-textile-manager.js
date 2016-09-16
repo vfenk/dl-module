@@ -27,7 +27,7 @@ module.exports = class POTextileManager extends PurchaseOrderBaseManager {
             if (!valid.unit || valid.unit == '')
                 errors["unit"] = "Nama unit yang mengajukan tidak boleh kosong";
 
-            if (!valid.PRDate || valid.PRDate == '')
+             if (!valid.PRDate || valid.PRDate == ''|| valid.PRDate == undefined)
                 errors["PRDate"] = "Tanggal PR tidak boleh kosong";
 
             if (!valid.category || valid.category == '')
@@ -36,20 +36,36 @@ module.exports = class POTextileManager extends PurchaseOrderBaseManager {
             if (!valid.staffName || valid.staffName == '')
                 errors["staffName"] = "Nama staff pembelian yang menerima PR tidak boleh kosong";
 
-            if (!valid.receivedDate || valid.receivedDate == '')
+            if (!valid.receivedDate || valid.receivedDate == '' || valid.receivedDate == undefined)
                 errors["receiveDate"] = "Tanggal terima PR tidak boleh kosong";
 
-            if (valid.items.length < 1)
-                errors["items"] = "Harus ada minimal 1 barang";
+            if (valid.items.length > 0) {
+                var itemErrors = [];
+                for (var item of valid.items) {
+                    var itemError = {};
+                    
+                    if (!item.dealQuantity || item.dealQuantity == 0 || item.dealQuantity == '')
+                        itemError["dealQuantity"] = "Kwantum kesepakatan tidak boleh kosong";
+                    if (!item.dealMeasurement || item.dealMeasurement == 0 || item.dealMeasurement == '')
+                        itemError["dealMeasurement"] = "Satuan kesepakatan tidak boleh kosong";
+                    if (!item.defaultQuantity || item.defaultQuantity == 0 || item.defaultQuantity == '')
+                        itemError["defaultQuantity"] = "Kwantum tidak boleh kosong";
+                    itemErrors.push(itemError);
+                }
+                for (var itemError of itemErrors) {
+                    for (var prop in itemError) {
+                        errors.items = itemErrors;
+                        break;
+                    }
+                    if (errors.items)
+                        break;
+                }
 
-            for (var item of valid.items) {
-                if (!item.dealQuantity || item.dealQuantity == 0 || item.dealQuantity == '')
-                    errors["dealQuantity"] = "Kwantum kesepakatan tidak boleh kosong";
-                if (!item.dealMeasurement || item.dealMeasurement == 0 || item.dealMeasurement == '')
-                    errors["dealMeasurement"] = "Satuan kesepakatan tidak boleh kosong";
-                if (!item.defaultQuantity || item.defaultQuantity == 0 || item.defaultQuantity == '')
-                    errors["defaultQuantity"] = "Kwantum tidak boleh kosong";
             }
+            else if (valid.items.length <= 0) {
+                errors["items"] = "Harus ada minimal 1 barang";
+            }
+
 
             this.purchaseOrderManager._validatePO(valid, errors);
 
@@ -109,7 +125,7 @@ module.exports = class POTextileManager extends PurchaseOrderBaseManager {
         return query;
     }
 
-    _getQueryPurchaseOrderHasPODL(_paging) {
+    _getQueryPurchaseOrderPODL(_paging) {
         var filter = {
             _deleted: false,
             _type: this.poType,
@@ -143,10 +159,11 @@ module.exports = class POTextileManager extends PurchaseOrderBaseManager {
         return query;
     }
 
-    _getQueryPurchaseOrdernoHasPODL(_paging) {
+    _getQueryPurchaseOrdernoPODLBySupplier(_paging,supplier) {
         var filter = {
             _deleted: false,
             _type: this.poType,
+            "supplier.name":supplier,
             PODLNo: ''
         };
 

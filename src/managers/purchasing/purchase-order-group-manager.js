@@ -8,13 +8,14 @@ require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var PurchaseOrderGroup = DLModels.po.PurchaseOrderGroup;
+var PurchaseOrderBaseManager = require('./purchase-order-base-manager');
 
 module.exports = class PurchaseOrderGroupManager {
     constructor(db, user) {
         this.db = db;
         this.user = user;
-
         this.PurchaseOrderGroupCollection = this.db.use(map.po.collection.PurchaseOrderGroup);
+        this.purchaseOrderBaseManager = new PurchaseOrderBaseManager(db, user);
     }
 
     read(paging) {
@@ -130,6 +131,31 @@ module.exports = class PurchaseOrderGroupManager {
                 .then(validPurchaseOrderGroup => {
                     this.PurchaseOrderGroupCollection.insert(validPurchaseOrderGroup)
                         .then(id => {
+                            var tasks = [];
+                            for (var data of validPurchaseOrderGroup.items) {
+                                var getPOItemById = this.purchaseOrderBaseManager.getById(data._id);
+
+                                Promise.all([getPOItemById])
+                                    .then(result => {
+                                        var poItem = result;
+                                        poItem.PODLNo = validPurchaseOrderGroup.PODLNo
+                                        poItem.supplier = validPurchaseOrderGroup.supplier;
+                                        poItem.supplierId = validPurchaseOrderGroup.supplierId;
+                                        poItem.paymentDue = validPurchaseOrderGroup.paymentDue;
+                                        poItem.currency = validPurchaseOrderGroup.currency;
+                                        poItem.deliveryDate = validPurchaseOrderGroup.deliveryDate;
+                                        poItem.deliveryFeeByBuyer = validPurchaseOrderGroup.deliveryFeeByBuyer;
+                                        poItem.otherTest = validPurchaseOrderGroup.otherTest;
+                                        tasks.push(this.purchaseOrderBaseManager.update(poItem));
+                                    })
+                                    .catch(e => {
+                                        reject(e);
+                                    })
+                            }
+                            Promise.all(tasks)
+                                .then(results => {
+                                    resolve(id);
+                                })
                             resolve(id);
                         })
                         .catch(e => {
@@ -149,14 +175,14 @@ module.exports = class PurchaseOrderGroupManager {
 
             if (!valid.PODLNo || valid.PODLNo == '')
                 errors["PODLNo"] = "Nomor PODL tidak boleh kosong";
-                
+
             if (valid.supplier) {
                 if (!valid.supplierId || valid.supplierId == '')
                     errors["supplierId"] = "Nama Supplier tidak terdaftar";
             }
-            else 
+            else
                 errors["supplierId"] = "Nama Supplier tidak boleh kosong";
-                
+
             if (!valid.deliveryDate || valid.deliveryDate == '')
                 errors["deliveryDate"] = "Tanggal Kirim tidak boleh kosong";
             if (!valid.termOfPayment || valid.termOfPayment == '')
@@ -165,13 +191,30 @@ module.exports = class PurchaseOrderGroupManager {
                 errors["paymentDue"] = "Tempo Pembayaran tidak boleh kosong";
             if (valid.deliveryFeeByBuyer == undefined || valid.deliveryFeeByBuyer.toString() === '')
                 errors["deliveryFeeByBuyer"] = "Pilih salah satu ongkos kirim";
-            // if (valid.usePPn == undefined || valid.usePPn.toString() === '')
-            //     errors["usePPn"] = "Pengenaan PPn harus dipilih";
-            // if (valid.usePPh == undefined || valid.usePPh.toString() === '')
-            //     errors["usePPh"] = "Pengenaan PPh harus dipilih";
 
-            if (!valid.items) {
-                errors["items"] = "Harus ada minimal 1 nomor PO"
+            if (valid.items.length > 0) {
+                var itemErrors = [];
+                for (var item of valid.items) {
+                    var itemError = {};
+
+                    if (valid.usePPn == undefined || valid.usePPn.toString() === '')
+                        itemError["usePPn"] = "Pengenaan PPn harus dipilih";
+                    if (valid.usePPh == undefined || valid.usePPh.toString() === '')
+                        itemError["usePPh"] = "Pengenaan PPh harus dipilih";
+                    itemErrors.push(itemError);
+                }
+                for (var itemError of itemErrors) {
+                    for (var prop in itemError) {
+                        errors.items = itemErrors;
+                        break;
+                    }
+                    if (errors.items)
+                        break;
+                }
+
+            }
+            else if (valid.items.length <= 0) {
+                errors["items"] = "Harus ada minimal 1 nomor PO";
             }
 
             // 2c. begin: check if data has any error, reject if it has.
@@ -182,12 +225,13 @@ module.exports = class PurchaseOrderGroupManager {
 
             if (!valid.stamp)
                 valid = new PurchaseOrderGroup(valid);
-            
+
             valid.stamp(this.user.username, 'manager');
             resolve(valid);
+
         });
     }
-    
+
     update(purchaseOrderGroup) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrderGroup)
