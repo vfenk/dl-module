@@ -14,6 +14,102 @@ module.exports = class PurchaseOrderManager {
         this.PurchaseOrderCollection = this.db.use(map.po.collection.PurchaseOrder);
     }
 
+    getDataPO(unit, category, PODLNo, PRNo, supplierId, dateFrom, dateTo) {
+        return new Promise((resolve, reject) => {
+            var query;
+             if (unit != "undefined" && category != "undefined" && PODLNo != "undefined" && PRNo != "undefined" && supplierId != "undefined" && dateFrom != "undefined" && dateTo != "undefined") {
+                query = {
+                    unit: unit,
+                    category: category,
+                    PODLNo: PODLNo,
+                    PRNo: PRNo,
+                    supplierId: supplierId,
+                    PODate:
+                    {
+                        $gte: dateFrom,
+                        $lte: dateTo
+                    },
+                    _deleted: false
+                };
+            } else if (unit != "undefined" && category != "undefined" && PODLNo != "undefined" && PRNo != "undefined" && supplierId != "undefined") {
+                query = {
+                    unit: unit,
+                    category: category,
+                    PODLNo: PODLNo,
+                    PRNo: PRNo,
+                    supplierId: supplierId,
+                    _deleted: false
+                };
+            } else if (unit != "undefined" && category != "undefined" && PODLNo != "undefined" && PRNo != "undefined") {
+                query = {
+                    unit: unit,
+                    category: category,
+                    PODLNo: PODLNo,
+                    PRNo: PRNo,
+                    _deleted: false
+                };
+            } else if (unit != "undefined" && category != "undefined" && PODLNo != "undefined") {
+                query = {
+                    unit: unit,
+                    category: category,
+                    PODLNo: PODLNo,
+                    _deleted: false
+                };
+            } else if (unit != "undefined" && category != "undefined") {
+                query = {
+                    unit: unit,
+                    category: category,
+                    _deleted: false
+                };
+            } else
+                if (unit != "undefined") {
+                    query = {
+                        unit: unit,
+                        _deleted: false
+                    };
+                }
+                else if (category != "undefined") {
+                    query = {
+                        category: category,
+                        _deleted: false
+                    };
+                } else if (PODLNo != "undefined") {
+                    query = {
+                        PODLNo: PODLNo,
+                        _deleted: false
+                    };
+                } else if (PRNo != "undefined") {
+                    query = {
+                        PRNo: PRNo,
+                        _deleted: false
+                    };
+                } else if (supplierId != "undefined") {
+                    query = {
+                        supplierId: supplierId,
+                        _deleted: false
+                    };
+                } else if (dateFrom != "undefined" && dateTo != "undefined") {
+                    query = {
+                        PODate:
+                        {
+                            $gte: dateFrom,
+                            $lte: dateTo
+                        },
+                        _deleted: false
+                    };
+                }
+            this.PurchaseOrderCollection
+                .where(query)
+                .execute()
+                .then(PurchaseOrder => {
+                    resolve(PurchaseOrder);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
     create(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrder)
