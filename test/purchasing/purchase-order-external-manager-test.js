@@ -2,11 +2,13 @@
 
 var should = require('should');
 var helper = require("../helper");
-var PurchaseOrderBaseManager = require("../../src/managers/purchasing/purchase-order-manager");
+var PurchaseOrderExternalManager = require("../../src/managers/purchasing/purchase-order-external-manager");
 var instanceManager = null;
 
 function getData() {
+    var PurchaseOrderExternal = require('dl-models').purchasing.PurchaseOrderExternal;
     var PurchaseOrder = require('dl-models').purchasing.PurchaseOrder;
+    var Supplier = require('dl-models').master.Supplier;
     var Buyer = require('dl-models').master.Buyer;
     var Unit = require('dl-models').master.Unit;
     var Category = require('dl-models').master.Category;
@@ -18,6 +20,14 @@ function getData() {
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
     
+    var supplier = new Supplier();
+    supplier.code = code;
+    supplier.name = `name[${code}]`;
+    supplier.address = `Solo [${code}]`;
+    supplier.contact = `phone[${code}]`;
+    supplier.PIC=`PIC[${code}]`;
+    supplier.import = true;
+
     var buyer = new Buyer();
         buyer.code = code;
         buyer.name = `name[${code}]`;
@@ -75,36 +85,30 @@ function getData() {
         purchaseOrder.expectedDeliveryDate = new Date();
         purchaseOrder.actualDeliveryDate = new Date();
         purchaseOrder.items = _purchaseOrderItems;
-
-    return purchaseOrder;
-}
-
-function updateForSplit(purchaseOrder) {
-
-    var newPurchaseOrder = {};
-    newPurchaseOrder.no = purchaseOrder.no;
-    newPurchaseOrder.refNo = purchaseOrder.refNo;
-    newPurchaseOrder.buyer = purchaseOrder.buyer;
-    newPurchaseOrder.unit = purchaseOrder.unit;
-    newPurchaseOrder.category = purchaseOrder.category;
-    newPurchaseOrder.freightCostBy = purchaseOrder.freightCostBy+"split";
-    newPurchaseOrder.expectedDeliveryDate = purchaseOrder.expectedDeliveryDate;
-    newPurchaseOrder.actualDeliveryDate = purchaseOrder.actualDeliveryDate;
-    newPurchaseOrder.date = purchaseOrder.date;
-    newPurchaseOrder.items = purchaseOrder.items;
-
-    for (var item of newPurchaseOrder.items) {
-        item.dealQuantity = 1;
-        item.defaultQuantity = 10;
-    }
-
-    return newPurchaseOrder;
+    
+    var _purchaseOrderExternalItems = [];
+    _purchaseOrderExternalItems.push(purchaseOrder);
+    
+    var purchaseOrderExternal = new PurchaseOrderExternal();
+        purchaseOrderExternal.supplierId = "id";
+        purchaseOrderExternal.supplier = supplier;
+        purchaseOrderExternal.freightCostBy = "Pembeli";
+        purchaseOrderExternal.currency = "IDR";
+        purchaseOrderExternal.paymentMethod = "Cash";
+        purchaseOrderExternal.useVat = true;
+        purchaseOrderExternal.useIncomeTax = true;
+        purchaseOrderExternal.date = new Date();
+        purchaseOrderExternal.expectedDeliveryDate = new Date();
+        purchaseOrderExternal.actualDeliveryDate = new Date();
+        purchaseOrderExternal.items = _purchaseOrderItems;
+    
+    return purchaseOrderExternal;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new PurchaseOrderBaseManager(db, {
+            instanceManager = new PurchaseOrderExternalManager(db, {
                 username: 'unit-test'
             });
             done();
@@ -115,7 +119,7 @@ before('#00. connect db', function (done) {
 });
 
 it('#01. should success when read data', function (done) {
-    instanceManager.read('unit','category')
+    instanceManager.read()
         .then(documents => {
             documents.should.be.instanceof(Array);
             done();
@@ -125,19 +129,9 @@ it('#01. should success when read data', function (done) {
         })
 });
 
-it('#02. should success when read data no purchase order external ', function (done) {
-    instanceManager.readNoPurchaseOrderExternal('unit','category')
-        .then(documents => {
-            documents.should.be.instanceof(Array);
-            done();
-        })
-        .catch(e => {
-            done(e);
-        })
-});
 
 var createdId;
-it('#03. should success when create new data', function (done) {
+it('#02. should success when create new data', function (done) {
     var data = getData();
     instanceManager.create(data)
         .then(id => {
@@ -150,27 +144,8 @@ it('#03. should success when create new data', function (done) {
         })
 });
 
-it('#04. should success when split po', function (done) {
-    instanceManager.getSingleByQuery({ _id: createdId })
-        .then(result => {
-            var data = updateForSplit(result);
-            instanceManager.split(data)
-                .then(id => {
-                    id.should.be.Object();
-                    done();
-                })
-                .catch(e => {
-                    done(e);
-                })
-
-        })
-        .catch(e => {
-            done(e);
-        })
-});
-
 var createdData;
-it(`#05. should success when get created data with id`, function (done) {
+it(`#03. should success when get created data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             data.should.instanceof(Object);
@@ -182,8 +157,9 @@ it(`#05. should success when get created data with id`, function (done) {
         })
 });
 
-it(`#06. should success when update created data`, function (done) {
-    createdData.freightCostBy += '[updated]';
+it(`#04. should success when update created data`, function (done) {
+    createdData.unit += '[updated]';
+
     instanceManager.update(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -194,10 +170,11 @@ it(`#06. should success when update created data`, function (done) {
         });
 });
 
-it(`#07. should success when get updated data with id`, function (done) {
+it(`#05. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             data.no.should.equal(createdData.no);
+
             done();
         })
         .catch(e => {
@@ -205,7 +182,7 @@ it(`#07. should success when get updated data with id`, function (done) {
         })
 });
 
-it(`#08. should success when delete data`, function (done) {
+it(`#06. should success when delete data`, function (done) {
     instanceManager.delete(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -216,7 +193,7 @@ it(`#08. should success when delete data`, function (done) {
         });
 });
 
-it(`#09. should _deleted=true`, function (done) {
+it(`#07. should _deleted=true`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             data._deleted.should.be.Boolean();

@@ -1,13 +1,13 @@
 
 var helper = require("../helper");
-var CategoryManager = require("../../src/managers/core/category-manager");
+var CategoryManager = require("../../src/managers/master/category-manager");
 var instanceManager = null;
 var validator = require('dl-models').validator.category;
 
 require("should");
 
 function getData() {
-    var Category = require('dl-models').core.Category;
+    var Category = require('dl-models').master.Category;
     var category = new Category();
 
     var now = new Date();

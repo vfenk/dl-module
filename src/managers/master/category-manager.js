@@ -6,14 +6,14 @@ require("mongodb-toolkit");
 
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var Category = DLModels.core.Category;
+var Category = DLModels.master.Category;
 
 module.exports = class CategoryManager {
 
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.CategoryCollection = this.db.use(map.core.collection.Category);
+        this.CategoryCollection = this.db.use(map.master.collection.Category);
     }
 
     create(category) {

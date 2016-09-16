@@ -6,14 +6,14 @@ require("mongodb-toolkit");
 
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var Unit = DLModels.core.Unit;
+var Unit = DLModels.master.Unit;
 
 module.exports = class UnitManager {
 
     constructor(db, user) {
         this.db = db;
         this.user = user;
-        this.UnitCollection = this.db.use(map.core.collection.Unit);
+        this.UnitCollection = this.db.use(map.master.collection.Unit);
     }
 
     create(unit) {

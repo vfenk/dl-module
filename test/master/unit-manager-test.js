@@ -1,13 +1,13 @@
 
 var helper = require("../helper");
-var UnitManager = require("../../src/managers/core/unit-manager");
+var UnitManager = require("../../src/managers/master/unit-manager");
 var instanceManager = null;
 var validator = require('dl-models').validator.unit;
 
 require("should");
 
 function getData() {
-    var Unit = require('dl-models').core.Unit;
+    var Unit = require('dl-models').master.Unit;
     var unit = new Unit();
 
     var now = new Date();
