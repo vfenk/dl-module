@@ -12,6 +12,7 @@ function getData() {
     var Supplier = require('dl-models').core.Supplier;
     var Uom = require('dl-models').core.Uom;
     var Product = require('dl-models').core.Product;
+    var StandardQualityTestPercentage = require('dl-models').po.StandardQualityTestPercentage;
 
     var now = new Date();
     var stamp = now / 1000 | 0;
@@ -58,10 +59,20 @@ function getData() {
         product: product
     });
     
+    var _stdQtyTest = new StandardQualityTestPercentage({
+        shrinkage: 10,
+        wetRubbing: 20,
+        dryRubbing: 30,
+        washing: 40,
+        darkPrespiration: 50,
+        lightMedPrespiration: 60,
+    })
+    
     var _products = [];
     _products.push(productValue);
 
     purchaseOrder.items = _products;
+    purchaseOrder.standardQuality = _stdQtyTest;
     
     var _purchaseOrders = [];
     _purchaseOrders.push(purchaseOrder);

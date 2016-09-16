@@ -7,13 +7,15 @@ require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var SuratJalan = DLModels.suratJalan.SuratJalan;
-
+var PurchaseOrderBaseManager = require('../po/purchase-order-base-manager');
+var DOItem = DLModels.po.DOItem;
 module.exports = class SuratJalanManager {
 
     constructor(db, user) {
         this.db = db;
         this.user = user;
         this.SuratJalanCollection = this.db.use('surat-jalan');
+        this.purchaseOrderBaseManager = new PurchaseOrderBaseManager(db, user);
     }
     create(suratJalan) {
         return new Promise((resolve, reject) => {
@@ -21,6 +23,29 @@ module.exports = class SuratJalanManager {
                 .then(validSuratJalan => {
                     this.SuratJalanCollection.insert(validSuratJalan)
                         .then(id => {
+                            var tasks = [];
+                            for (var data of validSuratJalan.items) {
+                                var getPOItemById = this.purchaseOrderBaseManager.getById(data._id);
+
+                                Promise.all([getPOItemById])
+                                    .then(result => {
+                                        var poItem = result;
+                                        var doItem = new DOItem();
+                                        doItem.SJNo = validSuratJalan.SJNo;
+                                        doItem.SJDate = validSuratJalan.SJDate;
+                                        doItem.realizationQuantity = data.realizationQuantity;
+                                        poItem.DOitems.push(doItem);
+
+                                        tasks.push(this.purchaseOrderBaseManager.update(poItem));
+                                    })
+                                    .catch(e => {
+                                        reject(e);
+                                    })
+                            }
+                            Promise.all(tasks)
+                                .then(results => {
+                                    resolve(id);
+                                })
                             resolve(id);
                         })
                         .catch(e => {
@@ -141,27 +166,27 @@ module.exports = class SuratJalanManager {
                     //     if (!valid.deliveryNo || valid.deliveryNo == '')
                     //         errors["deliveryNo"] = "Nomor Penggiriman tidak boleh kosong";
 
-                    if (!valid.items) {
-                        errors["po"] = "Harus ada minimal 1 nomor PO"
-                    }
-                    else if (valid.items.length == 0) {
-                        errors["po"] = "Harus ada minimal 1 nomor PO"
-                    }
+                    if (valid.items.length > 0) {
+                        var itemErrors = [];
+                        for (var item of valid.items) {
+                            var itemError = {};
 
-                    for (var item of valid.items) {
-                        if (!item.items) {
-                            errors["po"] = "Harus ada minimal 1 barang setiap PO"
-                        }
-                        else if (item.items.length == 0) {
-                            errors["po"] = "Harus ada minimal 1 barang setiap PO"
-                        }
-                        
-                        
-
-                        for (var poItem of item.items) {
                             if (poItem.dealQuantity < poItem.realizationQuantity)
-                                errors["poItem"] = "Jumlah barang di SJ tidak boleh lebih besar dari jumlah barang di PO"
+                                itemError["realizationQuantity"] = "Jumlah barang di SJ tidak boleh lebih besar dari jumlah barang di PO"
+                            itemErrors.push(itemError);
                         }
+                        for (var itemError of itemErrors) {
+                            for (var prop in itemError) {
+                                errors.items = itemErrors;
+                                break;
+                            }
+                            if (errors.items)
+                                break;
+                        }
+
+                    }
+                    else if (valid.items.length <= 0) {
+                        errors["items"] = "Harus ada minimal 1 nomor PO";
                     }
 
                     // 2c. begin: check if data has any error, reject if it has.

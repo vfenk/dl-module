@@ -1,53 +1,37 @@
 var helper = require("../helper");
-var SparepartManager = require("../../src/managers/core/sparepart-manager");
+var ProductManager = require("../../src/managers/master/product-manager");
 var instanceManager = null;
 var should = require('should');
 
 function getData() {
-    var Sparepart = require('dl-models').core.Sparepart;
-    var Sparepart = require('dl-models').core.Sparepart;
-    var Uom = require('dl-models').core.Uom; 
+    var Product = require('dl-models').master.Product;
+    var Uom = require('dl-models').master.Uom; 
 
     var now = new Date();
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
 
-    var sparepart = new Sparepart();
-    // var uom_template = new Uom_Template({
-    //     mainValue: 1,
-    //     mainUnit: 'M',
-    //     convertedValue: 1,
-    //     convertedUnit: 'M'
-    // });
-    // var _uom_units = [];
-    // _uom_units.push(uom_template);
-
-    // var uom = new Uom({
-    //     category: `uom_Unit_Test[${code}]`,
-    //     default: uom_template,
-    //     units: _uom_units
-    // });
+    var product = new Product();
+    
     var uom = new Uom({
         unit: `Meter`
     });
 
-    var now = new Date();
-    var stamp = now / 1000 | 0;
-    var code = stamp.toString(36);
+    product.code = code;
+    product.name = `name[${code}]`;
+    product.price = 50;
+    product.description = `description for ${code}`;
+    product.uom = uom;
+    product.tags = 'product,master';
+    product.properties = [];
 
-    sparepart.code = code;
-    sparepart.name = `name[${code}]`;
-    sparepart.description = `description for ${code}`;
-    sparepart.uom = uom;
-    sparepart.price = 50;
-
-    return sparepart;
+    return product;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            instanceManager = new SparepartManager(db, {
+            instanceManager = new ProductManager(db, {
                 username: 'unit-test'
             });
             done();
@@ -139,6 +123,7 @@ it(`#06. should success when delete data`, function (done) {
 it(`#07. should _deleted=true`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
+            // validate.product(data);
             data._deleted.should.be.Boolean();
             data._deleted.should.equal(true);
             done();
@@ -159,12 +144,8 @@ it('#08. should error when create new data with same code', function (done) {
             done("Should not be able to create data with same code");
         })
         .catch(e => {
-            try {
-                e.errors.should.have.property('code');
-                done();
-            } catch (ex) {
-                done(ex);
-            }
+            e.errors.should.have.property('code');
+            done();
         })
 });
 
@@ -183,3 +164,5 @@ it('#09. should error with property code and name ', function (done) {
             }
         })
 });
+
+
