@@ -11,12 +11,15 @@ describe('#dl-module', function (done) {
     //console.log(path);
 
     // Master
-    // test('@master/uom-manager', './master/uom-manager-test');
-    // test('@master/supplier-manager', './master/supplier-manager-test');
-    // test('@master/buyer-manager', './master/buyer-manager-test');
-    // test('@master/product-manager', './master/product-manager-test');
+    test('@master/uom-manager', './master/uom-manager-test');
+    test('@master/supplier-manager', './master/supplier-manager-test');
+    test('@master/buyer-manager', './master/buyer-manager-test');
+    test('@master/product-manager', './master/product-manager-test');
+    test('@master/unit-manager', './master/unit-manager-test');
+    test('@master/category-manager', './master/category-manager-test');
 
     //Purchasing 
     test('@purchasing/purchase-order-base-manager', './purchasing/purchase-order-manager-test');
     test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
+    test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
 })
