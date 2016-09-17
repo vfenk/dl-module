@@ -14,6 +14,33 @@ module.exports = class PurchaseOrderManager {
         this.PurchaseOrderCollection = this.db.use(map.po.collection.PurchaseOrder);
     }
 
+    getDataPOUnit(startdate,enddate){
+        return new Promise((resolve, reject) => { 
+             if (startdate != "undefined" && enddate != "undefined") { 
+                   
+            this.PurchaseOrderCollection.group(
+            {
+                key:  { unit: 1 },
+                cond: { _createdDate: { 
+                            $gte: startdate, 
+                            $lt: enddate  },
+                        _deleted: false  
+                        },
+                reduce: function( curr, result ) {
+                            result.total += curr.item.price;
+                        },
+                initial: { total : 0 }
+            }).then(PurchaseOrder => { 
+                    resolve(PurchaseOrder); 
+                }) 
+                .catch(e => { 
+                    reject(e); 
+                }); 
+                }
+        });
+        
+    }
+
     create(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrder)
@@ -92,5 +119,7 @@ module.exports = class PurchaseOrderManager {
 
         return errors;
     }
+
+    
 
 }

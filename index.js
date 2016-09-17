@@ -10,26 +10,29 @@ module.exports = {
             GeneralMerchandiseManager: require('./src/managers/core/general-merchandise-manager'),
             UoMManager: require('./src/managers/core/UoM-manager')
         },
-        costCalculation:{
-            CostCalculationManager: require("./src/managers/cost-calculation/cost-calculation-manager")
-        },
+        // costCalculation:{
+        //     //CostCalculationManager: require("./src/managers/cost-calculation/cost-calculation-manager")
+        // },
         po: {
-            PurchaseOrder: require('./src/managers/po/purchase-order-manager'),
-            PurchaseOrderGroup: require('./src/managers/po/purchase-order-group-manager'),
-            POGarmentSparepart: require('./src/managers/po/po-garment-sparepart-manager'),
-            POTextileSparepart: require('./src/managers/po/po-textile-sparepart-manager'),
-            POGarmentGeneral: require('./src/managers/po/po-garment-general-manager'),
-            POTextileJobOrderManager: require('./src/managers/po/po-textile-job-order-external-manager'),
-            POGarmentAccessories: require('./src/managers/po/po-garment-accessories-manager'),
-            POGarmentJobOrderAccessoriesManager: require('./src/managers/po/po-garment-job-order-accessories-manager'),
-            POTextileGeneralATK: require('./src/managers/po/po-textile-general-atk-manager'),
-            POGarmentFabric: require('./src/managers/po/po-garment-fabric-manager'),
-            POTextileGeneralOtherATK: require('./src/managers/po/po-textile-general-other-atk-manager'),
-            POGarmentJobOrderFabric: require('./src/managers/po/po-garment-job-order-fabric-manager'),
+            // PurchaseOrder: require('./src/managers/po/purchase-order-manager'),
+            // PurchaseOrderGroup: require('./src/managers/po/purchase-order-group-manager'),
+            // POGarmentSparepart: require('./src/managers/po/po-garment-sparepart-manager'),
+            // POTextileSparepart: require('./src/managers/po/po-textile-sparepart-manager'),
+            // POGarmentGeneral: require('./src/managers/po/po-garment-general-manager'),
+            // POTextileJobOrderManager: require('./src/managers/po/po-textile-job-order-external-manager'),
+            // POGarmentAccessories: require('./src/managers/po/po-garment-accessories-manager'),
+            // POGarmentJobOrderAccessoriesManager: require('./src/managers/po/po-garment-job-order-accessories-manager'),
+            // POTextileGeneralATK: require('./src/managers/po/po-textile-general-atk-manager'),
+            // POGarmentFabric: require('./src/managers/po/po-garment-fabric-manager'),
+            // POTextileGeneralOtherATK: require('./src/managers/po/po-textile-general-other-atk-manager'),
+            // POGarmentJobOrderFabric: require('./src/managers/po/po-garment-job-order-fabric-manager'),
             POTextile: require('./src/managers/po/po-textile-manager')
         },
         suratJalan: {
-            SuratJalan: require("./src/managers/surat-jalan/surat-jalan-manager")
+           // SuratJalan: require("./src/managers/surat-jalan/surat-jalan-manager")
         },
+        reports:{
+            POUnitPeriode : require('./src/managers/reports/purchase-order-unit-periode-manager')
+        }
     }
 }
