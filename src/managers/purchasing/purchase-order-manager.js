@@ -203,7 +203,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 .then(validPurchaseOrder => {
                     this.create(validPurchaseOrder)
                         .then(id => {
-                            this.getByPR(validPurchaseOrder.purchaseRequestId).then(po => {
+                            this._getByPR(validPurchaseOrder.purchaseRequest.no).then(po => {
                                 for (var item of validPurchaseOrder.items) {
                                     for (var product of po.items) {
                                         if (item.product.code == product.product.code) {
@@ -232,12 +232,12 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-    getByPR(_purchaseRequestId) {
+    _getByPR(_purchaseRequestNo) {
         return new Promise((resolve, reject) => {
-            if (_purchaseRequestId === '')
+            if (_purchaseRequestNo === '')
                 resolve(null);
             var query = {
-                purchaseRequestId: _purchaseRequestId,
+                "purchaseRequest.no": _purchaseRequestNo,
                 _deleted: false
             };
             this.getSingleByQuery(query)
