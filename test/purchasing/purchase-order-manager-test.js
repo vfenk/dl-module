@@ -75,6 +75,8 @@ function getData() {
         purchaseOrder.expectedDeliveryDate = new Date();
         purchaseOrder.actualDeliveryDate = new Date();
         purchaseOrder.items = _purchaseOrderItems;
+        purchaseOrder.purchaseRequest.no = '1' + code + stamp;
+        purchaseOrder.purchaseRequest.date = new Date();
 
     return purchaseOrder;
 }
