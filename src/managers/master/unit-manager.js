@@ -7,31 +7,75 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Unit = DLModels.master.Unit;
+var BaseManager = require('../base-manager');
 
-module.exports = class UnitManager {
+module.exports = class UnitManager extends BaseManager {
 
     constructor(db, user) {
-        this.db = db;
-        this.user = user;
-        this.UnitCollection = this.db.use(map.master.collection.Unit);
+        super(db, user);
+        this.collection = this.db.use(map.master.collection.Unit);
     }
 
-    create(unit) {
+    _getQuery(paging) {
+        var deleted = {
+            _deleted: false
+        };
+        var query = paging.keyword ? {
+            '$and': [deleted]
+        } : deleted;
+
+        if (paging.keyword) {
+            var regex = new RegExp(paging.keyword, "i");
+            var filterDivision = {
+                'division': {
+                    '$regex': regex
+                }
+            };
+
+            query['$and'].push(filterDivision);
+        }
+        return query;
+    }
+    
+    _validate(unit) {
+        var errors = {};
         return new Promise((resolve, reject) => {
-            // this._validate(unit)
-            //     .then(validunit => {
-                    this.UnitCollection.insert(unit)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // })
+            var valid = unit;
+            // 1. begin: Declare promises.
+            var getunitPromise = this.collection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        division: valid.division
+                    }]
+            });
+
+            // 2. begin: Validation.
+            Promise.all([getunitPromise])
+                .then(results => {
+                    var _unit = results[0];
+
+                    if (!valid.division || valid.division == '')
+                        errors["division"] = "Divisi Tidak Boleh Kosong";
+                    else if (_unit) {
+                        errors["division"] = "Divisi sudah terdaftar";
+                    }
+
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
+
+                    valid = new Unit(unit);
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
         });
-    } 
+    }
    
 }

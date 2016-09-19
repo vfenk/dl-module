@@ -16,7 +16,7 @@ function getData() {
 
     unit.code = code;
     unit.division = `division[${code}]`;
-    unit.subdivision = `subdivison [${code}]`; 
+    unit.subDivision = `subdivison [${code}]`; 
     unit.description = `desc[${code}]`;
     return unit;
 }

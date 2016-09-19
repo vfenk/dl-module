@@ -5,7 +5,8 @@ module.exports = {
             SupplierManager: require("./src/managers/master/supplier-manager"),
             ProductManager: require("./src/managers/master/product-manager"),
             CategoryManager: require('./src/managers/master/category-manager'),
-            UnitManager: require('./src/managers/master/unit-manager')
+            UnitManager: require('./src/managers/master/unit-manager'),
+            UomManager: require('./src/managers/master/uom-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
