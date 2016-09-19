@@ -29,18 +29,24 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterCode = {
-                'code': {
+            var filteNO = {
+                'no': {
                     '$regex': regex
                 }
             };
-            var filterName = {
-                'name': {
+            var filterNRefNo = {
+                'refNo': {
                     '$regex': regex
                 }
             };
+            var filterSupplierName = {
+                'supplier.name': {
+                    '$regex': regex
+                }
+            };
+            
             var $or = {
-                '$or': [filterCode, filterName]
+                '$or': [filteNO, filterNRefNo,filterSupplierName]
             };
 
             query['$and'].push($or);
@@ -78,7 +84,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        SJNo: valid.SJNo
+                        no: valid.no
                     }]
             });
             // 1. end: Declare promises.
