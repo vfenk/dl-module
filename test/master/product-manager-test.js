@@ -133,7 +133,6 @@ it(`#07. should _deleted=true`, function (done) {
         })
 });
 
-
 it('#08. should error when create new data with same code', function (done) {
     var data = Object.assign({}, createdData);
     delete data._id;
