@@ -107,29 +107,29 @@ it(`#04. should success when get updated data with id`, function (done) {
         })
 });
 
-// it(`#05. should success when delete data`, function (done) {
-//     instanceManager.delete(createdData)
-//         .then(id => {
-//             createdId.toString().should.equal(id.toString());
-//             done();
-//         })
-//         .catch(e => {
-//             done(e);
-//         });
-// });
+it(`#05. should success when delete data`, function (done) {
+    instanceManager.delete(createdData)
+        .then(id => {
+            createdId.toString().should.equal(id.toString());
+            done();
+        })
+        .catch(e => {
+            done(e);
+        });
+});
 
-// it(`#06. should _deleted=true`, function (done) {
-//     instanceManager.getSingleByQuery({ _id: createdId })
-//         .then(data => {
-//             // validate.product(data);
-//             data._deleted.should.be.Boolean();
-//             data._deleted.should.equal(true);
-//             done();
-//         })
-//         .catch(e => {
-//             done(e);
-//         })
-// });
+it(`#06. should _deleted=true`, function (done) {
+    instanceManager.getSingleByQuery({ _id: createdId })
+        .then(data => {
+            // validate.product(data);
+            data._deleted.should.be.Boolean();
+            data._deleted.should.equal(true);
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
 
 
 it('#07. should error when create new data with same code', function (done) {
