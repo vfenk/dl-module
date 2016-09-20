@@ -24,21 +24,28 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             // if (!valid.buyerId || valid.buyerId.toString() == '')
             //     errors["buyer"] = "Nama Buyer tidak boleh kosong";
 
-            if (!valid.purchaseRequest.unit)
-                errors["purchaseRequest.unit"] = "Nama unit yang mengajukan tidak boleh kosong";
+            if (valid.purchaseRequest) {
+                var itemError = {};
+                if (!valid.purchaseRequest.unit)
+                    itemError["unit"] = "Nama unit yang mengajukan tidak boleh kosong";
 
-            if (!valid.purchaseRequest.category)
-                errors["purchaseRequest.category"] = "Kategori tidak boleh kosong";
+                if (!valid.purchaseRequest.category)
+                    itemError["category"] = "Kategori tidak boleh kosong";
 
-            if (!valid.purchaseRequest.no)
-                errors["purchaseRequest.no"] = "No. PR yang mengajukan tidak boleh kosong";
+                if (!valid.purchaseRequest.no)
+                    itemError["no"] = "No. PR tidak boleh kosong";
 
-            if (!valid.purchaseRequest.date)
-                errors["purchaseRequest.date"] = "Tanggal PR tidak boleh kosong";
+                if (!valid.purchaseRequest.date)
+                    itemError["date"] = "Tanggal PR tidak boleh kosong";
 
-            if (!valid.purchaseRequest.expectedDeliveryDate)
-                errors["purchaseRequest.expectedDeliveryDate"] = "Tanggal terima PR tidak boleh kosong";
+                if (!valid.purchaseRequest.expectedDeliveryDate)
+                    itemError["expectedDeliveryDate"] = "Tanggal terima PR tidak boleh kosong";
 
+                for (var prop in itemError) {
+                    errors["purchaseRequest"] = itemError;
+                    break;
+                }
+            }
 
             // if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
             //     errors["expectedDeliveryDate"] = "Tanggal rencana kirim tidak boleh kosong";
@@ -77,9 +84,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 var ValidationError = require('../../validation-error');
                 reject(new ValidationError('data does not pass validation', errors));
             }
-            
-            if(valid.purchaseRequest)
-            {
+
+            if (valid.purchaseRequest) {
                 valid.refNo = valid.purchaseRequest.no;
                 valid.unit = valid.purchaseRequest.unit;
                 valid.unitId = valid.purchaseRequest.unit._id;
