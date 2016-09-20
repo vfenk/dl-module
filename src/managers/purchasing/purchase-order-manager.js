@@ -21,14 +21,24 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = purchaseOrder;
 
-            if (!valid.buyerId || valid.buyerId.toString() == '')
-                errors["buyer"] = "Nama Buyer tidak boleh kosong";
+            // if (!valid.buyerId || valid.buyerId.toString() == '')
+            //     errors["buyer"] = "Nama Buyer tidak boleh kosong";
 
-            if (!valid.unit || valid.unit == '')
-                errors["unit"] = "Nama unit yang mengajukan tidak boleh kosong";
+            if (!valid.purchaseRequest.unit)
+                errors["purchaseRequest.unit"] = "Nama unit yang mengajukan tidak boleh kosong";
 
-            if (!valid.categoryId || valid.categoryId.toString() == '')
-                errors["category"] = "Kategori tidak boleh kosong";
+            if (!valid.purchaseRequest.category)
+                errors["purchaseRequest.category"] = "Kategori tidak boleh kosong";
+
+            if (!valid.purchaseRequest.no)
+                errors["purchaseRequest.no"] = "No. PR yang mengajukan tidak boleh kosong";
+
+            if (!valid.purchaseRequest.date)
+                errors["purchaseRequest.date"] = "Tanggal PR tidak boleh kosong";
+
+            if (!valid.purchaseRequest.expectedDeliveryDate)
+                errors["purchaseRequest.expectedDeliveryDate"] = "Tanggal terima PR tidak boleh kosong";
+
 
             // if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
             //     errors["expectedDeliveryDate"] = "Tanggal rencana kirim tidak boleh kosong";
@@ -67,7 +77,17 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 var ValidationError = require('../../validation-error');
                 reject(new ValidationError('data does not pass validation', errors));
             }
-
+            
+            if(valid.purchaseRequest)
+            {
+                valid.refNo = valid.purchaseRequest.no;
+                valid.unit = valid.purchaseRequest.unit;
+                valid.unitId = valid.purchaseRequest.unit._id;
+                valid.category = valid.purchaseRequest.category;
+                valid.categoryId = valid.purchaseRequest.category._id;
+                valid.date = valid.purchaseRequest.date;
+                valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
+            }
             if (!valid.stamp)
                 valid = new PurchaseOrder(valid);
 
