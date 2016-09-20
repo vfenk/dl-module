@@ -1,14 +1,11 @@
 module.exports = {
     managers: {
-        core: {
-            BuyerManager: require("./src/managers/core/buyer-manager"),
-            SupplierManager: require("./src/managers/core/supplier-manager"),
-            SparepartManager: require("./src/managers/core/sparepart-manager"),
-            AccessoriesManager: require("./src/managers/core/accessories-manager"),
-            TextileManager: require('./src/managers/core/textile-manager'),
-            FabricManager: require('./src/managers/core/fabric-manager'),
-            GeneralMerchandiseManager: require('./src/managers/core/general-merchandise-manager'),
-            UoMManager: require('./src/managers/core/UoM-manager')
+        master: {
+            BuyerManager: require("./src/managers/master/buyer-manager"),
+            SupplierManager: require("./src/managers/master/supplier-manager"),
+            ProductManager: require("./src/managers/master/product-manager"),
+            CategoryManager: require('./src/managers/master/category-manager'),
+            UnitManager: require('./src/managers/master/unit-manager')
         },
         // costCalculation:{
         //     //CostCalculationManager: require("./src/managers/cost-calculation/cost-calculation-manager")
@@ -30,6 +27,11 @@ module.exports = {
         },
         suratJalan: {
            // SuratJalan: require("./src/managers/surat-jalan/surat-jalan-manager")
+        },
+        purchasing: {
+            PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
+            PurchaseOrderExternalManager: require('./src/managers/purchasing/purchase-order-external-manager'),
+            DeliveryOrderManager: require('./src/managers/purchasing/delivery-order-manager')
         },
         reports:{
             POUnitPeriode : require('./src/managers/reports/purchase-order-unit-periode-manager')
