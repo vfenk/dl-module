@@ -30,21 +30,21 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             if (!valid.categoryId || valid.categoryId.toString() == '')
                 errors["category"] = "Kategori tidak boleh kosong";
 
-            if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
-                errors["expectedDeliveryDate"] = "Tanggal rencana kirim tidak boleh kosong";
+            // if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
+            //     errors["expectedDeliveryDate"] = "Tanggal rencana kirim tidak boleh kosong";
 
-            if (!valid.actualDeliveryDate || valid.actualDeliveryDate == '')
-                errors["actualDeliveryDate"] = "Tanggal kirim tidak boleh kosong";
+            // if (!valid.actualDeliveryDate || valid.actualDeliveryDate == '')
+            //     errors["actualDeliveryDate"] = "Tanggal kirim tidak boleh kosong";
 
             if (valid.items.length > 0) {
                 var itemErrors = [];
                 for (var item of valid.items) {
                     var itemError = {};
 
-                    if (!item.dealQuantity || item.dealQuantity == 0 || item.dealQuantity == '')
-                        itemError["dealQuantity"] = "Jumlah kesepakatan tidak boleh kosong";
-                    if (!item.dealUom || item.dealUom == 0 || item.dealUom == '')
-                        itemError["dealUom"] = "Jumlah kesepakatan tidak boleh kosong";
+                    // if (!item.dealQuantity || item.dealQuantity == 0 || item.dealQuantity == '')
+                    //     itemError["dealQuantity"] = "Jumlah kesepakatan tidak boleh kosong";
+                    // if (!item.dealUom || item.dealUom == 0 || item.dealUom == '')
+                    //     itemError["dealUom"] = "Jumlah kesepakatan tidak boleh kosong";
                     if (!item.defaultQuantity || item.defaultQuantity == 0 || item.defaultQuantity == '')
                         itemError["defaultQuantity"] = "Jumlah default tidak boleh kosong";
                     itemErrors.push(itemError);
