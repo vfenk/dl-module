@@ -11,7 +11,6 @@ var BaseManager = require('../base-manager');
 module.exports = class PurchaseOrderManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
-        this.poType = '';
         this.moduleId = '';
         this.year = (new Date()).getFullYear().toString().substring(2, 4);
         this.collection = this.db.use(map.purchasing.collection.PurchaseOrder);
@@ -132,7 +131,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 }
             };
             var filterPONo = {
-                'No': {
+                'no': {
                     '$regex': regex
                 }
             };
