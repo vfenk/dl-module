@@ -221,30 +221,38 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     }
 
     split(purchaseOrder) {
-        purchaseOrder = new PurchaseOrder(purchaseOrder);
         return new Promise((resolve, reject) => {
-            purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
+                    delete validPurchaseOrder._id;
                     this.create(validPurchaseOrder)
                         .then(id => {
-                            this._getByPR(validPurchaseOrder.purchaseRequest.no).then(po => {
-                                for (var item of validPurchaseOrder.items) {
-                                    for (var product of po.items) {
-                                        if (item.product.code == product.product.code) {
-                                            product.dealQuantity = product.dealQuantity - item.dealQuantity
-                                            product.defaultQuantity = product.defaultQuantity - item.defaultQuantity
-
-                                            break;
+                            this.getSingleById(validPurchaseOrder.sourcePurchaseOrderId)
+                                .then(sourcePo => {
+                                    for (var item of validPurchaseOrder.items) {
+                                        for (var sourceItem of sourcePo.items) {
+                                            if (item.product.code == sourceItem.product.code) {
+                                                sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity
+                                                break;
+                                            }
                                         }
                                     }
-                                }
-                                this.update(po)
-                                    .then(results => {
-                                        resolve(id);
+
+                                    sourcePo.items = sourcePo.items.filter((item, index) => {
+                                        return item.defaultQuantity > 0;
                                     })
-                            })
-                            resolve(id);
+
+                                    this.update(sourcePo)
+                                        .then(results => {
+                                            resolve(id);
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        });
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
                         })
                         .catch(e => {
                             reject(e);
