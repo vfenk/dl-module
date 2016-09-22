@@ -16,6 +16,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.purchasing.collection.PurchaseOrderExternal);
+        this.year = (new Date()).getFullYear().toString().substring(2, 4);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
     }
 
@@ -116,7 +117,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
             if (!valid.currencyRate || valid.currencyRate == 0)
                 purchaseOrderExternalError["currencyRate"] = "Rate tidak boleh kosong";
-                
+
             if (!valid.paymentDueDays || valid.paymentDueDays == '')
                 purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
 
@@ -135,26 +136,30 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     var purchaseOrderError = {};
                     var purchaseOrderItemErrors = [];
                     var poItemHasError = false;
-                    
-                    if(!purchaseOrder.no || purchaseOrder.no=="")
-                    {
-                        poItemHasError=true;
+
+                    if (!purchaseOrder.no || purchaseOrder.no == "") {
+                        poItemHasError = true;
                         purchaseOrderError["no"] = "Purchase order internal tidak boleh kosong";
                     }
-                    
+
                     for (var poItem of purchaseOrder.items || []) {
                         var poItemError = {};
                         if (!poItem.dealQuantity || poItem.dealQuantity == 0) {
                             poItemHasError = true;
                             poItemError["dealQuantity"] = "Jumlah kesepakatan tidak boleh kosong";
                         }
-                        if (!poItem.dealUom || !poItem.dealUom.unit || poItem.dealUom.unit=="") {
+                        if (!poItem.dealUom || !poItem.dealUom.unit || poItem.dealUom.unit == "") {
                             poItemHasError = true;
                             poItemError["dealUom"] = "Jumlah kesepakatan tidak boleh kosong";
                         }
                         if (!poItem.pricePerDealUnit || poItem.pricePerDealUnit == 0) {
                             poItemHasError = true;
                             poItemError["pricePerDealUnit"] = "Harga tidak boleh kosong";
+                        }
+
+                        if (!poItem.conversion || poItem.conversion == '') {
+                            poItemHasError = true;
+                            poItemError["conversion"] = "Konversi tidak boleh kosong";
                         }
 
                         purchaseOrderItemErrors.push(poItemError);
@@ -183,5 +188,5 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             valid.stamp(this.user.username, 'manager');
             resolve(valid);
         });
-    } 
+    }
 }

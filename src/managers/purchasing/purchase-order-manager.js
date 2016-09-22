@@ -21,84 +21,94 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = purchaseOrder;
 
-            // if (!valid.buyerId || valid.buyerId.toString() == '')
-            //     errors["buyer"] = "Nama Buyer tidak boleh kosong";
-
-            if (valid.purchaseRequest) {
-                var itemError = {};
-                if (!valid.purchaseRequest.unit)
-                    itemError["unit"] = "Nama unit yang mengajukan tidak boleh kosong";
-
-                if (!valid.purchaseRequest.category)
-                    itemError["category"] = "Kategori tidak boleh kosong";
-
-                if (!valid.purchaseRequest.no)
-                    itemError["no"] = "No. PR tidak boleh kosong";
-
-                if (!valid.purchaseRequest.date)
-                    itemError["date"] = "Tanggal PR tidak boleh kosong";
-
-                if (!valid.purchaseRequest.expectedDeliveryDate)
-                    itemError["expectedDeliveryDate"] = "Tanggal terima PR tidak boleh kosong";
-
-                for (var prop in itemError) {
-                    errors["purchaseRequest"] = itemError;
-                    break;
-                }
-            }
-
-            // if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
-            //     errors["expectedDeliveryDate"] = "Tanggal rencana kirim tidak boleh kosong";
-
-            // if (!valid.actualDeliveryDate || valid.actualDeliveryDate == '')
-            //     errors["actualDeliveryDate"] = "Tanggal kirim tidak boleh kosong";
-
-            if (valid.items.length > 0) {
-                var itemErrors = [];
-                for (var item of valid.items) {
-                    var itemError = {};
-
-                    // if (!item.dealQuantity || item.dealQuantity == 0 || item.dealQuantity == '')
-                    //     itemError["dealQuantity"] = "Jumlah kesepakatan tidak boleh kosong";
-                    // if (!item.dealUom || item.dealUom == 0 || item.dealUom == '')
-                    //     itemError["dealUom"] = "Jumlah kesepakatan tidak boleh kosong";
-                    if (!item.defaultQuantity || item.defaultQuantity == 0 || item.defaultQuantity == '')
-                        itemError["defaultQuantity"] = "Jumlah default tidak boleh kosong";
-                    itemErrors.push(itemError);
-                }
-                for (var itemError of itemErrors) {
-                    for (var prop in itemError) {
-                        errors.items = itemErrors;
-                        break;
+            var getPurchaseOrderPromise = this.collection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
                     }
-                    if (errors.items)
-                        break;
-                }
+                }, {
+                        "purchaseRequest.no": valid.purchaseRequest.no
+                    }]
+            });
 
-            }
-            else {
-                errors["items"] = "Harus ada minimal 1 barang";
-            }
+            Promise.all([getPurchaseOrderPromise])
+                .then(results => {
+                    var _module = results[0];
 
-            for (var prop in errors) {
-                var ValidationError = require('../../validation-error');
-                reject(new ValidationError('data does not pass validation', errors));
-            }
+                    if (valid.purchaseRequest) {
+                        var itemError = {};
+                        if (!valid.purchaseRequest.unit)
+                            itemError["unit"] = "Nama unit yang mengajukan tidak boleh kosong";
 
-            if (valid.purchaseRequest) {
-                valid.refNo = valid.purchaseRequest.no;
-                valid.unit = valid.purchaseRequest.unit;
-                valid.unitId = valid.purchaseRequest.unit._id;
-                valid.category = valid.purchaseRequest.category;
-                valid.categoryId = valid.purchaseRequest.category._id;
-                valid.date = valid.purchaseRequest.date;
-                valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
-            }
-            if (!valid.stamp)
-                valid = new PurchaseOrder(valid);
+                        if (!valid.purchaseRequest.category)
+                            itemError["category"] = "Kategori tidak boleh kosong";
 
-            valid.stamp(this.user.username, 'manager');
-            resolve(valid);
+                        if (!valid.purchaseRequest.no)
+                            itemError["no"] = "No. PR tidak boleh kosong";
+                        else if (_module)
+                            itemError["no"] = "No. PR sudah terdaftar";
+
+                        if (!valid.purchaseRequest.date)
+                            itemError["date"] = "Tanggal PR tidak boleh kosong";
+
+                        if (!valid.purchaseRequest.expectedDeliveryDate)
+                            itemError["expectedDeliveryDate"] = "Tanggal terima PR tidak boleh kosong";
+
+                        for (var prop in itemError) {
+                            errors["purchaseRequest"] = itemError;
+                            break;
+                        }
+                    }
+
+                    if (valid.items.length > 0) {
+                        var itemErrors = [];
+                        for (var item of valid.items) {
+                            var itemError = {};
+
+                            if (!item.product || !item.product._id)
+                                itemError["product"] = "Nama barang tidak boleh kosong";
+                            if (!item.defaultQuantity || item.defaultQuantity == 0)
+                                itemError["defaultQuantity"] = "Jumlah default tidak boleh kosong";
+                            itemErrors.push(itemError);
+                        }
+                        for (var itemError of itemErrors) {
+                            for (var prop in itemError) {
+                                errors.items = itemErrors;
+                                break;
+                            }
+                            if (errors.items)
+                                break;
+                        }
+
+                    }
+                    else {
+                        errors["items"] = "Harus ada minimal 1 barang";
+                    }
+
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
+
+                    if (valid.purchaseRequest) {
+                        valid.refNo = valid.purchaseRequest.no;
+                        valid.unit = valid.purchaseRequest.unit;
+                        valid.unitId = valid.purchaseRequest.unit._id;
+                        valid.category = valid.purchaseRequest.category;
+                        valid.categoryId = valid.purchaseRequest.category._id;
+                        valid.date = valid.purchaseRequest.date;
+                        valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
+                    }
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
+
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+
         });
     }
 
