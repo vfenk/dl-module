@@ -31,9 +31,9 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     }]
             });
 
-            Promise.all([getProductPromise])
+            Promise.all([getPurchaseOrderPromise])
                 .then(results => {
-                    var _module = getPurchaseOrderPromise[0];
+                    var _module = results[0];
 
                     if (valid.purchaseRequest) {
                         var itemError = {};
@@ -65,7 +65,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         for (var item of valid.items) {
                             var itemError = {};
 
-                            if (!item.product || item.product._id)
+                            if (!item.product || !item.product._id)
                                 itemError["product"] = "Nama barang tidak boleh kosong";
                             if (!item.defaultQuantity || item.defaultQuantity == 0)
                                 itemError["defaultQuantity"] = "Jumlah default tidak boleh kosong";
@@ -231,29 +231,38 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     }
 
     split(purchaseOrder) {
-        purchaseOrder = new PurchaseOrder(purchaseOrder);
         return new Promise((resolve, reject) => {
-            purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
+                    delete validPurchaseOrder._id;
                     this.create(validPurchaseOrder)
                         .then(id => {
-                            this._getByPR(validPurchaseOrder.purchaseRequest.no).then(po => {
-                                for (var item of validPurchaseOrder.items) {
-                                    for (var product of po.items) {
-                                        if (item.product.code == product.product.code) {
-                                            product.dealQuantity = product.dealQuantity - item.dealQuantity
-                                            product.defaultQuantity = product.defaultQuantity - item.defaultQuantity
-
-                                            break;
+                            this.getSingleById(validPurchaseOrder.sourcePurchaseOrderId)
+                                .then(sourcePo => {
+                                    for (var item of validPurchaseOrder.items) {
+                                        for (var sourceItem of sourcePo.items) {
+                                            if (item.product.code == sourceItem.product.code) {
+                                                sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity
+                                                break;
+                                            }
                                         }
                                     }
-                                }
-                                this.update(po)
-                                    .then(results => {
-                                        resolve(id);
+
+                                    sourcePo.items = sourcePo.items.filter((item, index) => {
+                                        return item.defaultQuantity > 0;
                                     })
-                            })
+
+                                    this.update(sourcePo)
+                                        .then(results => {
+                                            resolve(id);
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        });
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
                         })
                         .catch(e => {
                             reject(e);

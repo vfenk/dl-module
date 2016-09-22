@@ -12,13 +12,13 @@ var PurchaseOrderManager = require('./purchase-order-manager');
 var BaseManager = require('../base-manager');
 var generateCode = require('../../utils/code-generator');
 
-module.exports = class PurchaseOrderExternalManager  extends BaseManager {
+module.exports = class PurchaseOrderExternalManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.purchasing.collection.PurchaseOrderExternal);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
     }
-    
+
     _getQuery(paging) {
         var filter = {
             _deleted: false
@@ -50,7 +50,7 @@ module.exports = class PurchaseOrderExternalManager  extends BaseManager {
         }
         return query;
     }
-    
+
     create(purchaseOrderExternal) {
         purchaseOrderExternal.no = `PO/DL/${this.year}${generateCode()}`;
         return new Promise((resolve, reject) => {
@@ -98,39 +98,87 @@ module.exports = class PurchaseOrderExternalManager  extends BaseManager {
     }
 
     _validate(purchaseOrderGroup) {
-        var errors = {};
+        var purchaseOrderExternalError = {};
         return new Promise((resolve, reject) => {
             var valid = purchaseOrderGroup;
-            
-            if (!valid.supplierId || valid.supplierId.toString() == '')
-                errors["supplierId"] = "Nama Supplier tidak boleh kosong";
-            
-            if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
-                errors["expectedDeliveryDate"] = "Tanggal rencana kirim tidak boleh kosong";
 
-            if (!valid.actualDeliveryDate || valid.actualDeliveryDate == '')
-                errors["actualDeliveryDate"] = "Tanggal kirim tidak boleh kosong";
-                
+            if (!valid.supplierId || valid.supplierId.toString() == '')
+                purchaseOrderExternalError["supplierId"] = "Nama Supplier tidak boleh kosong";
+
+            if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
+                purchaseOrderExternalError["expectedDeliveryDate"] = "Tanggal tersedia tidak boleh kosong";
+
+            if (!valid.date || valid.date == '')
+                purchaseOrderExternalError["date"] = "Tanggal tidak boleh kosong";
+
             if (!valid.paymentMethod || valid.paymentMethod == '')
-                errors["paymentMethod"] = "Metode Pembayaran tidak boleh kosong";
-                
+                purchaseOrderExternalError["paymentMethod"] = "Metode Pembayaran tidak boleh kosong";
+
+            if (!valid.currencyRate || valid.currencyRate == 0)
+                purchaseOrderExternalError["currencyRate"] = "Rate tidak boleh kosong";
+
             if (!valid.paymentDueDays || valid.paymentDueDays == '')
-                errors["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
-            
-            if (valid.useVat == undefined || valid.useVat.toString() === '')
-                itemError["useVat"] = "Pengenaan PPn harus dipilih";
-                
-            if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
-                itemError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
-            
-            if (valid.items.length <= 0) {
-                errors["items"] = "Harus ada minimal 1 nomor PO";
+                purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
+
+            // if (valid.useVat == undefined || valid.useVat.toString() === '')
+            //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
+
+            // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
+            //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
+
+            if (valid.items && valid.items.length < 1)
+                purchaseOrderExternalError["items"] = "Harus ada minimal 1 po internal";
+            else {
+                var purchaseOrderExternalItemErrors = [];
+                var poItemExternalHasError = false;
+                for (var purchaseOrder of valid.items) {
+                    var purchaseOrderError = {};
+                    var purchaseOrderItemErrors = [];
+                    var poItemHasError = false;
+
+                    if (!purchaseOrder.no || purchaseOrder.no == "") {
+                        poItemHasError = true;
+                        purchaseOrderError["no"] = "Purchase order internal tidak boleh kosong";
+                    }
+
+                    for (var poItem of purchaseOrder.items || []) {
+                        var poItemError = {};
+                        if (!poItem.dealQuantity || poItem.dealQuantity == 0) {
+                            poItemHasError = true;
+                            poItemError["dealQuantity"] = "Jumlah kesepakatan tidak boleh kosong";
+                        }
+                        if (!poItem.dealUom || !poItem.dealUom.unit || poItem.dealUom.unit == "") {
+                            poItemHasError = true;
+                            poItemError["dealUom"] = "Jumlah kesepakatan tidak boleh kosong";
+                        }
+                        if (!poItem.pricePerDealUnit || poItem.pricePerDealUnit == 0) {
+                            poItemHasError = true;
+                            poItemError["pricePerDealUnit"] = "Harga tidak boleh kosong";
+                        }
+
+                        if (!poItem.conversion || poItem.conversion == '') {
+                            poItemHasError = true;
+                            poItemError["conversion"] = "Konversi tidak boleh kosong";
+                        }
+
+                        purchaseOrderItemErrors.push(poItemError);
+                    }
+                    if (poItemHasError) {
+                        poItemExternalHasError = true;
+                        purchaseOrderError["items"] = purchaseOrderItemErrors;
+                    }
+
+                    purchaseOrderExternalItemErrors.push(purchaseOrderError);
+                }
+                if (poItemExternalHasError)
+                    purchaseOrderExternalError["items"] = purchaseOrderExternalItemErrors;
             }
 
+
             // 2c. begin: check if data has any error, reject if it has.
-            for (var prop in errors) {
+            for (var prop in purchaseOrderExternalError) {
                 var ValidationError = require('../../validation-error');
-                reject(new ValidationError('data podl does not pass validation', errors));
+                reject(new ValidationError('data podl does not pass validation', purchaseOrderExternalError));
             }
 
             if (!valid.stamp)
@@ -138,8 +186,6 @@ module.exports = class PurchaseOrderExternalManager  extends BaseManager {
 
             valid.stamp(this.user.username, 'manager');
             resolve(valid);
-
         });
     }
-
 }
