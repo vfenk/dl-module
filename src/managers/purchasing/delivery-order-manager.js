@@ -165,15 +165,53 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     reject(e);
                 })
         });
+    } 
+    getDataDeliveryOrder(no, supplierId, dateFrom, dateTo) {
+        return new Promise((resolve, reject) => {
+            var query;
+             if ( no != "undefined" && no != ""   && supplierId != "undefined" && supplierId!="" && dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
+                query = {
+                    no: no, 
+                    supplierId: supplierId,
+                    date:
+                    {
+                        $gte: new Date(dateFrom),
+                        $lte: new Date(dateTo)
+                    },
+                    _deleted: false
+                };
+            } else if  ( no != "undefined" && no != ""  &&  supplierId != "undefined" && supplierId!="") {
+                query = { 
+                    no: no,
+                    supplierId: supplierId,
+                    _deleted: false
+                };
+            }  else if  (no != "undefined" && no != "") {
+                query = { 
+                    no: no, 
+                    _deleted: false
+                };
+            }   else if  (dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
+                query = { 
+                    date:
+                    {
+                        $gte: new Date(dateFrom),
+                        $lte: new Date(dateTo)
+                    },
+                    _deleted: false
+                };
+            }  
+
+           this.collection
+                .where(query)
+                .execute()
+                .then(PurchaseOrder => {
+                    resolve(PurchaseOrder);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
     }
-
-     
-
-     
-
-     
-
-     
-
     
 }
