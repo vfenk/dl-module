@@ -64,7 +64,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 var getPOItemById = this.purchaseOrderManager.getSingleById(data._id);
 
                                 Promise.all([getPOItemById])
-                                    .then(result => {
+                                    .then(results => {
+                                        for(var result of results){
                                         var poItem = result;
                                         poItem.purchaseOrderExternalId = validPurchaseOrderExternal._id;
                                         poItem.purchaseOrderExternal = validPurchaseOrderExternal;
@@ -77,6 +78,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         poItem.vatRate = validPurchaseOrderExternal.vatRate;
                                         poItem.useIncomeTax = validPurchaseOrderExternal.useIncomeTax;
                                         tasks.push(this.purchaseOrderManager.update(poItem));
+                                        }
                                     })
                                     .catch(e => {
                                         reject(e);
