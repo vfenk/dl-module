@@ -292,4 +292,100 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 });
         });
     }
+
+     getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo) {
+        return new Promise((resolve, reject) => {
+            var query;
+             if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined"  && PODLNo !="" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId !="" && dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    PODLNo: PODLNo,
+                    PRNo: PRNo,
+                    supplierId: supplierId,
+                    date:
+                    {
+                        $gte: dateFrom,
+                        $lte: dateTo
+                    },
+                    _deleted: false
+                };
+            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined"  && PODLNo !="" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId !="") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    PODLNo: PODLNo,
+                    PRNo: PRNo,
+                    supplierId: supplierId,
+                    _deleted: false
+                };
+            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined"  && PODLNo !="" && PRNo != "undefined" && PRNo != "") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    PODLNo: PODLNo,
+                    PRNo: PRNo,
+                    _deleted: false
+                };
+            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    PODLNo: PODLNo,
+                    _deleted: false
+                };
+            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    _deleted: false
+                };
+            } else
+                if (unitId != "undefined" && unitId != "") {
+                    query = {
+                        unitId: unitId,
+                        _deleted: false
+                    };
+                }
+                else if (categoryId != "undefined" && categoryId !="") {
+                    query = {
+                        categoryId: categoryId,
+                        _deleted: false
+                    };
+                } else if (PODLNo != "undefined" && PODLNo !="") {
+                    query = {
+                        PODLNo: PODLNo,
+                        _deleted: false
+                    };
+                } else if (PRNo != "undefined" && PRNo !="") {
+                    query = {
+                        PRNo: PRNo,
+                        _deleted: false
+                    };
+                } else if (supplierId != "undefined" && supplierId !="") {
+                    query = {
+                        supplierId: supplierId,
+                        _deleted: false
+                    };
+                } else if (dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
+                    query = {
+                        date:
+                        {
+                            $gte: dateFrom,
+                            $lte: dateTo
+                        },
+                        _deleted: false
+                    };
+                }
+           this.collection
+                .where(query)
+                .execute()
+                .then(PurchaseOrder => {
+                    resolve(PurchaseOrder);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
 }
