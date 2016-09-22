@@ -16,6 +16,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.purchasing.collection.PurchaseOrderExternal);
+        this.year = (new Date()).getFullYear().toString().substring(2, 4);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
     }
 
