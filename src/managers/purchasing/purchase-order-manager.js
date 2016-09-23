@@ -34,6 +34,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             Promise.all([getPurchaseOrderPromise])
                 .then(results => {
                     var _module = results[0];
+                    var now = new Date();
 
                     if (valid.purchaseRequest) {
                         var itemError = {};
@@ -45,14 +46,27 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                         if (!valid.purchaseRequest.no)
                             itemError["no"] = "No. PR tidak boleh kosong";
-                        else if (_module)
+                        else if (_module && valid.sourcePurchaseOrder== null)
                             itemError["no"] = "No. PR sudah terdaftar";
-
+                         
                         if (!valid.purchaseRequest.date)
                             itemError["date"] = "Tanggal PR tidak boleh kosong";
+                        else
+                        {
+                            var _prDate = new Date(valid.purchaseRequest.date);
+                            if (_prDate > now)
+                                itemError["date"] = "Tanggal PR tidak boleh lebih besar dari tanggal hari ini";
+                        }
 
-                        if (!valid.purchaseRequest.expectedDeliveryDate)
-                            itemError["expectedDeliveryDate"] = "Tanggal terima PR tidak boleh kosong";
+                        // if (!valid.purchaseRequest.expectedDeliveryDate)
+                        //     itemError["expectedDeliveryDate"] = "Tanggal terima PR tidak boleh kosong";
+                        if (valid.purchaseRequest.expectedDeliveryDate && valid.purchaseRequest.date)
+                        {
+                            var _prDate = new Date(valid.purchaseRequest.date);
+                            var _expectedDate = new Date(valid.purchaseRequest.expectedDeliveryDate);
+                            if(_prDate>_expectedDate)
+                                itemError["expectedDeliveryDate"] = "Tanggal PR tidak boleh lebih besar dari tanggal tersedia";
+                        }
 
                         for (var prop in itemError) {
                             errors["purchaseRequest"] = itemError;
@@ -69,6 +83,24 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 itemError["product"] = "Nama barang tidak boleh kosong";
                             if (!item.defaultQuantity || item.defaultQuantity == 0)
                                 itemError["defaultQuantity"] = "Jumlah default tidak boleh kosong";
+                                
+                            if(valid.sourcePurchaseOrder != null)
+                            {
+                                for(var sourcePoItem of valid.sourcePurchaseOrder.items)
+                                {
+                                    if(item.product._id && item.defaultQuantity)
+                                    {
+                                        if(item.product._id == sourcePoItem.product._id)
+                                        {
+                                            if(item.defaultQuantity > sourcePoItem.defaultQuantity)
+                                            {
+                                                itemError["defaultQuantity"] = "Jumlah default tidak boleh lebih besar dari PO asal";
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                             itemErrors.push(itemError);
                         }
                         for (var itemError of itemErrors) {
@@ -149,10 +181,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return query;
     }
 
-    _getQueryNoPurchaseOrderExternal(_paging) {
+    _getQueryUnposted(_paging) {
         var filter = {
             _deleted: false,
-            // purchaseOrderExternalId: {}
+             purchaseOrderExternalId: {}
         };
 
         var query = _paging.keyword ? {
@@ -182,7 +214,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return query;
     }
 
-    readNoPurchaseOrderExternal(paging) {
+    readUnposted(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -192,7 +224,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
         return new Promise((resolve, reject) => {
 
-            var query = this._getQueryNoPurchaseOrderExternal(_paging);
+            var query = this._getQueryUnposted(_paging);
 
             this.collection
                 .where(query)
