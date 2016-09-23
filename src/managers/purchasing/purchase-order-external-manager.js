@@ -178,6 +178,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 poItem.supplierId = data.supplierId;
                                 poItem.supplier = data.supplier;
                                 poItem.freightCostBy = data.freightCostBy;
+                                poItem.pricePerDealUnit = data.pricePerDealUnit;
                                 poItem.paymentMethod = data.paymentMethod;
                                 poItem.paymentDueDays = data.paymentDueDays;
                                 poItem.useVat = data.useVat;
