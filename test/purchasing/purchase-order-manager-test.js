@@ -2,6 +2,7 @@
 
 var should = require('should');
 var helper = require("../helper");
+var assert = require('assert');
 var PurchaseOrderBaseManager = require("../../src/managers/purchasing/purchase-order-manager");
 var instanceManager = null;
 
