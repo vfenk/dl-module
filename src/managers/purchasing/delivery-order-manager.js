@@ -262,6 +262,11 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     supplierId: supplierId,
                     _deleted: false
                 };
+            } else if (supplierId != "undefined" && supplierId != "") {
+                query = {
+                    supplierId: supplierId,
+                    _deleted: false
+                };
             } else if (no != "undefined" && no != "") {
                 query = {
                     no: no,
