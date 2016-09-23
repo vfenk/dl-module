@@ -26,7 +26,12 @@ module.exports = class UnitManager extends BaseManager {
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-           var filterSubDivision = {
+             var filterDivision = {
+                'division': {
+                    '$regex': regex
+                }
+            };
+            var filterSubDivision = {
                 'subDivision': {
                     '$regex': regex
                 }
