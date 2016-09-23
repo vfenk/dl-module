@@ -2,6 +2,7 @@
 
 var should = require('should');
 var helper = require("../helper");
+var assert = require('assert');
 var PurchaseOrderBaseManager = require("../../src/managers/purchasing/purchase-order-manager");
 var instanceManager = null;
 
@@ -82,7 +83,7 @@ function getData() {
 function updateForSplit(purchaseOrder) {
 
     var newPurchaseOrder = {};
-    newPurchaseOrder.no = purchaseOrder.no;
+    newPurchaseOrder.no = purchaseOrder.no + code + stamp;
     newPurchaseOrder.refNo = purchaseOrder.refNo;
     newPurchaseOrder.buyer = purchaseOrder.buyer;
     newPurchaseOrder.unit = purchaseOrder.unit;
