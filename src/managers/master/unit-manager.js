@@ -26,13 +26,22 @@ module.exports = class UnitManager extends BaseManager {
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterDivision = {
+             var filterDivision = {
                 'division': {
                     '$regex': regex
                 }
             };
+            var filterSubDivision = {
+                'subDivision': {
+                    '$regex': regex
+                }
+            };
 
-            query['$and'].push(filterDivision);
+            var $or = {
+                '$or': [filterDivision, filterSubDivision]
+            };
+
+            query['$and'].push($or);
         }
         return query;
     }
