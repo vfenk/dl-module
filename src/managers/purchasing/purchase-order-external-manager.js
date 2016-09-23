@@ -208,7 +208,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     generatePOno() {
         var now = new Date();
         var stamp = now / 1000 | 0;
-        var code = stamp.toString().substring(0,3);
+        var code = stamp.toString();
         var year = now.getFullYear();
         var month = now.getMonth();
         var initial = 'AS';
@@ -240,7 +240,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     _getQueryUnposted(_paging) {
         var filter = {
             _deleted: false,
-            isPosted: false
+            isPosted: true
         };
 
         var query = _paging.keyword ? {
