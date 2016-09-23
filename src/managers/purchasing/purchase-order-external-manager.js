@@ -192,9 +192,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             reject(e);
                         })
                 }
+                purchaseOrderExternal.isPosted = true;
+                tasks.push(this.update(purchaseOrderExternal));
             }
-            purchaseOrderExternal.isPosted = true;
-            tasks.push(this.update(purchaseOrderExternal));
             Promise.all(tasks)
                 .then(result => {
                     resolve(result);
