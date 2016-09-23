@@ -173,7 +173,7 @@ it(`#03. should success when get created data with id`, function (done) {
 });
 
 it(`#04. should success when update created data`, function (done) {
-    createdData.SJNo += '[updated]';
+    createdData.refNo += '[updated]';
 
     instanceManager.update(createdData)
         .then(id => {

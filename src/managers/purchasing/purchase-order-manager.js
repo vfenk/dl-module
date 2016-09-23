@@ -11,7 +11,6 @@ var BaseManager = require('../base-manager');
 module.exports = class PurchaseOrderManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
-        this.poType = '';
         this.moduleId = '';
         this.year = (new Date()).getFullYear().toString().substring(2, 4);
         this.collection = this.db.use(map.purchasing.collection.PurchaseOrder);
@@ -22,58 +21,94 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = purchaseOrder;
 
-            if (!valid.buyerId || valid.buyerId.toString() == '')
-                errors["buyer"] = "Nama Buyer tidak boleh kosong";
-
-            if (!valid.unit || valid.unit == '')
-                errors["unit"] = "Nama unit yang mengajukan tidak boleh kosong";
-
-            if (!valid.categoryId || valid.categoryId.toString() == '')
-                errors["category"] = "Kategori tidak boleh kosong";
-
-            if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
-                errors["expectedDeliveryDate"] = "Tanggal rencana kirim tidak boleh kosong";
-
-            if (!valid.actualDeliveryDate || valid.actualDeliveryDate == '')
-                errors["actualDeliveryDate"] = "Tanggal kirim tidak boleh kosong";
-
-            if (valid.items.length > 0) {
-                var itemErrors = [];
-                for (var item of valid.items) {
-                    var itemError = {};
-
-                    if (!item.dealQuantity || item.dealQuantity == 0 || item.dealQuantity == '')
-                        itemError["dealQuantity"] = "Jumlah kesepakatan tidak boleh kosong";
-                    if (!item.dealUom || item.dealUom == 0 || item.dealUom == '')
-                        itemError["dealUom"] = "Jumlah kesepakatan tidak boleh kosong";
-                    if (!item.defaultQuantity || item.defaultQuantity == 0 || item.defaultQuantity == '')
-                        itemError["defaultQuantity"] = "Jumlah default tidak boleh kosong";
-                    itemErrors.push(itemError);
-                }
-                for (var itemError of itemErrors) {
-                    for (var prop in itemError) {
-                        errors.items = itemErrors;
-                        break;
+            var getPurchaseOrderPromise = this.collection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
                     }
-                    if (errors.items)
-                        break;
-                }
+                }, {
+                        "purchaseRequest.no": valid.purchaseRequest.no
+                    }]
+            });
 
-            }
-            else {
-                errors["items"] = "Harus ada minimal 1 barang";
-            }
+            Promise.all([getPurchaseOrderPromise])
+                .then(results => {
+                    var _module = results[0];
 
-            for (var prop in errors) {
-                var ValidationError = require('../../validation-error');
-                reject(new ValidationError('data does not pass validation', errors));
-            }
+                    if (valid.purchaseRequest) {
+                        var itemError = {};
+                        if (!valid.purchaseRequest.unit)
+                            itemError["unit"] = "Nama unit yang mengajukan tidak boleh kosong";
 
-            if (!valid.stamp)
-                valid = new PurchaseOrder(valid);
+                        if (!valid.purchaseRequest.category)
+                            itemError["category"] = "Kategori tidak boleh kosong";
 
-            valid.stamp(this.user.username, 'manager');
-            resolve(valid);
+                        if (!valid.purchaseRequest.no)
+                            itemError["no"] = "No. PR tidak boleh kosong";
+                        else if (_module)
+                            itemError["no"] = "No. PR sudah terdaftar";
+
+                        if (!valid.purchaseRequest.date)
+                            itemError["date"] = "Tanggal PR tidak boleh kosong";
+
+                        if (!valid.purchaseRequest.expectedDeliveryDate)
+                            itemError["expectedDeliveryDate"] = "Tanggal terima PR tidak boleh kosong";
+
+                        for (var prop in itemError) {
+                            errors["purchaseRequest"] = itemError;
+                            break;
+                        }
+                    }
+
+                    if (valid.items.length > 0) {
+                        var itemErrors = [];
+                        for (var item of valid.items) {
+                            var itemError = {};
+
+                            if (!item.product || !item.product._id)
+                                itemError["product"] = "Nama barang tidak boleh kosong";
+                            if (!item.defaultQuantity || item.defaultQuantity == 0)
+                                itemError["defaultQuantity"] = "Jumlah default tidak boleh kosong";
+                            itemErrors.push(itemError);
+                        }
+                        for (var itemError of itemErrors) {
+                            for (var prop in itemError) {
+                                errors.items = itemErrors;
+                                break;
+                            }
+                            if (errors.items)
+                                break;
+                        }
+
+                    }
+                    else {
+                        errors["items"] = "Harus ada minimal 1 barang";
+                    }
+
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
+
+                    if (valid.purchaseRequest) {
+                        valid.refNo = valid.purchaseRequest.no;
+                        valid.unit = valid.purchaseRequest.unit;
+                        valid.unitId = valid.purchaseRequest.unit._id;
+                        valid.category = valid.purchaseRequest.category;
+                        valid.categoryId = valid.purchaseRequest.category._id;
+                        valid.date = valid.purchaseRequest.date;
+                        valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
+                    }
+                    if (!valid.stamp)
+                        valid = new PurchaseOrder(valid);
+
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
+
         });
     }
 
@@ -132,7 +167,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 }
             };
             var filterPONo = {
-                'No': {
+                'no': {
                     '$regex': regex
                 }
             };
@@ -196,30 +231,38 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     }
 
     split(purchaseOrder) {
-        purchaseOrder = new PurchaseOrder(purchaseOrder);
         return new Promise((resolve, reject) => {
-            purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
+                    delete validPurchaseOrder._id;
                     this.create(validPurchaseOrder)
                         .then(id => {
-                            this._getByPR(validPurchaseOrder.purchaseRequest.no).then(po => {
-                                for (var item of validPurchaseOrder.items) {
-                                    for (var product of po.items) {
-                                        if (item.product.code == product.product.code) {
-                                            product.dealQuantity = product.dealQuantity - item.dealQuantity
-                                            product.defaultQuantity = product.defaultQuantity - item.defaultQuantity
-
-                                            break;
+                            this.getSingleById(validPurchaseOrder.sourcePurchaseOrderId)
+                                .then(sourcePo => {
+                                    for (var item of validPurchaseOrder.items) {
+                                        for (var sourceItem of sourcePo.items) {
+                                            if (item.product.code == sourceItem.product.code) {
+                                                sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity
+                                                break;
+                                            }
                                         }
                                     }
-                                }
-                                this.update(po)
-                                    .then(results => {
-                                        resolve(id);
+
+                                    sourcePo.items = sourcePo.items.filter((item, index) => {
+                                        return item.defaultQuantity > 0;
                                     })
-                            })
-                            resolve(id);
+
+                                    this.update(sourcePo)
+                                        .then(results => {
+                                            resolve(id);
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        });
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
                         })
                         .catch(e => {
                             reject(e);
@@ -243,6 +286,102 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             this.getSingleByQuery(query)
                 .then(module => {
                     resolve(module);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
+     getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo) {
+        return new Promise((resolve, reject) => {
+            var query;
+             if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined"  && PODLNo !="" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId !="" && dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    PODLNo: PODLNo,
+                    PRNo: PRNo,
+                    supplierId: supplierId,
+                    date:
+                    {
+                        $gte: dateFrom,
+                        $lte: dateTo
+                    },
+                    _deleted: false
+                };
+            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined"  && PODLNo !="" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId !="") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    PODLNo: PODLNo,
+                    PRNo: PRNo,
+                    supplierId: supplierId,
+                    _deleted: false
+                };
+            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined"  && PODLNo !="" && PRNo != "undefined" && PRNo != "") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    PODLNo: PODLNo,
+                    PRNo: PRNo,
+                    _deleted: false
+                };
+            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    PODLNo: PODLNo,
+                    _deleted: false
+                };
+            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="") {
+                query = {
+                    unitId: unitId,
+                    categoryId: categoryId,
+                    _deleted: false
+                };
+            } else
+                if (unitId != "undefined" && unitId != "") {
+                    query = {
+                        unitId: unitId,
+                        _deleted: false
+                    };
+                }
+                else if (categoryId != "undefined" && categoryId !="") {
+                    query = {
+                        categoryId: categoryId,
+                        _deleted: false
+                    };
+                } else if (PODLNo != "undefined" && PODLNo !="") {
+                    query = {
+                        PODLNo: PODLNo,
+                        _deleted: false
+                    };
+                } else if (PRNo != "undefined" && PRNo !="") {
+                    query = {
+                        PRNo: PRNo,
+                        _deleted: false
+                    };
+                } else if (supplierId != "undefined" && supplierId !="") {
+                    query = {
+                        supplierId: supplierId,
+                        _deleted: false
+                    };
+                } else if (dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
+                    query = {
+                        date:
+                        {
+                            $gte: dateFrom,
+                            $lte: dateTo
+                        },
+                        _deleted: false
+                    };
+                }
+           this.collection
+                .where(query)
+                .execute()
+                .then(PurchaseOrder => {
+                    resolve(PurchaseOrder);
                 })
                 .catch(e => {
                     reject(e);

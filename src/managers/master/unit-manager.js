@@ -48,7 +48,8 @@ module.exports = class UnitManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        division: valid.division
+                        division: valid.division,
+                        subDivision: valid.subDivision
                     }]
             });
 
@@ -60,7 +61,13 @@ module.exports = class UnitManager extends BaseManager {
                     if (!valid.division || valid.division == '')
                         errors["division"] = "Divisi Tidak Boleh Kosong";
                     else if (_unit) {
-                        errors["division"] = "Divisi sudah terdaftar";
+                        errors["division"] = "Perpaduan Divisi dan Sub Divisi sudah terdaftar";
+                    }
+                    
+                    if (!valid.subDivision || valid.subDivision == '')
+                        errors["subDivision"] = "Sub Divisi Tidak Boleh Kosong";
+                    else if (_unit) {
+                        errors["subDivision"] = "Perpaduan Divisi dan Sub Divisi sudah terdaftar";
                     }
 
                     for (var prop in errors) {
