@@ -53,10 +53,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     }
 
     create(purchaseOrderExternal) {
-        purchaseOrderExternal.no = `PO/DL/${this.year}${generateCode()}`;
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrderExternal)
                 .then(validPurchaseOrderExternal => {
+                    validPurchaseOrderExternal.no = this.generatePOno();
                     this.collection.insert(validPurchaseOrderExternal)
                         .then(id => {
                             resolve(id);
@@ -88,10 +88,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             if (!valid.paymentMethod || valid.paymentMethod == '')
                 purchaseOrderExternalError["paymentMethod"] = "Metode Pembayaran tidak boleh kosong";
 
-            if (!valid.currencyRate || valid.currencyRate == 0)
+            if ((valid.currency.toUpperCase() !="IDR") && !valid.currencyRate || valid.currencyRate == 0)
                 purchaseOrderExternalError["currencyRate"] = "Rate tidak boleh kosong";
 
-            if (!valid.paymentDueDays || valid.paymentDueDays == '')
+            if ((valid.paymentMethod.toUpperCase() !="CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
                 purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
 
             // if (valid.useVat == undefined || valid.useVat.toString() === '')
@@ -166,42 +166,73 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     post(listPurchaseOrderExternal) {
         var tasks = [];
         return new Promise((resolve, reject) => {
-        for(var purchaseOrderExternal of listPurchaseOrderExternal)
-        {
-            for (var data of purchaseOrderExternal.items) {
-            var getPOItemById = this.purchaseOrderManager.getSingleById(data._id);
-            Promise.all([getPOItemById])
-                .then(results => {
-                    for (var result of results) {
-                        var poItem = result;
-                        poItem.purchaseOrderExternalId = data._id;
-                        poItem.purchaseOrderExternal = data;
-                        poItem.supplierId = data.supplierId;
-                        poItem.supplier = data.supplier;
-                        poItem.freightCostBy = data.freightCostBy;
-                        poItem.paymentMethod = data.paymentMethod;
-                        poItem.paymentDueDays = data.paymentDueDays;
-                        poItem.useVat = data.useVat;
-                        poItem.vatRate = data.vatRate;
-                        poItem.useIncomeTax = data.useIncomeTax;
-                        poItem.isPosted=true;
-                        tasks.push(this.purchaseOrderManager.update(poItem));
-                    }
+            for (var purchaseOrderExternal of listPurchaseOrderExternal) {
+                for (var data of purchaseOrderExternal.items) {
+                    var getPOItemById = this.purchaseOrderManager.getSingleById(data._id);
+                    Promise.all([getPOItemById])
+                        .then(results => {
+                            for (var result of results) {
+                                var poItem = result;
+                                poItem.purchaseOrderExternalId = data._id;
+                                poItem.purchaseOrderExternal = data;
+                                poItem.supplierId = data.supplierId;
+                                poItem.supplier = data.supplier;
+                                poItem.freightCostBy = data.freightCostBy;
+                                poItem.paymentMethod = data.paymentMethod;
+                                poItem.paymentDueDays = data.paymentDueDays;
+                                poItem.useVat = data.useVat;
+                                poItem.vatRate = data.vatRate;
+                                poItem.useIncomeTax = data.useIncomeTax;
+                                poItem.isPosted = true;
+                                tasks.push(this.purchaseOrderManager.update(poItem));
+                            }
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
+                }
+            }
+            purchaseOrderExternal.isPosted = true;
+            tasks.push(this.update(purchaseOrderExternal));
+            Promise.all(tasks)
+                .then(result => {
+                    resolve(result);
                 })
                 .catch(e => {
                     reject(e);
                 })
-            }
+        });
+    }
+
+    generatePOno() {
+        var now = new Date();
+        var stamp = now / 1000 | 0;
+        var code = stamp.toString().substring(0,3);
+        var year = now.getFullYear();
+        var month = now.getMonth();
+        var initial = 'AS';
+        var div = "UMUM";
+        var unit = '';
+        switch (div.toUpperCase().trim()) {
+            case "UMUM":
+                unit = 'PBL.A';
+                break;
+            case 'UTILITY':
+                unit = 'PBL.C';
+                break;
+            case "FINISHING&PRINTING":
+                unit = 'PBL.D';
+                break;
+            case 'WEAVING':
+                unit = 'PBL.E';
+                break;
+            case "SPINNING":
+                unit = 'PBL.F';
+                break;
+            default:
+                unit = "PBL.X";
         }
-        purchaseOrderExternal.isPosted=true;    
-        tasks.push(this.update(purchaseOrderExternal));
-        Promise.all(tasks)
-            .then(result => {
-                resolve(result);
-            })
-            .catch(e => {
-                reject(e);
-                })
-    });
-}
+        var no = `${code}/DL-${unit}/PO-${initial}/${month}/${year}`;
+        return no;
+    }
 }

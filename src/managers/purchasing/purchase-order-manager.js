@@ -11,7 +11,7 @@ var BaseManager = require('../base-manager');
 module.exports = class PurchaseOrderManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
-        this.moduleId = '';
+        this.moduleId = 'PO';
         this.year = (new Date()).getFullYear().toString().substring(2, 4);
         this.collection = this.db.use(map.purchasing.collection.PurchaseOrder);
     }
@@ -46,27 +46,23 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                         if (!valid.purchaseRequest.no)
                             itemError["no"] = "No. PR tidak boleh kosong";
-                        else if (_module && valid.sourcePurchaseOrder== null)
+                        else if (_module && valid.sourcePurchaseOrder == null)
                             itemError["no"] = "No. PR sudah terdaftar";
-                         
-                        if (!valid.purchaseRequest.date)
-                            itemError["date"] = "Tanggal PR tidak boleh kosong";
-                        else
-                        {
-                            var _prDate = new Date(valid.purchaseRequest.date);
-                            if (_prDate > now)
-                                itemError["date"] = "Tanggal PR tidak boleh lebih besar dari tanggal hari ini";
-                        }
+                        //pending
+                        // if (!valid.purchaseRequest.date)
+                        //     itemError["date"] = "Tanggal PR tidak boleh kosong";
+                        // else {
+                        //     var _prDate = new Date(valid.purchaseRequest.date);
+                        //     if (_prDate > now)
+                        //         itemError["date"] = "Tanggal PR tidak boleh lebih besar dari tanggal hari ini";
+                        // }
 
-                        // if (!valid.purchaseRequest.expectedDeliveryDate)
-                        //     itemError["expectedDeliveryDate"] = "Tanggal terima PR tidak boleh kosong";
-                        if (valid.purchaseRequest.expectedDeliveryDate && valid.purchaseRequest.date)
-                        {
-                            var _prDate = new Date(valid.purchaseRequest.date);
-                            var _expectedDate = new Date(valid.purchaseRequest.expectedDeliveryDate);
-                            if(_prDate>_expectedDate)
-                                itemError["expectedDeliveryDate"] = "Tanggal PR tidak boleh lebih besar dari tanggal tersedia";
-                        }
+                        // if (valid.purchaseRequest.expectedDeliveryDate && valid.purchaseRequest.date) {
+                        //     var _prDate = new Date(valid.purchaseRequest.date);
+                        //     var _expectedDate = new Date(valid.purchaseRequest.expectedDeliveryDate);
+                        //     if (_prDate > _expectedDate)
+                        //         itemError["expectedDeliveryDate"] = "Tanggal PR tidak boleh lebih besar dari tanggal tersedia";
+                        // }
 
                         for (var prop in itemError) {
                             errors["purchaseRequest"] = itemError;
@@ -83,18 +79,16 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 itemError["product"] = "Nama barang tidak boleh kosong";
                             if (!item.defaultQuantity || item.defaultQuantity == 0)
                                 itemError["defaultQuantity"] = "Jumlah default tidak boleh kosong";
-                                
-                            if(valid.sourcePurchaseOrder != null)
-                            {
-                                for(var sourcePoItem of valid.sourcePurchaseOrder.items)
-                                {
-                                    if(item.product._id && item.defaultQuantity)
-                                    {
-                                        if(item.product._id == sourcePoItem.product._id)
-                                        {
-                                            if(item.defaultQuantity > sourcePoItem.defaultQuantity)
-                                            {
+
+                            if (valid.sourcePurchaseOrder != null) {
+                                for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
+                                    if (item.product._id && item.defaultQuantity) {
+                                        if (item.product._id == sourcePoItem.product._id) {
+                                            if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
                                                 itemError["defaultQuantity"] = "Jumlah default tidak boleh lebih besar dari PO asal";
+                                                break;
+                                            } else if (item.defaultQuantity == sourcePoItem.defaultQuantity) {
+                                                itemError["defaultQuantity"] = "Jumlah default tidak boleh sama dengan PO asal";
                                                 break;
                                             }
                                         }
@@ -184,7 +178,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     _getQueryUnposted(_paging) {
         var filter = {
             _deleted: false,
-             purchaseOrderExternalId: {}
+            purchaseOrderExternalId: {}
         };
 
         var query = _paging.keyword ? {
@@ -264,29 +258,37 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     split(purchaseOrder) {
         return new Promise((resolve, reject) => {
-            this._validate(purchaseOrder)
-                .then(validPurchaseOrder => {
-                    delete validPurchaseOrder._id;
-                    this.create(validPurchaseOrder)
-                        .then(id => {
-                            this.getSingleById(validPurchaseOrder.sourcePurchaseOrderId)
-                                .then(sourcePo => {
-                                    for (var item of validPurchaseOrder.items) {
-                                        for (var sourceItem of sourcePo.items) {
-                                            if (item.product.code == sourceItem.product.code) {
-                                                sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity
-                                                break;
+            this.getSingleById(validPurchaseOrder.sourcePurchaseOrderId)
+                .then(purchaseOrder => {
+                    purchaseOrder.sourcePurchaseOrder = purchaseOrder;
+                    purchaseOrder.sourcePurchaseOrderId = purchaseOrder._id;
+                    this._validate(purchaseOrder)
+                        .then(validPurchaseOrder => {
+                            delete validPurchaseOrder._id;
+                            this.create(validPurchaseOrder)
+                                .then(id => {
+                                    this.getSingleById(validPurchaseOrder.sourcePurchaseOrderId)
+                                        .then(sourcePo => {
+                                            for (var item of validPurchaseOrder.items) {
+                                                for (var sourceItem of sourcePo.items) {
+                                                    if (item.product.code == sourceItem.product.code) {
+                                                        sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity
+                                                        break;
+                                                    }
+                                                }
                                             }
-                                        }
-                                    }
 
-                                    sourcePo.items = sourcePo.items.filter((item, index) => {
-                                        return item.defaultQuantity > 0;
-                                    })
+                                            sourcePo.items = sourcePo.items.filter((item, index) => {
+                                                return item.defaultQuantity > 0;
+                                            })
 
-                                    this.update(sourcePo)
-                                        .then(results => {
-                                            resolve(id);
+                                            this.update(sourcePo)
+                                                .then(results => {
+                                                    resolve(id);
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                });
                                         })
                                         .catch(e => {
                                             reject(e);
@@ -298,11 +300,11 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         })
                         .catch(e => {
                             reject(e);
-                        });
+                        })
                 })
                 .catch(e => {
                     reject(e);
-                })
+                });
 
         });
     }
@@ -325,10 +327,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-     getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo) {
+    getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo) {
         return new Promise((resolve, reject) => {
             var query;
-             if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined"  && PODLNo !="" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId !="" && dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
+            if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined" && PODLNo != "" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId != "" && dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
                 query = {
                     unitId: unitId,
                     categoryId: categoryId,
@@ -342,7 +344,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     },
                     _deleted: false
                 };
-            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined"  && PODLNo !="" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId !="") {
+            } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined" && PODLNo != "" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId != "") {
                 query = {
                     unitId: unitId,
                     categoryId: categoryId,
@@ -351,7 +353,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     supplierId: supplierId,
                     _deleted: false
                 };
-            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined"  && PODLNo !="" && PRNo != "undefined" && PRNo != "") {
+            } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined" && PODLNo != "" && PRNo != "undefined" && PRNo != "") {
                 query = {
                     unitId: unitId,
                     categoryId: categoryId,
@@ -359,14 +361,14 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     PRNo: PRNo,
                     _deleted: false
                 };
-            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="" && PODLNo != "undefined") {
+            } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined") {
                 query = {
                     unitId: unitId,
                     categoryId: categoryId,
                     PODLNo: PODLNo,
                     _deleted: false
                 };
-            } else if (unitId != "undefined" && unitId != ""  && categoryId != "undefined"  && categoryId !="") {
+            } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "") {
                 query = {
                     unitId: unitId,
                     categoryId: categoryId,
@@ -379,27 +381,27 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         _deleted: false
                     };
                 }
-                else if (categoryId != "undefined" && categoryId !="") {
+                else if (categoryId != "undefined" && categoryId != "") {
                     query = {
                         categoryId: categoryId,
                         _deleted: false
                     };
-                } else if (PODLNo != "undefined" && PODLNo !="") {
+                } else if (PODLNo != "undefined" && PODLNo != "") {
                     query = {
                         PODLNo: PODLNo,
                         _deleted: false
                     };
-                } else if (PRNo != "undefined" && PRNo !="") {
+                } else if (PRNo != "undefined" && PRNo != "") {
                     query = {
                         PRNo: PRNo,
                         _deleted: false
                     };
-                } else if (supplierId != "undefined" && supplierId !="") {
+                } else if (supplierId != "undefined" && supplierId != "") {
                     query = {
                         supplierId: supplierId,
                         _deleted: false
                     };
-                } else if (dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
+                } else if (dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
                     query = {
                         date:
                         {
@@ -409,7 +411,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         _deleted: false
                     };
                 }
-           this.collection
+            this.collection
                 .where(query)
                 .execute()
                 .then(PurchaseOrder => {

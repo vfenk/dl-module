@@ -83,65 +83,83 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var valid = deliveryOrder;
             var now = new Date();
 
-            if (!valid.no || valid.no == '')
-                errors["no"] = "Nomor surat jalan tidak boleh kosong";
-
-            if (!valid.date || valid.date == '')
-                errors["date"] = "Tanggal surat jalan tidak boleh kosong";
-            else if (valid.date > now)
-                errors["SJDate"] = "Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
-
-            if (!valid.supplierId || valid.supplierId.toString() == '')
-                errors["supplier"] = "Nama supplier tidak boleh kosong";
-
-            if (valid.items && valid.items.length < 1) {
-                errors["items"] = "Harus ada minimal 1 nomor po eksternal";
-            } else {
-                var deliveryOrderItemErrors = [];
-                var deliveryOrderItemHasError = false;
-                for (var doItem of valid.items || []) {
-                    var purchaseOrderExternalItemErrors = [];
-                    var purchaseOrderExternalItemHasErrors = false;
-                    var purchaseOrderExternalError = {};
-
-                    if (!doItem.purchaseOrderExternal) {
-                        purchaseOrderExternalItemHasErrors = true;
-                        purchaseOrderExternalError["purchaseOrderExternal"] = "Purchase order external tidak boleh kosong";
+            var getDeliveryderPromise = this.collection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
                     }
+                }, {
+                        "no": valid.no
+                    }]
+            });
+            Promise.all([getDeliveryderPromise])
+                .then(results => {
+                    var _module = results[0];
+                    if (!valid.no || valid.no == '')
+                        errors["no"] = "Nomor surat jalan tidak boleh kosong";
+                    else if (_module)
+                        errors["no"] = "Nomor surat jalan sudah terdaftar";
 
-                    for (var doFulfillment of doItem.fulfillments || []) {
-                        var fulfillmentError = {};
-                        if (!doFulfillment.deliveredQuantity || doFulfillment.deliveredQuantity == 0) {
-                            purchaseOrderExternalItemHasErrors = true;
-                            fulfillmentError["deliveredQuantity"] = "Jumlah barang diterima tidak boleh kosong";
+                    if (!valid.date || valid.date == '')
+                        errors["date"] = "Tanggal surat jalan tidak boleh kosong";
+                    else if (valid.date > now)
+                        errors["SJDate"] = "Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
+
+                    if (!valid.supplierId || valid.supplierId.toString() == '')
+                        errors["supplier"] = "Nama supplier tidak boleh kosong";
+
+                    if (valid.items && valid.items.length < 1) {
+                        errors["items"] = "Harus ada minimal 1 nomor po eksternal";
+                    } else {
+                        var deliveryOrderItemErrors = [];
+                        var deliveryOrderItemHasError = false;
+                        for (var doItem of valid.items || []) {
+                            var purchaseOrderExternalItemErrors = [];
+                            var purchaseOrderExternalItemHasErrors = false;
+                            var purchaseOrderExternalError = {};
+
+                            if (!doItem.purchaseOrderExternal) {
+                                purchaseOrderExternalItemHasErrors = true;
+                                purchaseOrderExternalError["purchaseOrderExternal"] = "Purchase order external tidak boleh kosong";
+                            }
+
+                            for (var doFulfillment of doItem.fulfillments || []) {
+                                var fulfillmentError = {};
+                                if (!doFulfillment.deliveredQuantity || doFulfillment.deliveredQuantity == 0) {
+                                    purchaseOrderExternalItemHasErrors = true;
+                                    fulfillmentError["deliveredQuantity"] = "Jumlah barang diterima tidak boleh kosong";
+                                }
+                                else if (doFulfillment.deliveredQuantity > doFulfillment.purchaseOrderQuantity) {
+                                    purchaseOrderExternalItemHasErrors = true;
+                                    fulfillmentError["deliveredQuantity"] = "Jumlah barang diterima tidak boleh lebih besar dari jumlah barnag di po eksternal";
+                                }
+                                purchaseOrderExternalItemErrors.push(fulfillmentError);
+                            }
+                            if (purchaseOrderExternalItemHasErrors) {
+                                deliveryOrderItemHasError = true;
+                                purchaseOrderExternalError["fulfillments"] = purchaseOrderExternalItemErrors;
+                            }
+                            deliveryOrderItemErrors.push(purchaseOrderExternalError);
                         }
-                        else if (doFulfillment.deliveredQuantity > doFulfillment.purchaseOrderQuantity) {
-                            purchaseOrderExternalItemHasErrors = true;
-                            fulfillmentError["deliveredQuantity"] = "Jumlah barang diterima tidak boleh lebih besar dari jumlah barnag di po eksternal";
-                        }
-                        purchaseOrderExternalItemErrors.push(fulfillmentError);
+                        if (purchaseOrderExternalItemHasErrors)
+                            errors["items"] = deliveryOrderItemErrors;
                     }
-                    if (purchaseOrderExternalItemHasErrors) {
-                        deliveryOrderItemHasError = true;
-                        purchaseOrderExternalError["fulfillments"] = purchaseOrderExternalItemErrors;
+
+                    // 2c. begin: check if data has any error, reject if it has.
+                    for (var prop in errors) {
+                        var ValidationError = require('../../validation-error');
+                        reject(new ValidationError('data does not pass validation', errors));
                     }
-                    deliveryOrderItemErrors.push(purchaseOrderExternalError);
-                }
-                if (purchaseOrderExternalItemHasErrors)
-                    errors["items"] = deliveryOrderItemErrors;
-            }
 
-            // 2c. begin: check if data has any error, reject if it has.
-            for (var prop in errors) {
-                var ValidationError = require('../../validation-error');
-                reject(new ValidationError('data does not pass validation', errors));
-            }
+                    if (!valid.stamp)
+                        valid = new DeliveryOrder(valid);
 
-            if (!valid.stamp)
-                valid = new DeliveryOrder(valid);
-
-            valid.stamp(this.user.username, 'manager');
-            resolve(valid);
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
+                    reject(e);
+                })
         });
     }
 
@@ -223,13 +241,13 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     reject(e);
                 })
         });
-    } 
+    }
     getDataDeliveryOrder(no, supplierId, dateFrom, dateTo) {
         return new Promise((resolve, reject) => {
             var query;
-             if ( no != "undefined" && no != ""   && supplierId != "undefined" && supplierId!="" && dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
+            if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "" && dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
                 query = {
-                    no: no, 
+                    no: no,
                     supplierId: supplierId,
                     date:
                     {
@@ -238,19 +256,19 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     },
                     _deleted: false
                 };
-            } else if  ( no != "undefined" && no != ""  &&  supplierId != "undefined" && supplierId!="") {
-                query = { 
+            } else if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "") {
+                query = {
                     no: no,
                     supplierId: supplierId,
                     _deleted: false
                 };
-            }  else if  (no != "undefined" && no != "") {
-                query = { 
-                    no: no, 
+            } else if (no != "undefined" && no != "") {
+                query = {
+                    no: no,
                     _deleted: false
                 };
-            }   else if  (dateFrom != "undefined" && dateFrom !="" && dateTo != "undefined" && dateTo !="") {
-                query = { 
+            } else if (dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
+                query = {
                     date:
                     {
                         $gte: new Date(dateFrom),
@@ -258,9 +276,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     },
                     _deleted: false
                 };
-            }  
+            }
 
-           this.collection
+            this.collection
                 .where(query)
                 .execute()
                 .then(PurchaseOrder => {
