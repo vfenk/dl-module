@@ -388,4 +388,36 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 });
         });
     }
+
+    getDataPOUnit(startdate,enddate){
+        return new Promise((resolve, reject) => { 
+             if (startdate != "undefined" && enddate != "undefined") { 
+                this.collection.aggregate(
+                    [{
+                            $match: {
+                                "date": {
+                                    $gte: new Date(startdate) , 
+                                    $lte: new Date(enddate)   }
+                            }
+                        },
+                        {
+                            $unwind: "$items"
+                        },
+                        {
+                            $group:{
+                                _id: "$unit.division" ,
+                                "pricetotal":{$sum:"$items.pricePerDealUnit"}
+                            }
+                        }
+                    ]
+                    )
+                    .toArray(function(err, result) {
+                        assert.equal(err, null);
+                        console.log(result);
+                        resolve(result);
+                    }); 
+             }      
+         });
+    }
+    
 }

@@ -83,7 +83,7 @@ function getData() {
 function updateForSplit(purchaseOrder) {
 
     var newPurchaseOrder = {};
-    newPurchaseOrder.no = purchaseOrder.no;
+    newPurchaseOrder.no = purchaseOrder.no + code + stamp;
     newPurchaseOrder.refNo = purchaseOrder.refNo;
     newPurchaseOrder.buyer = purchaseOrder.buyer;
     newPurchaseOrder.unit = purchaseOrder.unit;

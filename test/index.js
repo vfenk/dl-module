@@ -15,7 +15,7 @@ describe('#dl-module', function (done) {
     // test('@master/supplier-manager', './master/supplier-manager-test');
     // test('@master/buyer-manager', './master/buyer-manager-test');
     // test('@master/product-manager', './master/product-manager-test');
-    // test('@master/unit-manager', './master/unit-manager-test');
+     test('@master/unit-manager', './master/unit-manager-test');
     // test('@master/category-manager', './master/category-manager-test');
 
     // test('@manager/UoM-manager', './managers/UoM-manager-test');
@@ -43,7 +43,7 @@ describe('#dl-module', function (done) {
     // test('@po/po-textile-manager', './po/po-textile-manager-test');
     // test('@CostCalculation', './cost-calculation/cost-calculation-manager-test');
     //Purchasing 
-    test('@purchasing/purchase-order-base-manager', './purchasing/purchase-order-manager-test');
-    test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
-    test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
+    // test('@purchasing/purchase-order-base-manager', './purchasing/purchase-order-manager-test');
+    // test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
+    // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
 })
