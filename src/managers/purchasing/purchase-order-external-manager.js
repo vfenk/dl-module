@@ -130,10 +130,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             poItemError["pricePerDealUnit"] = "Harga tidak boleh kosong";
                         }
 
-                        // if (!poItem.conversion || poItem.conversion == '') {
-                        //     poItemHasError = true;
-                        //     poItemError["conversion"] = "Konversi tidak boleh kosong";
-                        // }
+                        if (!poItem.conversion || poItem.conversion == '') {
+                            poItemHasError = true;
+                            poItemError["conversion"] = "Konversi tidak boleh kosong";
+                        }
 
                         purchaseOrderItemErrors.push(poItemError);
                     }
@@ -235,5 +235,64 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         }
         var no = `${code}/DL-${unit}/PO-${initial}/${month}/${year}`;
         return no;
+    }
+    
+    _getQueryUnposted(_paging) {
+        var filter = {
+            _deleted: false,
+            isPosted: false
+        };
+
+        var query = _paging.keyword ? {
+            '$and': [filter]
+        } : filter;
+
+        if (_paging.keyword) {
+            var regex = new RegExp(_paging.keyword, "i");
+            var filterRefPONo = {
+                'refNo': {
+                    '$regex': regex
+                }
+            };
+            var filterPONo = {
+                'no': {
+                    '$regex': regex
+                }
+            };
+
+            var $or = {
+                '$or': [filterRefPONo, filterPONo]
+            };
+
+            query['$and'].push($or);
+        }
+
+        return query;
+    }
+
+    readUnposted(paging) {
+        var _paging = Object.assign({
+            page: 1,
+            size: 20,
+            order: '_id',
+            asc: true
+        }, paging);
+
+        return new Promise((resolve, reject) => {
+
+            var query = this._getQueryUnposted(_paging);
+
+            this.collection
+                .where(query)
+                .page(_paging.page, _paging.size)
+                .orderBy(_paging.order, _paging.asc)
+                .execute()
+                .then(PurchaseOrders => {
+                    resolve(PurchaseOrders);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
     }
 }
