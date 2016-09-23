@@ -3,6 +3,7 @@
 var ObjectId = require("mongodb").ObjectId;
 require('mongodb-toolkit');
 var DLModels = require('dl-models');
+var assert = require('assert');
 var map = DLModels.map;
 var PurchaseOrder = DLModels.purchasing.PurchaseOrder;
 var generateCode = require('../../utils/code-generator');
@@ -419,5 +420,5 @@ module.exports = class PurchaseOrderManager extends BaseManager {
              }      
          });
     }
-    
+
 }
