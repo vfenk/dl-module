@@ -130,10 +130,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             poItemError["pricePerDealUnit"] = "Harga tidak boleh kosong";
                         }
 
-                        if (!poItem.conversion || poItem.conversion == '') {
-                            poItemHasError = true;
-                            poItemError["conversion"] = "Konversi tidak boleh kosong";
-                        }
+                        // if (!poItem.conversion || poItem.conversion == '') {
+                        //     poItemHasError = true;
+                        //     poItemError["conversion"] = "Konversi tidak boleh kosong";
+                        // }
 
                         purchaseOrderItemErrors.push(poItemError);
                     }
@@ -163,24 +163,27 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         });
     }
 
-    post(purchaseOrderExternal) {
+    post(listPurchaseOrderExternal) {
         var tasks = [];
-        for (var data of purchaseOrderExternal.items) {
+        return new Promise((resolve, reject) => {
+        for(var purchaseOrderExternal of listPurchaseOrderExternal)
+        {
+            for (var data of purchaseOrderExternal.items) {
             var getPOItemById = this.purchaseOrderManager.getSingleById(data._id);
             Promise.all([getPOItemById])
                 .then(results => {
                     for (var result of results) {
                         var poItem = result;
-                        poItem.purchaseOrderExternalId = validPurchaseOrderExternal._id;
-                        poItem.purchaseOrderExternal = validPurchaseOrderExternal;
-                        poItem.supplierId = validPurchaseOrderExternal.supplierId;
-                        poItem.supplier = validPurchaseOrderExternal.supplier;
-                        poItem.freightCostBy = validPurchaseOrderExternal.freightCostBy;
-                        poItem.paymentMethod = validPurchaseOrderExternal.paymentMethod;
-                        poItem.paymentDueDays = validPurchaseOrderExternal.paymentDueDays;
-                        poItem.useVat = validPurchaseOrderExternal.useVat;
-                        poItem.vatRate = validPurchaseOrderExternal.vatRate;
-                        poItem.useIncomeTax = validPurchaseOrderExternal.useIncomeTax;
+                        poItem.purchaseOrderExternalId = data._id;
+                        poItem.purchaseOrderExternal = data;
+                        poItem.supplierId = data.supplierId;
+                        poItem.supplier = data.supplier;
+                        poItem.freightCostBy = data.freightCostBy;
+                        poItem.paymentMethod = data.paymentMethod;
+                        poItem.paymentDueDays = data.paymentDueDays;
+                        poItem.useVat = data.useVat;
+                        poItem.vatRate = data.vatRate;
+                        poItem.useIncomeTax = data.useIncomeTax;
                         poItem.isPosted=true;
                         tasks.push(this.purchaseOrderManager.update(poItem));
                     }
@@ -188,12 +191,17 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 .catch(e => {
                     reject(e);
                 })
+            }
         }
         purchaseOrderExternal.isPosted=true;    
         tasks.push(this.update(purchaseOrderExternal));
         Promise.all(tasks)
-            .then(results => {
-                resolve(id);
+            .then(result => {
+                resolve(result);
             })
-    }
+            .catch(e => {
+                reject(e);
+                })
+    });
+}
 }
