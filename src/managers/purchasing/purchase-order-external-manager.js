@@ -59,35 +59,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 .then(validPurchaseOrderExternal => {
                     this.collection.insert(validPurchaseOrderExternal)
                         .then(id => {
-                            var tasks = [];
-                            for (var data of validPurchaseOrderExternal.items) {
-                                var getPOItemById = this.purchaseOrderManager.getSingleById(data._id);
-
-                                Promise.all([getPOItemById])
-                                    .then(results => {
-                                        for(var result of results){
-                                        var poItem = result;
-                                        poItem.purchaseOrderExternalId = validPurchaseOrderExternal._id;
-                                        poItem.purchaseOrderExternal = validPurchaseOrderExternal;
-                                        poItem.supplierId = validPurchaseOrderExternal.supplierId;
-                                        poItem.supplier = validPurchaseOrderExternal.supplier;
-                                        poItem.freightCostBy = validPurchaseOrderExternal.freightCostBy;
-                                        poItem.paymentMethod = validPurchaseOrderExternal.paymentMethod;
-                                        poItem.paymentDueDays = validPurchaseOrderExternal.paymentDueDays;
-                                        poItem.useVat = validPurchaseOrderExternal.useVat;
-                                        poItem.vatRate = validPurchaseOrderExternal.vatRate;
-                                        poItem.useIncomeTax = validPurchaseOrderExternal.useIncomeTax;
-                                        tasks.push(this.purchaseOrderManager.update(poItem));
-                                        }
-                                    })
-                                    .catch(e => {
-                                        reject(e);
-                                    })
-                            }
-                            Promise.all(tasks)
-                                .then(results => {
-                                    resolve(id);
-                                })
                             resolve(id);
                         })
                         .catch(e => {
@@ -190,5 +161,39 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             valid.stamp(this.user.username, 'manager');
             resolve(valid);
         });
+    }
+
+    post(purchaseOrderExternal) {
+        var tasks = [];
+        for (var data of purchaseOrderExternal.items) {
+            var getPOItemById = this.purchaseOrderManager.getSingleById(data._id);
+            Promise.all([getPOItemById])
+                .then(results => {
+                    for (var result of results) {
+                        var poItem = result;
+                        poItem.purchaseOrderExternalId = validPurchaseOrderExternal._id;
+                        poItem.purchaseOrderExternal = validPurchaseOrderExternal;
+                        poItem.supplierId = validPurchaseOrderExternal.supplierId;
+                        poItem.supplier = validPurchaseOrderExternal.supplier;
+                        poItem.freightCostBy = validPurchaseOrderExternal.freightCostBy;
+                        poItem.paymentMethod = validPurchaseOrderExternal.paymentMethod;
+                        poItem.paymentDueDays = validPurchaseOrderExternal.paymentDueDays;
+                        poItem.useVat = validPurchaseOrderExternal.useVat;
+                        poItem.vatRate = validPurchaseOrderExternal.vatRate;
+                        poItem.useIncomeTax = validPurchaseOrderExternal.useIncomeTax;
+                        poItem.isPosted=true;
+                        tasks.push(this.purchaseOrderManager.update(poItem));
+                    }
+                })
+                .catch(e => {
+                    reject(e);
+                })
+        }
+        purchaseOrderExternal.isPosted=true;    
+        tasks.push(this.update(purchaseOrderExternal));
+        Promise.all(tasks)
+            .then(results => {
+                resolve(id);
+            })
     }
 }

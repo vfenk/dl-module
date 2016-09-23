@@ -10,6 +10,7 @@ var DLModels = require('dl-models');
 var map = DLModels.map;
 var DeliveryOrder = DLModels.purchasing.DeliveryOrder;
 var PurchaseOrderManager = require('./purchase-order-manager');
+var PurchaseOrderExternalManager = require('./purchase-order-external-manager');
 
 // var PurchaseOrderBaseManager = require('../po/purchase-order-base-manager');
 // var DOItem = DLModels.po.DOItem;
@@ -19,6 +20,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         super(db, user);
         this.collection = this.db.use(map.purchasing.collection.DeliveryOrder);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
+        this.purchaseOrderExternalManager = new PurchaseOrderExternalManager(db, user);
     }
 
     _getQuery(paging) {
@@ -185,34 +187,36 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                             reject(e);
                                         });
                                 }
-                                // var getPOItemById = this.purchaseOrderManager.getSingleById(data._id);
-                                // Promise.all([getPOItemById])
-                                //     .then(result => {
-                                //         var poItem = result;
-                                //         poItem.purchaseOrderExternalId = validDeliveryOrder._id;
-                                //         poItem.purchaseOrderExternal = validDeliveryOrder;
-                                //         poItem.supplierId = validDeliveryOrder.supplierId;
-                                //         poItem.supplier = validDeliveryOrder.supplier;
-                                //         poItem.freightCostBy = validDeliveryOrder.freightCostBy;
-                                //         poItem.paymentMethod = validDeliveryOrder.paymentMethod;
-                                //         poItem.paymentDueDays = validDeliveryOrder.paymentDueDays;
-                                //         poItem.useVat = validDeliveryOrder.useVat;
-                                //         poItem.vatRate = validDeliveryOrder.vatRate;
-                                //         poItem.useIncomeTax = validDeliveryOrder.useIncomeTax;
-                                //         tasks.push(this.purchaseOrderManager.update(poItem));
-                                //     })
-                                //     .catch(e => {
-                                //         reject(e);
-                                //     })
                             }
+                            var tasksPoExternal = [];
                             Promise.all(tasks)
                                 .then(results => {
-                                    resolve(id);
+                                    for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                        var purchaseOrderExternal = validDeliveryOrder.purchaseOrderExternal;
+                                        for (var purchaseOrderExternalItem of purchaseOrderExternal.items) {
+                                            var indexPO = purchaseOrderExternal.indexOf(purchaseOrderExternalItem);
+                                            var getPurchaseOrderById = this.purchaseOrderManager.getSingleById(purchaseOrderExternalItem._id);
+                                            Promise.all([getPurchaseOrderById])
+                                                .then(results => {
+                                                    for (var result of results) {
+                                                        var purchaseOrder = result;
+                                                        purchaseOrderExternal.items[indexPO] = purchaseOrder;
+                                                    }
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                });
+                                        }
+                                        tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
+                                    }
                                 })
-                            resolve(id);
                         })
                         .catch(e => {
                             reject(e);
+                        })
+                    Promise.all(tasksPoExternal)
+                        .then(results => {
+                            resolve(id);
                         })
                 })
                 .catch(e => {
@@ -220,12 +224,5 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 })
         });
     }
-
-
-
-
-
-
-
 
 }

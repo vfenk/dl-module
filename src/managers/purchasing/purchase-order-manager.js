@@ -45,7 +45,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                         if (!valid.purchaseRequest.no)
                             itemError["no"] = "No. PR tidak boleh kosong";
-                        else if (_module)
+                        else if (_module && !valid.sourcePurchaseOrder._id)
                             itemError["no"] = "No. PR sudah terdaftar";
 
                         if (!valid.purchaseRequest.date)
