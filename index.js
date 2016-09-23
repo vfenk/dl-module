@@ -33,9 +33,9 @@ module.exports = {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
             PurchaseOrderExternalManager: require('./src/managers/purchasing/purchase-order-external-manager'),
             DeliveryOrderManager: require('./src/managers/purchasing/delivery-order-manager')
-        },
-        reports:{
-            POUnitPeriode : require('./src/managers/reports/purchase-order-unit-periode-manager')
         }
+        // reports:{
+        //     POUnitPeriode : require('./src/managers/reports/purchase-order-unit-periode-manager')
+        // }
     }
 }
