@@ -458,7 +458,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                            {
                                $group:{
                                    _id: "$unit.division" ,
-                                   "pricetotal":{$sum:"$purchaseOrderExternal.items.pricePerDealUnit"}
+                                   "pricetotal":{$sum:{$multiply:["$purchaseOrderExternal.items.pricePerDealUnit","$purchaseOrderExternal.items.dealQuantity","$purchaseOrderExternal.currencyRate"]}}
                                }
                            }
                        ]
