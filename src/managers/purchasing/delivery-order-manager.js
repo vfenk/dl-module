@@ -188,7 +188,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                                                             var fulfillmentObj = {
                                                                 no: validDeliveryOrder.no,
-                                                                deliveredQuantity: doItem.deliveredQuantity
+                                                                deliveredQuantity: doItem.deliveredQuantity,
+                                                                date:validDeliveryOrder.date
                                                             };
                                                             poItem.fulfillments.push(fulfillmentObj);
 
