@@ -3,6 +3,7 @@
 var ObjectId = require("mongodb").ObjectId;
 require('mongodb-toolkit');
 var DLModels = require('dl-models');
+var assert = require('assert');
 var map = DLModels.map;
 var PurchaseOrder = DLModels.purchasing.PurchaseOrder;
 var generateCode = require('../../utils/code-generator');
@@ -421,5 +422,56 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     reject(e);
                 });
         });
+    }
+
+    getDataPOUnit(startdate,enddate){
+        return new Promise((resolve, reject) => { 
+             if (startdate != "undefined" && enddate != "undefined") { 
+                 
+                   this.collection.aggregate(
+                       [{
+                                $match: {
+                                    $and: [
+                                       {
+                                           $and: [ 
+                                            {
+                                                "date": {
+                                                $gte: startdate , 
+                                                $lte: enddate   }
+                                            },
+                                            {
+                                                "_deleted":false
+                                            }                         
+                                            
+                                            ]
+                                       },
+                                       {
+                                           "isPosted":true
+                                       } 
+                                    ]
+                                    
+                                }
+                            },
+                            {
+                                $unwind: "$purchaseOrderExternal.items"
+                            },
+                           {
+                               $group:{
+                                   _id: "$unit.division" ,
+                                   "pricetotal":{$sum:"$purchaseOrderExternal.items.pricePerDealUnit"}
+                               }
+                           }
+                       ]
+                       )
+                        .toArray(function(err, result) {
+                            assert.equal(err, null);
+                            console.log(result);
+                            resolve(result);
+                        }); 
+                
+             }      
+         });
+
+        
     }
 }
