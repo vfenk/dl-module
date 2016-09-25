@@ -88,10 +88,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             if (!valid.paymentMethod || valid.paymentMethod == '')
                 purchaseOrderExternalError["paymentMethod"] = "Metode Pembayaran tidak boleh kosong";
 
-            if ((valid.currency.toUpperCase() !="IDR") && !valid.currencyRate || valid.currencyRate == 0)
+            if (!valid.currencyRate || valid.currencyRate == 0)
                 purchaseOrderExternalError["currencyRate"] = "Rate tidak boleh kosong";
 
-            if ((valid.paymentMethod.toUpperCase() !="CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
+            if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
                 purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
 
             // if (valid.useVat == undefined || valid.useVat.toString() === '')
@@ -165,39 +165,59 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
     post(listPurchaseOrderExternal) {
         var tasks = [];
+        var getPOItemById = [];
         return new Promise((resolve, reject) => {
             for (var purchaseOrderExternal of listPurchaseOrderExternal) {
+                
+                purchaseOrderExternal.isPosted = true;
+                tasks.push(this.update(purchaseOrderExternal));
                 for (var data of purchaseOrderExternal.items) {
-                    var getPOItemById = this.purchaseOrderManager.getSingleById(data._id);
-                    Promise.all([getPOItemById])
-                        .then(results => {
-                            for (var result of results) {
-                                var poItem = result;
-                                poItem.purchaseOrderExternalId = data._id;
-                                poItem.purchaseOrderExternal = data;
-                                poItem.supplierId = data.supplierId;
-                                poItem.supplier = data.supplier;
-                                poItem.freightCostBy = data.freightCostBy;
-                                poItem.pricePerDealUnit = data.pricePerDealUnit;
-                                poItem.paymentMethod = data.paymentMethod;
-                                poItem.paymentDueDays = data.paymentDueDays;
-                                poItem.useVat = data.useVat;
-                                poItem.vatRate = data.vatRate;
-                                poItem.useIncomeTax = data.useIncomeTax;
-                                poItem.isPosted = true;
-                                tasks.push(this.purchaseOrderManager.update(poItem));
+                    getPOItemById.push(this.purchaseOrderManager.getSingleById(data._id));
+                }
+            }
+            Promise.all(getPOItemById)
+                .then(results => {
+                    for (var result of results) {
+                        var _purchaseOrder = result;
+                        for (var _purchaseOrderExternal of listPurchaseOrderExternal) {
+                            for (var _poExternal of _purchaseOrderExternal.items) {
+                                if (_purchaseOrder._id == _poExternal._id) {
+                                    _purchaseOrder.purchaseOrderExternalId = _purchaseOrderExternal._id;
+                                    _purchaseOrder.purchaseOrderExternal = _purchaseOrderExternal;
+                                    _purchaseOrder.supplierId = _purchaseOrderExternal.supplierId;
+                                    _purchaseOrder.supplier = _purchaseOrderExternal.supplier;
+                                    _purchaseOrder.freightCostBy = _purchaseOrderExternal.freightCostBy;
+                                    _purchaseOrder.paymentMethod = _purchaseOrderExternal.paymentMethod;
+                                    _purchaseOrder.paymentDueDays = _purchaseOrderExternal.paymentDueDays;
+                                    _purchaseOrder.useVat = _purchaseOrderExternal.useVat;
+                                    _purchaseOrder.vatRate = _purchaseOrderExternal.vatRate;
+                                    _purchaseOrder.useIncomeTax = _purchaseOrderExternal.useIncomeTax;
+                                    _purchaseOrder.isPosted = true;
+
+                                    for (var poItem of _purchaseOrder.items) {
+                                        for (var itemExternal of _poExternal.items) {
+                                            if (itemExternal.product._id == poItem.product._id) {
+                                                poItem.dealQuantity = itemExternal.dealQuantity;
+                                                poItem.dealUom = itemExternal.dealUom;
+                                                poItem.pricePerDealUnit = itemExternal.pricePerDealUnit;
+                                                poItem.conversion = itemExternal.conversion;
+                                            }
+                                        }
+                                    }
+                                    tasks.push(this.purchaseOrderManager.update(_purchaseOrder));
+                                    break;
+                                }
                             }
+                        }
+                    }
+
+                    Promise.all(tasks)
+                        .then(result => {
+                            resolve(result);
                         })
                         .catch(e => {
                             reject(e);
                         })
-                }
-                purchaseOrderExternal.isPosted = true;
-                tasks.push(this.update(purchaseOrderExternal));
-            }
-            Promise.all(tasks)
-                .then(result => {
-                    resolve(result);
                 })
                 .catch(e => {
                     reject(e);
@@ -236,7 +256,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         var no = `${code}/DL-${unit}/PO-${initial}/${month}/${year}`;
         return no;
     }
-    
+
     _getQueryUnposted(_paging) {
         var filter = {
             _deleted: false,

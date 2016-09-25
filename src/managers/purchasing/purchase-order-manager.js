@@ -334,8 +334,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 query = {
                     unitId: unitId,
                     categoryId: categoryId,
-                    PODLNo: PODLNo,
-                    PRNo: PRNo,
+                    "purchaseOrderExternal.no": PODLNo,
+                    "purchaseRequest.no": PRNo,
                     supplierId: supplierId,
                     date:
                     {
@@ -348,8 +348,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 query = {
                     unitId: unitId,
                     categoryId: categoryId,
-                    PODLNo: PODLNo,
-                    PRNo: PRNo,
+                    "purchaseOrderExternal.no": PODLNo,
+                    "purchaseRequest.no": PRNo,
                     supplierId: supplierId,
                     _deleted: false
                 };
@@ -357,15 +357,15 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 query = {
                     unitId: unitId,
                     categoryId: categoryId,
-                    PODLNo: PODLNo,
-                    PRNo: PRNo,
+                    "purchaseOrderExternal.no": PODLNo,
+                    "purchaseRequest.no": PRNo,
                     _deleted: false
                 };
             } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined") {
                 query = {
                     unitId: unitId,
                     categoryId: categoryId,
-                    PODLNo: PODLNo,
+                    "purchaseOrderExternal.no": PODLNo,
                     _deleted: false
                 };
             } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "") {
@@ -388,12 +388,12 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     };
                 } else if (PODLNo != "undefined" && PODLNo != "") {
                     query = {
-                        PODLNo: PODLNo,
+                        "purchaseOrderExternal.no": PODLNo,
                         _deleted: false
                     };
                 } else if (PRNo != "undefined" && PRNo != "") {
                     query = {
-                        PRNo: PRNo,
+                        "purchaseRequest.no": PRNo,
                         _deleted: false
                     };
                 } else if (supplierId != "undefined" && supplierId != "") {
