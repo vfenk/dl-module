@@ -48,9 +48,17 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     '$regex': regex
                 }
             };
-
+            var filterItem = {
+                items: {
+                    $elemMatch: {
+                        'purchaseOrderExternal.no':{
+                            '$regex': regex
+                        }
+                    }
+                }
+            };
             var $or = {
-                '$or': [filteNO, filterNRefNo, filterSupplierName]
+                '$or': [filteNO, filterNRefNo, filterSupplierName,filterItem]
             };
 
             query['$and'].push($or);
@@ -254,6 +262,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 })
         });
     }
+    
     getDataDeliveryOrder(no, supplierId, dateFrom, dateTo) {
         return new Promise((resolve, reject) => {
             var query;

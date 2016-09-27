@@ -1,12 +1,17 @@
 module.exports = {
     managers: {
+        auth: {
+            AccountManager: require("./src/managers/auth/account-manager"),
+            RoleManager: require("./src/managers/auth/role-manager")
+        },
         master: {
             BuyerManager: require("./src/managers/master/buyer-manager"),
             SupplierManager: require("./src/managers/master/supplier-manager"),
             ProductManager: require("./src/managers/master/product-manager"),
             CategoryManager: require('./src/managers/master/category-manager'),
             UnitManager: require('./src/managers/master/unit-manager'),
-            UomManager: require('./src/managers/master/uom-manager')
+            UomManager: require('./src/managers/master/uom-manager'),
+            CurrencyManager: require('./src/managers/master/currency-manager')
         },
         // costCalculation:{
         //     //CostCalculationManager: require("./src/managers/cost-calculation/cost-calculation-manager")
