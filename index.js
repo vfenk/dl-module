@@ -1,5 +1,9 @@
 module.exports = {
     managers: {
+        auth: {
+            AccountManager: require("./src/managers/auth/account-manager"),
+            RoleManager: require("./src/managers/auth/role-manager")
+        },
         master: {
             BuyerManager: require("./src/managers/master/buyer-manager"),
             SupplierManager: require("./src/managers/master/supplier-manager"),
