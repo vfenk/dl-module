@@ -330,6 +330,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo) {
         return new Promise((resolve, reject) => {
+            var sorting={
+                "purchaseRequest.date": 1, 
+                "purchaseRequest.no": 1
+            };
             var query;
             if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined" && PODLNo != "" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId != "" && dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
                 query = {
@@ -412,11 +416,9 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         _deleted: false
                     };
                 }
-            this.collection
-                .where(query)
-                .execute()
-                .then(PurchaseOrder => {
-                    resolve(PurchaseOrder);
+            this.collection.find(query).sort(sorting).toArray()
+                .then(purchaseOrders => {
+                    resolve(purchaseOrders);
                 })
                 .catch(e => {
                     reject(e);
