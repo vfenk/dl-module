@@ -235,8 +235,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             '$and': [filter]
         } : filter;
 
-        if (paging.keyword) {
-            var regex = new RegExp(paging.keyword, "i");
+        if (_paging.keyword) {
+            var regex = new RegExp(_paging.keyword, "i");
 
             var filterRefPONo = {
                 'refNo': {
