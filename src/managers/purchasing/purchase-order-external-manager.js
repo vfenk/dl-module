@@ -37,6 +37,20 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     '$regex': regex
                 }
             };
+            var filterRefPO = {
+                'refNo': {
+                    '$regex': regex
+                }
+            };
+            var filterPOItem = {
+                items: {
+                    $elemMatch: {
+                        no:{
+                            '$regex': regex
+                        }
+                    }
+                }
+            };
             var filterSupplierName = {
                 'supplier.name': {
                     '$regex': regex
@@ -44,7 +58,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             };
 
             var $or = {
-                '$or': [filterPODLNo, filterSupplierName]
+                '$or': [filterPODLNo,filterRefPO, filterPOItem, filterSupplierName]
             };
 
             query['$and'].push($or);
@@ -267,21 +281,36 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             '$and': [filter]
         } : filter;
 
-        if (_paging.keyword) {
-            var regex = new RegExp(_paging.keyword, "i");
-            var filterRefPONo = {
-                'refNo': {
+        if (paging.keyword) {
+            var regex = new RegExp(paging.keyword, "i");
+
+            var filterPODLNo = {
+                'no': {
                     '$regex': regex
                 }
             };
-            var filterPONo = {
-                'no': {
+            var filterRefPO = {
+                "refNo": {
+                    '$regex': regex
+                }
+            };
+            var filterPOItem = {
+                items: {
+                    $elemMatch: {
+                        no:{
+                            '$regex': regex
+                        }
+                    }
+                }
+            };
+            var filterSupplierName = {
+                "supplier.name": {
                     '$regex': regex
                 }
             };
 
             var $or = {
-                '$or': [filterRefPONo, filterPONo]
+                '$or': [filterPODLNo,filterRefPO, filterPOItem, filterSupplierName]
             };
 
             query['$and'].push($or);
