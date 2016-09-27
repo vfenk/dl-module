@@ -272,8 +272,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     supplierId: supplierId,
                     date:
                     {
-                        $gte: new Date(dateFrom),
-                        $lte: new Date(dateTo)
+                        $gte: dateFrom,
+                        $lte: dateTo
                     },
                     _deleted: false
                 };
@@ -297,8 +297,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 query = {
                     date:
                     {
-                        $gte: new Date(dateFrom),
-                        $lte: new Date(dateTo)
+                        $gte: dateFrom,
+                        $lte: dateTo
                     },
                     _deleted: false
                 };
