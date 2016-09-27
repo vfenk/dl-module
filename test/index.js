@@ -9,6 +9,9 @@ describe('#dl-module', function (done) {
 
     this.timeout(2 * 60000);
     //console.log(path);
+    // Auth
+    test('@auth/account-manager', './auth/account-manager-test');
+    test('@auth/role-manager', './auth/role-manager-test');
 
     // Master
     // test('@master/uom-manager', './master/uom-manager-test');
@@ -45,5 +48,5 @@ describe('#dl-module', function (done) {
     //Purchasing 
     // test('@purchasing/purchase-order-base-manager', './purchasing/purchase-order-manager-test');
     // test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
-     test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
+    //  test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
 })
