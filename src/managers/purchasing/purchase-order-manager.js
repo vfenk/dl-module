@@ -88,10 +88,11 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                             if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
                                                 itemError["defaultQuantity"] = "Jumlah default tidak boleh lebih besar dari PO asal";
                                                 break;
-                                            } else if (item.defaultQuantity == sourcePoItem.defaultQuantity) {
-                                                itemError["defaultQuantity"] = "Jumlah default tidak boleh sama dengan PO asal";
-                                                break;
-                                            }
+                                            } 
+                                            // else if (item.defaultQuantity == sourcePoItem.defaultQuantity) {
+                                            //     itemError["defaultQuantity"] = "Jumlah default tidak boleh sama dengan PO asal";
+                                            //     break;
+                                            // }
                                         }
                                     }
                                 }
@@ -156,24 +157,73 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     '$regex': regex
                 }
             };
+            var filterRefPOEksternal = {
+                "purchaseOrderExternal.refNo": {
+                    '$regex': regex
+                }
+            };
             var filterPONo = {
                 'no': {
                     '$regex': regex
                 }
             };
+            var filterUnitDivision = {
+                "unit.division": {
+                    '$regex': regex
+                }
+            };
+            var filterUnitSubDivision = {
+                "unit.subDivision": {
+                    '$regex': regex
+                }
+            };
+            var filterCategory = {
+                "category.name": {
+                    '$regex': regex
+                }
+            };
+            var filterStaff = {
+                '_createdBy': {
+                    '$regex': regex
+                }
+            };
             var filterBuyerName = {
-                'buyer.name': {
+                "buyer.name": {
                     '$regex': regex
                 }
             };
 
             var $or = {
-                '$or': [filterRefPONo, filterPONo, filterBuyerName]
+                '$or': [filterRefPONo,filterRefPOEksternal, filterPONo,filterUnitDivision,filterUnitSubDivision,filterCategory, filterBuyerName]
             };
 
             query['$and'].push($or);
         }
         return query;
+    }
+
+    read(paging) {
+        var _paging = Object.assign({
+            page: 1,
+            size: 20,
+            order: 'date',
+            asc: true
+        }, paging);
+
+        return new Promise((resolve, reject) => {
+            var query = this._getQuery(_paging);
+            this.collection
+                .where(query)
+                .page(_paging.page, _paging.size)
+                .orderBy(_paging.order, _paging.asc)
+                .execute()
+                .then(modules => {
+                    resolve(modules);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
     }
 
     _getQueryUnposted(_paging) {
@@ -188,8 +238,14 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
         if (_paging.keyword) {
             var regex = new RegExp(_paging.keyword, "i");
+
             var filterRefPONo = {
                 'refNo': {
+                    '$regex': regex
+                }
+            };
+            var filterRefPOEksternal = {
+                "purchaseOrderExternal.refNo": {
                     '$regex': regex
                 }
             };
@@ -198,9 +254,34 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     '$regex': regex
                 }
             };
+            var filterUnitDivision = {
+                "unit.division": {
+                    '$regex': regex
+                }
+            };
+            var filterUnitSubDivision = {
+                "unit.subDivision": {
+                    '$regex': regex
+                }
+            };
+            var filterCategory = {
+                "category.name": {
+                    '$regex': regex
+                }
+            };
+            var filterStaff = {
+                '_createdBy': {
+                    '$regex': regex
+                }
+            };
+            var filterBuyerName = {
+                "buyer.name": {
+                    '$regex': regex
+                }
+            };
 
             var $or = {
-                '$or': [filterRefPONo, filterPONo]
+                '$or': [filterRefPONo,filterRefPOEksternal, filterPONo,filterUnitDivision,filterUnitSubDivision,filterCategory, filterBuyerName]
             };
 
             query['$and'].push($or);
@@ -424,87 +505,88 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-    getDataPOUnit(startdate,enddate){
-        return new Promise((resolve, reject) => { 
-             if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") { 
-                 
-                   this.collection.aggregate(
-                       [{
-                                $match: {
+    getDataPOUnit(startdate, enddate) {
+        return new Promise((resolve, reject) => {
+            if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") {
+
+                this.collection.aggregate(
+                    [{
+                        $match: {
+                            $and: [
+                                {
                                     $and: [
-                                       {
-                                           $and: [ 
-                                            {
-                                                "date": {
-                                                $gte: startdate , 
-                                                $lte: enddate   }
-                                            },
-                                            {
-                                                "_deleted":false
-                                            }                         
-                                            
-                                            ]
-                                       },
-                                       {
-                                           "isPosted":true
-                                       } 
+                                        {
+                                            "date": {
+                                                $gte: startdate,
+                                                $lte: enddate
+                                            }
+                                        },
+                                        {
+                                            "_deleted": false
+                                        }
+
                                     ]
-                                    
-                                }
-                            },
-                            {
-                                $unwind: "$items"
-                            },
-                           {
-                               $group:{
-                                   _id: "$unit.division" ,
-                                   "pricetotal":{$sum:{$multiply:["$items.pricePerDealUnit","$items.dealQuantity","$currencyRate"]}}
-                               }
-                           }
-                       ]
-                       )
-                        .toArray(function(err, result) {
-                            assert.equal(err, null);
-                            console.log(result);
-                            resolve(result);
-                        }); 
-                
-             }
-             else{
-                 this.collection.aggregate(
-                       [{
-                            $match: {
-                                       
-                                $and: [ 
-                                        {
-                                            "isPosted":true
-                                        } ,
-                                        {
-                                            "_deleted":false
-                                        }      
-                                        ]
-                                        },  
                                 },
                                 {
-                                    $unwind: "$items"
-                                },
-                            {
-                                $group:{
-                                    _id: "$unit.division" ,
-                                    "pricetotal":{$sum:{$multiply:["$items.pricePerDealUnit","$items.dealQuantity","$currencyRate"]}}
+                                    "isPosted": true
                                 }
-                            }
-                        ]
-                        )
-                            .toArray(function(err, result) {
-                                assert.equal(err, null);
-                                console.log(result);
-                                resolve(result);
-                            }); 
-                
-             }      
-         });
+                            ]
 
-        
+                        }
+                    },
+                        {
+                            $unwind: "$items"
+                        },
+                        {
+                            $group: {
+                                _id: "$unit.division",
+                                "pricetotal": { $sum: { $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"] } }
+                            }
+                        }
+                    ]
+                )
+                    .toArray(function (err, result) {
+                        assert.equal(err, null);
+                        console.log(result);
+                        resolve(result);
+                    });
+
+            }
+            else {
+                this.collection.aggregate(
+                    [{
+                        $match: {
+
+                            $and: [
+                                {
+                                    "isPosted": true
+                                },
+                                {
+                                    "_deleted": false
+                                }
+                            ]
+                        },
+                    },
+                        {
+                            $unwind: "$items"
+                        },
+                        {
+                            $group: {
+                                _id: "$unit.division",
+                                "pricetotal": { $sum: { $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"] } }
+                            }
+                        }
+                    ]
+                )
+                    .toArray(function (err, result) {
+                        assert.equal(err, null);
+                        console.log(result);
+                        resolve(result);
+                    });
+
+            }
+        });
+
+
     }
 }
