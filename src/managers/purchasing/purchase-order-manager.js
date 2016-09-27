@@ -88,10 +88,11 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                             if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
                                                 itemError["defaultQuantity"] = "Jumlah default tidak boleh lebih besar dari PO asal";
                                                 break;
-                                            } else if (item.defaultQuantity == sourcePoItem.defaultQuantity) {
-                                                itemError["defaultQuantity"] = "Jumlah default tidak boleh sama dengan PO asal";
-                                                break;
-                                            }
+                                            } 
+                                            // else if (item.defaultQuantity == sourcePoItem.defaultQuantity) {
+                                            //     itemError["defaultQuantity"] = "Jumlah default tidak boleh sama dengan PO asal";
+                                            //     break;
+                                            // }
                                         }
                                     }
                                 }
