@@ -271,10 +271,11 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return no;
     }
 
-    _getQueryUnposted(_paging) {
+    _getQueryUnposted(idSupplier, _paging) {
         var filter = {
             _deleted: false,
-            isPosted: true
+            isPosted: true,
+            "supplier._id":idSupplier
         };
 
         var query = _paging.keyword ? {
@@ -283,12 +284,23 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-
+            
+            var filterPOItem = {
+                items: {
+                    $elemMatch: {
+                        no:{
+                            '$regex': regex
+                        }
+                    }
+                }
+            };
+            
             var filterPODLNo = {
                 'no': {
                     '$regex': regex
                 }
             };
+            
             var filterRefPO = {
                 "refNo": {
                     '$regex': regex
@@ -303,14 +315,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     }
                 }
             };
-            var filterSupplierName = {
-                "supplier.name": {
-                    '$regex': regex
-                }
-            };
 
             var $or = {
-                '$or': [filterPODLNo,filterRefPO, filterPOItem, filterSupplierName]
+                '$or': [filterPODLNo,filterRefPO, filterPOItem]
             };
 
             query['$and'].push($or);
@@ -319,7 +326,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return query;
     }
 
-    readUnposted(paging) {
+    readUnposted(idSupplier, paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -329,7 +336,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
         return new Promise((resolve, reject) => {
 
-            var query = this._getQueryUnposted(_paging);
+            var query = this._getQueryUnposted(idSupplier,_paging);
 
             this.collection
                 .where(query)
