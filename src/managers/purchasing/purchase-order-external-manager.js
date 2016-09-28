@@ -315,11 +315,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return no;
     }
 
-    _getQueryUnposted(idSupplier, _paging) {
+    _getQueryUnposted( _paging) {
         var filter = {
             _deleted: false,
-            isPosted: true,
-            "supplier._id": idSupplier
+            isPosted: true
         };
 
         var query = _paging.keyword ? {
@@ -370,7 +369,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return query;
     }
 
-    readUnposted(idSupplier, paging) {
+   readUnposted(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -379,8 +378,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         }, paging);
 
         return new Promise((resolve, reject) => {
-
-            var query = this._getQueryUnposted(idSupplier, _paging);
+            var query = this._getQueryUnposted(_paging);
 
             this.collection
                 .where(query)
