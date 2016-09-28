@@ -26,13 +26,26 @@ module.exports = class CurrencyManager extends BaseManager {
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterName = {
-                'name': {
+            var filterCode = {
+                'code': {
                     '$regex': regex
                 }
             };
+            var filterSymbol = {
+                'symbol': {
+                    '$regex': regex
+                }
+            };
+            var filterDescription = {
+                'description': {
+                    '$regex': regex
+                }
+            };
+            var $or = {
+                '$or': [filterCode, filterSymbol, filterDescription]
+            };
 
-            query['$and'].push(filterName);
+            query['$and'].push($or);
         }
         return query;
     }
@@ -83,5 +96,4 @@ module.exports = class CurrencyManager extends BaseManager {
                 })
         });
     }
-
 }
