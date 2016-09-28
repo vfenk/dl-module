@@ -316,9 +316,12 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     }
 
     _getQueryUnposted( _paging) {
+        var supplierId = _paging.filter.supplierId;
+        
         var filter = {
             _deleted: false,
-            isPosted: true
+            isPosted: true,
+            supplierId: new ObjectId(supplierId)
         };
 
         var query = _paging.keyword ? {
