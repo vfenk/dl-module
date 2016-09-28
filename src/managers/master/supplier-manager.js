@@ -70,6 +70,10 @@ module.exports = class SupplierManager extends BaseManager {
 
                     if (!valid.name || valid.name == '')
                         errors["name"] = "Nama harus diisi";
+                    
+                    if(!valid.import)
+                        valid.import=false;
+                        
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');

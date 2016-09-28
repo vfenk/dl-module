@@ -17,6 +17,8 @@ function getData() {
     supplier.contact = `phone[${code}]`;
     supplier.PIC=`PIC[${code}]`;
     supplier.import = true;
+    supplier.NPWP=`NPWP[${code}]`;
+    supplier.serialNumber=`serialNo[${code}]`;
 
     return supplier;
 }
@@ -83,6 +85,8 @@ it(`#03. should success when update created data`, function (done) {
     createdData.contact += '[updated]';
     createdData.PIC += '[updated]';
     createdData.import += '[updated]';
+    createdData.NPWP += '[updated]';
+    createdData.serialNumber += '[updated]';
 
     instanceManager.update(createdData)
         .then(id => {
