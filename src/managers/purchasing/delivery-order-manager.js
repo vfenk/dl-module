@@ -112,8 +112,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         errors["date"] = "Tanggal surat jalan tidak boleh kosong";
                     else if (valid.date > now)
                         errors["date"] = "Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
-                    if (!valid.supplierDOdate || valid.supplierDOdate == '')
-                        errors["supplierDOdate"] = "Tanggal surat jalan supplier tidak boleh kosong";
+                    if (!valid.supplierDoDate || valid.supplierDoDate == '')
+                        errors["supplierDoDate"] = "Tanggal surat jalan supplier tidak boleh kosong";
 
                     if (!valid.supplierId || valid.supplierId.toString() == '')
                         errors["supplier"] = "Nama supplier tidak boleh kosong";
