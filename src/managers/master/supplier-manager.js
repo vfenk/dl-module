@@ -50,12 +50,17 @@ module.exports = class SupplierManager extends BaseManager {
             // 1. begin: Declare promises.
             var getSupplierPromise = this.collection.singleOrDefault({
                 "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                        code: valid.code
-                    }]
+                    "$and": [{
+                        _id: {
+                            '$ne': new ObjectId(valid._id)
+                        }
+                    }, {
+                            code: valid.code
+                        }]
+                },
+                {
+                    _deleted:false
+                } ]
             });
             // 2. begin: Validation.
             Promise.all([getSupplierPromise])
@@ -70,6 +75,10 @@ module.exports = class SupplierManager extends BaseManager {
 
                     if (!valid.name || valid.name == '')
                         errors["name"] = "Nama harus diisi";
+                    
+                    if(!valid.import)
+                        valid.import=false;
+
                     // 2c. begin: check if data has any error, reject if it has.
                     for (var prop in errors) {
                         var ValidationError = require('../../validation-error');
