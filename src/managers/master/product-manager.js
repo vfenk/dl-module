@@ -89,6 +89,7 @@ module.exports = class ProductManager extends BaseManager {
                         reject(new ValidationError('Product Manager : data does not pass validation', errors));
                     }
 
+                    valid.uomId = new ObjectId(valid.uomId);
                     if (!valid.stamp)
                         valid = new Product(valid);
                     valid.stamp(this.user.username, 'manager');

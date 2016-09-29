@@ -161,6 +161,16 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
+                    valid.supplierId=new ObjectId(valid.supplierId);
+                    for(var item of valid.items)
+                    {
+                        item.purchaseOrderExternalId = new ObjectId(item.purchaseOrderExternalId);
+                        for(var fulfillment of item.fulfillments)
+                        {
+                            fulfillment.purchaseOrderId=new ObjectId(fulfillment.purchaseOrderId);
+                            fulfillment.productId=new ObjectId(fulfillment.productId);
+                        }
+                    }
                     if (!valid.stamp)
                         valid = new DeliveryOrder(valid);
 
@@ -180,6 +190,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var getPurchaseOrderById=[];
             this._validate(deliveryOrder)
                 .then(validDeliveryOrder => {
+                    validDeliveryOrder.supplierId=new ObjectId(validDeliveryOrder.supplierId);
                     this.collection.insert(validDeliveryOrder)
                         .then(id => {
                             //update PO Internal
@@ -208,8 +219,21 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                 totalRealize += poItemFulfillment.deliveredQuantity;
                                                             }
                                                             poItem.realizationQuantity = totalRealize;
+                                                            if(poItem.realizationQuantity == poItem.pricePerDealUnit)
+                                                                poItem.isClosed=true;
+                                                            else
+                                                                poItem.isClosed=false;
                                                             break;
                                                         }
+                                                    }
+                                                }
+                                                for (var poItem of purchaseOrder.items) {
+                                                    if (poItem.isClosed==true)
+                                                        purchaseOrder.isClosed=true;
+                                                    else
+                                                    {
+                                                        purchaseOrder.isClosed=false;
+                                                        break;
                                                     }
                                                 }
                                                 tasks.push(this.purchaseOrderManager.update(purchaseOrder));
@@ -227,6 +251,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         }
                                                         Promise.all(getPurchaseOrderById)
                                                             .then(results => {
+                                                                for(var result of results)
+                                                                {
+                                                                    if(result.isClosed == true)
+                                                                        purchaseOrderExternal.isClosed=true;
+                                                                    else{
+                                                                        purchaseOrderExternal.isClosed=false;
+                                                                        break;
+                                                                    }
+                                                                }
                                                                 purchaseOrderExternal.items = results;
                                                                 tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
                                                             })

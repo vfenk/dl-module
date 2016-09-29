@@ -71,6 +71,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             this._validate(purchaseOrderExternal)
                 .then(validPurchaseOrderExternal => {
                     validPurchaseOrderExternal.no = this.generatePOno();
+                    validPurchaseOrderExternal.supplierId=new ObjectId(validPurchaseOrderExternal.supplierId);
                     this.collection.insert(validPurchaseOrderExternal)
                         .then(id => {
                             var tasks = [];
@@ -209,6 +210,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         reject(new ValidationError('data podl does not pass validation', purchaseOrderExternalError));
                     }
 
+                    valid.supplierId=new ObjectId(valid.supplierId);
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
 
@@ -240,9 +242,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         for (var _purchaseOrderExternal of listPurchaseOrderExternal) {
                             for (var _poExternal of _purchaseOrderExternal.items) {
                                 if (_purchaseOrder._id == _poExternal._id) {
-                                    _purchaseOrder.purchaseOrderExternalId = _purchaseOrderExternal._id;
+                                    _purchaseOrder.purchaseOrderExternalId = new ObjectId(_purchaseOrderExternal._id);
                                     _purchaseOrder.purchaseOrderExternal = _purchaseOrderExternal;
-                                    _purchaseOrder.supplierId = _purchaseOrderExternal.supplierId;
+                                    _purchaseOrder.supplierId = new ObjectId(_purchaseOrderExternal.supplierId);
                                     _purchaseOrder.supplier = _purchaseOrderExternal.supplier;
                                     _purchaseOrder.freightCostBy = _purchaseOrderExternal.freightCostBy;
                                     _purchaseOrder.paymentMethod = _purchaseOrderExternal.paymentMethod;
@@ -321,6 +323,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         var filter = {
             _deleted: false,
             isPosted: true,
+            isClosed: true,
             supplierId: new ObjectId(supplierId)
         };
 
