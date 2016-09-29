@@ -84,7 +84,7 @@ module.exports = class ProductManager extends BaseManager {
                         errors["uom"] = "Satuan tidak boleh kosong";
 
                     // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in errors) {
+                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('Product Manager : data does not pass validation', errors));
                     }

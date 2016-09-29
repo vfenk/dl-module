@@ -204,7 +204,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
 
                     // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in purchaseOrderExternalError) {
+                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data podl does not pass validation', purchaseOrderExternalError));
                     }

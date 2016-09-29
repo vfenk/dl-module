@@ -82,7 +82,7 @@ module.exports = class BuyerManager extends BaseManager {
                         errors["country"] = "Silakan pilih salah satu negara";
 
                     // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in errors) {
+                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }

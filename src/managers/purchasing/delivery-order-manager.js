@@ -156,7 +156,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     }
 
                     // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in errors) {
+                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }
