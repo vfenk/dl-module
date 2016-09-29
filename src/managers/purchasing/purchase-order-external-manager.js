@@ -71,6 +71,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             this._validate(purchaseOrderExternal)
                 .then(validPurchaseOrderExternal => {
                     validPurchaseOrderExternal.no = this.generatePOno();
+                    validPurchaseOrderExternal.supplierId=new ObjectId(validPurchaseOrderExternal.supplierId);
                     this.collection.insert(validPurchaseOrderExternal)
                         .then(id => {
                             var tasks = [];
@@ -204,11 +205,12 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
 
                     // 2c. begin: check if data has any error, reject if it has.
-                    for (var prop in purchaseOrderExternalError) {
+                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data podl does not pass validation', purchaseOrderExternalError));
                     }
 
+                    valid.supplierId=new ObjectId(valid.supplierId);
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
 
@@ -240,9 +242,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         for (var _purchaseOrderExternal of listPurchaseOrderExternal) {
                             for (var _poExternal of _purchaseOrderExternal.items) {
                                 if (_purchaseOrder._id == _poExternal._id) {
-                                    _purchaseOrder.purchaseOrderExternalId = _purchaseOrderExternal._id;
+                                    _purchaseOrder.purchaseOrderExternalId = new ObjectId(_purchaseOrderExternal._id);
                                     _purchaseOrder.purchaseOrderExternal = _purchaseOrderExternal;
-                                    _purchaseOrder.supplierId = _purchaseOrderExternal.supplierId;
+                                    _purchaseOrder.supplierId = new ObjectId(_purchaseOrderExternal.supplierId);
                                     _purchaseOrder.supplier = _purchaseOrderExternal.supplier;
                                     _purchaseOrder.freightCostBy = _purchaseOrderExternal.freightCostBy;
                                     _purchaseOrder.paymentMethod = _purchaseOrderExternal.paymentMethod;
@@ -315,12 +317,13 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return no;
     }
 
-    _getQueryUnposted( _paging) {
+    _getQueryPosted( _paging) {
         var supplierId = _paging.filter.supplierId;
         
         var filter = {
             _deleted: false,
             isPosted: true,
+            isClosed: false,
             supplierId: new ObjectId(supplierId)
         };
 
@@ -372,7 +375,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return query;
     }
 
-   readUnposted(paging) {
+   readPosted(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -381,7 +384,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         }, paging);
 
         return new Promise((resolve, reject) => {
-            var query = this._getQueryUnposted(_paging);
+            var query = this._getQueryPosted(_paging);
 
             this.collection
                 .where(query)

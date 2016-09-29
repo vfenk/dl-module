@@ -113,17 +113,18 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         errors["items"] = "Harus ada minimal 1 barang";
                     }
 
-                    for (var prop in errors) {
+                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }
-
+                    
+                    valid.supplierId=new ObjectId(valid.supplierId);
                     if (valid.purchaseRequest) {
                         valid.refNo = valid.purchaseRequest.no;
                         valid.unit = valid.purchaseRequest.unit;
-                        valid.unitId = valid.purchaseRequest.unit._id;
+                        valid.unitId = new ObjectId(valid.purchaseRequest.unit._id);
                         valid.category = valid.purchaseRequest.category;
-                        valid.categoryId = valid.purchaseRequest.category._id;
+                        valid.categoryId = new ObjectId(valid.purchaseRequest.category._id);
                         valid.date = valid.purchaseRequest.date;
                         valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
                     }
@@ -323,6 +324,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrderc => {
+                    validPurchaseOrderc.supplierId=new ObjectId(validPurchaseOrderc.supplierId);
                     this.collection.insert(validPurchaseOrderc)
                         .then(id => {
                             resolve(id);

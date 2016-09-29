@@ -82,7 +82,7 @@ module.exports = class CurrencyManager extends BaseManager {
                     if (!valid.rate || valid.rate == 0)
                         errors["rate"] = "Rate mata uang Tidak Boleh Kosong";
 
-                    for (var prop in errors) {
+                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }

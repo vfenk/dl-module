@@ -63,7 +63,7 @@ module.exports = class UomManager extends BaseManager {
                         errors["unit"] = "Satuan sudah terdaftar";
                     }
 
-                    for (var prop in errors) {
+                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }

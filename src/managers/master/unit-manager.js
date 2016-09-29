@@ -79,7 +79,7 @@ module.exports = class UnitManager extends BaseManager {
                         errors["subDivision"] = "Perpaduan Divisi dan Sub Divisi sudah terdaftar";
                     }
 
-                    for (var prop in errors) {
+                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }
