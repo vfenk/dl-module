@@ -315,7 +315,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return no;
     }
 
-    _getQueryUnposted( _paging) {
+    _getQueryPosted( _paging) {
         var supplierId = _paging.filter.supplierId;
         
         var filter = {
@@ -372,7 +372,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return query;
     }
 
-   readUnposted(paging) {
+   readPosted(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -381,7 +381,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         }, paging);
 
         return new Promise((resolve, reject) => {
-            var query = this._getQueryUnposted(_paging);
+            var query = this._getQueryPosted(_paging);
 
             this.collection
                 .where(query)
