@@ -323,7 +323,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         var filter = {
             _deleted: false,
             isPosted: true,
-            isClosed: true,
+            isClosed: false,
             supplierId: new ObjectId(supplierId)
         };
 
