@@ -209,14 +209,16 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             order: 'date',
             asc: true
         }, paging);
-
+        
+        var sorting={
+                "unit.division": 1, 
+                "category.name": 1,
+                "purchaseRequest.date": 1
+            };
+            
         return new Promise((resolve, reject) => {
             var query = this._getQuery(_paging);
-            this.collection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
-                .execute()
+            this.collection.find(query).sort(sorting).toArray()
                 .then(modules => {
                     resolve(modules);
                 })
