@@ -210,7 +210,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                             var fulfillmentObj = {
                                                                 no: validDeliveryOrder.no,
                                                                 deliveredQuantity: doItem.deliveredQuantity,
-                                                                date:validDeliveryOrder.date
+                                                                date:validDeliveryOrder.date,
+                                                                supplierDoDate:validDeliveryOrder.supplierDoDate
                                                             };
                                                             poItem.fulfillments.push(fulfillmentObj);
 
@@ -305,7 +306,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 query = {
                     no: no,
                     supplierId: new ObjectId(supplierId),
-                    date:
+                    supplierDoDate:
                     {
                         $gte: dateFrom,
                         $lte: dateTo
@@ -330,7 +331,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 };
             } else if (dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
                 query = {
-                    date:
+                    supplierDoDate:
                     {
                         $gte: dateFrom,
                         $lte: dateTo
