@@ -304,7 +304,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "" && dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
                 query = {
                     no: no,
-                    supplierId: supplierId,
+                    supplierId: new ObjectId(supplierId),
                     date:
                     {
                         $gte: dateFrom,
@@ -315,12 +315,12 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             } else if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "") {
                 query = {
                     no: no,
-                    supplierId: supplierId,
+                    supplierId: new ObjectId(supplierId),
                     _deleted: false
                 };
             } else if (supplierId != "undefined" && supplierId != "") {
                 query = {
-                    supplierId: supplierId,
+                    supplierId: new ObjectId(supplierId),
                     _deleted: false
                 };
             } else if (no != "undefined" && no != "") {
