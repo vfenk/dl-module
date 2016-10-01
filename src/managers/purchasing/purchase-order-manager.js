@@ -118,7 +118,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
                     
-                    valid.supplierId=new ObjectId(valid.supplierId);
                     if (valid.purchaseRequest) {
                         valid.refNo = valid.purchaseRequest.no;
                         valid.unit = valid.purchaseRequest.unit;
@@ -210,14 +209,16 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             order: 'date',
             asc: true
         }, paging);
-
+        
+        var sorting={
+                "unit.division": 1, 
+                "category.name": 1,
+                "purchaseRequest.date": 1
+            };
+            
         return new Promise((resolve, reject) => {
             var query = this._getQuery(_paging);
-            this.collection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
-                .execute()
+            this.collection.find(query).sort(sorting).toArray()
                 .then(modules => {
                     resolve(modules);
                 })
@@ -230,7 +231,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     _getQueryUnposted(_paging) {
         var filter = {
             _deleted: false,
-            purchaseOrderExternalId: {}
+            isPosted: false
         };
 
         var query = _paging.keyword ? {
@@ -324,7 +325,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrderc => {
-                    validPurchaseOrderc.supplierId=new ObjectId(validPurchaseOrderc.supplierId);
                     this.collection.insert(validPurchaseOrderc)
                         .then(id => {
                             resolve(id);
@@ -420,11 +420,11 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             var query;
             if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined" && PODLNo != "" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId != "" && dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
                 query = {
-                    unitId: unitId,
-                    categoryId: categoryId,
+                    unitId: new ObjectId(unitId),
+                    categoryId: new ObjectId(categoryId),
                     "purchaseOrderExternal.no": PODLNo,
                     "purchaseRequest.no": PRNo,
-                    supplierId: supplierId,
+                    supplierId: new ObjectId(supplierId),
                     date:
                     {
                         $gte: dateFrom,
@@ -434,44 +434,44 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 };
             } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined" && PODLNo != "" && PRNo != "undefined" && PRNo != "" && supplierId != "undefined" && supplierId != "") {
                 query = {
-                    unitId: unitId,
-                    categoryId: categoryId,
+                    unitId: new ObjectId(unitId),
+                    categoryId: new ObjectId(categoryId),
                     "purchaseOrderExternal.no": PODLNo,
                     "purchaseRequest.no": PRNo,
-                    supplierId: supplierId,
+                    supplierId: new ObjectId(supplierId),
                     _deleted: false
                 };
             } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined" && PODLNo != "" && PRNo != "undefined" && PRNo != "") {
                 query = {
-                    unitId: unitId,
-                    categoryId: categoryId,
+                    unitId: new ObjectId(unitId),
+                    categoryId: new ObjectId(categoryId),
                     "purchaseOrderExternal.no": PODLNo,
                     "purchaseRequest.no": PRNo,
                     _deleted: false
                 };
             } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && PODLNo != "undefined") {
                 query = {
-                    unitId: unitId,
-                    categoryId: categoryId,
+                    unitId: new ObjectId(unitId),
+                    categoryId: new ObjectId(categoryId),
                     "purchaseOrderExternal.no": PODLNo,
                     _deleted: false
                 };
             } else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "") {
                 query = {
-                    unitId: unitId,
-                    categoryId: categoryId,
+                    unitId: new ObjectId(unitId),
+                    categoryId: new ObjectId(categoryId),
                     _deleted: false
                 };
             } else
                 if (unitId != "undefined" && unitId != "") {
                     query = {
-                        unitId: unitId,
+                        unitId: new ObjectId(unitId),
                         _deleted: false
                     };
                 }
                 else if (categoryId != "undefined" && categoryId != "") {
                     query = {
-                        categoryId: categoryId,
+                        categoryId: new ObjectId(categoryId),
                         _deleted: false
                     };
                 } else if (PODLNo != "undefined" && PODLNo != "") {
@@ -486,7 +486,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     };
                 } else if (supplierId != "undefined" && supplierId != "") {
                     query = {
-                        supplierId: supplierId,
+                        supplierId: new ObjectId(supplierId),
                         _deleted: false
                     };
                 } else if (dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {

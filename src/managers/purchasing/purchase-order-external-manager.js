@@ -205,7 +205,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
 
                     // 2c. begin: check if data has any error, reject if it has.
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
+                     if (Object.getOwnPropertyNames(purchaseOrderExternalError).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data podl does not pass validation', purchaseOrderExternalError));
                     }
@@ -247,6 +247,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     _purchaseOrder.supplierId = new ObjectId(_purchaseOrderExternal.supplierId);
                                     _purchaseOrder.supplier = _purchaseOrderExternal.supplier;
                                     _purchaseOrder.freightCostBy = _purchaseOrderExternal.freightCostBy;
+                                    _purchaseOrder.currency = _purchaseOrderExternal.currency;
+                                    _purchaseOrder.currencyRate = _purchaseOrderExternal.currencyRate;
                                     _purchaseOrder.paymentMethod = _purchaseOrderExternal.paymentMethod;
                                     _purchaseOrder.paymentDueDays = _purchaseOrderExternal.paymentDueDays;
                                     _purchaseOrder.useVat = _purchaseOrderExternal.useVat;

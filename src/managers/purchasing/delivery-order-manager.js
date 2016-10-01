@@ -210,7 +210,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                             var fulfillmentObj = {
                                                                 no: validDeliveryOrder.no,
                                                                 deliveredQuantity: doItem.deliveredQuantity,
-                                                                date:validDeliveryOrder.date
+                                                                date:validDeliveryOrder.date,
+                                                                supplierDoDate:validDeliveryOrder.supplierDoDate
                                                             };
                                                             poItem.fulfillments.push(fulfillmentObj);
 
@@ -304,8 +305,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "" && dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
                 query = {
                     no: no,
-                    supplierId: supplierId,
-                    date:
+                    supplierId: new ObjectId(supplierId),
+                    supplierDoDate:
                     {
                         $gte: dateFrom,
                         $lte: dateTo
@@ -315,12 +316,12 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             } else if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "") {
                 query = {
                     no: no,
-                    supplierId: supplierId,
+                    supplierId: new ObjectId(supplierId),
                     _deleted: false
                 };
             } else if (supplierId != "undefined" && supplierId != "") {
                 query = {
-                    supplierId: supplierId,
+                    supplierId: new ObjectId(supplierId),
                     _deleted: false
                 };
             } else if (no != "undefined" && no != "") {
@@ -330,7 +331,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 };
             } else if (dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
                 query = {
-                    date:
+                    supplierDoDate:
                     {
                         $gte: dateFrom,
                         $lte: dateTo
