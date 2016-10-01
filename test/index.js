@@ -8,12 +8,12 @@ function test(name, path) {
 describe('#dl-module', function (done) {
 
     this.timeout(2 * 60000);
-    //console.log(path);
-    // Auth
+    console.log(path);
+    Auth
     test('@auth/account-manager', './auth/account-manager-test');
     test('@auth/role-manager', './auth/role-manager-test');
 
-    // Master
+    //Master
     test('@master/uom-manager', './master/uom-manager-test');
     test('@master/supplier-manager', './master/supplier-manager-test');
     test('@master/buyer-manager', './master/buyer-manager-test');
