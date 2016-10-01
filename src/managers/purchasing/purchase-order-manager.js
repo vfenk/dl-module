@@ -551,7 +551,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 )
                     .toArray(function (err, result) {
                         assert.equal(err, null);
-                        console.log(result);
                         resolve(result);
                     });
 
@@ -571,26 +570,102 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             ]
                         },
                     },
-                        {
-                            $unwind: "$items"
-                        },
-                        {
-                            $group: {
-                                _id: "$unit.division",
-                                "pricetotal": { $sum: { $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"] } }
-                            }
+                    {
+                        $unwind: "$items"
+                    },
+                    {
+                        $group: {
+                            _id: "$unit.division",
+                            "pricetotal": { $sum: { $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"] } }
                         }
-                    ]
-                )
-                    .toArray(function (err, result) {
-                        assert.equal(err, null);
-                        console.log(result);
-                        resolve(result);
-                    });
+                    }
+                ]
+            )
+                .toArray(function (err, result) {
+                    assert.equal(err, null);
+                    resolve(result);
+                });
 
             }
         });
+    }
 
-
+    getDataPOCategory(startdate,enddate){
+        return new Promise((resolve, reject) => { 
+             if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") { 
+                   this.collection.aggregate(
+                       [{
+                        $match: {
+                            $and: [
+                                {
+                                    $and: [ 
+                                    {
+                                        "date": {
+                                        $gte: startdate , 
+                                        $lte: enddate   }
+                                    },
+                                    {
+                                        "_deleted":false
+                                    }                         
+                                    
+                                    ]
+                                },
+                                {
+                                    "isPosted":true
+                                } 
+                            ]
+                            
+                        }
+                    },
+                    {
+                        $unwind: "$items"
+                    },
+                    {
+                        $group:{
+                            _id: "$category.name" ,
+                            "pricetotal":{$sum:{$multiply:["$items.pricePerDealUnit","$items.dealQuantity","$currencyRate"]}}
+                        }
+                    }
+                ]
+                )
+                .toArray(function(err, result) {
+                    assert.equal(err, null);
+                    resolve(result);
+                }); 
+                
+             }
+             else{
+                 this.collection.aggregate(
+                       [{
+                            $match: {
+                                       
+                                $and: [ 
+                                        {
+                                            "isPosted":true
+                                        } ,
+                                        {
+                                            "_deleted":false
+                                        }      
+                                    ]
+                                }  
+                            },
+                            {
+                                $unwind: "$items"
+                            },
+                            {
+                                $group:{
+                                    _id: "$category.name" ,
+                                    "pricetotal":{$sum:{$multiply:["$items.pricePerDealUnit","$items.dealQuantity","$currencyRate"]}}
+                                }
+                            }
+                        ]
+                        )
+                    .toArray(function(err, result) {
+                        assert.equal(err, null);
+                        resolve(result);
+                    }); 
+                
+             }      
+         });
     }
 }
