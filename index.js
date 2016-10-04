@@ -11,7 +11,8 @@ module.exports = {
             CategoryManager: require('./src/managers/master/category-manager'),
             UnitManager: require('./src/managers/master/unit-manager'),
             UomManager: require('./src/managers/master/uom-manager'),
-            CurrencyManager: require('./src/managers/master/currency-manager')
+            CurrencyManager: require('./src/managers/master/currency-manager'),
+            VatManager: require('./src/managers/master/vat-manager'),
         },
         // costCalculation:{
         //     //CostCalculationManager: require("./src/managers/cost-calculation/cost-calculation-manager")

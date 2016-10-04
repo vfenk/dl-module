@@ -9,7 +9,7 @@ describe('#dl-module', function (done) {
 
     this.timeout(2 * 60000);
     console.log(path);
-    Auth
+   // Auth
     test('@auth/account-manager', './auth/account-manager-test');
     test('@auth/role-manager', './auth/role-manager-test');
 
@@ -29,6 +29,7 @@ describe('#dl-module', function (done) {
     test('@manager/textile-manager', './managers/textile-manager-test');
     test('@manager/sparepart-manager', './managers/sparepart-manager-test');
     test('@manager/general-merchandise-manager', './managers/general-merchandise-manager-test');
+    test('@master/vat-manager', './master/vat-manager-test');
     
     //PO
     test('@po/po-garment-sparepart-manager', './po/po-garment-sparepart-manager-test');
