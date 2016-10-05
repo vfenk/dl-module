@@ -184,7 +184,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                 if (validUnitReceiptNote.unitId.equals(purchaseOrder.unitId)) {
                                                     if (unitReceiptNoteItem.product._id.equals(poItem.product._id)) {
                                                         for (var fulfillment of poItem.fulfillments) {
-                                                            var fulfillmentNo = fulfillment.no || '';
+                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
                                                             if (fulfillmentNo == deliveryOrderNo ) {
                                                                 fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
