@@ -19,6 +19,7 @@ describe('#dl-module', function (done) {
     test('@master/unit-manager', './master/unit-manager-test');
     test('@master/category-manager', './master/category-manager-test');
     test('@master/currency-manager', './master/currency-manager-test');
+    test('@master/vat-manager', './master/vat-manager-test');
     
     //Purchasing 
     test('@purchasing/purchase-order-base-manager', './purchasing/purchase-order-manager-test');
