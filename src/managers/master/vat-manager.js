@@ -8,6 +8,7 @@ var DLModels = require('dl-models');
 var map = DLModels.map;
 var Vat = DLModels.master.Vat;
 var BaseManager = require('../base-manager');
+var i18n = require('dl-i18n');
 
 module.exports = class VatManager extends BaseManager {
 
@@ -68,10 +69,10 @@ module.exports = class VatManager extends BaseManager {
                     var _vat = results[0];
 
                     if (!valid.name || valid.name == '')
-                        errors["name"] = "Name Tidak Boleh Kosong"; 
+                        errors["name"] =  i18n.__("Vat.name.isRequired:%s is required", i18n.__("Vat.name._:Name"));//"Name Tidak Boleh Kosong"; 
                     
                    if (!valid.rate || valid.rate == 0)
-                        errors["rate"] = "Rate mata uang Tidak Boleh Kosong";
+                        errors["rate"] = i18n.__("Vat.rate.isRequired:%s is required", i18n.__("Vat.rate._:Rate"));//"Rate Tidak Boleh Kosong";
                     
 
                      if (Object.getOwnPropertyNames(errors).length > 0) {

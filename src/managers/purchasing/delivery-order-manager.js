@@ -11,6 +11,7 @@ var map = DLModels.map;
 var DeliveryOrder = DLModels.purchasing.DeliveryOrder;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var PurchaseOrderExternalManager = require('./purchase-order-external-manager');
+var i18n = require('dl-i18n');
 
 // var PurchaseOrderBaseManager = require('../po/purchase-order-base-manager');
 // var DOItem = DLModels.po.DOItem;
@@ -51,14 +52,14 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var filterItem = {
                 items: {
                     $elemMatch: {
-                        'purchaseOrderExternal.no':{
+                        'purchaseOrderExternal.no': {
                             '$regex': regex
                         }
                     }
                 }
             };
             var $or = {
-                '$or': [filteNO, filterNRefNo, filterSupplierName,filterItem]
+                '$or': [filteNO, filterNRefNo, filterSupplierName, filterItem]
             };
 
             query['$and'].push($or);
@@ -104,22 +105,22 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 .then(results => {
                     var _module = results[0];
                     if (!valid.no || valid.no == '')
-                        errors["no"] = "Nomor surat jalan tidak boleh kosong";
+                        errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan tidak boleh kosong";
                     else if (_module)
-                        errors["no"] = "Nomor surat jalan sudah terdaftar";
+                        errors["no"] = i18n.__("DeliveryOrder.no.isExists:%s is already exists", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan sudah terdaftar";
 
                     if (!valid.date || valid.date == '')
-                        errors["date"] = "Tanggal surat jalan tidak boleh kosong";
+                        errors["date"] = i18n.__("DeliveryOrder.date.isRequired:%s is required", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh kosong";
                     else if (valid.date > now)
-                        errors["date"] = "Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
+                        errors["date"] = i18n.__("DeliveryOrder.date.isGreater:%s is greater than today", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
                     if (!valid.supplierDoDate || valid.supplierDoDate == '')
-                        errors["supplierDoDate"] = "Tanggal surat jalan supplier tidak boleh kosong";
+                        errors["supplierDoDate"] = i18n.__("DeliveryOrder.supplierDoDate.isRequired:%s is required", i18n.__("DeliveryOrder.supplierDoDate._:SupplierDoDate"));//"Tanggal surat jalan supplier tidak boleh kosong";
 
                     if (!valid.supplierId || valid.supplierId.toString() == '')
-                        errors["supplier"] = "Nama supplier tidak boleh kosong";
+                        errors["supplier"] =  i18n.__("DeliveryOrder.supplier.name.isRequired:%s is required", i18n.__("DeliveryOrder.supplier.name._:NameSupplier")); //"Nama supplier tidak boleh kosong";
 
                     if (valid.items && valid.items.length < 1) {
-                        errors["items"] = "Harus ada minimal 1 nomor po eksternal";
+                        errors["items"] = i18n.__("DeliveryOrder.items.isRequired:%s is required", i18n.__("DeliveryOrder.items.name._:Items")); //"Harus ada minimal 1 nomor po eksternal";
                     } else {
                         var deliveryOrderItemErrors = [];
                         var deliveryOrderItemHasError = false;
@@ -130,18 +131,18 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                             if (!doItem.purchaseOrderExternal) {
                                 purchaseOrderExternalItemHasErrors = true;
-                                purchaseOrderExternalError["purchaseOrderExternal"] = "Purchase order external tidak boleh kosong";
+                                purchaseOrderExternalError["purchaseOrderExternal"] = i18n.__("DeliveryOrder.items.purchaseOrderExternal.isRequired:%s is required", i18n.__("DeliveryOrder.items.purchaseOrderExternal._:PurchaseOrderExternal")); //"Purchase order external tidak boleh kosong";
                             }
 
                             for (var doFulfillment of doItem.fulfillments || []) {
                                 var fulfillmentError = {};
                                 if (!doFulfillment.deliveredQuantity || doFulfillment.deliveredQuantity == 0) {
                                     purchaseOrderExternalItemHasErrors = true;
-                                    fulfillmentError["deliveredQuantity"] = "Jumlah barang diterima tidak boleh kosong";
+                                    fulfillmentError["deliveredQuantity"] = i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity.isRequired:%s is required or not 0", i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity._:DeliveredQuantity")); //"Jumlah barang diterima tidak boleh kosong";
                                 }
                                 else if (doFulfillment.deliveredQuantity > doFulfillment.purchaseOrderQuantity) {
                                     purchaseOrderExternalItemHasErrors = true;
-                                    fulfillmentError["deliveredQuantity"] = "Jumlah barang diterima tidak boleh lebih besar dari jumlah barang di po eksternal";
+                                    fulfillmentError["deliveredQuantity"] = i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity.isGreater:%s is greater than purchaseOrderQuantity", i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity._:DeliveredQuantity")); //"Jumlah barang diterima tidak boleh lebih besar dari jumlah barang di po eksternal";
                                 }
                                 purchaseOrderExternalItemErrors.push(fulfillmentError);
                             }
@@ -156,19 +157,17 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     }
 
                     // 2c. begin: check if data has any error, reject if it has.
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-                    valid.supplierId=new ObjectId(valid.supplierId);
-                    for(var item of valid.items)
-                    {
+                    valid.supplierId = new ObjectId(valid.supplierId);
+                    for (var item of valid.items) {
                         item.purchaseOrderExternalId = new ObjectId(item.purchaseOrderExternalId);
-                        for(var fulfillment of item.fulfillments)
-                        {
-                            fulfillment.purchaseOrderId=new ObjectId(fulfillment.purchaseOrderId);
-                            fulfillment.productId=new ObjectId(fulfillment.productId);
+                        for (var fulfillment of item.fulfillments) {
+                            fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrderId);
+                            fulfillment.productId = new ObjectId(fulfillment.productId);
                         }
                     }
                     if (!valid.stamp)
@@ -187,10 +186,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var tasks = [];
             var tasksPoExternal = [];
-            var getPurchaseOrderById=[];
+            var getPurchaseOrderById = [];
             this._validate(deliveryOrder)
                 .then(validDeliveryOrder => {
-                    validDeliveryOrder.supplierId=new ObjectId(validDeliveryOrder.supplierId);
+                    validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
                     this.collection.insert(validDeliveryOrder)
                         .then(id => {
                             //update PO Internal
@@ -198,94 +197,91 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
                                     getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
                                 }
-                                    Promise.all(getPurchaseOrderById)
-                                        .then(results => {
-                                            for (var result of results) {
-                                                var purchaseOrder = result;
-                                                for (var poItem of purchaseOrder.items) {
-                                                    var doItems = validDeliveryOrderItem.fulfillments;
-                                                    for (var doItem of doItems) {
-                                                        if (purchaseOrder._id == doItem.purchaseOrder._id && poItem.product._id == doItem.product._id) {
+                                Promise.all(getPurchaseOrderById)
+                                    .then(results => {
+                                        for (var result of results) {
+                                            var purchaseOrder = result;
+                                            for (var poItem of purchaseOrder.items) {
+                                                var doItems = validDeliveryOrderItem.fulfillments;
+                                                for (var doItem of doItems) {
+                                                    if (purchaseOrder._id.equals(doItem.purchaseOrder._id) && poItem.product._id.equals(doItem.product._id)) {
+                                                        var fulfillmentObj = {
+                                                            no: validDeliveryOrder.no,
+                                                            deliveredQuantity: doItem.deliveredQuantity,
+                                                            date: validDeliveryOrder.date,
+                                                            supplierDoDate: validDeliveryOrder.supplierDoDate
+                                                        };
+                                                        poItem.fulfillments.push(fulfillmentObj);
 
-                                                            var fulfillmentObj = {
-                                                                no: validDeliveryOrder.no,
-                                                                deliveredQuantity: doItem.deliveredQuantity,
-                                                                date:validDeliveryOrder.date,
-                                                                supplierDoDate:validDeliveryOrder.supplierDoDate
-                                                            };
-                                                            poItem.fulfillments.push(fulfillmentObj);
-
-                                                            var totalRealize = 0;
-                                                            for (var poItemFulfillment of poItem.fulfillments) {
-                                                                totalRealize += poItemFulfillment.deliveredQuantity;
-                                                            }
-                                                            poItem.realizationQuantity = totalRealize;
-                                                            if(poItem.realizationQuantity == poItem.dealQuantity)
-                                                                poItem.isClosed=true;
-                                                            else
-                                                                poItem.isClosed=false;
-                                                            break;
+                                                        var totalRealize = 0;
+                                                        for (var poItemFulfillment of poItem.fulfillments) {
+                                                            totalRealize += poItemFulfillment.deliveredQuantity;
                                                         }
-                                                    }
-                                                }
-                                                for (var poItem of purchaseOrder.items) {
-                                                    if (poItem.isClosed==true)
-                                                        purchaseOrder.isClosed=true;
-                                                    else
-                                                    {
-                                                        purchaseOrder.isClosed=false;
+                                                        poItem.realizationQuantity = totalRealize;
+                                                        if (poItem.realizationQuantity == poItem.dealQuantity)
+                                                            poItem.isClosed = true;
+                                                        else
+                                                            poItem.isClosed = false;
                                                         break;
                                                     }
                                                 }
-                                                tasks.push(this.purchaseOrderManager.update(purchaseOrder));
                                             }
+                                            for (var poItem of purchaseOrder.items) {
+                                                if (poItem.isClosed == true)
+                                                    purchaseOrder.isClosed = true;
+                                                else {
+                                                    purchaseOrder.isClosed = false;
+                                                    break;
+                                                }
+                                            }
+                                            tasks.push(this.purchaseOrderManager.update(purchaseOrder));
+                                        }
 
-                                            Promise.all(tasks)
-                                                .then(results => {
-                                                    //update PO Eksternal
-                                                    for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                        var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                        var getPurchaseOrderById = [];
-                                                        for (var purchaseOrderExternalItem of purchaseOrderExternal.items) {
-                                                            // var indexPO = purchaseOrderExternal.items.indexOf(purchaseOrderExternalItem);
-                                                            getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(purchaseOrderExternalItem._id));
-                                                        }
-                                                        Promise.all(getPurchaseOrderById)
-                                                            .then(results => {
-                                                                for(var result of results)
-                                                                {
-                                                                    if(result.isClosed == true)
-                                                                        purchaseOrderExternal.isClosed=true;
-                                                                    else{
-                                                                        purchaseOrderExternal.isClosed=false;
-                                                                        break;
-                                                                    }
-                                                                }
-                                                                purchaseOrderExternal.items = results;
-                                                                tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
-                                                            })
-                                                            .catch(e => {
-                                                                reject(e);
-                                                            });
-
+                                        Promise.all(tasks)
+                                            .then(results => {
+                                                //update PO Eksternal
+                                                for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                    var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
+                                                    var getPurchaseOrderById = [];
+                                                    for (var purchaseOrderExternalItem of purchaseOrderExternal.items) {
+                                                        // var indexPO = purchaseOrderExternal.items.indexOf(purchaseOrderExternalItem);
+                                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(purchaseOrderExternalItem._id));
                                                     }
-
-                                                    Promise.all(tasksPoExternal)
+                                                    Promise.all(getPurchaseOrderById)
                                                         .then(results => {
-                                                            resolve(id);
+                                                            for (var result of results) {
+                                                                if (result.isClosed == true)
+                                                                    purchaseOrderExternal.isClosed = true;
+                                                                else {
+                                                                    purchaseOrderExternal.isClosed = false;
+                                                                    break;
+                                                                }
+                                                            }
+                                                            purchaseOrderExternal.items = results;
+                                                            tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
                                                         })
                                                         .catch(e => {
                                                             reject(e);
-                                                        })
-                                                })
-                                                .catch(e => {
-                                                    reject(e);
-                                                })
+                                                        });
 
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        });
+                                                }
+
+                                                Promise.all(tasksPoExternal)
+                                                    .then(results => {
+                                                        resolve(id);
+                                                    })
+                                                    .catch(e => {
+                                                        reject(e);
+                                                    })
+                                            })
+                                            .catch(e => {
+                                                reject(e);
+                                            })
+
+                                    })
+                                    .catch(e => {
+                                        reject(e);
+                                    });
                             }
 
                         })
@@ -298,7 +294,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 })
         });
     }
-    
+
     getDataDeliveryOrder(no, supplierId, dateFrom, dateTo) {
         return new Promise((resolve, reject) => {
             var query;
