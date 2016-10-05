@@ -205,7 +205,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                 for (var poItem of purchaseOrder.items) {
                                                     var doItems = validDeliveryOrderItem.fulfillments;
                                                     for (var doItem of doItems) {
-                                                        if (purchaseOrder._id == doItem.purchaseOrder._id && poItem.product._id == doItem.product._id) {
+                                                        if (purchaseOrder._id.equals(doItem.purchaseOrder._id) && poItem.product._id.equals(doItem.product._id)) {
 
                                                             var fulfillmentObj = {
                                                                 no: validDeliveryOrder.no,
