@@ -9,11 +9,14 @@ require("should");
 function getData() {
     var Currency = require('dl-models').master.Currency;
     var currency = new Currency(); 
-
-    currency.code = 'IDR';
-    currency.symbol = 'Rp';
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
+    
+    currency.code = code;
+    currency.symbol = `symbol[${code}]`;
     currency.rate = 1; 
-    currency.description = 'rupiah';
+    currency.description = `description[${code}]`;
     return currency;
 }
 
