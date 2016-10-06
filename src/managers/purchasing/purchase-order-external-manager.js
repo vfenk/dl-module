@@ -268,6 +268,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                                 poItem.dealUom = itemExternal.dealUom;
                                                 poItem.pricePerDealUnit = itemExternal.pricePerDealUnit;
                                                 poItem.conversion = itemExternal.conversion;
+                                                poItem.currency = _poExternal.currency;
+                                                poItem.currencyRate = _poExternal.currencyRate;
                                             }
                                         }
                                     }
