@@ -191,6 +191,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                         for (var fulfillment of poItem.fulfillments) {
                                                             var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
+
                                                             if (fulfillmentNo == deliveryOrderNo) {
                                                                 fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
                                                                 fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
