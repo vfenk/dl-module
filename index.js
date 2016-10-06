@@ -17,7 +17,8 @@ module.exports = {
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
             PurchaseOrderExternalManager: require('./src/managers/purchasing/purchase-order-external-manager'),
-            DeliveryOrderManager: require('./src/managers/purchasing/delivery-order-manager')
+            DeliveryOrderManager: require('./src/managers/purchasing/delivery-order-manager'),
+            UnitReceiptNoteManager: require('./src/managers/purchasing/unit-receipt-note-manager')
         }
     }
 }

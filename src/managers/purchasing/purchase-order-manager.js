@@ -84,8 +84,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                             if (valid.sourcePurchaseOrder != null) {
                                 for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
-                                    if (item.product._id && item.defaultQuantity) {
-                                        if (item.product._id.equals(sourcePoItem.product._id)) {
+                                    if (item.product._id && item.defaultQuantity) { 
+                                        if (item.product._id.equals(sourcePoItem.product._id)) { 
                                             if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
                                                 itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isGreater:%s is greater than the first PO", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh lebih besar dari PO asal";
                                                 break;
