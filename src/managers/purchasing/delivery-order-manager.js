@@ -349,6 +349,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         });
     }
     
+    getQueryForUnitReceiptNote( _paging) {
         var supplierId = _paging.filter.supplierId;
         var unitId = _paging.filter.unitId;
         
@@ -404,6 +405,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return query;
     }
 
+    readForUnitReceiptNote(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -412,6 +414,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         }, paging);
 
         return new Promise((resolve, reject) => {
+            var query = this.getQueryForUnitReceiptNote(_paging);
 
             this.collection
                 .where(query)
