@@ -8,6 +8,7 @@ var DLModels = require('dl-models');
 var map = DLModels.map;
 var Unit = DLModels.master.Unit;
 var BaseManager = require('../base-manager');
+var i18n = require('dl-i18n');
 
 module.exports = class UnitManager extends BaseManager {
 
@@ -68,15 +69,15 @@ module.exports = class UnitManager extends BaseManager {
                     var _unit = results[0];
 
                     if (!valid.division || valid.division == '')
-                        errors["division"] = "Divisi Tidak Boleh Kosong";
+                        errors["division"] = i18n.__("Unit.division.isRequired:%s is required", i18n.__("Unit.division._:Division")); //"Divisi Tidak Boleh Kosong";
                     else if (_unit) {
-                        errors["division"] = "Perpaduan Divisi dan Sub Divisi sudah terdaftar";
+                        errors["division"] = i18n.__("Unit.division.isExists:%s is already exists", i18n.__("Unit.division._:Division"));//"Perpaduan Divisi dan Sub Divisi sudah terdaftar";
                     }
                     
                     if (!valid.subDivision || valid.subDivision == '')
-                        errors["subDivision"] = "Sub Divisi Tidak Boleh Kosong";
+                        errors["subDivision"] = i18n.__("Unit.subDivision.isRequired:%s is required", i18n.__("Unit.subDivision._:SubDivision")); //"Sub Divisi Tidak Boleh Kosong";
                     else if (_unit) {
-                        errors["subDivision"] = "Perpaduan Divisi dan Sub Divisi sudah terdaftar";
+                        errors["subDivision"] = i18n.__("Unit.subDivision.isExists:%s is already exists", i18n.__("Unit.subDivision._:SubDivision"));//"Perpaduan Divisi dan Sub Divisi sudah terdaftar";
                     }
 
                      if (Object.getOwnPropertyNames(errors).length > 0) {

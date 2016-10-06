@@ -8,6 +8,7 @@ var DLModels = require('dl-models');
 var map = DLModels.map;
 var Currency = DLModels.master.Currency;
 var BaseManager = require('../base-manager');
+var i18n = require('dl-i18n');
 
 module.exports = class CurrencyManager extends BaseManager {
 
@@ -71,16 +72,16 @@ module.exports = class CurrencyManager extends BaseManager {
                     var _currency = results[0];
 
                     if (!valid.code || valid.code == '')
-                        errors["code"] = "Kode mata uang Tidak Boleh Kosong";
+                        errors["code"] = i18n.__("Currency.code.isRequired:%s is required", i18n.__("Currency.code._:Code")); //"Kode mata uang Tidak Boleh Kosong";
                     else if (_currency) {
-                        errors["code"] = "Kode mata uang sudah terdaftar";
+                        errors["code"] = i18n.__("Currency.code.isExists:%s is already exists", i18n.__("Currency.code._:Code")); //"Kode mata uang sudah terdaftar";
                     }
 
                     if (!valid.symbol || valid.symbol == '')
-                        errors["symbol"] = "Simbol mata uang Tidak Boleh Kosong";
+                        errors["symbol"] = i18n.__("Currency.symbol.isRequired:%s is required", i18n.__("Currency.symbol._:Symbol")); //"Simbol mata uang Tidak Boleh Kosong";
 
                     if (!valid.rate || valid.rate == 0)
-                        errors["rate"] = "Rate mata uang Tidak Boleh Kosong";
+                        errors["rate"] = i18n.__("Currency.rate.isRequired:%s is required", i18n.__("Currency.rate._:Rate")); //"Rate mata uang Tidak Boleh Kosong";
 
                      if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
