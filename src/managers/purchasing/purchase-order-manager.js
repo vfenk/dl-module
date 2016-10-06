@@ -8,6 +8,7 @@ var map = DLModels.map;
 var PurchaseOrder = DLModels.purchasing.PurchaseOrder;
 var generateCode = require('../../utils/code-generator');
 var BaseManager = require('../base-manager');
+var i18n = require('dl-i18n');
 
 module.exports = class PurchaseOrderManager extends BaseManager {
     constructor(db, user) {
@@ -40,15 +41,15 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     if (valid.purchaseRequest) {
                         var itemError = {};
                         if (!valid.purchaseRequest.unit)
-                            itemError["unit"] = "Nama unit yang mengajukan tidak boleh kosong";
+                            itemError["unit"] = i18n.__("PurchaseOrder.unit.isRequired:%s is required", i18n.__("PurchaseOrder.unit._:Unit")); //"Nama unit yang mengajukan tidak boleh kosong";
 
                         if (!valid.purchaseRequest.category)
-                            itemError["category"] = "Kategori tidak boleh kosong";
+                            itemError["category"] = i18n.__("PurchaseOrder.category.isRequired:%s is required", i18n.__("PurchaseOrder.category._:Category")); //"Kategori tidak boleh kosong";
 
                         if (!valid.purchaseRequest.no)
-                            itemError["no"] = "No. PR tidak boleh kosong";
+                            itemError["no"] = i18n.__("PurchaseOrder.purchaseRequest.no.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest.no._:No")); //"No. PR tidak boleh kosong";
                         else if (_module && _module.sourcePurchaseOrder == null && valid.sourcePurchaseOrder == null)
-                            itemError["no"] = "No. PR sudah terdaftar";
+                            itemError["no"] = i18n.__("PurchaseOrder.purchaseRequest.no.isExists:%s is already exists", i18n.__("PurchaseOrder.purchaseRequest.no.._:No")); //"No. PR sudah terdaftar";
                         //pending
                         // if (!valid.purchaseRequest.date)
                         //     itemError["date"] = "Tanggal PR tidak boleh kosong";
@@ -77,18 +78,18 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             var itemError = {};
 
                             if (!item.product || !item.product._id)
-                                itemError["product"] = "Nama barang tidak boleh kosong";
+                                itemError["product"] = i18n.__("PurchaseOrder.items.product.name.isRequired:%s is required", i18n.__("PurchaseOrder.items.product.name._:Name")); //"Nama barang tidak boleh kosong";
                             if (!item.defaultQuantity || item.defaultQuantity == 0)
-                                itemError["defaultQuantity"] = "Jumlah default tidak boleh kosong";
+                                itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isRequired:%s is required", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh kosong";
 
                             if (valid.sourcePurchaseOrder != null) {
                                 for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
-                                    if (item.product._id && item.defaultQuantity) {
-                                        if (item.product._id == sourcePoItem.product._id) {
+                                    if (item.product._id && item.defaultQuantity) { 
+                                        if (item.product._id.equals(sourcePoItem.product._id)) { 
                                             if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
-                                                itemError["defaultQuantity"] = "Jumlah default tidak boleh lebih besar dari PO asal";
+                                                itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isGreater:%s is greater than the first PO", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh lebih besar dari PO asal";
                                                 break;
-                                            } 
+                                            }
                                             // else if (item.defaultQuantity == sourcePoItem.defaultQuantity) {
                                             //     itemError["defaultQuantity"] = "Jumlah default tidak boleh sama dengan PO asal";
                                             //     break;
@@ -110,14 +111,14 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                     }
                     else {
-                        errors["items"] = "Harus ada minimal 1 barang";
+                        errors["items"] = i18n.__("PurchaseOrder.items.isRequired:%s is required", i18n.__("PurchaseOrder.items._:Items")); //"Harus ada minimal 1 barang";
                     }
 
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }
-                    
+
                     if (valid.purchaseRequest) {
                         valid.refNo = valid.purchaseRequest.no;
                         valid.unit = valid.purchaseRequest.unit;
@@ -194,7 +195,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             };
 
             var $or = {
-                '$or': [filterRefPONo,filterRefPOEksternal, filterPONo,filterUnitDivision,filterUnitSubDivision,filterCategory, filterBuyerName]
+                '$or': [filterRefPONo, filterRefPOEksternal, filterPONo, filterUnitDivision, filterUnitSubDivision, filterCategory, filterBuyerName]
             };
 
             query['$and'].push($or);
@@ -209,13 +210,13 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             order: 'date',
             asc: true
         }, paging);
-        
-        var sorting={
-                "unit.division": 1, 
-                "category.name": 1,
-                "purchaseRequest.date": 1
-            };
-            
+
+        var sorting = {
+            "unit.division": 1,
+            "category.name": 1,
+            "purchaseRequest.date": 1
+        };
+
         return new Promise((resolve, reject) => {
             var query = this._getQuery(_paging);
             this.collection.find(query).sort(sorting).toArray()
@@ -283,7 +284,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             };
 
             var $or = {
-                '$or': [filterRefPONo,filterRefPOEksternal, filterPONo,filterUnitDivision,filterUnitSubDivision,filterCategory, filterBuyerName]
+                '$or': [filterRefPONo, filterRefPOEksternal, filterPONo, filterUnitDivision, filterUnitSubDivision, filterCategory, filterBuyerName]
             };
 
             query['$and'].push($or);
@@ -413,8 +414,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo) {
         return new Promise((resolve, reject) => {
-            var sorting={
-                "purchaseRequest.date": 1, 
+            var sorting = {
+                "purchaseRequest.date": 1,
                 "purchaseRequest.no": 1
             };
             var query;
@@ -599,28 +600,28 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 this.collection.aggregate(
                     [{
                         $match: {
-                            $and :[{
-                            $and: [
-                                {
-                                    $and: [
-                                        {
-                                            "date": {
-                                                $gte: startdate,
-                                                $lte: enddate
+                            $and: [{
+                                $and: [
+                                    {
+                                        $and: [
+                                            {
+                                                "date": {
+                                                    $gte: startdate,
+                                                    $lte: enddate
+                                                }
+                                            },
+                                            {
+                                                "_deleted": false
                                             }
-                                        },
-                                        {
-                                            "_deleted": false
-                                        }
-                                    ]
-                                },
-                                {
-                                    "isPosted": true
-                                }
-                            ]
+                                        ]
+                                    },
+                                    {
+                                        "isPosted": true
+                                    }
+                                ]
                             },
-                            {
-                                    "unit.division":unit
+                                {
+                                    "unit.division": unit
                                 }
                             ]
                         }
@@ -646,119 +647,120 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 this.collection.aggregate(
                     [{
                         $match: {
-                            $and :[
+                            $and: [
                                 {
-                                $and: [
-                                    {
-                                        "isPosted": true
-                                    },
-                                    {
-                                        "_deleted": false
-                                    }
-                                ]
+                                    $and: [
+                                        {
+                                            "isPosted": true
+                                        },
+                                        {
+                                            "_deleted": false
+                                        }
+                                    ]
                                 },
                                 {
-                                    "unit.division":unit
+                                    "unit.division": unit
                                 }
                             ]
                         }
                     },
-                    {
-                        $unwind: "$items"
-                    },
-                    {
-                        $group: {
-                            _id: "$unit.subDivision",
-                            "pricetotal": { $sum: { $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"] } }
+                        {
+                            $unwind: "$items"
+                        },
+                        {
+                            $group: {
+                                _id: "$unit.subDivision",
+                                "pricetotal": { $sum: { $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"] } }
+                            }
                         }
-                    }
-                ]
-            )
-                .toArray(function (err, result) {
-                    assert.equal(err, null);
-                    resolve(result);
-                });
+                    ]
+                )
+                    .toArray(function (err, result) {
+                        assert.equal(err, null);
+                        resolve(result);
+                    });
 
             }
         });
     }
 
-    getDataPOCategory(startdate,enddate){
-        return new Promise((resolve, reject) => { 
-             if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") { 
-                   this.collection.aggregate(
-                       [{
+    getDataPOCategory(startdate, enddate) {
+        return new Promise((resolve, reject) => {
+            if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") {
+                this.collection.aggregate(
+                    [{
                         $match: {
                             $and: [
                                 {
-                                    $and: [ 
-                                    {
-                                        "date": {
-                                        $gte: startdate , 
-                                        $lte: enddate   }
-                                    },
-                                    {
-                                        "_deleted":false
-                                    }                         
-                                    
+                                    $and: [
+                                        {
+                                            "date": {
+                                                $gte: startdate,
+                                                $lte: enddate
+                                            }
+                                        },
+                                        {
+                                            "_deleted": false
+                                        }
+
                                     ]
                                 },
                                 {
-                                    "isPosted":true
-                                } 
-                            ]
-                            
-                        }
-                    },
-                    {
-                        $unwind: "$items"
-                    },
-                    {
-                        $group:{
-                            _id: "$category.name" ,
-                            "pricetotal":{$sum:{$multiply:["$items.pricePerDealUnit","$items.dealQuantity","$currencyRate"]}}
-                        }
-                    }
-                ]
-                )
-                .toArray(function(err, result) {
-                    assert.equal(err, null);
-                    resolve(result);
-                }); 
-                
-             }
-             else{
-                 this.collection.aggregate(
-                       [{
-                            $match: {
-                                       
-                                $and: [ 
-                                        {
-                                            "isPosted":true
-                                        } ,
-                                        {
-                                            "_deleted":false
-                                        }      
-                                    ]
-                                }  
-                            },
-                            {
-                                $unwind: "$items"
-                            },
-                            {
-                                $group:{
-                                    _id: "$category.name" ,
-                                    "pricetotal":{$sum:{$multiply:["$items.pricePerDealUnit","$items.dealQuantity","$currencyRate"]}}
+                                    "isPosted": true
                                 }
+                            ]
+
+                        }
+                    },
+                        {
+                            $unwind: "$items"
+                        },
+                        {
+                            $group: {
+                                _id: "$category.name",
+                                "pricetotal": { $sum: { $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"] } }
                             }
-                        ]
-                        )
-                    .toArray(function(err, result) {
+                        }
+                    ]
+                )
+                    .toArray(function (err, result) {
                         assert.equal(err, null);
                         resolve(result);
-                    }); 
-                
-             }      
-         });
+                    });
+
+            }
+            else {
+                this.collection.aggregate(
+                    [{
+                        $match: {
+
+                            $and: [
+                                {
+                                    "isPosted": true
+                                },
+                                {
+                                    "_deleted": false
+                                }
+                            ]
+                        }
+                    },
+                        {
+                            $unwind: "$items"
+                        },
+                        {
+                            $group: {
+                                _id: "$category.name",
+                                "pricetotal": { $sum: { $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"] } }
+                            }
+                        }
+                    ]
+                )
+                    .toArray(function (err, result) {
+                        assert.equal(err, null);
+                        resolve(result);
+                    });
+
+            }
+        });
     }
 }

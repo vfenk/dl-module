@@ -4,6 +4,7 @@
 var ObjectId = require("mongodb").ObjectId;
 var UomManager = require('./uom-manager');
 var BaseManager = require('../base-manager');
+var i18n = require('dl-i18n');
 
 // internal deps
 require('mongodb-toolkit');
@@ -58,8 +59,8 @@ module.exports = class ProductManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        code: valid.code
-                    }]
+                    code: valid.code
+                }]
             });
 
             // 2. begin: Validation.
@@ -68,23 +69,23 @@ module.exports = class ProductManager extends BaseManager {
                     var _module = results[0];
 
                     if (!valid.code || valid.code == '')
-                        errors["code"] = "Kode tidak boleh kosong.";
+                        errors["code"] = i18n.__("Product.code.isRequired:%s is required", i18n.__("Product.code._:Code")); // "Kode tidak boleh kosong.";
                     else if (_module) {
-                        errors["code"] = "Kode sudah terdaftar.";
+                        errors["code"] = i18n.__("Product.code.isExists:%s is already exists", i18n.__("Product.code._:Code")); // "Kode sudah terdaftar.";
                     }
 
                     if (!valid.name || valid.name == '')
-                        errors["name"] = "Nama tidak boleh kosong.";
+                        errors["name"] =  i18n.__("Product.name.isRequired:%s is required", i18n.__("Product.name._:Name")); // "Nama tidak boleh kosong.";
 
                     if (valid.uom) {
                         if (!valid.uom.unit || valid.uom.unit == '')
-                            errors["uom"] = "Satuan tidak boleh kosong";
+                            errors["uom"] = i18n.__("Product.uom.isRequired:%s is required", i18n.__("Product.uom._:Uom")); //"Satuan tidak boleh kosong";
                     }
                     else
-                        errors["uom"] = "Satuan tidak boleh kosong";
+                        errors["uom"] = i18n.__("Product.uom.isRequired:%s is required", i18n.__("Product.uom._:Uom")); //"Satuan tidak boleh kosong";
 
                     // 2c. begin: check if data has any error, reject if it has.
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('Product Manager : data does not pass validation', errors));
                     }
