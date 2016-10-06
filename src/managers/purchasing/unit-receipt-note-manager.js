@@ -4,7 +4,7 @@ require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var assert = require('assert');
 var map = DLModels.map;
-
+var i18n = require('dl-i18n');
 var UnitReceiptNote = DLModels.purchasing.UnitReceiptNote;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var BaseManager = require('../base-manager');
@@ -37,56 +37,61 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     var now = new Date();
 
                     if (!valid.no || valid.no == '')
-                        errors["no"] = "No. bon unit tidak boleh kosong";
+                        errors["no"] = i18n.__("UnitReceiptNote.no.isRequired:%s is required", i18n.__("UnitReceiptNote.no._:No")); //No. bon unit tidak boleh kosong";
                     else if (_module)
-                        errors["no"] = "No. bon unit sudah terdaftar";
+                        errors["no"] = i18n.__("UnitReceiptNote.no.isExists:%s is already exists", i18n.__("UnitReceiptNote.no._:No")); //"No. bon unit sudah terdaftar";
 
                     if (!valid.unitId)
-                        errors["unit"] = "Unit tidak boleh kosong";
+                        errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
                     else if (valid.unit) {
                         if (!valid.unit._id)
-                            errors["unit"] = "Unit tidak boleh kosong";
+                            errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
                     }
                     else if (!valid.unit)
-                        errors["unit"] = "Nama supplier tidak boleh kosong";
+                        errors["unit"] =  i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
 
                     if (!valid.supplierId)
-                        errors["supplier"] = "Nama supplier tidak boleh kosong";
+                        errors["supplier"] = i18n.__("UnitReceiptNote.supplier.isRequired:%s name is required", i18n.__("UnitReceiptNote.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
                     else if (valid.supplier) {
                         if (!valid.supplier._id)
-                            errors["supplier"] = "Nama supplier tidak boleh kosong";
+                            errors["supplier"] = i18n.__("UnitReceiptNote.supplier.isRequired:%s name is required", i18n.__("UnitReceiptNote.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
                     }
                     else if (!valid.supplier)
-                        errors["supplier"] = "Nama supplier tidak boleh kosong";
+                        errors["supplier"] = i18n.__("UnitReceiptNote.supplier.isRequired:%s name is required", i18n.__("UnitReceiptNote.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
 
                     if (!valid.deliveryOrderId)
-                        errors["deliveryOrder"] = "No. surat jalan tidak boleh kosong";
+                        errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s is required", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No.")); //"No. surat jalan tidak boleh kosong";
                     else if (valid.deliveryOrder) {
                         if (!valid.deliveryOrder._id)
-                            errors["deliveryOrder"] = "No. surat jalan tidak boleh kosong";
+                            errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s is required", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No")); //"No. surat jalan tidak boleh kosong";
                     }
                     else if (!valid.deliveryOrder)
-                        errors["deliveryOrder"] = "No. surat jalan tidak boleh kosong";
+                        errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s is required", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No")); //"No. surat jalan tidak boleh kosong";
 
-                    if (valid.items.length <= 0) {
-                        errors["items"] = "Harus ada minimal 1 barang";
+                    if (valid.items) {
+                        if (valid.items.length <= 0) {
+                            errors["items"] =  i18n.__("UnitReceiptNote.items.isRequired:%s is required", i18n.__("UnitReceiptNote.items._:Item")); //"Harus ada minimal 1 barang";
+                        }
+                        else {
+                            var itemErrors = [];
+                            for (var item of valid.items) {
+                                var itemError = {};
+                                if (item.deliveredQuantity <= 0)
+                                    itemError["deliveredQuantity"] = i18n.__("UnitReceiptNote.items.deliveredQuantity.isRequired:%s is required", i18n.__("UnitReceiptNote.items.deliveredQuantity._:Delivered Quantity")); //Jumlah barang tidak boleh kosong";
+                                itemErrors.push(itemError);
+                            }
+                            for (var itemError of itemErrors) {
+                                for (var prop in itemError) {
+                                    errors.items = itemErrors;
+                                    break;
+                                }
+                                if (errors.items)
+                                    break;
+                            }
+                        }
                     }
                     else {
-                        var itemErrors = [];
-                        for (var item of valid.items) {
-                            var itemError = {};
-                            if (item.deliveredQuantity < 0)
-                                itemError["deliveredQuantity"] = "Jumlah barang tidak boleh kosong";
-                            itemErrors.push(itemError);
-                        }
-                        for (var itemError of itemErrors) {
-                            for (var prop in itemError) {
-                                errors.items = itemErrors;
-                                break;
-                            }
-                            if (errors.items)
-                                break;
-                        }
+                        errors["items"] = i18n.__("UnitReceiptNote.items.isRequired:%s is required", i18n.__("UnitReceiptNote.items._:Item")); //"Harus ada minimal 1 barang";
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
@@ -186,7 +191,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                         for (var fulfillment of poItem.fulfillments) {
                                                             var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
-                                                            if (fulfillmentNo == deliveryOrderNo ) {
+
+                                                            if (fulfillmentNo == deliveryOrderNo) {
                                                                 fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
                                                                 fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
                                                                 fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;

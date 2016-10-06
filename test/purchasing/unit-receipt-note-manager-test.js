@@ -671,16 +671,64 @@ it(`#26. should success when delete data`, function (done) {
         });
 });
 
-// it('#27. should error when create new data with same code', function (done) {
-//     var data = Object.assign({}, createdData);
-//     delete data._id;
-//     unitReceiptNoteManager.create(data)
-//         .then(id => {
-//             id.should.be.Object(); 
-//             done();
-//         })
-//         .catch(e => {
-//             e.errors.should.have.property('no');
-//             done();
-//         })
-// });
+it('#27. should error when create new data with same code', function (done) {
+    var data = Object.assign({}, createdData);
+    delete data._id;
+    unitReceiptNoteManager.create(data)
+        .then(id => {
+            id.should.be.Object(); 
+            done();
+        })
+        .catch(e => {
+            e.errors.should.have.property('no');
+            done();
+        })
+});
+it('#28. should error when create new blank data', function (done) {
+    unitReceiptNoteManager.create({})
+        .then(id => {
+            id.should.be.Object(); 
+            done();
+        })
+        .catch(e => {
+            e.errors.should.have.property('no');
+            e.errors.should.have.property('unit');
+            e.errors.should.have.property('supplier');
+            e.errors.should.have.property('deliveryOrder');
+            done();
+        })
+});
+
+it('#29. should success when create new data', function (done) {
+    var unitReceiptNoteItem = new UnitReceiptNoteItem();
+    for (var doItem of deliveryOrder.items)
+    {
+        for(var doItemFulfillment of doItem.fulfillments)
+        {
+            unitReceiptNoteItem.product = doItemFulfillment.product;
+            unitReceiptNoteItem.deliveredQuantity = 0;
+            unitReceiptNoteItem.deliveredUom = doItemFulfillment.purchaseOrderUom;
+        }
+    }
+    var data = getDataUnitReceiptNote();
+    data.unit=unit;
+    data.unitId=unit._id;
+    data.supplier=supplier;
+    data.supplierId=supplier._id;
+    data.deliveryOrder=deliveryOrder;
+    data.deliveryOrderId=deliveryOrder._id;
+    data.items=[];
+    data.items.push(unitReceiptNoteItem);
+    
+    unitReceiptNoteManager.create(data)
+        .then(id => {
+            id.should.be.Object();
+            done();
+        })
+        .catch(e => {
+            for(var item of e.errors.items){
+                item.should.have.property('deliveredQuantity');
+                done();
+            }
+        })
+});
