@@ -197,21 +197,22 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
                                     getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
                                 }
-                                Promise.all(getPurchaseOrderById)
-                                    .then(results => {
-                                        for (var result of results) {
-                                            var purchaseOrder = result;
-                                            for (var poItem of purchaseOrder.items) {
-                                                var doItems = validDeliveryOrderItem.fulfillments;
-                                                for (var doItem of doItems) {
-                                                    if (purchaseOrder._id.equals(doItem.purchaseOrder._id) && poItem.product._id.equals(doItem.product._id)) {
-                                                        var fulfillmentObj = {
-                                                            no: validDeliveryOrder.no,
-                                                            deliveredQuantity: doItem.deliveredQuantity,
-                                                            date: validDeliveryOrder.date,
-                                                            supplierDoDate: validDeliveryOrder.supplierDoDate
-                                                        };
-                                                        poItem.fulfillments.push(fulfillmentObj);
+                                    Promise.all(getPurchaseOrderById)
+                                        .then(results => {
+                                            for (var result of results) {
+                                                var purchaseOrder = result;
+                                                for (var poItem of purchaseOrder.items) {
+                                                    var doItems = validDeliveryOrderItem.fulfillments;
+                                                    for (var doItem of doItems) {
+                                                        if (purchaseOrder._id.equals(doItem.purchaseOrder._id) && poItem.product._id.equals(doItem.product._id)) {
+
+                                                            var fulfillmentObj = {
+                                                                deliveryOderNo: validDeliveryOrder.no,
+                                                                deliveryOderDeliveredQuantity: doItem.deliveredQuantity,
+                                                                deliveryOderDate:validDeliveryOrder.date,
+                                                                supplierDoDate:validDeliveryOrder.supplierDoDate
+                                                            };
+                                                            poItem.fulfillments.push(fulfillmentObj);
 
                                                         var totalRealize = 0;
                                                         for (var poItemFulfillment of poItem.fulfillments) {
