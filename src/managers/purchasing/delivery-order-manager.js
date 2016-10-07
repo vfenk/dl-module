@@ -9,7 +9,6 @@ require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var DeliveryOrder = DLModels.purchasing.DeliveryOrder;
-var UnitReceiptNoteItem = DLModels.purchasing.UnitReceiptNoteItem;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var PurchaseOrderExternalManager = require('./purchase-order-external-manager');
 var i18n = require('dl-i18n');
