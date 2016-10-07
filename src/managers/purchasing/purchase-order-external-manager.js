@@ -72,7 +72,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             this._validate(purchaseOrderExternal)
                 .then(validPurchaseOrderExternal => {
                     validPurchaseOrderExternal.no = this.generatePOno();
-                    validPurchaseOrderExternal.supplierId=new ObjectId(validPurchaseOrderExternal.supplierId);
+                    validPurchaseOrderExternal.supplierId = new ObjectId(validPurchaseOrderExternal.supplierId);
                     this.collection.insert(validPurchaseOrderExternal)
                         .then(id => {
                             var tasks = [];
@@ -113,52 +113,52 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         var purchaseOrderExternalError = {};
         return new Promise((resolve, reject) => {
             var valid = purchaseOrderGroup;
-            
+
             var getPurchaseOrderPromise = this.collection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        "refNo": valid.refNo
-                    }]
+                    "refNo": valid.refNo
+                }]
             });
-            
+
             Promise.all([getPurchaseOrderPromise])
                 .then(results => {
                     var _module = results[0];
                     var now = new Date();
-                    
-                    if(valid.refNo != '' && _module)
+
+                    if (valid.refNo != '' && _module)
                         purchaseOrderExternalError["refNo"] = i18n.__("PurchaseOrderExternal.refNo.isExists:%s is already exists", i18n.__("PurchaseOrderExternal.refNo._:RefNo")); //"No. Ref Surat Jalan sudah terdaftar"; 
-                        
+
                     if (!valid.supplierId || valid.supplierId.toString() == '')
-                        purchaseOrderExternalError["supplierId"] = i18n.__("PurchaseOrderExternal.supplier.name.isRequired:%s is required", i18n.__("PurchaseOrderExternal.supplier.name._:Name"));//"Nama Supplier tidak boleh kosong";
+                        purchaseOrderExternalError["supplierId"] = i18n.__("PurchaseOrderExternal.supplier.name.isRequired:%s is required", i18n.__("PurchaseOrderExternal.supplier.name._:Name")); //"Nama Supplier tidak boleh kosong";
 
                     if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
-                        purchaseOrderExternalError["expectedDeliveryDate"] = i18n.__("PurchaseOrderExternal.expectedDeliveryDate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.expectedDeliveryDate._:ExpectedDeliveryDate"));//"Tanggal tersedia tidak boleh kosong";
+                        purchaseOrderExternalError["expectedDeliveryDate"] = i18n.__("PurchaseOrderExternal.expectedDeliveryDate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.expectedDeliveryDate._:ExpectedDeliveryDate")); //"Tanggal tersedia tidak boleh kosong";
 
                     if (!valid.date || valid.date == '')
-                        purchaseOrderExternalError["date"] = i18n.__("PurchaseOrderExternal.date.isRequired:%s is required", i18n.__("PurchaseOrderExternal.date._:Date"));//"Tanggal tidak boleh kosong";
+                        purchaseOrderExternalError["date"] = i18n.__("PurchaseOrderExternal.date.isRequired:%s is required", i18n.__("PurchaseOrderExternal.date._:Date")); //"Tanggal tidak boleh kosong";
 
                     if (!valid.paymentMethod || valid.paymentMethod == '')
-                        purchaseOrderExternalError["paymentMethod"] = i18n.__("PurchaseOrderExternal.paymentMethod.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentMethod._:PaymentMethod"));//"Metode Pembayaran tidak boleh kosong";
+                        purchaseOrderExternalError["paymentMethod"] = i18n.__("PurchaseOrderExternal.paymentMethod.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentMethod._:PaymentMethod")); //"Metode Pembayaran tidak boleh kosong";
 
                     if (!valid.currencyRate || valid.currencyRate == 0)
                         purchaseOrderExternalError["currencyRate"] = i18n.__("PurchaseOrderExternal.currencyRate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currencyRate._:CurrencyRate")); //"Rate tidak boleh kosong";
 
                     if (valid.paymentMethod.toUpperCase() != "CASH")
-                        if(!valid.paymentDueDays || valid.paymentDueDays == ''|| valid.paymentDueDays == 0)
+                        if (!valid.paymentDueDays || valid.paymentDueDays == '' || valid.paymentDueDays == 0)
                             purchaseOrderExternalError["paymentDueDays"] = i18n.__("PurchaseOrderExternal.paymentDueDays.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentDueDays._:PaymentDueDays")); //"Tempo Pembayaran tidak boleh kosong";
-                            
-                    // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
-                    //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
 
-                    // if (valid.useVat == undefined || valid.useVat.toString() === '')
-                    //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
+                        // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
+                        //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
 
-                    // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
-                    //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
+                        // if (valid.useVat == undefined || valid.useVat.toString() === '')
+                        //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
+
+                        // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
+                        //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
 
                     if (valid.items && valid.items.length < 1)
                         purchaseOrderExternalError["items"] = i18n.__("PurchaseOrderExternal.items.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items._:Items")); //"Harus ada minimal 1 po internal";
@@ -192,7 +192,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
                                 if (!poItem.conversion || poItem.conversion == '') {
                                     poItemHasError = true;
-                                    poItemError["conversion"] =  i18n.__("PurchaseOrderExternal.items.items.conversion.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.conversion._:Conversion")); //"Konversi tidak boleh kosong";
+                                    poItemError["conversion"] = i18n.__("PurchaseOrderExternal.items.items.conversion.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.conversion._:Conversion")); //"Konversi tidak boleh kosong";
                                 }
 
                                 purchaseOrderItemErrors.push(poItemError);
@@ -210,12 +210,12 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
 
                     // 2c. begin: check if data has any error, reject if it has.
-                     if (Object.getOwnPropertyNames(purchaseOrderExternalError).length > 0) {
+                    if (Object.getOwnPropertyNames(purchaseOrderExternalError).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data podl does not pass validation', purchaseOrderExternalError));
                     }
 
-                    valid.supplierId=new ObjectId(valid.supplierId);
+                    valid.supplierId = new ObjectId(valid.supplierId);
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
 
@@ -326,9 +326,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return no;
     }
 
-    _getQueryPosted( _paging) {
+    _getQueryPosted(_paging) {
         var supplierId = _paging.filter.supplierId;
-        
+
         var filter = {
             _deleted: false,
             isPosted: true,
@@ -384,7 +384,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return query;
     }
 
-   readPosted(paging) {
+    readPosted(paging) {
         var _paging = Object.assign({
             page: 1,
             size: 20,
@@ -408,4 +408,28 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 });
         });
     }
-}
+
+    pdf(id) {
+        return new Promise((resolve, reject) => {
+
+            this.getSingleById(id)
+                .then(pox => {
+                    var getDefinition = require('../../pdf/definitions/purchase-order-external');
+                    var definition = getDefinition(pox);
+
+                    var generatePdf = require('../../pdf/pdf-generator');
+                    generatePdf(definition)
+                        .then(binary => {
+                            resolve(binary);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+
+        });
+    }
+};
