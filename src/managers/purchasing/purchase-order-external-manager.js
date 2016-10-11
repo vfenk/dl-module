@@ -73,6 +73,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 .then(validPurchaseOrderExternal => {
                     validPurchaseOrderExternal.no = this.generatePOno();
                     validPurchaseOrderExternal.supplierId = new ObjectId(validPurchaseOrderExternal.supplierId);
+                    validPurchaseOrderExternal.supplier._id = new ObjectId(validPurchaseOrderExternal.supplier._id);
                     this.collection.insert(validPurchaseOrderExternal)
                         .then(id => {
                             var tasks = [];
@@ -120,8 +121,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                    "refNo": valid.refNo
-                }]
+                        "refNo": valid.refNo
+                    }]
             });
 
             Promise.all([getPurchaseOrderPromise])
@@ -151,14 +152,14 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         if (!valid.paymentDueDays || valid.paymentDueDays == '' || valid.paymentDueDays == 0)
                             purchaseOrderExternalError["paymentDueDays"] = i18n.__("PurchaseOrderExternal.paymentDueDays.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentDueDays._:PaymentDueDays")); //"Tempo Pembayaran tidak boleh kosong";
 
-                        // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
-                        //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
+                    // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
+                    //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
 
-                        // if (valid.useVat == undefined || valid.useVat.toString() === '')
-                        //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
+                    // if (valid.useVat == undefined || valid.useVat.toString() === '')
+                    //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
 
-                        // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
-                        //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
+                    // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
+                    //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
 
                     if (valid.items && valid.items.length < 1)
                         purchaseOrderExternalError["items"] = i18n.__("PurchaseOrderExternal.items.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items._:Items")); //"Harus ada minimal 1 po internal";
@@ -216,6 +217,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     }
 
                     valid.supplierId = new ObjectId(valid.supplierId);
+                    valid.supplier._id = new ObjectId(valid.supplier._id);
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
 
@@ -249,8 +251,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 if (_purchaseOrder._id.equals(_poExternal._id)) {
                                     _purchaseOrder.purchaseOrderExternalId = new ObjectId(_purchaseOrderExternal._id);
                                     _purchaseOrder.purchaseOrderExternal = _purchaseOrderExternal;
+                                    _purchaseOrder.purchaseOrderExternal._id = new ObjectId(_purchaseOrderExternal._id);
                                     _purchaseOrder.supplierId = new ObjectId(_purchaseOrderExternal.supplierId);
-                                    _purchaseOrder.supplier = _purchaseOrderExternal.supplier;
+                                    _purchaseOrder.supplier = _purchaseOrderExternal.supplier; 
+                                    _purchaseOrder.supplier._id = new ObjectId(_purchaseOrderExternal.supplier._id);
                                     _purchaseOrder.freightCostBy = _purchaseOrderExternal.freightCostBy;
                                     _purchaseOrder.currency = _purchaseOrderExternal.currency;
                                     _purchaseOrder.currencyRate = _purchaseOrderExternal.currencyRate;
