@@ -99,7 +99,23 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-
+                    valid.unitId = new ObjectId(valid.unitId);
+                    valid.supplierId = new ObjectId(valid.supplierId);
+                    valid.deliveryOrderId = new ObjectId(valid.deliveryOrderId);
+                    valid.deliveryOrder.supplierId = new ObjectId(valid.deliveryOrder.supplierId);
+                    for (var doItem of valid.deliveryOrder.items)
+                    {
+                        doItem.purchaseOrderExternalId = new ObjectId(doItem.purchaseOrderExternalId);
+                        for(var fulfillment of doItem.fulfillments)
+                        {
+                            fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrderId);
+                            fulfillment.productId = new ObjectId(fulfillment.productId);
+                        }
+                    }
+                    
+                    for (var item of valid.items)
+                        item.product._id = new ObjectId(item.product._id);
+                    
                     if (!valid.stamp)
                         valid = new UnitReceiptNote(valid);
 
