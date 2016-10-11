@@ -116,9 +116,9 @@ module.exports = function (unitReceiptNote) {
 
     
     
-    var tbody = items.map(function(item){
+    var tbody = items.map(function(item,index){
         return [{
-            text: $index,
+            text: index,
             style: ['size07', 'center']
         }, {
             text: `${item.product.code} - ${item.product.name}`,
