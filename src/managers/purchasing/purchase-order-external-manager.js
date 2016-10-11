@@ -73,6 +73,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 .then(validPurchaseOrderExternal => {
                     validPurchaseOrderExternal.no = this.generatePOno();
                     validPurchaseOrderExternal.supplierId = new ObjectId(validPurchaseOrderExternal.supplierId);
+                    validPurchaseOrderExternal.supplier._id = new ObjectId(validPurchaseOrderExternal.supplier._id);
                     this.collection.insert(validPurchaseOrderExternal)
                         .then(id => {
                             var tasks = [];
@@ -216,6 +217,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     }
 
                     valid.supplierId = new ObjectId(valid.supplierId);
+                    valid.supplier._id = new ObjectId(valid.supplier._id);
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
 
@@ -249,8 +251,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 if (_purchaseOrder._id.equals(_poExternal._id)) {
                                     _purchaseOrder.purchaseOrderExternalId = new ObjectId(_purchaseOrderExternal._id);
                                     _purchaseOrder.purchaseOrderExternal = _purchaseOrderExternal;
+                                    _purchaseOrder.purchaseOrderExternal._id = new ObjectId(_purchaseOrderExternal._id);
                                     _purchaseOrder.supplierId = new ObjectId(_purchaseOrderExternal.supplierId);
-                                    _purchaseOrder.supplier = _purchaseOrderExternal.supplier;
+                                    _purchaseOrder.supplier = _purchaseOrderExternal.supplier; 
+                                    _purchaseOrder.supplier._id = new ObjectId(_purchaseOrderExternal.supplier._id);
                                     _purchaseOrder.freightCostBy = _purchaseOrderExternal.freightCostBy;
                                     _purchaseOrder.currency = _purchaseOrderExternal.currency;
                                     _purchaseOrder.currencyRate = _purchaseOrderExternal.currencyRate;
