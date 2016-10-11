@@ -2,7 +2,7 @@ module.exports = function (unitReceiptNote) {
 
     var items = [].concat.apply([], unitReceiptNote.items);
 
-    var iso = unitReceiptNote.items.find(r => true).iso;
+    var iso = "FM.FP-GB-15-005/R2";
     var number = unitReceiptNote.no;
 
     var locale = 'id-id';
@@ -14,15 +14,15 @@ module.exports = function (unitReceiptNote) {
     var numberLocaleOptions = {
         style: 'decimal',
         maximumFractionDigits: 4
-
     };
+    
     var header = [{
         columns: [{
             columns: [{
                 width: '*',
                 stack: [{
                     text: 'PT DAN LIRIS',
-                    style: ['size10', 'bold']
+                    style: ['size15', 'bold']
                 }, {
                         text: 'BANARAN SUKOHARJO',
                         style: ['size09']
@@ -35,11 +35,15 @@ module.exports = function (unitReceiptNote) {
                     width: '*',
                     stack: [{
                         alignment: "right",
-                        text: 'ISO',
+                        text: ' ',
+                        style: ['size08', 'bold']
+                    },{
+                        alignment: "right",
+                        text: iso,
                         style: ['size08', 'bold']
                     }, {
                             alignment: "right",
-                            text: 'BON PENERIMAAN UNIT',
+                            text: 'BON PENERIMAAN BARANG',
                             style: ['size09']
                         }]
                 }]
@@ -52,35 +56,35 @@ module.exports = function (unitReceiptNote) {
             {
                 width: '40%',
                 columns: [{
-                    width: '*',
-                    stack: ['Tanggal', 'Diterima Dari']
+                    width: '35%',
+                    stack: ['Tanggal', 'Diterima dari']
                 }, {
-                        width: '1%',
+                        width: '5%',
                         stack: [':', ':']
                     }, {
                         width: '*',
                         stack: [`${new Date(unitReceiptNote.date).toLocaleString(locale, dateLocaleOptions)}`, unitReceiptNote.supplier.name]
                     }],
-                style: ['size07']
+                style: ['size08']
 
             },
             {
-                width: '20%',
+                width: '30%',
                 text: ''
             },
             {
-                width: '40%',
+                width: '30%',
                 columns: [{
-                    width: '42%',
+                    width: '25%',
                     stack: ['Bagian', 'No.']
                 }, {
-                        width: '1%',
+                        width: '5%',
                         stack: [':', ':']
                     }, {
                         width: '*',
                         stack: [unitReceiptNote.unit.division, unitReceiptNote.no]
                     }],
-                style: ['size07']
+                style: ['size08']
             }
         ]
     }, '\n'];
@@ -116,24 +120,25 @@ module.exports = function (unitReceiptNote) {
 
     
     
-    var tbody = items.map(function(item,index){
+    
+    
+    var tbody = items.map(function(item, index) {
         return [{
-            text: index,
-            style: ['size07', 'center']
-        }, {
-            text: `${item.product.code} - ${item.product.name}`,
-            style: ['size07', 'left']
-        }, {
-            text:  parseFloat(item.deliveredQuantity).toLocaleString(locale, numberLocaleOptions),
-            style: ['size07', 'center']
-        }, {
-            text: item.deliveredUom.unit,
-            style: ['size07', 'center']
-        },
-        {
-            text: item.remark,
-            style: ['size07', 'left']
-        }];
+                    text: (index+1).toString() || '',
+                    style: ['size07', 'center']
+                },{
+                    text: item.product.code +" - "+item.product.name,
+                    style: ['size07', 'left']
+                }, {
+                    text: parseFloat(item.deliveredQuantity).toLocaleString(locale, numberLocaleOptions),
+                    style: ['size07', 'center']
+                }, {
+                    text: item.deliveredUom.unit,
+                    style: ['size07', 'center']
+                }, {
+                    text: item.remark || '',
+                    style: ['size07', 'left']
+                }];
     });
     
     tbody = tbody.length > 0 ? tbody : [
@@ -146,24 +151,23 @@ module.exports = function (unitReceiptNote) {
 
     var table = [{
         table: {
-				        widths: ['5%', '40%', '20%', '10%', '25%'],
-				        headerRows: 1,
-				        body: [thead, tbody]
+            widths: ['5%', '40%', '20%', '10%', '25%'],
+            headerRows: 1,
+            body: [].concat([thead],tbody)
         }
     }];
 
     var footer = [
         '\n', {
             stack: [{
-                text: `Sukoharjo, ${new Date().toLocaleString(locale, dateLocaleOptions)}`,
+                text: `Sukoharjo, ${new Date(unitReceiptNote.date).toLocaleString(locale, dateLocaleOptions)}`,
                 alignment: "right"
-            },
-                '\n', {
+            }, {
                     columns: [{
-                        width: '35%',
-                        stack: ['Mengetahui\n\n\n\n\n', '(_______________________)'],
-                        style: 'center'
-                    }, {
+                            width: '35%',
+                            stack: ['Mengetahui\n\n\n\n\n', '(_______________________)'],
+                            style: 'center'
+                        }, {
                             width: '30%',
                             text: ''
                         }, {
@@ -181,7 +185,7 @@ module.exports = function (unitReceiptNote) {
         pageSize: 'A5',
         pageOrientation: 'portrait',
         pageMargins: 20,
-        content: [].concat(header, subHeader, table, footer),
+        content: [].concat(header, line, subHeader, table, footer),
         styles: {
             size06: {
                 fontSize: 6
@@ -197,6 +201,9 @@ module.exports = function (unitReceiptNote) {
             },
             size10: {
                 fontSize: 10
+            },
+            size15: {
+                fontSize: 15
             },
             bold: {
                 bold: true
