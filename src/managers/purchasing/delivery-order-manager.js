@@ -117,7 +117,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         errors["supplierDoDate"] = i18n.__("DeliveryOrder.supplierDoDate.isRequired:%s is required", i18n.__("DeliveryOrder.supplierDoDate._:SupplierDoDate"));//"Tanggal surat jalan supplier tidak boleh kosong";
 
                     if (!valid.supplierId || valid.supplierId.toString() == '')
-                        errors["supplier"] =  i18n.__("DeliveryOrder.supplier.name.isRequired:%s is required", i18n.__("DeliveryOrder.supplier.name._:NameSupplier")); //"Nama supplier tidak boleh kosong";
+                        errors["supplier"] = i18n.__("DeliveryOrder.supplier.name.isRequired:%s is required", i18n.__("DeliveryOrder.supplier.name._:NameSupplier")); //"Nama supplier tidak boleh kosong";
 
                     if (valid.items && valid.items.length < 1) {
                         errors["items"] = i18n.__("DeliveryOrder.items.isRequired:%s is required", i18n.__("DeliveryOrder.items.name._:Items")); //"Harus ada minimal 1 nomor po eksternal";
@@ -197,22 +197,22 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
                                     getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
                                 }
-                                    Promise.all(getPurchaseOrderById)
-                                        .then(results => {
-                                            for (var result of results) {
-                                                var purchaseOrder = result;
-                                                for (var poItem of purchaseOrder.items) {
-                                                    var doItems = validDeliveryOrderItem.fulfillments;
-                                                    for (var doItem of doItems) {
-                                                        if (purchaseOrder._id.equals(doItem.purchaseOrder._id) && poItem.product._id.equals(doItem.product._id)) {
+                                Promise.all(getPurchaseOrderById)
+                                    .then(results => {
+                                        for (var result of results) {
+                                            var purchaseOrder = result;
+                                            for (var poItem of purchaseOrder.items) {
+                                                var doItems = validDeliveryOrderItem.fulfillments;
+                                                for (var doItem of doItems) {
+                                                    if (purchaseOrder._id.equals(doItem.purchaseOrder._id) && poItem.product._id.equals(doItem.product._id)) {
 
-                                                            var fulfillmentObj = {
-                                                                deliveryOderNo: validDeliveryOrder.no,
-                                                                deliveryOderDeliveredQuantity: doItem.deliveredQuantity,
-                                                                deliveryOderDate:validDeliveryOrder.date,
-                                                                supplierDoDate:validDeliveryOrder.supplierDoDate
-                                                            };
-                                                            poItem.fulfillments.push(fulfillmentObj);
+                                                        var fulfillmentObj = {
+                                                            deliveryOderNo: validDeliveryOrder.no,
+                                                            deliveryOderDeliveredQuantity: doItem.deliveredQuantity,
+                                                            deliveryOderDate: validDeliveryOrder.date,
+                                                            supplierDoDate: validDeliveryOrder.supplierDoDate
+                                                        };
+                                                        poItem.fulfillments.push(fulfillmentObj);
 
                                                         var totalRealize = 0;
                                                         for (var poItemFulfillment of poItem.fulfillments) {
@@ -348,4 +348,89 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 });
         });
     }
+
+    getQueryBySupplierAndUnit(_paging) {
+        var supplierId = _paging.filter.supplierId;
+        var unitId = _paging.filter.unitId;
+
+        var filter = {
+            "_deleted": false,
+            "supplierId": new ObjectId(supplierId),
+            "items": {
+                $elemMatch: {
+                    "fulfillments": {
+                        $elemMatch: {
+                            "purchaseOrder.unitId": new ObjectId(unitId)
+                        }
+                    }
+                }
+            }
+        };
+
+        var query = _paging.keyword ? {
+            '$and': [filter]
+        } : filter;
+
+        if (_paging.keyword) {
+            var regex = new RegExp(_paging.keyword, "i");
+
+            var filterNo = {
+                'no': {
+                    '$regex': regex
+                }
+            };
+
+            var filterSupplierName = {
+                'supplier.name': {
+                    '$regex': regex
+                }
+            };
+
+            var filterUnitDivision = {
+                "unit.division": {
+                    '$regex': regex
+                }
+            };
+            var filterUnitSubDivision = {
+                "unit.subDivision": {
+                    '$regex': regex
+                }
+            };
+
+            var filterDeliveryOrder = {
+                "deliveryOrder.no": {
+                    '$regex': regex
+                }
+            };
+
+            var $or = {
+                '$or': [filterNo, filterSupplierName, filterUnitDivision, filterUnitSubDivision, filterDeliveryOrder]
+            };
+
+            query['$and'].push($or);
+        }
+
+        return query;
+    }
+
+    readBySupplierAndUnit(paging) {
+        var _paging = Object.assign({
+            page: 1,
+            size: 20,
+            order: '_id',
+            asc: true
+        }, paging);
+
+        return new Promise((resolve, reject) => {
+            var query = this.getQueryBySupplierAndUnit(_paging);
+            this.collection.find(query).toArray()
+                .then(DeliveryOrders => {
+                    resolve(DeliveryOrders);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
 }

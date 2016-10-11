@@ -208,6 +208,19 @@ before('#00. connect db', function (done) {
         })
 });
 
+// var purchaseOrderExternal;
+// it(`#19. should success when get created data with id`, function (done) {
+//     purchaseOrderExternalManager.pdf("57f47c1d2e1ca2003a8d0913")
+//         .then(data => {
+//             validatorPurchasing.purchaseOrderExternal(data);
+//             data.should.instanceof(Object);
+//             purchaseOrderExternal = data;
+//             done();
+//         })
+//         .catch(e => {
+//             done(e);
+//         })
+// });
 var unitId;
 it('#01. should success when create new data unit', function (done) {
     var data = getDataUnit();
