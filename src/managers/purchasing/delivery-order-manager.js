@@ -163,11 +163,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     }
 
                     valid.supplierId = new ObjectId(valid.supplierId);
+                    valid.supplier._id = new ObjectId(valid.supplier._id);
                     for (var item of valid.items) {
                         item.purchaseOrderExternalId = new ObjectId(item.purchaseOrderExternalId);
+                        item.purchaseOrderExternal._id = new ObjectId(item.purchaseOrderExternal._id);
                         for (var fulfillment of item.fulfillments) {
                             fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrderId);
+                            fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
                             fulfillment.productId = new ObjectId(fulfillment.productId);
+                            fulfillment.product._id = new ObjectId(fulfillment.product._id);
                         }
                     }
                     if (!valid.stamp)

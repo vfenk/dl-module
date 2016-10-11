@@ -123,8 +123,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         valid.refNo = valid.purchaseRequest.no;
                         valid.unit = valid.purchaseRequest.unit;
                         valid.unitId = new ObjectId(valid.purchaseRequest.unit._id);
+                        valid.unit._id = new ObjectId(valid.purchaseRequest.unit._id);
                         valid.category = valid.purchaseRequest.category;
                         valid.categoryId = new ObjectId(valid.purchaseRequest.category._id);
+                        valid.category._id = new ObjectId(valid.purchaseRequest.category._id);
                         valid.date = valid.purchaseRequest.date;
                         valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
                     }
