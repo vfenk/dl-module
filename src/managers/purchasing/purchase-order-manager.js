@@ -84,8 +84,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                             if (valid.sourcePurchaseOrder != null) {
                                 for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
-                                    if (item.product._id && item.defaultQuantity) { 
-                                        if (item.product._id.equals(sourcePoItem.product._id)) { 
+                                    sourcePoItem.product._id = new ObjectId(sourcePoItem.product._id); 
+                                    item.product._id=new ObjectId(item.product._id);
+                                    if (item.product._id && item.defaultQuantity) {
+                                        if (item.product._id.equals(sourcePoItem.product._id)) {
                                             if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
                                                 itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isGreater:%s is greater than the first PO", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh lebih besar dari PO asal";
                                                 break;
@@ -129,6 +131,12 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         valid.category._id = new ObjectId(valid.purchaseRequest.category._id);
                         valid.date = valid.purchaseRequest.date;
                         valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
+                        for (var poItem of valid.items)
+                        {
+                            poItem.product._id = new ObjectId(poItem.product.uom._id);
+                            poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
+                            poItem.defaultUom._id = new ObjectId(poItem.product.uom._id);
+                        }
                     }
                     if (!valid.stamp)
                         valid = new PurchaseOrder(valid);
