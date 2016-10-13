@@ -217,7 +217,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     }
 
                     valid.supplierId = new ObjectId(valid.supplierId);
-                    valid.supplier._id = new ObjectId(valid.supplier._id);
+                    valid.supplier._id = new ObjectId(valid.supplier._id); 
                     valid.currency._id = new ObjectId(valid.currency._id);
                     if (valid.vat) {
                         valid.vat._id = new ObjectId(valid.vat._id);
@@ -254,7 +254,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             poItem.defaultUom._id = new ObjectId(poItem.defaultUom._id);
                             poItem.dealUom._id = new ObjectId(poItem.dealUom._id);
                         }
-                    }
+                    } 
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
 
