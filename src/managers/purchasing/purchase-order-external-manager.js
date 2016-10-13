@@ -216,6 +216,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     }
 
                     valid.supplierId = new ObjectId(valid.supplierId);
+                    valid.supplier._id = new ObjectId(valid.supplier._id);
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
 
