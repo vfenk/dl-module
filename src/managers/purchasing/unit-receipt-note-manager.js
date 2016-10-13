@@ -268,5 +268,58 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
 
         });
     }
+    
+    getDataUnitReceiptNote(no, supplierId, dateFrom, dateTo) {
+        return new Promise((resolve, reject) => {
+            var query;
+            if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "" && dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
+                query = {
+                    no: no,
+                    supplierId: new ObjectId(supplierId),
+                    date:
+                    {
+                        $gte: dateFrom,
+                        $lte: dateTo
+                    },
+                    _deleted: false
+                };
+            } else if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "") {
+                query = {
+                    no: no,
+                    supplierId: new ObjectId(supplierId),
+                    _deleted: false
+                };
+            } else if (supplierId != "undefined" && supplierId != "") {
+                query = {
+                    supplierId: new ObjectId(supplierId),
+                    _deleted: false
+                };
+            } else if (no != "undefined" && no != "") {
+                query = {
+                    no: no,
+                    _deleted: false
+                };
+            } else if (dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
+                query = {
+                    date:
+                    {
+                        $gte: dateFrom,
+                        $lte: dateTo
+                    },
+                    _deleted: false
+                };
+            }
+
+            this.collection
+                .where(query)
+                .execute()
+                .then(unitReceiptNote => {
+                    resolve(unitReceiptNote);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
 
 }
