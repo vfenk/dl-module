@@ -64,7 +64,7 @@ module.exports = class BaseManager {
                         .then(modules => {
                             var elapsed = process.hrtime(start);
                             console.log(elapsed);
-                            resolve(modules.data);
+                            resolve(modules);
                         })
                         .catch(e => {
                             reject(e);
