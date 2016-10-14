@@ -236,31 +236,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
         return this.collection.createIndexes([createdDateIndex, poNoIndex]);
     }
-    read(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: 'date',
-            asc: true
-        }, paging);
-
-        var sorting = {
-            "unit.division": 1,
-            "category.name": 1,
-            "purchaseRequest.date": 1
-        };
-
-        return new Promise((resolve, reject) => {
-            var query = this._getQuery(_paging);
-            this.collection.find(query).sort(sorting).toArray()
-                .then(modules => {
-                    resolve(modules);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
+     
 
     _getQueryUnposted(_paging) {
         var filter = {
