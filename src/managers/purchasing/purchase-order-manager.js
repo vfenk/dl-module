@@ -27,7 +27,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
-                    }
+                    },
+                    _deleted:true
                 }, {
                         "purchaseRequest.no": valid.purchaseRequest.no
                     }]
@@ -153,7 +154,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     _getQuery(paging) {
         var filter = {
-            _deleted: false
+            _deleted: false,
+            _createdBy:this.user.username
         };
 
         var query = paging.keyword ? {
