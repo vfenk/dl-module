@@ -28,6 +28,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     }
                 }, {
                         "no": valid.no
+                    }, {
+                        _deleted: false
                     }]
             });
 
@@ -107,12 +109,29 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         doItem.purchaseOrderExternalId = new ObjectId(doItem.purchaseOrderExternalId);
                         for (var fulfillment of doItem.fulfillments) {
                             fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrderId);
+                            fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
+                            fulfillment.purchaseOrder.unitId = new ObjectId(fulfillment.purchaseOrder.unit._id);
+                            fulfillment.purchaseOrder.unit._id = new ObjectId(fulfillment.purchaseOrder.unit._id);
+                            fulfillment.purchaseOrder.categoryId = new ObjectId(fulfillment.purchaseOrder.category._id);
+                            fulfillment.purchaseOrder.category._id = new ObjectId(fulfillment.purchaseOrder.category._id);
                             fulfillment.productId = new ObjectId(fulfillment.productId);
                         }
                     }
 
-                    for (var item of valid.items)
+                    for (var item of valid.items){
                         item.product._id = new ObjectId(item.product._id);
+                        item.purchaseOrderId = new ObjectId(item.purchaseOrderId);
+                        item.purchaseOrder._id = new ObjectId(item.purchaseOrder._id);
+                        item.purchaseOrder.unitId = new ObjectId(item.purchaseOrder.unit._id);
+                        item.purchaseOrder.unit._id = new ObjectId(item.purchaseOrder.unit._id);
+                        item.purchaseOrder.categoryId = new ObjectId(item.purchaseOrder.category._id);
+                        item.purchaseOrder.category._id = new ObjectId(item.purchaseOrder.category._id);
+                        for(var poItem of item.purchaseOrder.items){
+                            poItem.product._id = new ObjectId(poItem.product.uom._id);
+                            poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
+                            poItem.defaultUom._id = new ObjectId(poItem.product.uom._id);
+                        }
+                    }
 
                     if (!valid.stamp)
                         valid = new UnitReceiptNote(valid);
@@ -268,7 +287,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         });
     }
 
-    getUnitReceiptNotes(_no, _unitId, _supplierId, _dateFrom, _dateTo) {
+    getUnitReceiptNotes(_no, _unitId, _categoryId, _supplierId, _dateFrom, _dateTo) {
         return new Promise((resolve, reject) => {
             var query = Object.assign({});
 
@@ -282,11 +301,21 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 var unitId = { unitId: new ObjectId(_unitId) };
                 Object.assign(query, unitId);
             }
+            if (_categoryId != "undefined" && _categoryId != "") {
+                var categoryId = {
+                    "items": {
+                        $elemMatch: {
+                            "purchaseOrder.categoryId": new ObjectId(_categoryId)
+                        }
+                    }
+                };
+                Object.assign(query, categoryId);
+            }
             if (_supplierId != "undefined" && _supplierId != "") {
                 var supplierId = { supplierId: new ObjectId(_supplierId) };
                 Object.assign(query, supplierId);
             }
-            if (_dateFrom != "undefined" && _dateFrom != "" && _dateTo != "undefined" && _dateTo != "") {
+            if (_dateFrom != "undefined" && _dateFrom != "null" && _dateFrom != "" && _dateTo != "undefined" && _dateTo != "null" && _dateTo != "") {
                 var date = {
                     date: {
                         $gte: _dateFrom,
@@ -296,7 +325,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 Object.assign(query, date);
             }
             Object.assign(query, deleted);
-            
+
             this.collection
                 .where(query)
                 .execute()
