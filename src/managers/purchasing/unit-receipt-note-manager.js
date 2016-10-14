@@ -99,7 +99,23 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-
+                    valid.unitId = new ObjectId(valid.unitId);
+                    valid.supplierId = new ObjectId(valid.supplierId);
+                    valid.deliveryOrderId = new ObjectId(valid.deliveryOrderId);
+                    valid.deliveryOrder.supplierId = new ObjectId(valid.deliveryOrder.supplierId);
+                    for (var doItem of valid.deliveryOrder.items)
+                    {
+                        doItem.purchaseOrderExternalId = new ObjectId(doItem.purchaseOrderExternalId);
+                        for(var fulfillment of doItem.fulfillments)
+                        {
+                            fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrderId);
+                            fulfillment.productId = new ObjectId(fulfillment.productId);
+                        }
+                    }
+                    
+                    for (var item of valid.items)
+                        item.product._id = new ObjectId(item.product._id);
+                    
                     if (!valid.stamp)
                         valid = new UnitReceiptNote(valid);
 
@@ -226,6 +242,83 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 .catch(e => {
                     reject(e);
                 })
+        });
+    }
+    
+    pdf(id) {
+        return new Promise((resolve, reject) => {
+
+            this.getSingleById(id)
+                .then(unitReceiptNote => {
+                    var getDefinition = require('../../pdf/definitions/unit-receipt-note');
+                    var definition = getDefinition(unitReceiptNote);
+
+                    var generatePdf = require('../../pdf/pdf-generator');
+                    generatePdf(definition)
+                        .then(binary => {
+                            resolve(binary);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+
+        });
+    }
+    
+    getDataUnitReceiptNote(no, supplierId, dateFrom, dateTo) {
+        return new Promise((resolve, reject) => {
+            var query;
+            if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "" && dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
+                query = {
+                    no: no,
+                    supplierId: new ObjectId(supplierId),
+                    date:
+                    {
+                        $gte: dateFrom,
+                        $lte: dateTo
+                    },
+                    _deleted: false
+                };
+            } else if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "") {
+                query = {
+                    no: no,
+                    supplierId: new ObjectId(supplierId),
+                    _deleted: false
+                };
+            } else if (supplierId != "undefined" && supplierId != "") {
+                query = {
+                    supplierId: new ObjectId(supplierId),
+                    _deleted: false
+                };
+            } else if (no != "undefined" && no != "") {
+                query = {
+                    no: no,
+                    _deleted: false
+                };
+            } else if (dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
+                query = {
+                    date:
+                    {
+                        $gte: dateFrom,
+                        $lte: dateTo
+                    },
+                    _deleted: false
+                };
+            }
+
+            this.collection
+                .where(query)
+                .execute()
+                .then(result => {
+                    resolve(result.data);
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
