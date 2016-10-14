@@ -121,8 +121,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        "refNo": valid.refNo
-                    }]
+                    "refNo": valid.refNo
+                }]
             });
 
             Promise.all([getPurchaseOrderPromise])
@@ -152,14 +152,14 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         if (!valid.paymentDueDays || valid.paymentDueDays == '' || valid.paymentDueDays == 0)
                             purchaseOrderExternalError["paymentDueDays"] = i18n.__("PurchaseOrderExternal.paymentDueDays.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentDueDays._:PaymentDueDays")); //"Tempo Pembayaran tidak boleh kosong";
 
-                    // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
-                    //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
+                        // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
+                        //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
 
-                    // if (valid.useVat == undefined || valid.useVat.toString() === '')
-                    //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
+                        // if (valid.useVat == undefined || valid.useVat.toString() === '')
+                        //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
 
-                    // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
-                    //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
+                        // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
+                        //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
 
                     if (valid.items && valid.items.length < 1)
                         purchaseOrderExternalError["items"] = i18n.__("PurchaseOrderExternal.items.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items._:Items")); //"Harus ada minimal 1 po internal";
@@ -217,7 +217,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     }
 
                     valid.supplierId = new ObjectId(valid.supplierId);
-                    valid.supplier._id = new ObjectId(valid.supplier._id); 
+                    valid.supplier._id = new ObjectId(valid.supplier._id);
                     valid.currency._id = new ObjectId(valid.currency._id);
                     if (valid.vat) {
                         valid.vat._id = new ObjectId(valid.vat._id);
@@ -254,7 +254,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             poItem.defaultUom._id = new ObjectId(poItem.defaultUom._id);
                             poItem.dealUom._id = new ObjectId(poItem.dealUom._id);
                         }
-                    } 
+                    }
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
 
@@ -432,7 +432,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             order: '_id',
             asc: true
         }, paging);
-
         return new Promise((resolve, reject) => {
             var query = this._getQueryPosted(_paging);
 

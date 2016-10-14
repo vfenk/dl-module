@@ -216,6 +216,24 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return query;
     }
 
+    _createIndexes()
+    {
+        var createdDateIndex = {
+            name: `ix_${map.master.collection.PurchaseOrder}__createdDate`,
+            key: {
+                _createdDate: -1
+            }
+        }
+        var poNoIndex = {
+            name: `ix_${map.master.collection.PurchaseOrder}_no`,
+            key: {
+                no: -1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([createdDateIndex, poNoIndex]);
+    }
     read(paging) {
         var _paging = Object.assign({
             page: 1,
@@ -323,8 +341,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 .page(_paging.page, _paging.size)
                 .orderBy(_paging.order, _paging.asc)
                 .execute()
-                .then(PurchaseOrders => {
-                    resolve(PurchaseOrders);
+                .then(result => {
+                    resolve(result.data);
                 })
                 .catch(e => {
                     reject(e);
