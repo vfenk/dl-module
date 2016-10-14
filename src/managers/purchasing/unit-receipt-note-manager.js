@@ -268,7 +268,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         });
     }
 
-    getDataUnitReceiptNote(_no, _unitId, _supplierId, _dateFrom, _dateTo) {
+    getListUnitReceiptNote(_no, _unitId, _supplierId, _dateFrom, _dateTo) {
         return new Promise((resolve, reject) => {
             var query = Object.assign({});
 
