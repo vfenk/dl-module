@@ -491,7 +491,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             this.collection
                 .where(query)
                 .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
+                .order(_paging.order) 
                 .execute()
                 .then(PurchaseOrders => {
                     resolve(PurchaseOrders);
