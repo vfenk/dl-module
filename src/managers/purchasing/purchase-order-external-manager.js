@@ -22,15 +22,12 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var filter = {
+        var deletedFilter = {
             _deleted: false,
-            _createdBy:this.user.username
-        };
+            _createdBy: this.user.username
+        }, keywordFilter = {};
 
-        var query = paging.keyword ? {
-            '$and': [filter]
-        } : filter;
-
+        var query = {};
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
 
@@ -59,12 +56,11 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 }
             };
 
-            var $or = {
+            keywordFilter = {
                 '$or': [filterPODLNo, filterRefPO, filterPOItem, filterSupplierName]
             };
-
-            query['$and'].push($or);
         }
+        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
         return query;
     }
 
@@ -111,6 +107,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         });
     }
 
+<<<<<<< HEAD
     update(purchaseOrderExternal) {
         return new Promise((resolve, reject) => {
             this._validate(data)
@@ -132,10 +129,42 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     Promise.all(tasks)
                                         .then(results => {
                                             resolve(id);
+=======
+    delete(purchaseOrderExternal) {
+        return new Promise((resolve, reject) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
+                    this._validate(purchaseOrderExternal)
+                        .then(validData => {
+                            validData._deleted = true;
+                            this.collection.update(validData)
+                                .then(id => {
+                                    var tasks = [];
+                                    var getPOItemById = [];
+                                    for (var data of validData.items) {
+                                        getPOItemById.push(this.purchaseOrderManager.getSingleById(data._id));
+                                    }
+                                    Promise.all(getPOItemById)
+                                        .then(results => {
+                                            for (var result of results) {
+                                                var poItem = result;
+                                                poItem.isPosted = false;
+                                                tasks.push(this.purchaseOrderManager.update(poItem));
+
+                                            }
+                                            Promise.all(tasks)
+                                                .then(results => {
+                                                    resolve(id);
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                })
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-receipt-note
                                         })
                                         .catch(e => {
                                             reject(e);
                                         })
+<<<<<<< HEAD
                                 })
                                 .catch(e => {
                                     reject(e);
@@ -148,6 +177,21 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 .catch(e => {
                     reject(e);
                 })
+=======
+
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-receipt-note
         });
     }
 
@@ -162,8 +206,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                    "refNo": valid.refNo
-                }]
+                        "refNo": valid.refNo
+                    }]
             });
 
             Promise.all([getPurchaseOrderPromise])
@@ -193,14 +237,14 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         if (!valid.paymentDueDays || valid.paymentDueDays == '' || valid.paymentDueDays == 0)
                             purchaseOrderExternalError["paymentDueDays"] = i18n.__("PurchaseOrderExternal.paymentDueDays.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentDueDays._:PaymentDueDays")); //"Tempo Pembayaran tidak boleh kosong";
 
-                        // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
-                        //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
+                    // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
+                    //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
 
-                        // if (valid.useVat == undefined || valid.useVat.toString() === '')
-                        //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
+                    // if (valid.useVat == undefined || valid.useVat.toString() === '')
+                    //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
 
-                        // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
-                        //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
+                    // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
+                    //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
 
                     if (valid.items && valid.items.length < 1)
                         purchaseOrderExternalError["items"] = i18n.__("PurchaseOrderExternal.items.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items._:Items")); //"Harus ada minimal 1 po internal";
@@ -231,17 +275,25 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     poItemHasError = true;
                                     poItemError["pricePerDealUnit"] = i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit._:PricePerDealUnit")); //"Harga tidak boleh kosong";
                                 }
-                                var price =(poItem.pricePerDealUnit.toString()).split(",");
-                                if (price[1]!=undefined || price[1]!="" || price[1]!=" " )
-                                {
-                                    poItem.pricePerDealUnit=parseFloat(poItem.pricePerDealUnit.toString()+".00");
-                                }else if (price[1].length()>2)
-                                {
+<<<<<<< HEAD
+                                var price = (poItem.pricePerDealUnit.toString()).split(",");
+                                if (price[1] != undefined || price[1] != "" || price[1] != " ") {
+                                    poItem.pricePerDealUnit = parseFloat(poItem.pricePerDealUnit.toString() + ".00");
+                                } else if (price[1].length() > 2) {
                                     poItemHasError = true;
                                     poItemError["pricePerDealUnit"] = i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit.isRequired:%s is greater than 2", i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit._:PricePerDealUnit")); //"Harga tidak boleh kosong";
-                                }else
-                                {
-                                    poItem.pricePerDealUnit=poItem.pricePerDealUnit;
+                                } else {
+                                    poItem.pricePerDealUnit = poItem.pricePerDealUnit;
+=======
+                                var price = (poItem.pricePerDealUnit.toString()).split(",");
+                                if (price[1] != undefined || price[1] != "" || price[1] != " ") {
+                                    poItem.pricePerDealUnit = parseFloat(poItem.pricePerDealUnit.toString() + ".00");
+                                } else if (price[1].length() > 2) {
+                                    poItemHasError = true;
+                                    poItemError["pricePerDealUnit"] = i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit.isRequired:%s is greater than 2", i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit._:PricePerDealUnit")); //"Harga tidak boleh kosong";
+                                } else {
+                                    poItem.pricePerDealUnit = poItem.pricePerDealUnit;
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-receipt-note
                                 }
 
                                 if (!poItem.conversion || poItem.conversion == '') {
@@ -305,7 +357,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             poItem.product._id = new ObjectId(poItem.product._id);
                             poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
                             poItem.defaultUom._id = new ObjectId(poItem.defaultUom._id);
-                            poItem.dealUom._id = new ObjectId(poItem.dealUom._id); 
+                            poItem.dealUom._id = new ObjectId(poItem.dealUom._id);
                         }
                     }
                     if (!valid.stamp)
@@ -420,6 +472,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return no;
     }
 
+<<<<<<< HEAD
     _getQueryPosted(_paging) {
         var supplierId = _paging.filter.supplierId;
 
@@ -491,7 +544,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             this.collection
                 .where(query)
                 .page(_paging.page, _paging.size)
-                .order(_paging.order) 
+                .order(_paging.order)
                 .execute()
                 .then(PurchaseOrders => {
                     resolve(PurchaseOrders);
@@ -502,6 +555,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         });
     }
 
+=======
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-receipt-note
     pdf(id) {
         return new Promise((resolve, reject) => {
 
