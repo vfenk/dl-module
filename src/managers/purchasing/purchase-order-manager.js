@@ -128,6 +128,9 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         valid.date = valid.purchaseRequest.date;
                         valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
                     }
+                    
+                        valid.unitId = new ObjectId(valid.unitId);
+                        valid.categoryId = new ObjectId(valid.categoryId);
                     if (!valid.stamp)
                         valid = new PurchaseOrder(valid);
 
