@@ -28,7 +28,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     },
-                    _deleted: true
+                    _deleted:true
                 }, {
                         "purchaseRequest.no": valid.purchaseRequest.no
                     }]
@@ -85,8 +85,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                             if (valid.sourcePurchaseOrder != null) {
                                 for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
-                                    sourcePoItem.product._id = new ObjectId(sourcePoItem.product._id);
-                                    item.product._id = new ObjectId(item.product._id);
+                                    sourcePoItem.product._id = new ObjectId(sourcePoItem.product._id); 
+                                    item.product._id=new ObjectId(item.product._id);
                                     if (item.product._id && item.defaultQuantity) {
                                         if (item.product._id.equals(sourcePoItem.product._id)) {
                                             if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
@@ -132,15 +132,16 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         valid.category._id = new ObjectId(valid.purchaseRequest.category._id);
                         valid.date = valid.purchaseRequest.date;
                         valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
-                        for (var poItem of valid.items) {
+                        for (var poItem of valid.items)
+                        {
                             poItem.product._id = new ObjectId(poItem.product.uom._id);
                             poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
                             poItem.defaultUom._id = new ObjectId(poItem.product.uom._id);
                         }
                     }
-
-                    valid.unitId = new ObjectId(valid.unitId);
-                    valid.categoryId = new ObjectId(valid.categoryId);
+                    
+                        valid.unitId = new ObjectId(valid.unitId);
+                        valid.categoryId = new ObjectId(valid.categoryId);
                     if (!valid.stamp)
                         valid = new PurchaseOrder(valid);
 
@@ -157,7 +158,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     _getQuery(paging) {
         var deletedFilter = {
             _deleted: false,
-            _createdBy: this.user.username
+            _createdBy:this.user.username
         }, keywordFilter = {};
 
         var query = {};
@@ -213,7 +214,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return query;
     }
 
-    _createIndexes() {
+    _createIndexes(){
         var createdDateIndex = {
             name: `ix_${map.master.collection.PurchaseOrder}__createdDate`,
             key: {
@@ -230,6 +231,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
         return this.collection.createIndexes([createdDateIndex, poNoIndex]);
     }
+    
     create(purchaseOrder) {
         purchaseOrder = new PurchaseOrder(purchaseOrder);
 
