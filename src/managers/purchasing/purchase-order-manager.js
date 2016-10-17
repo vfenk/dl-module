@@ -27,7 +27,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
-                    }
+                    },
+                    _deleted:true
                 }, {
                         "purchaseRequest.no": valid.purchaseRequest.no
                     }]
@@ -155,14 +156,12 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var filter = {
-            _deleted: false
-        };
+        var deletedFilter = {
+            _deleted: false,
+            _createdBy:this.user.username
+        }, keywordFilter = {};
 
-        var query = paging.keyword ? {
-            '$and': [filter]
-        } : filter;
-
+        var query = {};
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
 
@@ -207,17 +206,15 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 }
             };
 
-            var $or = {
+            keywordFilter = {
                 '$or': [filterRefPONo, filterRefPOEksternal, filterPONo, filterUnitDivision, filterUnitSubDivision, filterCategory, filterBuyerName]
             };
-
-            query['$and'].push($or);
         }
+        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
         return query;
     }
 
-    _createIndexes()
-    {
+    _createIndexes(){
         var createdDateIndex = {
             name: `ix_${map.master.collection.PurchaseOrder}__createdDate`,
             key: {
@@ -234,122 +231,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
         return this.collection.createIndexes([createdDateIndex, poNoIndex]);
     }
-    read(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: 'date',
-            asc: true
-        }, paging);
-
-        var sorting = {
-            "unit.division": 1,
-            "category.name": 1,
-            "purchaseRequest.date": 1
-        };
-
-        return new Promise((resolve, reject) => {
-            var query = this._getQuery(_paging);
-            this.collection.find(query).sort(sorting).toArray()
-                .then(modules => {
-                    resolve(modules);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-
-    _getQueryUnposted(_paging) {
-        var filter = {
-            _deleted: false,
-            isPosted: false
-        };
-
-        var query = _paging.keyword ? {
-            '$and': [filter]
-        } : filter;
-
-        if (_paging.keyword) {
-            var regex = new RegExp(_paging.keyword, "i");
-
-            var filterRefPONo = {
-                'refNo': {
-                    '$regex': regex
-                }
-            };
-            var filterRefPOEksternal = {
-                "purchaseOrderExternal.refNo": {
-                    '$regex': regex
-                }
-            };
-            var filterPONo = {
-                'no': {
-                    '$regex': regex
-                }
-            };
-            var filterUnitDivision = {
-                "unit.division": {
-                    '$regex': regex
-                }
-            };
-            var filterUnitSubDivision = {
-                "unit.subDivision": {
-                    '$regex': regex
-                }
-            };
-            var filterCategory = {
-                "category.name": {
-                    '$regex': regex
-                }
-            };
-            var filterStaff = {
-                '_createdBy': {
-                    '$regex': regex
-                }
-            };
-            var filterBuyerName = {
-                "buyer.name": {
-                    '$regex': regex
-                }
-            };
-
-            var $or = {
-                '$or': [filterRefPONo, filterRefPOEksternal, filterPONo, filterUnitDivision, filterUnitSubDivision, filterCategory, filterBuyerName]
-            };
-
-            query['$and'].push($or);
-        }
-
-        return query;
-    }
-
-    readUnposted(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: '_id',
-            asc: true
-        }, paging);
-
-        return new Promise((resolve, reject) => {
-
-            var query = this._getQueryUnposted(_paging);
-
-            this.collection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .orderBy(_paging.order, _paging.asc)
-                .execute()
-                .then(result => {
-                    resolve(result.data);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-
+    
     create(purchaseOrder) {
         purchaseOrder = new PurchaseOrder(purchaseOrder);
 
