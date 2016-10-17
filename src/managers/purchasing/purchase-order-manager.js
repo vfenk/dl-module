@@ -28,7 +28,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     },
-                    _deleted:true
+                    _deleted: true
                 }, {
                         "purchaseRequest.no": valid.purchaseRequest.no
                     }]
@@ -85,8 +85,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                             if (valid.sourcePurchaseOrder != null) {
                                 for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
-                                    sourcePoItem.product._id = new ObjectId(sourcePoItem.product._id); 
-                                    item.product._id=new ObjectId(item.product._id);
+                                    sourcePoItem.product._id = new ObjectId(sourcePoItem.product._id);
+                                    item.product._id = new ObjectId(item.product._id);
                                     if (item.product._id && item.defaultQuantity) {
                                         if (item.product._id.equals(sourcePoItem.product._id)) {
                                             if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
@@ -132,16 +132,15 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         valid.category._id = new ObjectId(valid.purchaseRequest.category._id);
                         valid.date = valid.purchaseRequest.date;
                         valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
-                        for (var poItem of valid.items)
-                        {
+                        for (var poItem of valid.items) {
                             poItem.product._id = new ObjectId(poItem.product.uom._id);
                             poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
                             poItem.defaultUom._id = new ObjectId(poItem.product.uom._id);
                         }
                     }
-                    
-                        valid.unitId = new ObjectId(valid.unitId);
-                        valid.categoryId = new ObjectId(valid.categoryId);
+
+                    valid.unitId = new ObjectId(valid.unitId);
+                    valid.categoryId = new ObjectId(valid.categoryId);
                     if (!valid.stamp)
                         valid = new PurchaseOrder(valid);
 
@@ -156,15 +155,12 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var filter = {
+        var deletedFilter = {
             _deleted: false,
-            _createdBy:this.user.username
-        };
+            _createdBy: this.user.username
+        }, keywordFilter = {};
 
-        var query = paging.keyword ? {
-            '$and': [filter]
-        } : filter;
-
+        var query = {};
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
 
@@ -209,17 +205,15 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 }
             };
 
-            var $or = {
+            keywordFilter = {
                 '$or': [filterRefPONo, filterRefPOEksternal, filterPONo, filterUnitDivision, filterUnitSubDivision, filterCategory, filterBuyerName]
             };
-
-            query['$and'].push($or);
         }
+        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
         return query;
     }
 
-    _createIndexes()
-    {
+    _createIndexes() {
         var createdDateIndex = {
             name: `ix_${map.master.collection.PurchaseOrder}__createdDate`,
             key: {
@@ -236,98 +230,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
         return this.collection.createIndexes([createdDateIndex, poNoIndex]);
     }
-     
-
-    _getQueryUnposted(_paging) {
-        var filter = {
-            _deleted: false,
-            isPosted: false
-        };
-
-        var query = _paging.keyword ? {
-            '$and': [filter]
-        } : filter;
-
-        if (_paging.keyword) {
-            var regex = new RegExp(_paging.keyword, "i");
-
-            var filterRefPONo = {
-                'refNo': {
-                    '$regex': regex
-                }
-            };
-            var filterRefPOEksternal = {
-                "purchaseOrderExternal.refNo": {
-                    '$regex': regex
-                }
-            };
-            var filterPONo = {
-                'no': {
-                    '$regex': regex
-                }
-            };
-            var filterUnitDivision = {
-                "unit.division": {
-                    '$regex': regex
-                }
-            };
-            var filterUnitSubDivision = {
-                "unit.subDivision": {
-                    '$regex': regex
-                }
-            };
-            var filterCategory = {
-                "category.name": {
-                    '$regex': regex
-                }
-            };
-            var filterStaff = {
-                '_createdBy': {
-                    '$regex': regex
-                }
-            };
-            var filterBuyerName = {
-                "buyer.name": {
-                    '$regex': regex
-                }
-            };
-
-            var $or = {
-                '$or': [filterRefPONo, filterRefPOEksternal, filterPONo, filterUnitDivision, filterUnitSubDivision, filterCategory, filterBuyerName]
-            };
-
-            query['$and'].push($or);
-        }
-
-        return query;
-    }
-
-    readUnposted(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: '_id',
-            asc: true
-        }, paging);
-
-        return new Promise((resolve, reject) => {
-
-            var query = this._getQueryUnposted(_paging);
-
-            this.collection
-                .where(query)
-                .page(_paging.page, _paging.size)
-                .order(_paging.order)
-                .execute()
-                .then(result => {
-                    resolve(result.data);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-
     create(purchaseOrder) {
         purchaseOrder = new PurchaseOrder(purchaseOrder);
 

@@ -147,14 +147,12 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var filter = {
+        var deletedFilter = {
             _deleted: false
-        };
-
-        var query = paging.keyword ? {
-            '$and': [filter]
-        } : filter;
-
+        }, keywordFilter = {};
+        
+        var query = {};
+        
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
 
@@ -187,12 +185,11 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 }
             };
 
-            var $or = {
+            keywordFilter = {
                 '$or': [filterNo, filterSupplierName, filterUnitDivision, filterUnitSubDivision, filterDeliveryOrder]
             };
-
-            query['$and'].push($or);
         }
+        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
         return query;
     }
 

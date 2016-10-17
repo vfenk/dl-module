@@ -25,12 +25,12 @@ module.exports = class DeliveryOrderManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deleted = {
+        var deletedFilter = {
             _deleted: false
-        };
-        var query = paging.keyword ? {
-            '$and': [deleted]
-        } : deleted;
+        }, keywordFilter = {};
+
+
+        var query = {};
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
@@ -58,12 +58,12 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     }
                 }
             };
-            var $or = {
+            keywordFilter = {
                 '$or': [filteNO, filterNRefNo, filterSupplierName, filterItem]
             };
-
-            query['$and'].push($or);
         }
+
+        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
         return query;
     }
 
@@ -204,7 +204,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
                                 poItem.defaultUom._id = new ObjectId(poItem.defaultUom._id);
                                 poItem.dealUom._id = new ObjectId(poItem.dealUom._id);
-                            } 
+                            }
                         }
 
                         for (var fulfillment of item.fulfillments) {
@@ -220,22 +220,20 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     }
                     if (!valid.stamp)
                         valid = new DeliveryOrder(valid);
-                    
+
                     valid.supplierId = new ObjectId(valid.supplierId);
                     valid.supplier._id = new ObjectId(valid.supplier._id);
-                    for (var doItem of valid.items)
-                    {
+                    for (var doItem of valid.items) {
                         doItem.purchaseOrderExternalId = new ObjectId(doItem.purchaseOrderExternalId);
                         doItem.purchaseOrderExternal._id = new ObjectId(doItem.purchaseOrderExternal._id);
-                        for(var fulfillment of doItem.fulfillments)
-                        {
+                        for (var fulfillment of doItem.fulfillments) {
                             fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrderId);
                             fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
                             fulfillment.productId = new ObjectId(fulfillment.productId);
                             fulfillment.product._id = new ObjectId(fulfillment.product._id);
                         }
                     }
-                    
+
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })
@@ -405,90 +403,6 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 .execute()
                 .then(PurchaseOrder => {
                     resolve(PurchaseOrder);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
-
-    getQueryBySupplierAndUnit(_paging) {
-        var supplierId = _paging.filter.supplierId;
-        var unitId = _paging.filter.unitId;
-
-        var filter = {
-            "_deleted": false,
-            "supplierId": new ObjectId(supplierId),
-            "items": {
-                $elemMatch: {
-                    "fulfillments": {
-                        $elemMatch: {
-                            "purchaseOrder.unitId": new ObjectId(unitId)
-                        }
-                    }
-                }
-            }
-        };
-
-        var query = _paging.keyword ? {
-            '$and': [filter]
-        } : filter;
-
-        if (_paging.keyword) {
-            var regex = new RegExp(_paging.keyword, "i");
-
-            var filterNo = {
-                'no': {
-                    '$regex': regex
-                }
-            };
-
-            var filterSupplierName = {
-                'supplier.name': {
-                    '$regex': regex
-                }
-            };
-
-            var filterUnitDivision = {
-                "unit.division": {
-                    '$regex': regex
-                }
-            };
-            var filterUnitSubDivision = {
-                "unit.subDivision": {
-                    '$regex': regex
-                }
-            };
-
-            var filterDeliveryOrder = {
-                "deliveryOrder.no": {
-                    '$regex': regex
-                }
-            };
-
-            var $or = {
-                '$or': [filterNo, filterSupplierName, filterUnitDivision, filterUnitSubDivision, filterDeliveryOrder]
-            };
-
-            query['$and'].push($or);
-        }
-
-        return query;
-    }
-
-    readBySupplierAndUnit(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: '_id',
-            asc: true
-        }, paging);
-
-        return new Promise((resolve, reject) => {
-            var query = this.getQueryBySupplierAndUnit(_paging);
-            this.collection.find(query).toArray()
-                .then(DeliveryOrders => {
-                    resolve(DeliveryOrders);
                 })
                 .catch(e => {
                     reject(e);
