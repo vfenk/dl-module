@@ -12,7 +12,7 @@ module.exports = function(pox) {
             };
         })
     });
-    
+
     items = [].concat.apply([], items);
 
     var iso = pox.items.find(r => true).iso;
@@ -22,12 +22,17 @@ module.exports = function(pox) {
     var supplierAtt = pox.supplier.PIC;
     var supplierTel = pox.supplier.contact;
 
-    var locale = 'id-id';
+    var locale = 'id-ID';
     var dateLocaleOptions = {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     };
+    var dateFormat = "DD-MMMM-YYYY";
+
+    var moment = require('moment');
+    moment.locale(locale);
+
     var numberLocaleOptions = {
         style: 'decimal',
         // currency: currency,
@@ -91,7 +96,7 @@ module.exports = function(pox) {
         }, {
             width: '35%',
             stack: [
-                `Solo, ${new Date(pox.date).toLocaleString(locale, dateLocaleOptions)} `, {
+                `Solo, ${moment(pox.date).format(dateFormat)} `, {
                     text: [
                         'Mohon', {
                             text: ' di-fax kembali',
@@ -189,10 +194,17 @@ module.exports = function(pox) {
             colSpan: 4
         }, "", "", ""]
     ];
+    var initialValue = {
+        price: 0,
+        quntity: 0
+    };
+    
+    var sum = (items.length > 0 ? items : [initialValue])
+        .map(item => item.price * item.quantity)
+        .reduce(function(prev, curr, index, arr) {
+            return prev + curr;
+        }, 0);
 
-    var sum = items.length > 0 ? items.reduce(function(prev, curr, index, arr) {
-        return (prev.price * prev.quantity) + (curr.price * curr.quantity);
-    }) : 0;
     var vat = pox.useVat ? sum * 0.1 : 0;
 
     var tfoot = [
@@ -250,8 +262,6 @@ module.exports = function(pox) {
             body: [].concat([thead], tbody, tfoot)
         }
     }];
-
-
     var footer = [
         '\n', {
             stack: [{
@@ -281,7 +291,7 @@ module.exports = function(pox) {
                         }, {
                             width: '*',
                             stack: [{
-                                text: `${new Date(pox.expectedDeliveryDate).toLocaleString(locale, dateLocaleOptions)}`,
+                                text: `${moment(pox.expectedDeliveryDate).format(dateFormat)}`,
                                 style: ['bold']
                             }, `${pox.remark}`]
                         }]
