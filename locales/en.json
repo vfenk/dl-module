@@ -1,0 +1,24 @@
+{
+	"UnitPaymentOrder": {
+		"no": {
+			"_": "No",
+			"isRequired": "%s is required"
+		},
+		"unit": {
+			"_": "Unit",
+			"isRequired": "%s is required"
+		},
+		"date": {
+			"_": "Date",
+			"isRequired": "%s is required"
+		},
+		"supplier": {
+			"_": "Supplier",
+			"isRequired": "%s name is required"
+		},
+		"items": {
+			"_": "Item",
+			"isRequired": "%s is required"
+		}
+	}
+}
