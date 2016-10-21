@@ -204,7 +204,7 @@ module.exports = function(pox) {
         .reduce(function(prev, curr, index, arr) {
             return prev + curr;
         }, 0);
-
+ 
     var vat = pox.useVat ? sum * 0.1 : 0;
 
     var tfoot = [
@@ -359,4 +359,4 @@ module.exports = function(pox) {
     };
 
     return dd;
-}
+};
