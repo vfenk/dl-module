@@ -68,6 +68,27 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         if (valid.items.length <= 0) {
                             errors["items"] = i18n.__("UnitPaymentOrder.items.isRequired:%s is required", i18n.__("UnitPaymentOrder.items._:Item")); //"Harus ada minimal 1 barang";
                         }
+<<<<<<< HEAD
+=======
+                        else {
+                            var itemErrors = [];
+                            for (var item of valid.items) {
+                                var itemError = {};
+
+                                if (item.deliveredQuantity <= 0)
+                                    itemError["deliveredQuantity"] = i18n.__("UnitPaymentOrder.items.deliveredQuantity.isRequired:%s is required", i18n.__("UnitPaymentOrder.items.deliveredQuantity._:Delivered Quantity")); //Jumlah barang tidak boleh kosong";
+                                itemErrors.push(itemError);
+                            }
+                            for (var itemError of itemErrors) {
+                                for (var prop in itemError) {
+                                    errors.items = itemErrors;
+                                    break;
+                                }
+                                if (errors.items)
+                                    break;
+                            }
+                        }
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-payment-price-correction-note
                     }
                     else {
                         errors["items"] = i18n.__("UnitPaymentOrder.items.isRequired:%s is required", i18n.__("UnitPaymentOrder.items._:Item")); //"Harus ada minimal 1 barang";
@@ -103,7 +124,12 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                             }
                         }
                         item.unitReceiptNote.deliveryOrder.supplierId = new ObjectId(item.unitReceiptNote.deliveryOrder.supplierId);
+<<<<<<< HEAD
 
+=======
+                        item.productId = new ObjectId(item.productId);
+                        item.product._id = new ObjectId(item.productId);
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-payment-price-correction-note
                         for (var fulfillment of doItem.fulfillments) {
                             fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrderId);
                             fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
@@ -116,9 +142,13 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     }
 
                     if (!valid.stamp)
+<<<<<<< HEAD
                     {
                         valid = new UnitPaymentOrder(valid);
                     }
+=======
+                        valid = new UnitPaymentOrder(valid);
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-payment-price-correction-note
 
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
@@ -194,6 +224,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                         for (var poItem of purchaseOrder.items) {
                                             for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
                                                 if (validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
+<<<<<<< HEAD
                                                     for (var fulfillment of poItem.fulfillments) {
                                                         var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                         var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
@@ -217,6 +248,32 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                         }
                                                     }
 
+=======
+                                                    if (unitPaymentOrderItem.product._id.equals(poItem.product._id)) {
+                                                        for (var fulfillment of poItem.fulfillments) {
+                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                            var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
+                                                            if (fulfillmentNo == deliveryOrderNo) {
+                                                                fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
+                                                                fulfillment.invoiceNo = validUnitPaymentOrder.invoceDate;
+                                                                fulfillment.interNoteDate = validUnitPaymentOrder.no;
+                                                                fulfillment.interNoteNo = validUnitPaymentOrder.date;
+                                                                fulfillment.interNoteValue = validUnitPaymentOrder.invoicePrice;
+                                                                fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
+                                                                if (validUnitPaymentOrder.incomeTaxNo) {
+                                                                    fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
+                                                                    fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
+                                                                    fulfillment.ppnValue = 0.1;
+                                                                }
+                                                                if (validUnitPaymentOrder.vatNo) {
+                                                                    fulfillment.ppnNo = validUnitPaymentOrder.vatNo;
+                                                                    fulfillment.pphValue = validUnitPaymentOrder.vatDate;
+                                                                    fulfillment.pphDate = validUnitPaymentOrder.vatRate;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-payment-price-correction-note
                                                 }
                                             }
                                         }
@@ -269,6 +326,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                 for (var poItem of purchaseOrder.items) {
                                                     for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
                                                         if (validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
+<<<<<<< HEAD
                                                             for (var fulfillment of poItem.fulfillments) {
                                                                 var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                                 var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
@@ -288,6 +346,29 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                                         fulfillment.ppnNo = validUnitPaymentOrder.vatNo;
                                                                         fulfillment.pphValue = validUnitPaymentOrder.vatDate;
                                                                         fulfillment.pphDate = validUnitPaymentOrder.vatRate;
+=======
+                                                            if (unitPaymentOrderItem.product._id.equals(poItem.product._id)) {
+                                                                for (var fulfillment of poItem.fulfillments) {
+                                                                    var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                                    var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
+                                                                    if (fulfillmentNo == deliveryOrderNo) {
+                                                                        fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
+                                                                        fulfillment.invoiceNo = validUnitPaymentOrder.invoceDate;
+                                                                        fulfillment.interNoteDate = validUnitPaymentOrder.no;
+                                                                        fulfillment.interNoteNo = validUnitPaymentOrder.date;
+                                                                        fulfillment.interNoteValue = validUnitPaymentOrder.invoicePrice;
+                                                                        fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
+                                                                        if (validUnitPaymentOrder.incomeTaxNo) {
+                                                                            fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
+                                                                            fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
+                                                                            fulfillment.ppnValue = 0.1;
+                                                                        }
+                                                                        if (validUnitPaymentOrder.vatNo) {
+                                                                            fulfillment.ppnNo = validUnitPaymentOrder.vatNo;
+                                                                            fulfillment.pphValue = validUnitPaymentOrder.vatDate;
+                                                                            fulfillment.pphDate = validUnitPaymentOrder.vatRate;
+                                                                        }
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-payment-price-correction-note
                                                                     }
                                                                 }
                                                             }
@@ -348,6 +429,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                 for (var poItem of purchaseOrder.items) {
                                                     for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
                                                         if (validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
+<<<<<<< HEAD
                                                             for (var fulfillment of poItem.fulfillments) {
                                                                 var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                                 var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
@@ -364,6 +446,26 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                                     fulfillment.ppnNo = '';
                                                                     fulfillment.pphValue = '';
                                                                     fulfillment.pphDate = '';
+=======
+                                                            if (unitPaymentOrderItem.product._id.equals(poItem.product._id)) {
+                                                                for (var fulfillment of poItem.fulfillments) {
+                                                                    var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                                    var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
+                                                                    if (fulfillmentNo == deliveryOrderNo) {
+                                                                        fulfillment.invoiceDate = '';
+                                                                        fulfillment.invoiceNo = '';
+                                                                        fulfillment.interNoteDate = '';
+                                                                        fulfillment.interNoteNo = '';
+                                                                        fulfillment.interNoteValue = '';
+                                                                        fulfillment.interNoteDueDate = '';
+                                                                        fulfillment.ppnNo = '';
+                                                                        fulfillment.ppnDate = '';
+                                                                        fulfillment.ppnValue = '';
+                                                                        fulfillment.ppnNo = '';
+                                                                        fulfillment.pphValue = '';
+                                                                        fulfillment.pphDate = '';
+                                                                    }
+>>>>>>> refs/remotes/origin/dev-purchasing-unit-payment-price-correction-note
                                                                 }
                                                             }
                                                         }
