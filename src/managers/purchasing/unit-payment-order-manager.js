@@ -115,8 +115,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         }
                     }
 
-                    if (!valid.stamp)
-                    {
+                    if (!valid.stamp) {
                         valid = new UnitPaymentOrder(valid);
                     }
 
@@ -180,59 +179,8 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                 .then(validUnitPaymentOrder => {
                     this.collection.insert(validUnitPaymentOrder)
                         .then(id => {
-                            //update PO Internal
-                            for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
-                                for (var doItem of unitPaymentOrderItem.unitReceiptNote.deliveryOrder.items)
-                                    for (var fulfillment of doItem.fulfillments) {
-                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillment.purchaseOrder._id));
-                                    }
-                            }
-                            Promise.all(getPurchaseOrderById)
-                                .then(results => {
-                                    for (var result of results) {
-                                        var purchaseOrder = result;
-                                        for (var poItem of purchaseOrder.items) {
-                                            for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
-                                                if (validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
-                                                    for (var fulfillment of poItem.fulfillments) {
-                                                        var fulfillmentNo = fulfillment.deliveryOderNo || '';
-                                                        var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
-                                                        if (fulfillmentNo == deliveryOrderNo) {
-                                                            fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
-                                                            fulfillment.invoiceNo = validUnitPaymentOrder.invoceDate;
-                                                            fulfillment.interNoteDate = validUnitPaymentOrder.no;
-                                                            fulfillment.interNoteNo = validUnitPaymentOrder.date;
-                                                            fulfillment.interNoteValue = validUnitPaymentOrder.invoicePrice;
-                                                            fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
-                                                            if (validUnitPaymentOrder.incomeTaxNo) {
-                                                                fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
-                                                                fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
-                                                                fulfillment.ppnValue = 0.1;
-                                                            }
-                                                            if (validUnitPaymentOrder.vatNo) {
-                                                                fulfillment.ppnNo = validUnitPaymentOrder.vatNo;
-                                                                fulfillment.pphValue = validUnitPaymentOrder.vatDate;
-                                                                fulfillment.pphDate = validUnitPaymentOrder.vatRate;
-                                                            }
-                                                        }
-                                                    }
-
-                                                }
-                                            }
-                                        }
-                                        tasks.push(this.purchaseOrderManager.update(purchaseOrder));
-                                    }
-                                    Promise.all(tasks)
-                                        .then(results => {
-                                            resolve(id);
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        })
-                                })
-                                .catch(e => {
-                                    reject(e);
-                                });
+                            this.updatePO(validUnitPaymentOrder);
+                            resolve(id);
                         })
                         .catch(e => {
                             reject(e);
@@ -255,58 +203,8 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         .then(validUnitPaymentOrder => {
                             this.collection.update(validUnitPaymentOrder)
                                 .then(id => {
-                                    //update PO Internal
-                                    for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
-                                        for (var doItem of unitPaymentOrderItem.unitReceiptNote.deliveryOrder.items)
-                                            for (var fulfillment of doItem.fulfillments) {
-                                                getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillment.purchaseOrder._id));
-                                            }
-                                    }
-                                    Promise.all(getPurchaseOrderById)
-                                        .then(results => {
-                                            for (var result of results) {
-                                                var purchaseOrder = result;
-                                                for (var poItem of purchaseOrder.items) {
-                                                    for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
-                                                        if (validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
-                                                            for (var fulfillment of poItem.fulfillments) {
-                                                                var fulfillmentNo = fulfillment.deliveryOderNo || '';
-                                                                var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
-                                                                if (fulfillmentNo == deliveryOrderNo) {
-                                                                    fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
-                                                                    fulfillment.invoiceNo = validUnitPaymentOrder.invoceDate;
-                                                                    fulfillment.interNoteDate = validUnitPaymentOrder.no;
-                                                                    fulfillment.interNoteNo = validUnitPaymentOrder.date;
-                                                                    fulfillment.interNoteValue = validUnitPaymentOrder.invoicePrice;
-                                                                    fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
-                                                                    if (validUnitPaymentOrder.incomeTaxNo) {
-                                                                        fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
-                                                                        fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
-                                                                        fulfillment.ppnValue = 0.1;
-                                                                    }
-                                                                    if (validUnitPaymentOrder.vatNo) {
-                                                                        fulfillment.ppnNo = validUnitPaymentOrder.vatNo;
-                                                                        fulfillment.pphValue = validUnitPaymentOrder.vatDate;
-                                                                        fulfillment.pphDate = validUnitPaymentOrder.vatRate;
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                tasks.push(this.purchaseOrderManager.update(purchaseOrder));
-                                            }
-                                            Promise.all(tasks)
-                                                .then(results => {
-                                                    resolve(id);
-                                                })
-                                                .catch(e => {
-                                                    reject(e);
-                                                })
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        });
+                                    this.updatePO(validUnitPaymentOrder);
+                                    resolve(id);
                                 })
                                 .catch(e => {
                                     reject(e);
@@ -322,6 +220,64 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         });
     }
 
+    updatePO(validUnitPaymentOrder) {
+        return new Promise((resolve, reject) => {
+            //update PO Internal
+            for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
+                for (var doItem of unitPaymentOrderItem.unitReceiptNote.deliveryOrder.items)
+                    for (var fulfillment of doItem.fulfillments) {
+                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillment.purchaseOrder._id));
+                    }
+            }
+            Promise.all(getPurchaseOrderById)
+                .then(results => {
+                    for (var result of results) {
+                        var purchaseOrder = result;
+                        for (var poItem of purchaseOrder.items) {
+                            for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
+                                if (validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
+                                    for (var fulfillment of poItem.fulfillments) {
+                                        var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                        var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
+                                        if (fulfillmentNo == deliveryOrderNo) {
+                                            fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
+                                            fulfillment.invoiceNo = validUnitPaymentOrder.invoceDate;
+                                            fulfillment.interNoteDate = validUnitPaymentOrder.no;
+                                            fulfillment.interNoteNo = validUnitPaymentOrder.date;
+                                            fulfillment.interNoteValue = validUnitPaymentOrder.invoicePrice;
+                                            fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
+                                            if (validUnitPaymentOrder.incomeTaxNo) {
+                                                fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
+                                                fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
+                                                fulfillment.ppnValue = 0.1;
+                                            }
+                                            if (validUnitPaymentOrder.vatNo) {
+                                                fulfillment.ppnNo = validUnitPaymentOrder.vatNo;
+                                                fulfillment.pphValue = validUnitPaymentOrder.vatDate;
+                                                fulfillment.pphDate = validUnitPaymentOrder.vatRate;
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                        tasks.push(this.purchaseOrderManager.update(purchaseOrder));
+                    }
+                    Promise.all(tasks)
+                        .then(results => {
+                            resolve(results);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        })
+                })
+                .catch(e => {
+                    reject(e);
+                });
+
+        });
+    }
     delete(unitPaymentOrder) {
         return new Promise((resolve, reject) => {
             var tasks = [];

@@ -140,7 +140,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }
                     
-                        valid.unitId = new ObjectId(valid.unitId);
+                        valid.unitId = new ObjectId(valid.unit._id);
                         valid.categoryId = new ObjectId(valid.categoryId);
                     if (!valid.stamp)
                         valid = new PurchaseOrder(valid);
@@ -446,7 +446,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                     ]
                                 },
                                 {
-                                    "isPosted": true
+                                    "purchaseOrderExternal.isPosted": true
                                 }
                             ]
 
@@ -477,7 +477,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                             $and: [
                                 {
-                                    "isPosted": true
+                                    "purchaseOrderExternal.isPosted": true
                                 },
                                 {
                                     "_deleted": false
@@ -529,7 +529,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         ]
                                     },
                                     {
-                                        "isPosted": true
+                                        "purchaseOrderExternal.isPosted": true
                                     }
                                 ]
                             },
@@ -564,7 +564,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 {
                                     $and: [
                                         {
-                                            "isPosted": true
+                                            "purchaseOrderExternal.isPosted": true
                                         },
                                         {
                                             "_deleted": false
@@ -619,7 +619,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                     ]
                                 },
                                 {
-                                    "isPosted": true
+                                    "purchaseOrderExternal.isPosted": true
                                 }
                             ]
 
@@ -649,7 +649,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
                             $and: [
                                 {
-                                    "isPosted": true
+                                    "purchaseOrderExternal.isPosted": true
                                 },
                                 {
                                     "_deleted": false
