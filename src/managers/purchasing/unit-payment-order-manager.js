@@ -172,9 +172,6 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
     create(unitPaymentOrder) {
         return new Promise((resolve, reject) => {
-            var tasks = [];
-            var tasksPoExternal = [];
-            var getPurchaseOrderById = [];
             this._validate(unitPaymentOrder)
                 .then(validUnitPaymentOrder => {
                     this.collection.insert(validUnitPaymentOrder)
@@ -194,9 +191,6 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
     update(unitPaymentOrder) {
         return new Promise((resolve, reject) => {
-            var tasks = [];
-            var tasksPoExternal = [];
-            var getPurchaseOrderById = [];
             this._createIndexes()
                 .then((createIndexResults) => {
                     this._validate(unitPaymentOrder)
@@ -222,6 +216,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
     updatePO(validUnitPaymentOrder) {
         return new Promise((resolve, reject) => {
+            var tasks = [];
+            var tasksPoExternal = [];
+            var getPurchaseOrderById = [];
             //update PO Internal
             for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
                 for (var doItem of unitPaymentOrderItem.unitReceiptNote.deliveryOrder.items)
