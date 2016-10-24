@@ -5,52 +5,52 @@ var helper = require("../helper");
 var assert = require('assert');
 var validator = require('dl-models').validator.master;
 var validatorPurchasing = require('dl-models').validator.purchasing;
-var PurchaseOrderBaseManager = require("../../src/managers/purchasing/purchase-order-manager");
+var PurchaseRequestManager = require("../../src/managers/purchasing/purchase-request-manager");
 var UnitManager = require("../../src/managers/master/unit-manager");
 var CategoryManager = require("../../src/managers/master/category-manager");
 var ProductManager = require("../../src/managers/master/product-manager");
 var UomManager = require("../../src/managers/master/uom-manager");
-var purchaseOrderManager = null;
+var BudgetManager = require("../../src/managers/master/budget-manager");
+var purchaseRequestManager = null;
 var unitManager = null;
 var categoryManager = null;
 var productManager = null;
 var uomManager = null;
+var budgetManager = null;
 
 function getData() {
-    var PurchaseOrder = require('dl-models').purchasing.PurchaseOrder;
-    var PurchaseOrderItem = require('dl-models').purchasing.PurchaseOrderItem;
+    var PurchaseRequest = require('dl-models').purchasing.PurchaseRequest;
+    var PurchaseRequestItem = require('dl-models').purchasing.PurchaseRequestItem;
 
     var now = new Date();
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
     
-    var purchaseOrder = new PurchaseOrder();
-        purchaseOrder.purchaseRequest.no = '1' + code + stamp;
-        purchaseOrder.purchaseRequest.date = new Date();
-        purchaseOrder.purchaseRequest.expectedDeliveryDate = new Date();
-        purchaseOrder.remark = `remark [${code}]`;
+    var purchaseRequest = new PurchaseRequest();
+        purchaseRequest.no = '1' + code + stamp;
+        purchaseRequest.date = new Date();
+        purchaseRequest.expectedDeliveryDate = new Date();
+        purchaseRequest.remark = `remark [${code}]`;
 
-    return purchaseOrder;
+    return purchaseRequest;
 }
 
-function getDataPurchaseOrderItem() {
-    var PurchaseOrder = require('dl-models').purchasing.PurchaseOrder;
-    var PurchaseOrderItem = require('dl-models').purchasing.PurchaseOrderItem;
+function getDataPurchaseRequestItem() {
+    var PurchaseRequest = require('dl-models').purchasing.PurchaseRequest;
+    var PurchaseRequestItem = require('dl-models').purchasing.PurchaseRequestItem;
 
     var now = new Date();
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
     
-    var purchaseOrderItem = new PurchaseOrderItem();
-        purchaseOrderItem.price= 10000;
-        purchaseOrderItem.description= 'test desc';
-        purchaseOrderItem.defaultQuantity= 1000;
-        purchaseOrderItem.dealQuantity= 1000;
+    var purchaseRequestItem = new PurchaseRequestItem();
+        purchaseRequestItem.remark= 'test desc';
+        purchaseRequestItem.quantity= 1000;
 
-    var _purchaseOrderItems = [];
-    _purchaseOrderItems.push(purchaseOrderItem);
+    var _purchaseRequestItems = [];
+    _purchaseRequestItems.push(purchaseRequestItem);
     
-    return _purchaseOrderItems;
+    return _purchaseRequestItems;
 }
 
 function getDataProduct() {
@@ -109,25 +109,21 @@ function getDataUnit() {
     return unit;
 }
 
-function updateForSplit(purchaseOrder) {
+function getDataBudget() {
+    var Budget = require('dl-models').master.Budget;
     var now = new Date();
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
-    
-    var newPurchaseOrder = purchaseOrder;
-    newPurchaseOrder.sourcePurchaseOrder = purchaseOrder
-    newPurchaseOrder.sourcePurchaseOrderId = purchaseOrder._id;
-    for(var purchaseOrderItem of newPurchaseOrder.items)
-    {
-        purchaseOrderItem.defaultQuantity= 50;
-    }
-    return newPurchaseOrder;
+    var budget = new Budget();
+    Budget.code= `CodeBudget [${code}]`;
+    Budget.name= `Budget [${code}]`;
+    return budget;
 }
 
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
-            purchaseOrderManager = new PurchaseOrderBaseManager(db, {
+            purchaseRequestManager = new PurchaseRequestManager(db, {
                 username: 'unit-test'
             });
             
@@ -144,6 +140,10 @@ before('#00. connect db', function (done) {
             });
             
             uomManager = new UomManager(db, {
+                username: 'unit-test'
+            });
+
+            budgetManager = new BudgetManager(db, {
                 username: 'unit-test'
             });
             
@@ -269,9 +269,9 @@ it(`#08. should success when get created data product with id`, function (done) 
 });
 
 it('#09. should success when read data', function (done) {
-    purchaseOrderManager.read()
+    purchaseRequestManager.read()
         .then(documents => {
-            documents.data.should.be.instanceof(Array);
+            documents.should.be.instanceof(Array);
             done();
         })
         .catch(e => {
@@ -279,27 +279,29 @@ it('#09. should success when read data', function (done) {
         })
 });
 
-var purchaseOrderId;
-it('#11. should success when create new data purchase order', function (done) {
+
+var purchaseRequestId;
+it('#10. should success when create new data purchase request', function (done) {
     var data = getData();
-    var purchaseOrderItems = getDataPurchaseOrderItem();
-    for(var purchaseOrderItem of purchaseOrderItems){
-        purchaseOrderItem.defaultUom=uom;
-        purchaseOrderItem.dealUom=uom;
-        purchaseOrderItem.product= product;
+    var purchaseRequestItems = getDataPurchaseRequestItem();
+    for(var purchaseRequestItem of purchaseRequestItems){
+        purchaseRequestItem.uom=uom;
+        purchaseRequestItem.product= product;
     }
     
-    var _purchaseOrderItems = [];
-    _purchaseOrderItems.push(purchaseOrderItem);
+    var _purchaseRequestItems = [];
+    _purchaseRequestItems.push(purchaseRequestItem);
     
-    data.purchaseRequest.unit = unit;
-    data.purchaseRequest.category = category;
-    data.items = _purchaseOrderItems;
-    
-    purchaseOrderManager.create(data)
+    data.items = _purchaseRequestItems;
+    data.unit=unit;
+    data.category=category;
+    data.unitId=unit._id;
+    data.categoryId=category._id;
+
+    purchaseRequestManager.create(data)
         .then(id => {
             id.should.be.Object();
-            purchaseOrderId = id;
+            purchaseRequestId = id;
             done();
         })
         .catch(e => {
@@ -307,32 +309,13 @@ it('#11. should success when create new data purchase order', function (done) {
         })
 });
 
-it('#12. should success when split purchase order', function (done) {
-    purchaseOrderManager.getSingleByQuery({ _id: purchaseOrderId })
-        .then(result => {
-            var data = updateForSplit(result);
-            purchaseOrderManager.split(data)
-                .then(id => {
-                    id.should.be.Object();
-                    done();
-                })
-                .catch(e => {
-                    done(e);
-                })
-
-        })
-        .catch(e => {
-            done(e);
-        })
-});
-
-var purchaseOrder;
-it(`#13. should success when get created data purchase order with id`, function (done) {
-    purchaseOrderManager.getSingleByQuery({ _id: purchaseOrderId })
+var purchaseRequest;
+it(`#11. should success when get created data purchase request with id`, function (done) {
+    purchaseRequestManager.getSingleByQuery({ _id: purchaseRequestId })
         .then(data => {
-            validatorPurchasing.purchaseOrder(data);
+            validatorPurchasing.purchaseRequest(data);
             data.should.instanceof(Object);
-            purchaseOrder = data;
+            purchaseRequest = data;
             done();
         })
         .catch(e => {
@@ -340,11 +323,11 @@ it(`#13. should success when get created data purchase order with id`, function 
         })
 });
 
-it(`#14. should success when update created data purchase order`, function (done) {
-    purchaseOrder.remark += '[updated]';
-    purchaseOrderManager.update(purchaseOrder)
+it(`#12. should success when update created data purchase request`, function (done) {
+    purchaseRequest.remark += '[updated]';
+    purchaseRequestManager.update(purchaseRequest)
         .then(id => {
-            purchaseOrderId.toString().should.equal(id.toString());
+            purchaseRequestId.toString().should.equal(id.toString());
             done();
         })
         .catch(e => {
@@ -352,10 +335,10 @@ it(`#14. should success when update created data purchase order`, function (done
         });
 });
 
-it(`#15. should success when get updated data purchase order with id`, function (done) {
-    purchaseOrderManager.getSingleByQuery({ _id: purchaseOrderId })
+it(`#13. should success when get updated data purchase request with id`, function (done) {
+    purchaseRequestManager.getSingleByQuery({ _id: purchaseRequestId })
         .then(data => {
-            data.no.should.equal(purchaseOrder.no);
+            data.no.should.equal(purchaseRequest.no);
             done();
         })
         .catch(e => {
@@ -363,10 +346,10 @@ it(`#15. should success when get updated data purchase order with id`, function 
         })
 });
 
-it(`#16. should success when delete data purchase order`, function (done) {
-    purchaseOrderManager.delete(purchaseOrder)
+it(`#14. should success when delete data purchase request`, function (done) {
+    purchaseRequestManager.delete(purchaseRequest)
         .then(id => {
-            purchaseOrderId.toString().should.equal(id.toString());
+            purchaseRequestId.toString().should.equal(id.toString());
             done();
         })
         .catch(e => {
@@ -374,8 +357,8 @@ it(`#16. should success when delete data purchase order`, function (done) {
         });
 });
 
-it(`#17. should _deleted=true`, function (done) {
-    purchaseOrderManager.getSingleByQuery({ _id: purchaseOrderId })
+it(`#15. should _deleted=true`, function (done) {
+    purchaseRequestManager.getSingleByQuery({ _id: purchaseRequestId })
         .then(data => {
             data._deleted.should.be.Boolean();
             data._deleted.should.equal(true);
