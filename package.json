@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danliris/dl-module.git#dev"
+    "url": "git+https://github.com/danliris/dl-module.git"
   },
   "author": "Moonlay",
   "license": "MIT",
