@@ -53,7 +53,13 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         errors["unit"] = i18n.__("UnitPaymentOrder.unit.isRequired:%s is required", i18n.__("UnitPaymentOrder.unit._:Unit")); //"Unit tidak boleh kosong";
 
                     if (!valid.date || valid.date == '')
-                        errors["no"] = i18n.__("UnitPaymentOrder.date.isRequired:%s is required", i18n.__("UnitPaymentOrder.date._:Date")); //tanggal surat perintah bayar tidak boleh kosong";
+                        errors["date"] = i18n.__("UnitPaymentOrder.date.isRequired:%s is required", i18n.__("UnitPaymentOrder.date._:Date")); //tanggal surat perintah bayar tidak boleh kosong";
+
+                    if (!valid.invoceNo || valid.invoceNo == '')
+                        errors["invoceNo"] = i18n.__("UnitPaymentOrder.invoceNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.invoceNo._:InvoceNo")); //No. surat invoice tidak boleh kosong";
+
+                    if (!valid.invoceDate || valid.invoceDate == '')
+                        errors["invoceDate"] = i18n.__("UnitPaymentOrder.invoceDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.invoceDate._:InvoceDate")); //tanggal surat invoice tidak boleh kosong";
 
                     if (!valid.supplierId)
                         errors["supplier"] = i18n.__("UnitPaymentOrder.supplier.isRequired:%s name is required", i18n.__("UnitPaymentOrder.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
@@ -80,10 +86,16 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
                     valid.unitId = new ObjectId(valid.unitId);
                     valid.supplierId = new ObjectId(valid.supplierId);
-                    valid.categoryId = new ObjectId(valid.category._id);
-                    valid.category._id = new ObjectId(valid.category._id);
-                    valid.currency._id = new ObjectId(valid.currency._id);
-                    valid.vat._id = new ObjectId(valid.vat._id);
+                    if (valid.category != null) {
+                        valid.categoryId = new ObjectId(valid.category._id);
+                        valid.category._id = new ObjectId(valid.category._id);
+                    }
+                    if (valid.currency != null) {
+                        valid.currency._id = new ObjectId(valid.currency._id);
+                    }
+                    if (valid.vat != null) {
+                        valid.vat._id = new ObjectId(valid.vat._id);
+                    }
                     valid.supplierId = new ObjectId(valid.categoryId);
                     valid.unit._id = new ObjectId(valid.unitId);
                     valid.supplier._id = new ObjectId(valid.supplierId);
@@ -254,9 +266,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                 fulfillment.ppnValue = 0.1;
                                             }
                                             if (validUnitPaymentOrder.vatNo) {
-                                                fulfillment.ppnNo = validUnitPaymentOrder.vatNo;
-                                                fulfillment.pphValue = validUnitPaymentOrder.vatDate;
-                                                fulfillment.pphDate = validUnitPaymentOrder.vatRate;
+                                                fulfillment.pphNo = validUnitPaymentOrder.vatNo;
+                                                fulfillment.pphValue = validUnitPaymentOrder.vatRate;
+                                                fulfillment.pphDate = validUnitPaymentOrder.vatDate;
                                             }
                                         }
                                     }
