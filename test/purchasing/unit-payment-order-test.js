@@ -6,7 +6,7 @@ var UnitPaymentOrderManager = require("../../src/managers/purchasing/unit-paymen
 var unitReceiptNoteManager = null;
 var unitPaymentOrderManager = null;
 var UnitReceiptNoteItem = require('dl-models').purchasing.UnitReceiptNoteItem;
-var UnitPaymentOrderItem = require('dl-models').purchasing.UnitPaymentOrderItem;
+var UnitPaymentOrderItem = require('dl-models').purchasing.UnitPaymentOrderItem; 
 
 require("should");
 function getDataUnitPaymentOrder() {
@@ -69,7 +69,11 @@ it('#02. should success when create new data', function (done) {
     if (createdData) {
         unitPaymentOrderItem.unitReceiptNoteId = createdData._id;
         unitPaymentOrderItem.unitReceiptNote = createdData;
-    }
+    } 
+    data.vat= {"_id": "5809dfcc70fcf5421c57d705"};
+    data.currency= {"_id": "5809dfcc70fcf5421c57d705"};
+    data.category= {"_id": "5809dfcc70fcf5421c57d705"};
+    data.termPayment='cash';
     data.unit = createdData.unit;
     data.unitId = createdData.unit._id;
     data.supplier = createdData.supplier;
