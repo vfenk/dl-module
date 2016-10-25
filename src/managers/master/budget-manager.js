@@ -6,15 +6,15 @@ require("mongodb-toolkit");
 
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var Uom = DLModels.master.Uom;
+var Budget = DLModels.master.Budget;
 var BaseManager = require('../base-manager');
 var i18n = require('dl-i18n');
 
-module.exports = class UomManager extends BaseManager {
-    
+module.exports = class BudgetManager  extends BaseManager  {
+
     constructor(db, user) {
         super(db, user);
-        this.collection = this.db.use(map.master.collection.uom);
+        this.collection = this.db.use(map.master.collection.Budget);
     }
 
     _getQuery(paging) {
@@ -27,41 +27,41 @@ module.exports = class UomManager extends BaseManager {
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterUnit = {
-                'unit': {
+            var filterName = {
+                'name': {
                     '$regex': regex
                 }
             };
 
-            query['$and'].push(filterUnit);
+            query['$and'].push(filterName);
         }
         return query;
     }
     
-    _validate(uom) {
+    _validate(budget) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = uom;
+            var valid = budget;
             // 1. begin: Declare promises.
-            var getuomPromise = this.collection.singleOrDefault({
+            var getbudgetPromise = this.collection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        unit: valid.unit
+                        name: valid.name
                     }]
             });
 
             // 2. begin: Validation.
-            Promise.all([getuomPromise])
+            Promise.all([getbudgetPromise])
                 .then(results => {
-                    var _uom = results[0];
+                    var _budget = results[0];
 
-                    if (!valid.unit || valid.unit == '')
-                        errors["unit"] =  i18n.__("Uom.unit.isRequired:%s is required", i18n.__("Uom.unit._:Unit")); //"Satuan Tidak Boleh Kosong";
-                    else if (_uom) {
-                        errors["unit"] = i18n.__("Uom.unit.isExists:%s is already exists", i18n.__("Uom.unit._:Unit")); //"Satuan sudah terdaftar";
+                    if (!valid.name || valid.name == '')
+                        errors["name"] = i18n.__("Budget.name.isRequired:%s is required", i18n.__("Budget.name._:Name"));//"Nama Budget Tidak Boleh Kosong";
+                    else if (_budget) {
+                        errors["name"] = i18n.__("Budget.name.isExists:%s is already exists", i18n.__("Budget.name._:Name"));//"Nama Budget sudah terdaftar";
                     }
 
                      if (Object.getOwnPropertyNames(errors).length > 0) {
@@ -69,7 +69,7 @@ module.exports = class UomManager extends BaseManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-                    valid = new Uom(uom);
+                    valid = new Budget(budget);
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })
@@ -78,4 +78,5 @@ module.exports = class UomManager extends BaseManager {
                 })
         });
     }
+   
 }

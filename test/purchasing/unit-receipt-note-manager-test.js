@@ -1,9 +1,8 @@
-'use strict';
-
-var should = require('should');
 var helper = require("../helper");
 var validator = require('dl-models').validator.master;
 var validatorPurchasing = require('dl-models').validator.purchasing;
+var UnitReceiptNoteManager = require("../../src/managers/purchasing/unit-receipt-note-manager");
+var DeliveryOrderManager = require("../../src/managers/purchasing/delivery-order-manager");
 var PurchaseOrderExternalManager = require("../../src/managers/purchasing/purchase-order-external-manager");
 var PurchaseOrderBaseManager = require("../../src/managers/purchasing/purchase-order-manager");
 var UnitManager = require("../../src/managers/master/unit-manager");
@@ -12,6 +11,8 @@ var ProductManager = require("../../src/managers/master/product-manager");
 var UomManager = require("../../src/managers/master/uom-manager");
 var SupplierManager = require("../../src/managers/master/supplier-manager");
 var CurrencyManager = require("../../src/managers/master/currency-manager");
+var unitReceiptNoteManager = null;
+var deliveryOrderManager = null;
 var purchaseOrderExternalManager = null;
 var purchaseOrderManager = null;
 var unitManager = null;
@@ -20,8 +21,41 @@ var productManager = null;
 var uomManager = null;
 var supplierManager = null;
 var currencyManager = null;
+var DeliveryOrderItem = require('dl-models').purchasing.DeliveryOrderItem;
+var DeliveryOrderItemFulfillment = require('dl-models').purchasing.DeliveryOrderItemFulfillment;
+var UnitReceiptNoteItem = require('dl-models').purchasing.UnitReceiptNoteItem;
 
-function getData() {
+require("should");
+function getDataUnitReceiptNote() {
+    var UnitReceiptNote = require('dl-models').purchasing.UnitReceiptNote;
+
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
+    
+    var unitReceiptNote = new UnitReceiptNote();
+    unitReceiptNote.no = code;
+    unitReceiptNote.date = now;
+    unitReceiptNote.remark = `remark ${code}`;
+    return unitReceiptNote;
+}
+
+function getDataDeliveryOrder() {
+    var DeliveryOrder = require('dl-models').purchasing.DeliveryOrder;
+
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
+    
+    var deliveryOrder = new DeliveryOrder();
+    deliveryOrder.no = code;
+    deliveryOrder.date = now;
+    deliveryOrder.supplierDoDate = now;
+    deliveryOrder.remark = `remark ${code}`;
+    return deliveryOrder;
+}
+
+function getDataPurchaseOrderExternal() {
     var PurchaseOrderExternal = require('dl-models').purchasing.PurchaseOrderExternal;
     var now = new Date();
     var stamp = now / 1000 | 0;
@@ -170,6 +204,14 @@ function getDataCurrency() {
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
+            unitReceiptNoteManager = new UnitReceiptNoteManager(db, {
+                username: 'unit-test'
+            });
+            
+            deliveryOrderManager = new DeliveryOrderManager(db, {
+                username: 'unit-test'
+            });
+            
             purchaseOrderExternalManager = new PurchaseOrderExternalManager(db, {
                 username: 'unit-test'
             });
@@ -208,19 +250,6 @@ before('#00. connect db', function (done) {
         })
 });
 
-// var purchaseOrderExternal;
-// it(`#19. should success when get created data with id`, function (done) {
-//     purchaseOrderExternalManager.pdf("57f47c1d2e1ca2003a8d0913")
-//         .then(data => {
-//             validatorPurchasing.purchaseOrderExternal(data);
-//             data.should.instanceof(Object);
-//             purchaseOrderExternal = data;
-//             done();
-//         })
-//         .catch(e => {
-//             done(e);
-//         })
-// });
 var unitId;
 it('#01. should success when create new data unit', function (done) {
     var data = getDataUnit();
@@ -336,7 +365,7 @@ it(`#08. should success when get created data product with id`, function (done) 
 });
 
 var purchaseOrderId;
-it('#11. should success when create new data purchase order', function (done) {
+it('#09. should success when create new data purchase order', function (done) {
     var data = getDataPurchaseOrder();
     var purchaseOrderItems = getDataPurchaseOrderItem();
     for(var purchaseOrderItem of purchaseOrderItems){
@@ -364,7 +393,7 @@ it('#11. should success when create new data purchase order', function (done) {
 });
 
 var purchaseOrder;
-it(`#12. should success when get created data purchase order with id`, function (done) {
+it(`#10. should success when get created data purchase order with id`, function (done) {
     purchaseOrderManager.getSingleByQuery({ _id: purchaseOrderId })
         .then(data => {
             validatorPurchasing.purchaseOrder(data);
@@ -378,7 +407,7 @@ it(`#12. should success when get created data purchase order with id`, function 
 });
 
 var supplierId;
-it('#13. should success when create new data supplier', function (done) {
+it('#11. should success when create new data supplier', function (done) {
     var data = getDataSupplier();
     supplierManager.create(data)
         .then(id => {
@@ -392,7 +421,7 @@ it('#13. should success when create new data supplier', function (done) {
 });
 
 var supplier;
-it(`#14. should success when get created data supplier with id`, function (done) {
+it(`#12. should success when get created data supplier with id`, function (done) {
     supplierManager.getSingleByQuery({ _id: supplierId })
         .then(data => {
             validator.supplier(data);
@@ -406,7 +435,7 @@ it(`#14. should success when get created data supplier with id`, function (done)
 });
 
 var currencyId;
-it('#15. should success when create new data currency', function (done) {
+it('#13. should success when create new data currency', function (done) {
     var data = getDataCurrency();
     currencyManager.create(data)
         .then(id => {
@@ -420,7 +449,7 @@ it('#15. should success when create new data currency', function (done) {
 });
 
 var currency;
-it(`#16. should success when get created data currency with id`, function (done) {
+it(`#14. should success when get created data currency with id`, function (done) {
     currencyManager.getSingleByQuery({ _id: currencyId })
         .then(data => {
             validator.currency(data);
@@ -433,20 +462,9 @@ it(`#16. should success when get created data currency with id`, function (done)
         })
 });
 
-it('#17. should success when read data', function (done) {
-    purchaseOrderExternalManager.read()
-        .then(documents => {
-            documents.data.should.be.instanceof(Array);
-            done();
-        })
-        .catch(e => {
-            done(e);
-        })
-});
-
 var purchaseOrderExternalId;
-it('#18. should success when create new data', function (done) {
-    var data = getData();
+it('#15. should success when create new data purchaseOrder external', function (done) {
+    var data = getDataPurchaseOrderExternal();
     data.supplier=supplier;
     data.supplierId=supplierId;
     data.currency = currency;
@@ -473,7 +491,7 @@ it('#18. should success when create new data', function (done) {
 });
 
 var purchaseOrderExternal;
-it(`#19. should success when get created data with id`, function (done) {
+it(`#16. should success when get created data purchaseOrder external with id`, function (done) {
     purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
         .then(data => {
             validatorPurchasing.purchaseOrderExternal(data);
@@ -486,55 +504,7 @@ it(`#19. should success when get created data with id`, function (done) {
         })
 });
 
-it(`#20. should success when update created data`, function (done) {
-    purchaseOrderExternal.remark += '[updated]';
-
-    purchaseOrderExternalManager.update(purchaseOrderExternal)
-        .then(id => {
-            purchaseOrderExternalId.toString().should.equal(id.toString());
-            done();
-        })
-        .catch(e => {
-            done(e);
-        });
-});
-
-it(`#21. should success when get updated data with id`, function (done) {
-    purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
-        .then(data => {
-            data.no.should.equal(purchaseOrderExternal.no);
-
-            done();
-        })
-        .catch(e => {
-            done(e);
-        })
-});
-
-it(`#22. should success when delete data`, function (done) {
-    purchaseOrderExternalManager.delete(purchaseOrderExternal)
-        .then(id => {
-            purchaseOrderExternalId.toString().should.equal(id.toString());
-            done();
-        })
-        .catch(e => {
-            done(e);
-        });
-});
-
-it(`#23. should _deleted=true`, function (done) {
-    purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
-        .then(data => {
-            data._deleted.should.be.Boolean();
-            data._deleted.should.equal(true);
-            done();
-        })
-        .catch(e => {
-            done(e);
-        })
-});
-
-it(`#24. should success when post`, function (done) {
+it(`#17. should success when post`, function (done) {
     var listPurchaseOrderExternal = [];
     listPurchaseOrderExternal.push(purchaseOrderExternal);
     purchaseOrderExternalManager.post(listPurchaseOrderExternal)
@@ -546,14 +516,219 @@ it(`#24. should success when post`, function (done) {
         })
 });
 
-it(`#25. should isPosted=true`, function (done) {
-    purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
-        .then(data => {
-            data.isPosted.should.be.Boolean();
-            data.isPosted.should.equal(true);
+var deliveryOrderId;
+it('#18. should success when create new data delivery Order', function (done) {
+    var doItemFulfillment  = new DeliveryOrderItemFulfillment();
+    doItemFulfillment.purchaseOrderId = purchaseOrder._id;
+    doItemFulfillment.purchaseOrder = purchaseOrder;
+    doItemFulfillment.productId = product._id;
+    doItemFulfillment.product = product;
+    doItemFulfillment.purchaseOrderQuantity = 1000;
+    doItemFulfillment.purchaseOrderUom = uom;
+    doItemFulfillment.deliveredQuantity = 450;
+    
+    var doItem = new DeliveryOrderItem();
+    doItem.purchaseOrderExternal =purchaseOrderExternal;
+    doItem.purchaseOrderExternalId = purchaseOrderExternal._id;
+    doItem.fulfillments=[];
+    doItem.fulfillments.push(doItemFulfillment);
+    
+    var data = getDataDeliveryOrder();
+    data.supplier=supplier;
+    data.supplierId=supplier._id;
+    data.items=[];
+    data.items.push(doItem);
+    
+    deliveryOrderManager.create(data)
+        .then(id => {
+            id.should.be.Object();
+            deliveryOrderId = id;
             done();
         })
         .catch(e => {
             done(e);
+        })
+});
+
+var deliveryOrder;
+it(`#19. should success when get created data delivery Order with id`, function (done) {
+    deliveryOrderManager.getSingleByQuery({ _id: deliveryOrderId })
+        .then(data => {
+            // validate.product(data);
+            data.should.instanceof(Object);
+            deliveryOrder = data;
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
+it(`#20. should success when post`, function (done) {
+    var listPurchaseOrderExternal = [];
+    listPurchaseOrderExternal.push(purchaseOrderExternal);
+    purchaseOrderExternalManager.post(listPurchaseOrderExternal)
+        .then(data => {
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
+it('#21. should success when read data', function (done) {
+    unitReceiptNoteManager.read()
+        .then(documents => {
+            //process documents
+            documents.data.should.be.instanceof(Array);
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
+var createdId;
+it('#22. should success when create new data', function (done) {
+    var unitReceiptNoteItem = new UnitReceiptNoteItem();
+    for (var doItem of deliveryOrder.items)
+    {
+        for(var doItemFulfillment of doItem.fulfillments)
+        {
+            unitReceiptNoteItem.product = doItemFulfillment.product;
+            unitReceiptNoteItem.deliveredQuantity = doItemFulfillment.deliveredQuantity;
+            unitReceiptNoteItem.deliveredUom = doItemFulfillment.purchaseOrderUom;
+        }
+    }
+    var data = getDataUnitReceiptNote();
+    data.unit=unit;
+    data.unitId=unit._id;
+    data.supplier=supplier;
+    data.supplierId=supplier._id;
+    data.deliveryOrder=deliveryOrder;
+    data.deliveryOrderId=deliveryOrder._id;
+    data.items=[];
+    data.items.push(unitReceiptNoteItem);
+    
+    unitReceiptNoteManager.create(data)
+        .then(id => {
+            id.should.be.Object();
+            createdId = id;
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
+var createdData;
+it(`#23. should success when get created data with id`, function (done) {
+    unitReceiptNoteManager.getSingleByQuery({ _id: createdId })
+        .then(data => {
+            validatorPurchasing.unitReceiptNote(data);
+            data.should.instanceof(Object);
+            createdData = data;
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
+it(`#24. should success when update created data`, function (done) {
+    createdData.remark += '[updated]';
+
+    unitReceiptNoteManager.update(createdData)
+        .then(id => {
+            createdId.toString().should.equal(id.toString());
+            done();
+        })
+        .catch(e => {
+            done(e);
+        });
+});
+
+it(`#25. should success when get updated data with id`, function (done) {
+    unitReceiptNoteManager.getSingleByQuery({ _id: createdId })
+        .then(data => {
+            data.no.should.equal(createdData.no); 
+            createdData = data;
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
+it(`#26. should success when delete data`, function (done) {
+    unitReceiptNoteManager.delete(createdData)
+        .then(id => {
+            createdId.toString().should.equal(id.toString());
+            done();
+        })
+        .catch(e => {
+            done(e);
+        });
+});
+
+it('#27. should error when create new data with same code', function (done) {
+    var data = Object.assign({}, createdData);
+    delete data._id;
+    unitReceiptNoteManager.create(data)
+        .then(id => {
+            id.should.be.Object(); 
+            done();
+        })
+        .catch(e => {
+            e.errors.should.have.property('no');
+            done();
+        })
+});
+it('#28. should error when create new blank data', function (done) {
+    unitReceiptNoteManager.create({})
+        .then(id => {
+            id.should.be.Object(); 
+            done();
+        })
+        .catch(e => {
+            e.errors.should.have.property('no');
+            e.errors.should.have.property('unit');
+            e.errors.should.have.property('supplier');
+            e.errors.should.have.property('deliveryOrder');
+            done();
+        })
+});
+
+it('#29. should success when create new data', function (done) {
+    var unitReceiptNoteItem = new UnitReceiptNoteItem();
+    for (var doItem of deliveryOrder.items)
+    {
+        for(var doItemFulfillment of doItem.fulfillments)
+        {
+            unitReceiptNoteItem.product = doItemFulfillment.product;
+            unitReceiptNoteItem.deliveredQuantity = 0;
+            unitReceiptNoteItem.deliveredUom = doItemFulfillment.purchaseOrderUom;
+        }
+    }
+    var data = getDataUnitReceiptNote();
+    data.unit=unit;
+    data.unitId=unit._id;
+    data.supplier=supplier;
+    data.supplierId=supplier._id;
+    data.deliveryOrder=deliveryOrder;
+    data.deliveryOrderId=deliveryOrder._id;
+    data.items=[];
+    data.items.push(unitReceiptNoteItem);
+    
+    unitReceiptNoteManager.create(data)
+        .then(id => {
+            id.should.be.Object();
+            done();
+        })
+        .catch(e => {
+            for(var item of e.errors.items){
+                item.should.have.property('deliveredQuantity');
+                done();
+            }
         })
 });
