@@ -252,11 +252,11 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 .then(validDeliveryOrder => {
                     validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
                     //UPDATE PO INTERNAL
-                    var poId=new ObjectId();
+                    var poId = new ObjectId();
                     for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                         for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
-                            if(!poId .equals(fulfillmentItem.purchaseOrder._id)){
-                                poId=new ObjectId(fulfillmentItem.purchaseOrder._id);
+                            if (!poId.equals(fulfillmentItem.purchaseOrder._id)) {
+                                poId = new ObjectId(fulfillmentItem.purchaseOrder._id);
                                 getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
                             }
                         }
@@ -289,7 +289,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                         }
                                         if (poItem.isClosed == true)
                                             purchaseOrder.isClosed = true;
-                                        else 
+                                        else
                                             purchaseOrder.isClosed = false;
                                     }
                                     tasks.push(this.purchaseOrderManager.update(purchaseOrder));
@@ -371,50 +371,35 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
     getDataDeliveryOrder(no, supplierId, dateFrom, dateTo) {
         return new Promise((resolve, reject) => {
-            var query;
-            if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "" && dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
-                query = {
-                    no: no,
-                    supplierId: new ObjectId(supplierId),
-                    supplierDoDate:
-                    {
-                        $gte: dateFrom,
-                        $lte: dateTo
-                    },
-                    _deleted: false
-                };
-            } else if (no != "undefined" && no != "" && supplierId != "undefined" && supplierId != "") {
-                query = {
-                    no: no,
-                    supplierId: new ObjectId(supplierId),
-                    _deleted: false
-                };
-            } else if (supplierId != "undefined" && supplierId != "") {
-                query = {
-                    supplierId: new ObjectId(supplierId),
-                    _deleted: false
-                };
-            } else if (no != "undefined" && no != "") {
-                query = {
-                    no: no,
-                    _deleted: false
-                };
-            } else if (dateFrom != "undefined" && dateFrom != "" && dateTo != "undefined" && dateTo != "") {
-                query = {
-                    supplierDoDate:
-                    {
-                        $gte: dateFrom,
-                        $lte: dateTo
-                    },
-                    _deleted: false
-                };
+            var query = Object.assign({});
+            var deleted = { _deleted: false };
+
+            if (no != "undefined" && no != "") {
+                var _no = { no: no };
+                Object.assign(query, _no);
             }
+            if (supplierId != "undefined" && supplierId != "") {
+                var _supplierId = { supplierId: new ObjectId(supplierId) };
+                Object.assign(query, _supplierId);
+            }
+            if (dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
+                var supplierDoDate = {
+                    supplierDoDate:
+                    {
+                        $gte: dateFrom,
+                        $lte: dateTo
+                    }
+                };
+                Object.assign(query, supplierDoDate);
+            }
+
+            Object.assign(query, deleted);
 
             this.collection
                 .where(query)
                 .execute()
                 .then(PurchaseOrder => {
-                    resolve(PurchaseOrder);
+                    resolve(PurchaseOrder.data);
                 })
                 .catch(e => {
                     reject(e);
