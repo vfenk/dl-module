@@ -254,9 +254,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                 fulfillment.ppnValue = 0.1;
                                             }
                                             if (validUnitPaymentOrder.vatNo) {
-                                                fulfillment.ppnNo = validUnitPaymentOrder.vatNo;
-                                                fulfillment.pphValue = validUnitPaymentOrder.vatDate;
-                                                fulfillment.pphDate = validUnitPaymentOrder.vatRate;
+                                                fulfillment.pphNo = validUnitPaymentOrder.vatNo;
+                                                fulfillment.pphValue = validUnitPaymentOrder.vatRate;
+                                                fulfillment.pphDate = validUnitPaymentOrder.vatDate;
                                             }
                                         }
                                     }
