@@ -41,6 +41,17 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     '$regex': regex
                 }
             };
+
+            var filterPrNo = {
+                items: {
+                    $elemMatch: {
+                        'purchaseRequest.no': {
+                            '$regex': regex
+                        }
+                    }
+                }
+            };
+
             var filterPOItem = {
                 items: {
                     $elemMatch: {
@@ -57,7 +68,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             };
 
             keywordFilter = {
-                '$or': [filterPODLNo, filterRefPO, filterPOItem, filterSupplierName]
+                '$or': [filterPODLNo, filterPrNo, filterRefPO, filterPOItem, filterSupplierName]
             };
         }
         query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
@@ -224,9 +235,15 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
                             for (var poItem of purchaseOrder.items || []) {
                                 var poItemError = {};
+                                var dealUomId = new ObjectId(poItem.dealUom._id);
+                                var defaultUomId = new ObjectId(poItem.defaultUom._id);
                                 if (!poItem.dealQuantity || poItem.dealQuantity == 0) {
                                     poItemHasError = true;
                                     poItemError["dealQuantity"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:DealQuantity")); //"Jumlah kesepakatan tidak boleh kosong";
+                                }
+                                else if (dealUomId.equals(defaultUomId) && poItem.dealQuantity > poItem.defaultQuantity) {
+                                    poItemHasError = true;
+                                    poItemError["dealQuantity"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s must not be greater than defaultQuantity", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:DealQuantity")); //"Jumlah kesepakatan tidak boleh kosong";
                                 }
                                 if (!poItem.dealUom || !poItem.dealUom.unit || poItem.dealUom.unit == "") {
                                     poItemHasError = true;
