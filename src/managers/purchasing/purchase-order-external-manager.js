@@ -331,7 +331,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         if (valid.vat._id)
                             valid.vat._id = new ObjectId(valid.vat._id);
                         else
-                            valid.vat = {};
+                            valid.vat = null;
                     }
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
