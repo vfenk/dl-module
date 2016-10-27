@@ -205,11 +205,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
             var getPurchaseOrderById = [];
             this._validate(unitReceiptNote)
                 .then(validUnitReceiptNote => {
-<<<<<<< HEAD
                     validUnitReceiptNote.no = this.generateNo(validUnitReceiptNote.unit.code);
-=======
-                    unitReceiptNote.no = this.generateNo(unitReceiptNote.unit.code);
->>>>>>> upstream/uat
                     validUnitReceiptNote.unitId = new ObjectId(validUnitReceiptNote.unitId);
                     validUnitReceiptNote.supplierId = new ObjectId(validUnitReceiptNote.supplierId);
                     validUnitReceiptNote.deliveryOrderId = new ObjectId(validUnitReceiptNote.deliveryOrderId);
