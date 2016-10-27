@@ -168,3 +168,14 @@ it('#08. should error when create new blank data', function (done) {
             done();
         })
 });
+
+ 
+it(`#19. should success when get created data with id`, function (done) {
+    unitPaymentOrderManager.pdf("58108555bc64432eb81b6875")
+        .then(data => { 
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
