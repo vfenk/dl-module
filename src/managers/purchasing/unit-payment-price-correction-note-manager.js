@@ -195,7 +195,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
             this.getSingleById(id)
                 .then(unitReceiptNote => {
-                    var getDefinition = require('../../pdf/definitions/unit-receipt-note');
+                    var getDefinition = require('../../pdf/definitions/unit-payment-correction-note');
                     var definition = getDefinition(unitReceiptNote);
 
                     var generatePdf = require('../../pdf/pdf-generator');
@@ -212,6 +212,17 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 });
 
         });
+    }
+    
+    generateNo(unit) {
+        var now = new Date();
+        var stamp = now / 1000 | 0;
+        var code = stamp.toString();
+        var locale = 'id-ID';
+        var moment = require('moment');
+        moment.locale(locale);
+        var no = `NDO${unit.code.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
+        return no;
     }
 
 }
