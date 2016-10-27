@@ -367,4 +367,28 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         });
     }
 
+     pdf(id) {
+        return new Promise((resolve, reject) => {
+
+            this.getSingleById(id)
+                .then(unitPaymentOrder => {
+                    var getDefinition = require('../../pdf/definitions/unit-payment-order');
+                    var definition = getDefinition(unitPaymentOrder);
+
+                    var generatePdf = require('../../pdf/pdf-generator');
+                    generatePdf(definition)
+                        .then(binary => {
+                            resolve(binary);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+
+        });
+    }
+
 }
