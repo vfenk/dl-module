@@ -16,6 +16,11 @@ module.exports = function (unitPaymentCorrection) {
     items = [].concat.apply([], items);
 
     var currency = unitPaymentCorrection.items.find(r => true).currency.symbol;
+    var urDates = unitPaymentCorrection.unitPaymentOrder.items.map(unitPaymentOrderItem => {
+        return new Date(unitPaymentOrderItem.unitReceiptNote.date)
+    })
+    var sjDate = Math.max.apply(null, urDates);
+
 
     var locale = 'id-ID';
     var dateLocaleOptions = {
@@ -252,7 +257,7 @@ module.exports = function (unitPaymentCorrection) {
                             style: ['size08']
                         }, {
                             width: '*',
-                            text: `${moment(unitPaymentCorrection.invoiceCorrectionDate).format(dateFormat2)} `,
+                            text: `${moment(sjDate).format(dateFormat2)} `,
                             style: ['size08']
                         }]
                 }]
