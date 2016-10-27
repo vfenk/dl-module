@@ -65,7 +65,6 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
                     if (valid.items) {
                         if (valid.items.length <= 0) {
-                            errors["items"] = i18n.__("UnitPaymentPriceCorrectionNote.items.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.items._:Item"));
                         }
                         else {
                             var itemErrors = [];
