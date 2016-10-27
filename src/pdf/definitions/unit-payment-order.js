@@ -91,7 +91,7 @@ module.exports = function (unitPaymentOrder) {
                         style: ['size08']
                     }, {
                             alignment: "left",
-                            text: 'SUKOHARJO, 18 Juli 2016',
+                            text: 'SUKOHARJO, '+`${moment(unitPaymentOrder.date).format(dateFormat)}`,
                             style: ['size09']
                         }, {
                             alignment: "left",

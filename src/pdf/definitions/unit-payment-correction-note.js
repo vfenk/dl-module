@@ -79,7 +79,7 @@ module.exports = function (unitPaymentCorrection) {
         }, '\n', {
             columns: [{
                 width: '50%',
-                text: `Retur/Potongan ${unitPaymentCorrection.unitPaymentOrder.category}`,
+                text: `Retur/Potongan ${unitPaymentCorrection.unitPaymentOrder.category.name}`,
                 style: ['size09']
             }, {
                     width: '40%',
