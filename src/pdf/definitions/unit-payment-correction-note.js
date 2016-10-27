@@ -252,7 +252,7 @@ module.exports = function (unitPaymentCorrection) {
                             style: ['size08']
                         }, {
                             width: '*',
-                            text: `${moment(unitPaymentCorrection.invoiceCorrectionDate).format(dateFormat2)} BON KELUAR`,
+                            text: `${moment(unitPaymentCorrection.invoiceCorrectionDate).format(dateFormat2)} `,
                             style: ['size08']
                         }]
                 }]
@@ -284,7 +284,7 @@ module.exports = function (unitPaymentCorrection) {
                             style: ['size08']
                         }, {
                             width: '*',
-                            text: '096/VIII/2016',
+                            text: unitPaymentCorrection.unitCoverLetterNo,
                             style: ['size08']
                         }]
                 }]
