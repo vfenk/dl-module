@@ -195,7 +195,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
             this.getSingleById(id)
                 .then(unitReceiptNote => {
-                    var getDefinition = require('../../pdf/definitions/unit-receipt-note');
+                    var getDefinition = require('../../pdf/definitions/unit-payment-correction-note');
                     var definition = getDefinition(unitReceiptNote);
 
                     var generatePdf = require('../../pdf/pdf-generator');
