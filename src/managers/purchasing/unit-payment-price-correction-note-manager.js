@@ -64,32 +64,32 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
                     if (valid.items) {
-                        // if (valid.items.length <= 0) {
-                        // }
-                        // else {
-                        //     var itemErrors = [];
-                        //     for (var item of valid.items) {
-                        //         var itemError = {};
-                        //         if (item.pricePerUnit <= 0)
-                        //             itemError["pricePerUnit"] = i18n.__("UnitPaymentPriceCorrectionNote.items.pricePerUnit.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.items.pricePerUnit._:Price Per Unit"));
+                        if (valid.items.length <= 0) {
+                        }
+                        else {
+                            var itemErrors = [];
+                            for (var item of valid.items) {
+                                var itemError = {};
+                                if (item.pricePerUnit <= 0)
+                                    itemError["pricePerUnit"] = i18n.__("UnitPaymentPriceCorrectionNote.items.pricePerUnit.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.items.pricePerUnit._:Price Per Unit"));
 
-                        //         if (item.priceTotal <= 0)
-                        //             itemError["priceTotal"] = i18n.__("UnitPaymentPriceCorrectionNote.items.priceTotal.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.items.priceTotal._:Total Price"));
+                                if (item.priceTotal <= 0)
+                                    itemError["priceTotal"] = i18n.__("UnitPaymentPriceCorrectionNote.items.priceTotal.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.items.priceTotal._:Total Price"));
 
-                        //         itemErrors.push(itemError);
-                        //     }
-                        //     for (var itemError of itemErrors) {
-                        //         for (var prop in itemError) {
-                        //             errors.items = itemErrors;
-                        //             break;
-                        //         }
-                        //         if (errors.items)
-                        //             break;
-                        //     }
-                        // }
+                                itemErrors.push(itemError);
+                            }
+                            for (var itemError of itemErrors) {
+                                for (var prop in itemError) {
+                                    errors.items = itemErrors;
+                                    break;
+                                }
+                                if (errors.items)
+                                    break;
+                            }
+                        }
 
-                        if (valid.items.length == 0)
-                            errors["items"] = i18n.__("UnitPaymentPriceCorrectionNote.items.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.items._:Item"));
+                        // if (valid.items.length == 0)
+                        //     errors["items"] = i18n.__("UnitPaymentPriceCorrectionNote.items.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.items._:Item"));
                     }
                     else {
                         errors["items"] = i18n.__("UnitPaymentPriceCorrectionNote.items.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.items._:Item"));
