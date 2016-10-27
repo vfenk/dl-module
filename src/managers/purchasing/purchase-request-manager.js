@@ -23,24 +23,17 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             var valid = purchaseRequest;
 
             var getPurchaseRequestPromise = this.collection.singleOrDefault({
-                    "$and": [{
+                    
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     }
-                }, {
-                        "no": valid.no
-                    }]
+                
             });
 
             Promise.all([getPurchaseRequestPromise])
                 .then(results => {
                     var _module = results[0];
                     var now = new Date();
-
-                    if (!valid.no || valid.no == '')
-                    errors["no"] = i18n.__("PurchaseRequest.no.isRequired:%s is required", i18n.__("PurchaseRequest.no._:No")); //No. bon PR tidak boleh kosong";
-                    else if (_module)
-                        errors["no"] = i18n.__("PurchaseRequest.no.isExists:%s is already exists", i18n.__("PurchaseRequest.no._:No")); //"No. bon PR sudah terdaftar";
 
                     if (!valid.date || valid.date == '' || valid.date =="undefined")
                         errors["date"] = i18n.__("PurchaseRequest.date.isRequired:%s is required", i18n.__("PurchaseRequest.date._:Date"));//"Tanggal PR tidak boleh kosong";
@@ -54,6 +47,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     else if (!valid.unit)
                         errors["unit"] =  i18n.__("PurchaseRequest.unit.isRequired:%s is required", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
 
+                    
                     if (!valid.categoryId)
                         errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is required", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
                     else if (valid.category) {
@@ -65,9 +59,10 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
                     if (!valid.budget || valid.budget.name=='')
                         errors["budget"] = i18n.__("PurchaseRequest.budget.name.isRequired:%s is required", i18n.__("PurchaseRequest.budget.name._:Budget")); //"Budget tidak boleh kosong";
-
-
-
+                    
+                    if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate=='' || valid.expectedDeliveryDate=='undefined' )
+                        valid.expectedDeliveryDate="";
+                    
                     if (valid.items) {
                         if (valid.items.length <= 0) {
                             errors["items"] =  i18n.__("PurchaseRequest.items.isRequired:%s is required", i18n.__("PurchaseRequest.items._:Item")); //"Harus ada minimal 1 barang";
@@ -101,6 +96,12 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
+                    valid.unitId = new ObjectId(valid.unitId);
+                    valid.unit._id = new ObjectId(valid.unitId);
+                    if (valid.category != null) {
+                        valid.categoryId = new ObjectId(valid.category._id);
+                        valid.category._id = new ObjectId(valid.category._id);
+                    }
                     
                     if (!valid.stamp)
                         valid = new PurchaseRequest(valid);
@@ -161,15 +162,19 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     }
 
     create(purchaseRequest) {
-        purchaseRequest = new PurchaseRequest(purchaseRequest);
+        //purchaseRequest = new PurchaseRequest(purchaseRequest);
         return new Promise((resolve, reject) => {
             var dateFormat = "MMYY";
             var locale = 'id-ID';
             var moment = require('moment');
             moment.locale(locale);
-            purchaseRequest.no = `${purchaseRequest.budget.code}${purchaseRequest.unit.code}${purchaseRequest.category.code}${moment(purchaseRequest.date).format(dateFormat)}${generateCode()}`;
             this._validate(purchaseRequest)
                 .then(validPurchaseRequest => {
+                    validPurchaseRequest.no = `${validPurchaseRequest.budget.code}${validPurchaseRequest.unit.code}${validPurchaseRequest.category.code}${moment(validPurchaseRequest.date).format(dateFormat)}${generateCode()}`;
+                    if(validPurchaseRequest.expectedDeliveryDate=="undefined")
+                    {
+                        validPurchaseRequest.expectedDeliveryDate="";
+                    }
                     this.collection.insert(validPurchaseRequest)
                         .then(id => {
                             resolve(id);
