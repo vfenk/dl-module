@@ -302,7 +302,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 }
             query = Object.assign(query, {
                 _createdBy: this.user.username,
-                _deleted: false
+                _deleted: false,
+                isPosted: true
             });
             this.collection.find(query).sort(sorting).toArray()
                 .then(purchaseRequest => {
