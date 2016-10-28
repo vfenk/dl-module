@@ -38,9 +38,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     var _module = results[0];
                     var now = new Date();
 
-                    if (!valid.no || valid.no == '')
-                        errors["no"] = i18n.__("UnitReceiptNote.no.isRequired:%s is required", i18n.__("UnitReceiptNote.no._:No")); //No. bon unit tidak boleh kosong";
-                    else if (_module)
+                    if (_module)
                         errors["no"] = i18n.__("UnitReceiptNote.no.isExists:%s is already exists", i18n.__("UnitReceiptNote.no._:No")); //"No. bon unit sudah terdaftar";
 
                     if (!valid.unitId)
@@ -110,8 +108,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     valid.deliveryOrder.supplierId = new ObjectId(valid.deliveryOrder.supplier._id);
                     valid.deliveryOrder.supplier._id = new ObjectId(valid.deliveryOrder.supplier._id);
                     for (var doItem of valid.deliveryOrder.items) {
-                        doItem.purchaseOrderExternalId = new ObjectId(doItem.purchaseOrderExternal._id); 
-                        doItem.purchaseOrderExternal._id = new ObjectId(doItem.purchaseOrderExternal._id); 
+                        doItem.purchaseOrderExternalId = new ObjectId(doItem.purchaseOrderExternal._id);
+                        doItem.purchaseOrderExternal._id = new ObjectId(doItem.purchaseOrderExternal._id);
                         for (var fulfillment of doItem.fulfillments) {
                             fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrder._id);
                             fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
@@ -131,8 +129,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         item.purchaseOrder.unitId = new ObjectId(item.purchaseOrder.unit._id);
                         item.purchaseOrder.unit._id = new ObjectId(item.purchaseOrder.unit._id);
                         item.purchaseOrder.categoryId = new ObjectId(item.purchaseOrder.category._id);
-                        item.purchaseOrder.category._id = new ObjectId(item.purchaseOrder.category._id); 
-                        item.purchaseOrder.currency._id = new ObjectId(item.currency._id); 
+                        item.purchaseOrder.category._id = new ObjectId(item.purchaseOrder.category._id);
+                        item.purchaseOrder.currency._id = new ObjectId(item.currency._id);
                         for (var poItem of item.purchaseOrder.items) {
                             poItem.product._id = new ObjectId(poItem.product.uom._id);
                             poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
@@ -207,6 +205,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
             var getPurchaseOrderById = [];
             this._validate(unitReceiptNote)
                 .then(validUnitReceiptNote => {
+                    validUnitReceiptNote.no = this.generateNo(validUnitReceiptNote.unit.code);
                     validUnitReceiptNote.unitId = new ObjectId(validUnitReceiptNote.unitId);
                     validUnitReceiptNote.supplierId = new ObjectId(validUnitReceiptNote.supplierId);
                     validUnitReceiptNote.deliveryOrderId = new ObjectId(validUnitReceiptNote.deliveryOrderId);
@@ -340,6 +339,17 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     reject(e);
                 });
         });
+    }
+
+    generateNo(_unitCode) {
+        var now = new Date();
+        var stamp = now / 1000 | 0;
+        var code = stamp.toString();
+        var locale = 'id-ID';
+        var moment = require('moment');
+        moment.locale(locale);
+        var no = `BTU${(_unitCode || "").toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
+        return no;
     }
 
 }
