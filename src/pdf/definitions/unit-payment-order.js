@@ -50,9 +50,9 @@ module.exports = function (unitPaymentOrder) {
         style: 'decimal',
         maximumFractionDigits: 4
     };
-
-    var incomeTax = unitPaymentOrder.ppnNo != undefined ? sum * 0.1 : 0;
-    var vat = unitPaymentOrder.pphNo != undefined ? sum * (unitPaymentOrder.vatRate/100) : 0;
+ 
+    var incomeTax = unitPaymentOrder.incomeTaxNo != undefined ? sum * 0.1 : 0;
+    var vat = unitPaymentOrder.vatNo != undefined ? sum * (unitPaymentOrder.vatRate/100) : 0; 
 
     var header = [{
         columns: [
