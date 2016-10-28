@@ -27,10 +27,10 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                    "no": valid.no
-                }, {
-                    _deleted: false
-                }]
+                        "no": valid.no
+                    }, {
+                        _deleted: false
+                    }]
             });
 
             var getUnitPaymentOrder = this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id);
@@ -139,8 +139,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
     _getQuery(paging) {
         var deletedFilter = {
-                _deleted: false
-            },
+            _deleted: false
+        },
             keywordFilter = {};
 
         var query = {};
@@ -229,16 +229,16 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         return no;
     }
 
-    generateNo(unit) {
+    generateNo(unit, category) {
         var now = new Date();
         var stamp = now / 1000 | 0;
         var code = stamp.toString();
         var locale = 'id-ID';
         var moment = require('moment');
         moment.locale(locale);
-        var no = `NDO${unit.code.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
+        var no = `NDO${unit.toUpperCase()}${category.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
         return no;
-    } 
+    }
 
     create(unitPaymentPriceCorrectionNote) {
         return new Promise((resolve, reject) => {
