@@ -27,10 +27,10 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        "no": valid.no
-                    }, {
-                        _deleted: false
-                    }]
+                    "no": valid.no
+                }, {
+                    _deleted: false
+                }]
             });
 
             var getUnitPaymentOrder = this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id);
@@ -64,9 +64,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
                     if (valid.items) {
-                        if (valid.items.length <= 0) {
-                        }
-                        else {
+                        if (valid.items.length > 0) {
                             var itemErrors = [];
                             for (var item of valid.items) {
                                 var itemError = {};
@@ -141,8 +139,9 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
     _getQuery(paging) {
         var deletedFilter = {
-            _deleted: false
-        }, keywordFilter = {};
+                _deleted: false
+            },
+            keywordFilter = {};
 
         var query = {};
 
@@ -171,7 +170,9 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 '$or': [filterNo, filterSupplierName, filterUnitCoverLetterNo]
             };
         }
-        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
+        query = {
+            '$and': [deletedFilter, paging.filter, keywordFilter]
+        }
         return query;
     }
 
@@ -216,7 +217,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
         });
     }
-    
+
     generateNo(unit) {
         var now = new Date();
         var stamp = now / 1000 | 0;
@@ -226,8 +227,34 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         moment.locale(locale);
         var no = `NDO${unit.code.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
         return no;
+    } 
+
+    create(unitPaymentPriceCorrectionNote) {
+        return new Promise((resolve, reject) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
+                    this._validate(unitPaymentPriceCorrectionNote)
+                        .then(validData => {
+                            validData.no = this.generateNo(validData.unitPaymentOrder.unit.code, validData.unitPaymentOrder.category.code);
+                            this.collection.insert(validData)
+                                .then(id => {
+                                    resolve(id);
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
     }
 
+<<<<<<< HEAD
     generateNo(unit,category) {
         var now = new Date();
         var stamp = now / 1000 | 0;
@@ -265,3 +292,6 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
     }
 
 }
+=======
+}
+>>>>>>> upstream/dev
