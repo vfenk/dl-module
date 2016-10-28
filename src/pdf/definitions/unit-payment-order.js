@@ -50,9 +50,9 @@ module.exports = function (unitPaymentOrder) {
         style: 'decimal',
         maximumFractionDigits: 4
     };
-
+ 
     var incomeTax = unitPaymentOrder.incomeTaxNo != undefined ? sum * 0.1 : 0;
-    var vat = unitPaymentOrder.vatNo != undefined ? sum * (unitPaymentOrder.vatRate/100) : 0;
+    var vat = unitPaymentOrder.vatNo != undefined ? sum * (unitPaymentOrder.vatRate/100) : 0; 
 
     var header = [{
         columns: [
@@ -91,7 +91,7 @@ module.exports = function (unitPaymentOrder) {
                         style: ['size08']
                     }, {
                             alignment: "left",
-                            text: 'SUKOHARJO, 18 Juli 2016',
+                            text: 'SUKOHARJO, '+`${moment(unitPaymentOrder.date).format(dateFormat)}`,
                             style: ['size09']
                         }, {
                             alignment: "left",
