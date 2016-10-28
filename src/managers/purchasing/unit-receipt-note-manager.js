@@ -209,7 +209,6 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     validUnitReceiptNote.unitId = new ObjectId(validUnitReceiptNote.unitId);
                     validUnitReceiptNote.supplierId = new ObjectId(validUnitReceiptNote.supplierId);
                     validUnitReceiptNote.deliveryOrderId = new ObjectId(validUnitReceiptNote.deliveryOrderId);
-                    validUnitReceiptNote.date = validUnitReceiptNote._createdDate;
                     this.collection.insert(validUnitReceiptNote)
                         .then(id => {
                             //update PO Internal
