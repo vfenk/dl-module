@@ -99,6 +99,12 @@ module.exports = class CurrencyManager extends BaseManager {
     }
 
     _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.master.collection.Currency}__createDate`,
+            key: {
+                _createdDate: -1
+            }
+        }
 
         var codeIndex = {
             name: `ix_${map.master.collection.Currency}_code`,
@@ -108,6 +114,6 @@ module.exports = class CurrencyManager extends BaseManager {
             unique: true
         }
 
-        return this.collection.createIndexes([codeIndex]);
+        return this.collection.createIndexes([dateIndex, codeIndex]);
     }
 }
