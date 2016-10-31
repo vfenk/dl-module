@@ -97,4 +97,23 @@ module.exports = class BuyerManager extends BaseManager {
                 })
         });
     }
+
+     _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.master.collection.Buyer}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var codeIndex = {
+            name: `ix_${map.master.collection.Buyer}_code`,
+            key: {
+                code: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, codeIndex]);
+    }
 }
