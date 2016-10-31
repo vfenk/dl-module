@@ -1,3 +1,5 @@
+var global = require('../../global');
+
 module.exports = function(pox) {
 
     var items = pox.items.map(po => {
@@ -22,33 +24,10 @@ module.exports = function(pox) {
     var supplierAtt = pox.supplier.PIC;
     var supplierTel = pox.supplier.contact;
 
-    var locale = 'id-ID';
-    var dateLocaleOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    var dateFormat = "DD-MMMM-YYYY";
+    var locale = global.config.locale; 
 
     var moment = require('moment');
-    moment.locale(locale);
-
-    var numberLocaleOptions = {
-        style: 'decimal',
-        // currency: currency,
-        maximumFractionDigits: 4,
-        // currencyDisplay: 'symbol',
-
-    };
-    var currencyLocaleOptions = {
-        style: 'decimal',
-        minimumFractionDigits: 2,
-        // currency: currency,
-        maximumFractionDigits: 2,
-        // currencyDisplay: 'symbol',
-
-    };
-
+    moment.locale(locale.name); 
 
     var header = [{
             text: 'PT. DAN LIRIS',
@@ -96,7 +75,7 @@ module.exports = function(pox) {
         }, {
             width: '35%',
             stack: [
-                `Solo, ${moment(pox.date).format(dateFormat)} `, {
+                `Solo, ${moment(pox.date).format(locale.date.format)} `, {
                     text: [
                         'Mohon', {
                             text: ' di-fax kembali',
@@ -162,7 +141,7 @@ module.exports = function(pox) {
             }],
             style: ['size07']
         }, {
-            text: parseFloat(item.quantity).toLocaleString(locale, numberLocaleOptions) + ' ' + item.uom,
+            text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + ' ' + item.uom,
             style: ['size07', 'center']
         }, {
             columns: [{
@@ -170,7 +149,7 @@ module.exports = function(pox) {
                 text: `${currency}`
             }, {
                 width: '*',
-                text: `${parseFloat(item.price).toLocaleString(locale, currencyLocaleOptions)}`,
+                text: `${parseFloat(item.price).toLocaleString(locale, locale.currency)}`,
                 style: ['right']
             }],
             style: ['size07']
@@ -180,7 +159,7 @@ module.exports = function(pox) {
                 text: `${currency}`
             }, {
                 width: '*',
-                text: `${parseFloat(item.quantity * item.price).toLocaleString(locale, currencyLocaleOptions)}`,
+                text: `${parseFloat(item.quantity * item.price).toLocaleString(locale, locale.currency)}`,
                 style: ['right']
             }],
             style: ['size07']
@@ -218,7 +197,7 @@ module.exports = function(pox) {
                 text: currency
             }, {
                 width: '*',
-                text: parseFloat(sum).toLocaleString(locale, currencyLocaleOptions),
+                text: parseFloat(sum).toLocaleString(locale, locale.currency),
                 style: ['right']
             }],
             style: ['size08']
@@ -233,7 +212,7 @@ module.exports = function(pox) {
                 text: currency
             }, {
                 width: '*',
-                text: parseFloat(vat).toLocaleString(locale, currencyLocaleOptions),
+                text: parseFloat(vat).toLocaleString(locale, locale.currency),
                 style: ['right']
             }],
             style: ['size08']
@@ -248,7 +227,7 @@ module.exports = function(pox) {
                 text: currency
             }, {
                 width: '*',
-                text: parseFloat(sum + vat).toLocaleString(locale, currencyLocaleOptions),
+                text: parseFloat(sum + vat).toLocaleString(locale, locale.currency),
                 style: ['bold', 'right']
             }],
             style: ['size09']
@@ -291,7 +270,7 @@ module.exports = function(pox) {
                         }, {
                             width: '*',
                             stack: [{
-                                text: `${moment(pox.expectedDeliveryDate).format(dateFormat)}`,
+                                text: `${moment(pox.expectedDeliveryDate).format(locale.date.format)}`,
                                 style: ['bold']
                             }, `${pox.remark}`]
                         }]

@@ -94,5 +94,23 @@ module.exports = class UnitManager extends BaseManager {
                 })
         });
     }
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.master.collection.Unit}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var codeIndex = {
+            name: `ix_${map.master.collection.Unit}_code`,
+            key: {
+                code: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, codeIndex]);
+    }
    
 }

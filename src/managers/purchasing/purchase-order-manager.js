@@ -748,4 +748,23 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             }
         });
     }
+
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.purchasing.collection.PurchaseOrder}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var noIndex = {
+            name: `ix_${map.purchasing.collection.PurchaseOrder}_no`,
+            key: {
+                no: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, noIndex]);
+    }
 }
