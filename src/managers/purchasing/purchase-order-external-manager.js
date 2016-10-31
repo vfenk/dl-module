@@ -464,4 +464,22 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
         });
     }
+     _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.purchasing.collection.PurchaseOrderExternal}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var noIndex = {
+            name: `ix_${map.purchasing.collection.PurchaseOrderExternal}_no`,
+            key: {
+                no: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, noIndex]);
+    }
 };
