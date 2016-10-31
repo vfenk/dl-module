@@ -391,4 +391,23 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         });
     }
 
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.purchasing.collection.UnitPaymentOrder}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var noIndex = {
+            name: `ix_${map.purchasing.collection.UnitPaymentOrder}_no`,
+            key: {
+                no: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, noIndex]);
+    }
+
 }

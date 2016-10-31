@@ -407,4 +407,23 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         });
     }
 
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.purchasing.collection.DeliveryOrder}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var noIndex = {
+            name: `ix_${map.purchasing.collection.DeliveryOrder}_no`,
+            key: {
+                no: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, noIndex]);
+    }
+
 }

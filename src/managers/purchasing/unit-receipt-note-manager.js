@@ -354,4 +354,22 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         return no;
     }
 
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.purchasing.collection.UnitReceiptNote}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var noIndex = {
+            name: `ix_${map.purchasing.collection.UnitReceiptNote}_no`,
+            key: {
+                no: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, noIndex]);
+    } 
 }
