@@ -22,7 +22,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deletedFilter = {
+        var basedFilter = {
             _deleted: false,
             _createdBy: this.user.username
         }, keywordFilter = {};
@@ -71,7 +71,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 '$or': [filterPODLNo, filterPrNo, filterRefPO, filterPOItem, filterSupplierName]
             };
         }
-        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
+        query = { '$and': [basedFilter, paging.filter, keywordFilter] }
         return query;
     }
 

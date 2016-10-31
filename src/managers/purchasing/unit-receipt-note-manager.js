@@ -155,8 +155,9 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deletedFilter = {
-            _deleted: false
+        var basedFilter = {
+            _deleted: false,
+            _createdBy: this.user.username
         }, keywordFilter = {};
 
         var query = {};
@@ -197,7 +198,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 '$or': [filterNo, filterSupplierName, filterUnitDivision, filterUnitSubDivision, filterDeliveryOrder]
             };
         }
-        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
+        query = { '$and': [basedFilter, paging.filter, keywordFilter] }
         return query;
     }
 

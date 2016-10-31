@@ -147,8 +147,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deletedFilter = {
-            _deleted: false
+        var basedFilter = {
+            _deleted: false,
+            _createdBy: this.user.username
         }, keywordFilter = {};
 
         var query = {};
@@ -183,7 +184,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                 '$or': [filterNo, filterSupplierName, filterUnitDivision, filterUnitSubDivision]
             };
         }
-        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
+        query = { '$and': [basedFilter, paging.filter, keywordFilter] }
         return query;
     }
 
