@@ -1,3 +1,5 @@
+var global = require('../../global');
+
 module.exports = function (unitReceiptNote) {
 
     var items = [].concat.apply([], unitReceiptNote.items);
