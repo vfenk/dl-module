@@ -20,13 +20,9 @@ module.exports = function (unitPaymentCorrection) {
     var urDates = unitPaymentCorrection.unitPaymentOrder.items.map(unitPaymentOrderItem => {
         return new Date(unitPaymentOrderItem.unitReceiptNote.date)
     })
-    var sjDate = Math.max.apply(null, urDates);
+    var sjDate = Math.max.apply(null, urDates); 
 
-
-    var locale = global.config.locale; 
-    
-    var dateFormat = "DD MMMM YYYY";
-    var dateFormat2 = "DD/MM/YYYY";
+    var locale = global.config.locale;  
 
     var moment = require('moment');
     moment.locale(locale.name); 
@@ -59,7 +55,7 @@ module.exports = function (unitPaymentCorrection) {
             }, {
                     width: '*',
                     stack: [
-                        `SUKOHARJO, ${moment(unitPaymentCorrection.unitPaymentOrder.date).format(dateFormat)}`,
+                        `SUKOHARJO, ${moment(unitPaymentCorrection.unitPaymentOrder.date).format(locale.date.format)}`,
                         `(${unitPaymentCorrection.unitPaymentOrder.supplier.code}) ${unitPaymentCorrection.unitPaymentOrder.supplier.name}`,
                         `${unitPaymentCorrection.unitPaymentOrder.supplier.address}`],
                     alignment: 'right',
@@ -217,7 +213,7 @@ module.exports = function (unitPaymentCorrection) {
     };
 
     var footer = ['\n', {
-                text: `Perjanjian Pembayaran : ${moment(unitPaymentCorrection.unitPaymentOrder.dueDate).format(dateFormat)}`,
+                text: `Perjanjian Pembayaran : ${moment(unitPaymentCorrection.unitPaymentOrder.dueDate).format(locale.date.format)}`,
                 style: ['size08']
             }, {
             columns: [{
@@ -232,7 +228,7 @@ module.exports = function (unitPaymentCorrection) {
                         style: ['size08']
                     }, {
                         width: '*',
-                        text: `NO ${unitPaymentCorrection.invoiceCorrectionNo} ${moment(unitPaymentCorrection.invoiceCorrectionDate).format(dateFormat2)}`,
+                        text: `NO ${unitPaymentCorrection.invoiceCorrectionNo} ${moment(unitPaymentCorrection.invoiceCorrectionDate).format(locale.date.format)}`,
                         style: ['size08']
                     }]
             }, {
@@ -247,7 +243,7 @@ module.exports = function (unitPaymentCorrection) {
                             style: ['size08']
                         }, {
                             width: '*',
-                            text: `${moment(sjDate).format(dateFormat2)} `,
+                            text: `${moment(sjDate).format(locale.date.format)} `,
                             style: ['size08']
                         }]
                 }]
