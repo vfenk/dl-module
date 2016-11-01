@@ -1,4 +1,5 @@
 var Say = require('../../utils/say');
+var global = require('../../global');
 
 module.exports = function (unitPaymentCorrection) {
 
@@ -19,33 +20,18 @@ module.exports = function (unitPaymentCorrection) {
     var urDates = unitPaymentCorrection.unitPaymentOrder.items.map(unitPaymentOrderItem => {
         return new Date(unitPaymentOrderItem.unitReceiptNote.date)
     })
-    var sjDate = Math.max.apply(null, urDates);
+    var sjDate = Math.max.apply(null, urDates); 
 
-
-    var locale = 'id-ID';
-    var dateLocaleOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    var dateFormat = "DD MMMM YYYY";
-    var dateFormat2 = "DD/MM/YYYY";
+    var locale = global.config.locale;  
 
     var moment = require('moment');
-    moment.locale(locale);
+    moment.locale(locale.name); 
 
     var numberLocaleOptions = {
         style: 'decimal',
         maximumFractionDigits: 4,
 
-    };
-
-    var currencyLocaleOptions = {
-        style: 'decimal',
-        minimumFractionDigits: 4,
-        maximumFractionDigits: 4,
-    };
-
+    }; 
     var header = [
         {
             columns: [{
@@ -69,7 +55,7 @@ module.exports = function (unitPaymentCorrection) {
             }, {
                     width: '*',
                     stack: [
-                        `SUKOHARJO, ${moment(unitPaymentCorrection.unitPaymentOrder.date).format(dateFormat)}`,
+                        `SUKOHARJO, ${moment(unitPaymentCorrection.unitPaymentOrder.date).format(locale.date.format)}`,
                         `(${unitPaymentCorrection.unitPaymentOrder.supplier.code}) ${unitPaymentCorrection.unitPaymentOrder.supplier.name}`,
                         `${unitPaymentCorrection.unitPaymentOrder.supplier.address}`],
                     alignment: 'right',
@@ -126,10 +112,10 @@ module.exports = function (unitPaymentCorrection) {
                 text: item.product.name,
                 style: ['size07', 'left']
             }, {
-                text: parseFloat(item.pricePerUnit).toLocaleString(locale, currencyLocaleOptions),
+                text: parseFloat(item.pricePerUnit).toLocaleString(locale, locale.currency),
                 style: ['size07', 'right']
             }, {
-                text: parseFloat(item.priceTotal).toLocaleString(locale, currencyLocaleOptions),
+                text: parseFloat(item.priceTotal).toLocaleString(locale, locale.currency),
                 style: ['size07', 'right']
             }, {
                 text: item.prNo,
@@ -178,7 +164,7 @@ module.exports = function (unitPaymentCorrection) {
                     style: ['size08']
                 }, {
                     width: '65%',
-                    text: parseFloat(sum).toLocaleString(locale, currencyLocaleOptions),
+                    text: parseFloat(sum).toLocaleString(locale, locale.currency),
                     style: ['size08', 'right']
                 }],
             margin: [350, 0, 0, 0]
@@ -193,7 +179,7 @@ module.exports = function (unitPaymentCorrection) {
                     style: ['size08']
                 }, {
                     width: '65%',
-                    text: parseFloat(useIncomeTax).toLocaleString(locale, currencyLocaleOptions),
+                    text: parseFloat(useIncomeTax).toLocaleString(locale, locale.currency),
                     style: ['size08', 'right']
                 }],
             margin: [350, 0, 0, 0]
@@ -208,7 +194,7 @@ module.exports = function (unitPaymentCorrection) {
                     style: ['size08']
                 }, {
                     width: '65%',
-                    text: parseFloat(sum + useIncomeTax).toLocaleString(locale, currencyLocaleOptions),
+                    text: parseFloat(sum + useIncomeTax).toLocaleString(locale, locale.currency),
                     style: ['size08', 'right', 'bold']
                 }],
             margin: [350, 0, 0, 0]
@@ -227,7 +213,7 @@ module.exports = function (unitPaymentCorrection) {
     };
 
     var footer = ['\n', {
-                text: `Perjanjian Pembayaran : ${moment(unitPaymentCorrection.unitPaymentOrder.dueDate).format(dateFormat)}`,
+                text: `Perjanjian Pembayaran : ${moment(unitPaymentCorrection.unitPaymentOrder.dueDate).format(locale.date.format)}`,
                 style: ['size08']
             }, {
             columns: [{
@@ -242,7 +228,7 @@ module.exports = function (unitPaymentCorrection) {
                         style: ['size08']
                     }, {
                         width: '*',
-                        text: `NO ${unitPaymentCorrection.invoiceCorrectionNo} ${moment(unitPaymentCorrection.invoiceCorrectionDate).format(dateFormat2)}`,
+                        text: `NO ${unitPaymentCorrection.invoiceCorrectionNo} ${moment(unitPaymentCorrection.invoiceCorrectionDate).format(locale.date.format)}`,
                         style: ['size08']
                     }]
             }, {
@@ -257,7 +243,7 @@ module.exports = function (unitPaymentCorrection) {
                             style: ['size08']
                         }, {
                             width: '*',
-                            text: `${moment(sjDate).format(dateFormat2)} `,
+                            text: `${moment(sjDate).format(locale.date.format)} `,
                             style: ['size08']
                         }]
                 }]

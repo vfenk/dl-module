@@ -7,22 +7,10 @@ module.exports = function (unitReceiptNote) {
     var iso = "FM.FP-GB-15-005/R2";
     var number = unitReceiptNote.no;
 
-    var locale = 'id-ID';
-    var dateLocaleOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    var dateFormat = "DD-MMMM-YYYY";
+    var locale = global.config.locale;
 
     var moment = require('moment');
-    moment.locale(locale);
-    
-    
-    var numberLocaleOptions = {
-        style: 'decimal',
-        maximumFractionDigits: 4
-    };
+    moment.locale(locale.name);  
     
     var header = [{
         columns: [{
@@ -71,7 +59,7 @@ module.exports = function (unitReceiptNote) {
                         stack: [':', ':']
                     }, {
                         width: '*',
-                        stack: [`${moment(unitReceiptNote.date).format(dateFormat)}`, unitReceiptNote.supplier.name]
+                        stack: [`${moment(unitReceiptNote.date).format(locale.date.format)}`, unitReceiptNote.supplier.name]
                     }],
                 style: ['size08']
 
@@ -138,7 +126,7 @@ module.exports = function (unitReceiptNote) {
                     text: item.product.code +" - "+item.product.name,
                     style: ['size07', 'left']
                 }, {
-                    text: parseFloat(item.deliveredQuantity).toLocaleString(locale, numberLocaleOptions),
+                    text: parseFloat(item.deliveredQuantity).toLocaleString(locale, locale.decimal),
                     style: ['size07', 'center']
                 }, {
                     text: item.deliveredUom.unit,
@@ -168,7 +156,7 @@ module.exports = function (unitReceiptNote) {
     var footer = [
         '\n', {
             stack: [{
-                text: `Sukoharjo, ${moment(unitReceiptNote.date).format(dateFormat)}`,
+                text: `Sukoharjo, ${moment(unitReceiptNote.date).format(locale.date.format)}`,
                 alignment: "right"
             }, {
                     columns: [{
