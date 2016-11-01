@@ -156,8 +156,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     _getQuery(paging) {
         var deletedFilter = {
-            _deleted: false,
-            _createdBy: this.user.username
+            _deleted: false
         }, keywordFilter = {};
 
         var query = {};
