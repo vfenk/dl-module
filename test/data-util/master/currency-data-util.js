@@ -15,10 +15,13 @@ class CurrencyDataUtil {
             code: 'UT/Currency/01',
             symbol:'Rp',
             rate: 1,
-            description=''
+            description:''
         };
         return Promise.resolve(this.getSert(testData));
     }
-}
+} 
+
 module.exports = new CurrencyDataUtil();
+
+
 
