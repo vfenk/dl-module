@@ -1,4 +1,5 @@
 var Say = require('../../utils/say');
+var global = require('../../global');
 
 module.exports = function (unitPaymentCorrection) {
 
@@ -22,30 +23,19 @@ module.exports = function (unitPaymentCorrection) {
     var sjDate = Math.max.apply(null, urDates);
 
 
-    var locale = 'id-ID';
-    var dateLocaleOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
+    var locale = global.config.locale; 
+    
     var dateFormat = "DD MMMM YYYY";
     var dateFormat2 = "DD/MM/YYYY";
 
     var moment = require('moment');
-    moment.locale(locale);
+    moment.locale(locale.name); 
 
     var numberLocaleOptions = {
         style: 'decimal',
         maximumFractionDigits: 4,
 
-    };
-
-    var currencyLocaleOptions = {
-        style: 'decimal',
-        minimumFractionDigits: 4,
-        maximumFractionDigits: 4,
-    };
-
+    }; 
     var header = [
         {
             columns: [{
@@ -126,10 +116,10 @@ module.exports = function (unitPaymentCorrection) {
                 text: item.product.name,
                 style: ['size07', 'left']
             }, {
-                text: parseFloat(item.pricePerUnit).toLocaleString(locale, currencyLocaleOptions),
+                text: parseFloat(item.pricePerUnit).toLocaleString(locale, locale.currency),
                 style: ['size07', 'right']
             }, {
-                text: parseFloat(item.priceTotal).toLocaleString(locale, currencyLocaleOptions),
+                text: parseFloat(item.priceTotal).toLocaleString(locale, locale.currency),
                 style: ['size07', 'right']
             }, {
                 text: item.prNo,
@@ -178,7 +168,7 @@ module.exports = function (unitPaymentCorrection) {
                     style: ['size08']
                 }, {
                     width: '65%',
-                    text: parseFloat(sum).toLocaleString(locale, currencyLocaleOptions),
+                    text: parseFloat(sum).toLocaleString(locale, locale.currency),
                     style: ['size08', 'right']
                 }],
             margin: [350, 0, 0, 0]
@@ -193,7 +183,7 @@ module.exports = function (unitPaymentCorrection) {
                     style: ['size08']
                 }, {
                     width: '65%',
-                    text: parseFloat(useIncomeTax).toLocaleString(locale, currencyLocaleOptions),
+                    text: parseFloat(useIncomeTax).toLocaleString(locale, locale.currency),
                     style: ['size08', 'right']
                 }],
             margin: [350, 0, 0, 0]
@@ -208,7 +198,7 @@ module.exports = function (unitPaymentCorrection) {
                     style: ['size08']
                 }, {
                     width: '65%',
-                    text: parseFloat(sum + useIncomeTax).toLocaleString(locale, currencyLocaleOptions),
+                    text: parseFloat(sum + useIncomeTax).toLocaleString(locale, locale.currency),
                     style: ['size08', 'right', 'bold']
                 }],
             margin: [350, 0, 0, 0]
