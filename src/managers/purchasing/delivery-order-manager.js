@@ -25,9 +25,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var basedFilter = {
-            _deleted: false,
-            _createdBy: this.user.username
+        var deletedFilter = {
+            _deleted: false
         }, keywordFilter = {};
 
 
@@ -64,7 +63,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             };
         }
 
-        query = { '$and': [basedFilter, paging.filter, keywordFilter] }
+        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
         return query;
     }
 

@@ -138,9 +138,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
     }
 
     _getQuery(paging) {
-        var basedFilter = {
-            _deleted: false,
-            _createdBy: this.user.username
+        var deletedFilter = {
+            _deleted: false
         },
             keywordFilter = {};
 
@@ -172,7 +171,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
             };
         }
         query = {
-            '$and': [basedFilter, paging.filter, keywordFilter]
+            '$and': [deletedFilter, paging.filter, keywordFilter]
         }
         return query;
     }
