@@ -2,8 +2,8 @@ module.exports = {
     config: {
         locale: {
             name: 'id-ID',
-            date: {
-                format: 'DD/MMM/YYYY'
+            date: { 
+                format: 'DD MMMM YYYY' 
             },
             currency: {
                 style: 'decimal',
