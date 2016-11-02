@@ -101,14 +101,16 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('unitPaymentOrder does not pass validation', errors));
                     }
-                    if (valid.useVat.toString() == "false") {
+                    if (!valid.useVat) {
                         valid.vatNo = "";
                         valid.vatDate = null;
                         valid.vatRate = 0;
+                        valid.useVat = false;
                     }
-                    if (valid.useIncomeTax.toString() == "false") {
+                    if (!valid.useIncomeTax) {
                         valid.incomeTaxNo = "";
-                        incomeTaxDate = null;
+                        valid.incomeTaxDate = null;
+                        valid.useIncomeTax = false;
                     }
                     valid.unitId = new ObjectId(valid.unitId);
                     valid.supplierId = new ObjectId(valid.supplierId);
@@ -281,28 +283,31 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         var purchaseOrder = result;
                         for (var poItem of purchaseOrder.items) {
                             for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
-                                if (validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
-                                    for (var fulfillment of poItem.fulfillments) {
-                                        var fulfillmentNo = fulfillment.deliveryOderNo || '';
-                                        var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
-                                        if (fulfillmentNo == deliveryOrderNo) {
-                                            fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
-                                            fulfillment.invoiceNo = validUnitPaymentOrder.invoceDate;
-                                            fulfillment.interNoteDate = validUnitPaymentOrder.date;
-                                            fulfillment.interNoteNo = validUnitPaymentOrder.no;
-                                            fulfillment.interNoteValue = validUnitPaymentOrder.invoicePrice;
-                                            fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
-                                            if (validUnitPaymentOrder.incomeTaxNo) {
-                                                fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
-                                                fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
-                                                fulfillment.ppnValue = 0.1;
-                                            }
-                                            if (validUnitPaymentOrder.vatNo) {
-                                                fulfillment.pphNo = validUnitPaymentOrder.vatNo;
-                                                fulfillment.pphValue = validUnitPaymentOrder.vatRate;
-                                                fulfillment.pphDate = validUnitPaymentOrder.vatDate;
+                                for (var unitReceiptNoteItem of unitPaymentOrderItem.unitReceiptNote.items) {
+                                    if (purchaseOrder._id.equals(unitReceiptNoteItem.purchaseOrder._id) && poItem.product._id.equals(unitReceiptNoteItem.product._id) && validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
+                                        for (var fulfillment of poItem.fulfillments) {
+                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                            var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
+                                            if (fulfillmentNo == deliveryOrderNo) {
+                                                fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
+                                                fulfillment.invoiceNo = validUnitPaymentOrder.invoceNo;
+                                                fulfillment.interNoteDate = validUnitPaymentOrder.date;
+                                                fulfillment.interNoteNo = validUnitPaymentOrder.no;
+                                                fulfillment.interNoteValue = unitReceiptNoteItem.pricePerDealUnit;
+                                                fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
+                                                if (validUnitPaymentOrder.incomeTaxNo) {
+                                                    fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
+                                                    fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
+                                                    fulfillment.ppnValue = 0.1;
+                                                }
+                                                if (validUnitPaymentOrder.vatNo) {
+                                                    fulfillment.pphNo = validUnitPaymentOrder.vatNo;
+                                                    fulfillment.pphValue = validUnitPaymentOrder.vatRate;
+                                                    fulfillment.pphDate = validUnitPaymentOrder.vatDate;
+                                                }
                                             }
                                         }
+                                        break;
                                     }
 
                                 }

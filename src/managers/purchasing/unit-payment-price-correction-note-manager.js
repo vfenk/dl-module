@@ -112,11 +112,14 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                 if (_purchaseOrderId.equals(_unitReceiptNoteItem.purchaseOrder._id) && _productId.equals(_unitReceiptNoteItem.product._id)) {
                                     item.purchaseOrderId = new ObjectId(_unitReceiptNoteItem.purchaseOrder._id);
                                     item.purchaseOrder = _unitReceiptNoteItem.purchaseOrder;
+                                    item.purchaseOrder._id = new ObjectId(_unitReceiptNoteItem.purchaseOrder._id);
                                     item.productId = new ObjectId(_unitReceiptNoteItem.product._id);
                                     item.product = _unitReceiptNoteItem.product;
+                                    item.product._id = new ObjectId(_unitReceiptNoteItem.product._id);
                                     item.quantity = _unitReceiptNoteItem.deliveredQuantity;
                                     item.uom = _unitReceiptNoteItem.deliveredUom;
                                     item.uomId = new ObjectId(_unitReceiptNoteItem.deliveredUom._id);
+                                    item.uom._id = new ObjectId(_unitReceiptNoteItem.deliveredUom._id);
                                     item.currency = _unitReceiptNoteItem.currency;
                                     item.currencyRate = _unitReceiptNoteItem.currencyRate;
                                     break;
@@ -271,6 +274,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                             }
                                         }
                                         tasks.push(this.purchaseOrderManager.update(_purchaseOrder));
+                                    }
                                         Promise.all(tasks)
                                             .then(results => {
                                                 this.collection.insert(validData)
@@ -284,7 +288,6 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                             .catch(e => {
                                                 reject(e);
                                             })
-                                    }
                                 })
                                 .catch(e => {
                                     reject(e);
@@ -345,7 +348,6 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                         var _priceCorrectionNo = fulfillmentPoItem.priceCorrectionNo || '';
                                                         if (validData.unitPaymentOrder.no == _unitPaymentOrderNo && validData.no == _priceCorrectionNo) {
                                                             fulfillmentPoItem.priceCorrectionDate = validData.date;
-                                                            fulfillmentPoItem.priceCorrectionPricePerUnit = _unitPaymentPriceCorrectionNoteItem.pricePerUnit;
                                                             fulfillmentPoItem.priceCorrectionPriceTotal = _unitPaymentPriceCorrectionNoteItem.priceTotal;
                                                             fulfillmentPoItem.priceCorrectionRemark = validData.remark;
                                                             break;
@@ -414,7 +416,6 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                         if (validData.unitPaymentOrder.no == _unitPaymentOrderNo && validData.no == _priceCorrectionNo) {
                                                             delete fulfillmentPoItem.priceCorrectionDate;
                                                             delete fulfillmentPoItem.priceCorrectionNo;
-                                                            delete fulfillmentPoItem.priceCorrectionPricePerUnit;
                                                             delete fulfillmentPoItem.priceCorrectionPriceTotal;
                                                             delete fulfillmentPoItem.priceCorrectionRemark;
                                                             break;
