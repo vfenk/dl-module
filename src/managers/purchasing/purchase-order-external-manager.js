@@ -23,8 +23,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
     _getQuery(paging) {
         var deletedFilter = {
-            _deleted: false,
-            _createdBy: this.user.username
+            _deleted: false
         }, keywordFilter = {};
 
         var query = {};
@@ -342,62 +341,86 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     post(listPurchaseOrderExternal) {
         var tasks = [];
         var getPOItemById = [];
+        var getPOExternalById = [];
         return new Promise((resolve, reject) => {
             for (var purchaseOrderExternal of listPurchaseOrderExternal) {
-
-                purchaseOrderExternal.isPosted = true;
-                tasks.push(this.update(purchaseOrderExternal));
+                getPOExternalById.push(this.getSingleByIdOrDefault(purchaseOrderExternal._id));
                 for (var data of purchaseOrderExternal.items) {
-                    getPOItemById.push(this.purchaseOrderManager.getSingleById(data._id));
+                    getPOItemById.push(this.purchaseOrderManager.getSingleByIdOrDefault(data._id));
                 }
             }
-            Promise.all(getPOItemById)
-                .then(results => {
-                    for (var result of results) {
-                        var _purchaseOrder = result;
-                        for (var _purchaseOrderExternal of listPurchaseOrderExternal) {
-                            for (var _poExternal of _purchaseOrderExternal.items) {
-                                if (_purchaseOrder._id.equals(_poExternal._id)) {
-                                    _purchaseOrder.purchaseOrderExternalId = new ObjectId(_purchaseOrderExternal._id);
-                                    _purchaseOrder.purchaseOrderExternal = _purchaseOrderExternal;
-                                    _purchaseOrder.purchaseOrderExternal._id = new ObjectId(_purchaseOrderExternal._id);
-                                    _purchaseOrder.supplierId = new ObjectId(_purchaseOrderExternal.supplierId);
-                                    _purchaseOrder.supplier = _purchaseOrderExternal.supplier;
-                                    _purchaseOrder.supplier._id = new ObjectId(_purchaseOrderExternal.supplier._id);
-                                    _purchaseOrder.freightCostBy = _purchaseOrderExternal.freightCostBy;
-                                    _purchaseOrder.currency = _purchaseOrderExternal.currency;
-                                    _purchaseOrder.currencyRate = _purchaseOrderExternal.currencyRate;
-                                    _purchaseOrder.paymentMethod = _purchaseOrderExternal.paymentMethod;
-                                    _purchaseOrder.paymentDueDays = _purchaseOrderExternal.paymentDueDays;
-                                    _purchaseOrder.vat = _purchaseOrderExternal.vat;
-                                    _purchaseOrder.useVat = _purchaseOrderExternal.useVat;
-                                    _purchaseOrder.vatRate = _purchaseOrderExternal.vatRate;
-                                    _purchaseOrder.useIncomeTax = _purchaseOrderExternal.useIncomeTax;
-                                    _purchaseOrder.isPosted = true;
+            Promise.all(getPOExternalById)
+                .then(_purchaseOrderExternalList => {
 
-                                    for (var poItem of _purchaseOrder.items) {
-                                        for (var itemExternal of _poExternal.items) {
-                                            itemExternal.product._id = new ObjectId(itemExternal.product._id);
-                                            if ((itemExternal.product._id).equals(poItem.product._id)) {
-                                                poItem.dealQuantity = itemExternal.dealQuantity;
-                                                poItem.dealUom = itemExternal.dealUom;
-                                                poItem.pricePerDealUnit = itemExternal.pricePerDealUnit;
-                                                poItem.conversion = itemExternal.conversion;
-                                                poItem.currency = _poExternal.currency;
-                                                poItem.currencyRate = _poExternal.currencyRate;
-                                            }
-                                        }
-                                    }
-                                    tasks.push(this.purchaseOrderManager.update(_purchaseOrder));
-                                    break;
-                                }
+                    for (var _purchaseOrderExternal of listPurchaseOrderExternal) {
+                        for (var _poExternal of _purchaseOrderExternalList) {
+                            if (_poExternal._id.equals(_purchaseOrderExternal._id)) {
+                                _purchaseOrderExternal = _poExternal;
+                                _purchaseOrderExternal.isPosted = true;
+                                tasks.push(this.update(_purchaseOrderExternal));
+                                break;
                             }
                         }
                     }
+                    Promise.all(getPOItemById)
+                        .then(_purchaseOrderList => {
+                            for (var _purchaseOrderExternal of listPurchaseOrderExternal) {
+                                for (var _poExternal of _purchaseOrderExternalList) {
+                                    if (_poExternal._id.equals(_purchaseOrderExternal._id)) {
+                                        _purchaseOrderExternal = _poExternal;
+                                        _purchaseOrderExternal.isPosted = true;
+                                        tasks.push(this.update(_purchaseOrderExternal));
 
-                    Promise.all(tasks)
-                        .then(result => {
-                            resolve(result);
+                                        for (var _poExternalItem of _purchaseOrderExternal.items) {
+                                            for (var _purchaseOrder of _purchaseOrderList) {
+                                                if (_purchaseOrder._id.equals(_poExternalItem._id)) {
+                                                    _purchaseOrder.purchaseOrderExternalId = new ObjectId(_purchaseOrderExternal._id);
+                                                    _purchaseOrder.purchaseOrderExternal = _purchaseOrderExternal;
+                                                    _purchaseOrder.purchaseOrderExternal._id = new ObjectId(_purchaseOrderExternal._id);
+                                                    _purchaseOrder.supplierId = new ObjectId(_purchaseOrderExternal.supplierId);
+                                                    _purchaseOrder.supplier = _purchaseOrderExternal.supplier;
+                                                    _purchaseOrder.supplier._id = new ObjectId(_purchaseOrderExternal.supplier._id);
+                                                    _purchaseOrder.freightCostBy = _purchaseOrderExternal.freightCostBy;
+                                                    _purchaseOrder.currency = _purchaseOrderExternal.currency;
+                                                    _purchaseOrder.currencyRate = _purchaseOrderExternal.currencyRate;
+                                                    _purchaseOrder.paymentMethod = _purchaseOrderExternal.paymentMethod;
+                                                    _purchaseOrder.paymentDueDays = _purchaseOrderExternal.paymentDueDays;
+                                                    _purchaseOrder.vat = _purchaseOrderExternal.vat;
+                                                    _purchaseOrder.useVat = _purchaseOrderExternal.useVat;
+                                                    _purchaseOrder.vatRate = _purchaseOrderExternal.vatRate;
+                                                    _purchaseOrder.useIncomeTax = _purchaseOrderExternal.useIncomeTax;
+                                                    _purchaseOrder.isPosted = true;
+
+                                                    for (var poItem of _purchaseOrder.items) {
+                                                        for (var itemExternal of _poExternalItem.items) {
+                                                            itemExternal.product._id = new ObjectId(itemExternal.product._id);
+                                                            if ((itemExternal.product._id).equals(poItem.product._id)) {
+                                                                poItem.dealQuantity = itemExternal.dealQuantity;
+                                                                poItem.dealUom = itemExternal.dealUom;
+                                                                poItem.pricePerDealUnit = itemExternal.pricePerDealUnit;
+                                                                poItem.conversion = itemExternal.conversion;
+                                                                poItem.currency = _poExternal.currency;
+                                                                poItem.currencyRate = _poExternal.currencyRate;
+                                                            }
+                                                        }
+                                                    }
+                                                    tasks.push(this.purchaseOrderManager.update(_purchaseOrder));
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        break;
+                                    }
+                                }
+                            }
+                            Promise.all(tasks)
+                                .then(result => {
+                                    resolve(result);
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                })
                         })
                         .catch(e => {
                             reject(e);
@@ -464,7 +487,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
         });
     }
-     _createIndexes() {
+    _createIndexes() {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.PurchaseOrderExternal}__updatedDate`,
             key: {

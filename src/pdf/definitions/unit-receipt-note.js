@@ -178,8 +178,8 @@ module.exports = function (unitReceiptNote) {
     ];
 
     var dd = {
-        pageSize: 'A5',
-        pageOrientation: 'portrait',
+        pageSize: 'A6',
+        pageOrientation: 'landscape',
         pageMargins: 20,
         content: [].concat(header, line, subHeader, table, footer),
         styles: {

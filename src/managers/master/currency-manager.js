@@ -32,21 +32,21 @@ module.exports = class CurrencyManager extends BaseManager {
                     '$regex': regex
                 }
             };
-            var filterSymbol = {
-                'symbol': {
-                    '$regex': regex
-                }
-            };
-            var filterDescription = {
-                'description': {
-                    '$regex': regex
-                }
-            };
-            var $or = {
-                '$or': [filterCode, filterSymbol, filterDescription]
-            };
+            // var filterSymbol = {
+            //     'symbol': {
+            //         '$regex': regex
+            //     }
+            // };
+            // var filterDescription = {
+            //     'description': {
+            //         '$regex': regex
+            //     }
+            // };
+            // var $or = {
+            //     '$or': [filterCode, filterSymbol, filterDescription]
+            // };
 
-            query['$and'].push($or);
+            query['$and'].push(filterCode);
         }
         return query;
     }
