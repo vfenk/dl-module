@@ -133,7 +133,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         valid.date = valid.purchaseRequest.date;
                         valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
                         for (var poItem of valid.items) {
-                            poItem.product._id = new ObjectId(poItem.product._id);
+                            poItem.product._id = new ObjectId(poItem.product.uom._id);
                             poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
                             poItem.defaultUom._id = new ObjectId(poItem.product.uom._id);
                         }
