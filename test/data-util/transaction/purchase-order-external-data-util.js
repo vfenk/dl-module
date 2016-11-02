@@ -26,17 +26,19 @@ class PurchaseOrderExternalDataUtil {
                                 currencyRate: results[1].rate,
                                 paymentMethod: 'CASH',
                                 paymentDueDays: 0,
-                                vat : results[2],
-                                useVat : false,
-                                vatRate : results[2].rate,
-                                useIncomeTax : false, 
-                                date : new Date(),
-                                expectedDeliveryDate : new Date(),
-                                actualDeliveryDate : new Date(),
-                                isPosted : false,
-                                isClosed : false,
-                                remark : '', 
-                                items: [results[3]]
+                                vat: results[2],
+                                useVat: false,
+                                vatRate: results[2].rate,
+                                useIncomeTax: false,
+                                date: new Date(),
+                                expectedDeliveryDate: new Date(),
+                                actualDeliveryDate: new Date(),
+                                isPosted: false,
+                                isClosed: false,
+                                remark: '',
+                                items: [{
+
+                                    }]
                             };
 
                             manager.create(data)
