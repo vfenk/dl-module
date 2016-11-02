@@ -105,7 +105,15 @@ module.exports = class VatManager extends BaseManager {
             unique: true
         }
 
-        return this.collection.createIndexes([dateIndex, nameIndex]);
+        var rateIndex = {
+            name: `ix_${map.master.collection.Vat}_rate`,
+            key: {
+                rate: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, nameIndex, rateIndex]);
     }
  
 }
