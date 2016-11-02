@@ -290,9 +290,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     valid.supplierId = new ObjectId(valid.supplier._id);
                     valid.supplier._id = new ObjectId(valid.supplier._id);
                     valid.currency._id = new ObjectId(valid.currency._id);
-                    if (valid.vat) {
-                        valid.vat._id = new ObjectId(valid.vat._id);
-                    }
                     for (var item of valid.items) {
                         item.purchaseRequest.unit._id = new ObjectId(item.purchaseRequest.unit._id);
                         item.purchaseRequest.category._id = new ObjectId(item.purchaseRequest.category._id);
@@ -329,6 +326,14 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
 
+                    if (valid.vat) {
+                        if (valid.vat._id)
+                            valid.vat._id = new ObjectId(valid.vat._id);
+                        else
+                            valid.vat = null;
+                    }
+                    else
+                        valid.vat = null;
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })

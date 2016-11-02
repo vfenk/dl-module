@@ -369,10 +369,11 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         });
     }
 
-    getDataDeliveryOrder(no, supplierId, dateFrom, dateTo) {
+    getDataDeliveryOrder(no, supplierId, dateFrom, dateTo, createdBy) {
         return new Promise((resolve, reject) => {
             var query = Object.assign({});
             var deleted = { _deleted: false };
+            var _createdBy = { _createdBy: createdBy };
 
             if (no != "undefined" && no != "") {
                 var _no = { no: no };
@@ -393,7 +394,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 Object.assign(query, supplierDoDate);
             }
 
-            Object.assign(query, deleted);
+            Object.assign(query, deleted, _createdBy);
 
             this.collection
                 .where(query)
