@@ -10,13 +10,13 @@ class VatDataUtil {
             };
         }));
     }
-    getTestData() {
+     getTestData() {
         var testData = { 
             name: 'Vat 01',
             rate: 1,
-            description=''
+            description:''
         };
-        return Promise.resolve(this.getSert(testData));
+         return Promise.resolve(this.getSert(testData));
     }
 }
 module.exports = new VatDataUtil();
