@@ -286,9 +286,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 for (var unitReceiptNoteItem of unitPaymentOrderItem.unitReceiptNote.items) {
                                     if (purchaseOrder._id.equals(unitReceiptNoteItem.purchaseOrder._id) && poItem.product._id.equals(unitReceiptNoteItem.product._id) && validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
                                         for (var fulfillment of poItem.fulfillments) {
-                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
-                                            var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
-                                            if (fulfillmentNo == deliveryOrderNo) {
+                                            var fulfillmentNo = fulfillment.unitReceiptNoteNo || '';
+                                            var unitReceiptNoteNo = unitPaymentOrderItem.unitReceiptNote.no || '';
+                                            if (fulfillmentNo == unitReceiptNoteNo) {
                                                 fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
                                                 fulfillment.invoiceNo = validUnitPaymentOrder.invoceNo;
                                                 fulfillment.interNoteDate = validUnitPaymentOrder.date;
@@ -354,25 +354,30 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                 var purchaseOrder = result;
                                                 for (var poItem of purchaseOrder.items) {
                                                     for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
-                                                        if (validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
-                                                            for (var fulfillment of poItem.fulfillments) {
-                                                                var fulfillmentNo = fulfillment.deliveryOderNo || '';
-                                                                var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
-                                                                if (fulfillmentNo == deliveryOrderNo) {
-                                                                    fulfillment.invoiceDate = '';
-                                                                    fulfillment.invoiceNo = '';
-                                                                    fulfillment.interNoteDate = '';
-                                                                    fulfillment.interNoteNo = '';
-                                                                    fulfillment.interNoteValue = '';
-                                                                    fulfillment.interNoteDueDate = '';
-                                                                    fulfillment.ppnNo = '';
-                                                                    fulfillment.ppnDate = '';
-                                                                    fulfillment.ppnValue = '';
-                                                                    fulfillment.ppnNo = '';
-                                                                    fulfillment.pphValue = '';
-                                                                    fulfillment.pphDate = '';
+                                                        for (var unitReceiptNoteItem of unitPaymentOrderItem.unitReceiptNote.items) {
+                                                            if (purchaseOrder._id.equals(unitReceiptNoteItem.purchaseOrder._id) && poItem.product._id.equals(unitReceiptNoteItem.product._id) && validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
+                                                                for (var fulfillment of poItem.fulfillments) {
+                                                                    var fulfillmentNo = fulfillment.unitReceiptNoteNo || '';
+                                                                    var unitReceiptNoteNo = unitPaymentOrderItem.unitReceiptNote.no || '';
+                                                                    var interNoteNo = fulfillment.interNoteNo || '';
+                                                                    if (interNoteNo == validUnitPaymentOrder.no && fulfillmentNo == unitReceiptNoteNo) {
+                                                                        fulfillment.invoiceDate = '';
+                                                                        fulfillment.invoiceNo = '';
+                                                                        fulfillment.interNoteDate = '';
+                                                                        fulfillment.interNoteNo = '';
+                                                                        fulfillment.interNoteValue = '';
+                                                                        fulfillment.interNoteDueDate = '';
+                                                                        fulfillment.ppnNo = '';
+                                                                        fulfillment.ppnDate = '';
+                                                                        fulfillment.ppnValue = '';
+                                                                        fulfillment.ppnNo = '';
+                                                                        fulfillment.pphValue = '';
+                                                                        fulfillment.pphDate = '';
+                                                                    }
                                                                 }
+                                                                break;
                                                             }
+
                                                         }
                                                     }
                                                 }
