@@ -101,4 +101,22 @@ module.exports = class ProductManager extends BaseManager {
                 })
         });
     }
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.master.collection.Product}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var codeIndex = {
+            name: `ix_${map.master.collection.Product}_code`,
+            key: {
+                code: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, codeIndex]);
+    }
 };

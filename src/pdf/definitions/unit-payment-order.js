@@ -1,4 +1,5 @@
 var say = require('../../utils/say');
+var global = require('../../global');
 
 module.exports = function (unitPaymentOrder) {
 
@@ -24,16 +25,10 @@ module.exports = function (unitPaymentOrder) {
     var iso = "FM-6.00-06-012/R2";
     var number = unitPaymentOrder.no;
 
-    var locale = 'id-ID';
-    var dateLocaleOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    var dateFormat = "DD-MMMM-YYYY";
+    var locale = global.config.locale;  
 
     var moment = require('moment');
-    moment.locale(locale);
+    moment.locale(locale.name); 
 
     var initialValue = {
         price: 0,
@@ -44,15 +39,10 @@ module.exports = function (unitPaymentOrder) {
         .map(item => item.price * item.quantity)
         .reduce(function (prev, curr, index, arr) {
             return prev + curr;
-        }, 0);
-
-    var numberLocaleOptions = {
-        style: 'decimal',
-        maximumFractionDigits: 4
-    };
-
-    var incomeTax = unitPaymentOrder.ppnNo != undefined ? sum * 0.1 : 0;
-    var vat = unitPaymentOrder.pphNo != undefined ? sum * (unitPaymentOrder.vatRate/100) : 0;
+        }, 0); 
+ 
+    var incomeTax = unitPaymentOrder.incomeTaxNo != '' ? sum * 0.1 : 0;
+    var vat = unitPaymentOrder.vatNo != '' ? sum * (unitPaymentOrder.vatRate/100) : 0; 
 
     var header = [{
         columns: [
@@ -91,7 +81,7 @@ module.exports = function (unitPaymentOrder) {
                         style: ['size08']
                     }, {
                             alignment: "left",
-                            text: 'SUKOHARJO, '+`${moment(unitPaymentOrder.date).format(dateFormat)}`,
+                            text: 'SUKOHARJO, '+`${moment(unitPaymentOrder.date).format(locale.date.format)}`,
                             style: ['size09']
                         }, {
                             alignment: "left",
@@ -175,10 +165,10 @@ module.exports = function (unitPaymentOrder) {
                 text: item.product,
                 style: ['size07', 'left']
             }, {
-                text: parseFloat(item.price).toLocaleString(locale, numberLocaleOptions),
+                text: parseFloat(item.price).toLocaleString(locale, locale.currency),
                 style: ['size07', 'right']
             }, {
-                text: parseFloat(item.price * item.quantity).toLocaleString(locale, numberLocaleOptions),
+                text: parseFloat(item.price * item.quantity).toLocaleString(locale, locale.decimal),
                 style: ['size07', 'right']
             }, {
                 text: item.prNo,
@@ -220,7 +210,7 @@ module.exports = function (unitPaymentOrder) {
                     },
                     {
                         width: '25%',
-                        stack: [parseFloat(sum).toLocaleString(locale, numberLocaleOptions)],
+                        stack: [parseFloat(sum).toLocaleString(locale, locale.decimal)],
                         style: 'right'
                     }]
             },
@@ -231,7 +221,7 @@ module.exports = function (unitPaymentOrder) {
                         style: 'left'
                     }, {
                             width: '20%',
-                            stack: ['RP     ' + parseFloat(vat).toLocaleString(locale, numberLocaleOptions)],
+                            stack: ['RP     ' + parseFloat(vat).toLocaleString(locale, locale.currency)],
                             style: 'left'
                         }, {
                             width: '25%',
@@ -240,7 +230,7 @@ module.exports = function (unitPaymentOrder) {
                         },
                         {
                             width: '25%',
-                            stack: [parseFloat(incomeTax).toLocaleString(locale, numberLocaleOptions)],
+                            stack: [parseFloat(incomeTax).toLocaleString(locale, locale.currency)],
                             style: 'right'
                         }]
                 },
@@ -251,7 +241,7 @@ module.exports = function (unitPaymentOrder) {
                         style: 'left'
                     }, {
                             width: '20%',
-                            stack: ['RP     ' + parseFloat((sum + incomeTax) - vat).toLocaleString(locale, numberLocaleOptions)],
+                            stack: ['RP     ' + parseFloat((sum + incomeTax) - vat).toLocaleString(locale, locale.currency)],
                             style: 'left'
                         }, {
                             width: '25%',
@@ -260,7 +250,7 @@ module.exports = function (unitPaymentOrder) {
                         },
                         {
                             width: '25%',
-                            stack: [parseFloat(sum + incomeTax).toLocaleString(locale, numberLocaleOptions)],
+                            stack: [parseFloat(sum + incomeTax).toLocaleString(locale, locale.currency)],
                             style: 'right'
                         }]
                 },
@@ -282,7 +272,7 @@ module.exports = function (unitPaymentOrder) {
                         style: 'left'
                     }, {
                             width: '75%',
-                            stack: ['\n'+`${moment(unitPaymentOrder.dueDate).format(dateFormat)}`],
+                            stack: ['\n'+`${moment(unitPaymentOrder.dueDate).format(locale.date.format)}`],
                             style: 'left'
                         }]
                 },
@@ -301,7 +291,7 @@ module.exports = function (unitPaymentOrder) {
                             style: 'left'
                         }, {
                             width: '75%',
-                            stack: [`${moment(maxReceiptNoteDate).format(dateFormat)}`],
+                            stack: [`${moment(maxReceiptNoteDate).format(locale.date.format)}`],
                             style: 'left'
                         }]
                 },

@@ -133,7 +133,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         valid.date = valid.purchaseRequest.date;
                         valid.expectedDeliveryDate = valid.purchaseRequest.expectedDeliveryDate;
                         for (var poItem of valid.items) {
-                            poItem.product._id = new ObjectId(poItem.product.uom._id);
+                            poItem.product._id = new ObjectId(poItem.product._id);
                             poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
                             poItem.defaultUom._id = new ObjectId(poItem.product.uom._id);
                         }
@@ -156,8 +156,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     _getQuery(paging) {
         var deletedFilter = {
-            _deleted: false,
-            _createdBy: this.user.username
+            _deleted: false
         }, keywordFilter = {};
 
         var query = {};
@@ -747,5 +746,24 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
             }
         });
+    }
+
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.purchasing.collection.PurchaseOrder}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var noIndex = {
+            name: `ix_${map.purchasing.collection.PurchaseOrder}_no`,
+            key: {
+                no: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, noIndex]);
     }
 }

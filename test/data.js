@@ -11,6 +11,8 @@ module.exports = {
         category: require('./data-util/master/category-data-util')
     },
     transaction: {
-        purchaseRequest: require('./data-util/transaction/purchase-request-data-util')
+        purchaseRequest: require('./data-util/transaction/purchase-request-data-util'),
+        purchaseOrder: require('./data-util/transaction/purchase-order-data-util'),
+        purchaseOrderExternal: require('./data-util/transaction/purchase-order-external-data-util')
     }
 };

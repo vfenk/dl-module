@@ -68,7 +68,25 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                             errors["supplier"] = i18n.__("UnitPaymentOrder.supplier.isRequired:%s name is required", i18n.__("UnitPaymentOrder.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
                     }
                     else if (!valid.supplier)
-                        errors["supplier"] = i18n.__("UnitPaymentOrder.supplier.isRequired:%s name is required", i18n.__("UnitPaymentOrder.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
+                        errors["supplier"] = i18n.__("UnitPaymentOrder.supplier.isRequired:%s name is required", i18n.__("UnitPaymentOrder.supplier._:Category")); //"Category tidak boleh kosong";
+
+                    if (!valid.categoryId)
+                        errors["category"] = i18n.__("UnitPaymentOrder.category.isRequired:%s name is required", i18n.__("UnitPaymentOrder.category._:Category")); //"Category tidak boleh kosong";
+                    else if (valid.category) {
+                        if (!valid.supplier._id)
+                            errors["category"] = i18n.__("UnitPaymentOrder.category.isRequired:%s name is required", i18n.__("UnitPaymentOrder.category._:Category")); //"Category tidak boleh kosong";
+                    }
+                    else if (!valid.category)
+                        errors["category"] = i18n.__("UnitPaymentOrder.category.isRequired:%s name is required", i18n.__("UnitPaymentOrder.category._:Category")); //"Category tidak boleh kosong";
+
+                    if (!valid.dueDate || valid.dueDate == '')
+                        errors["dueDate"] = i18n.__("UnitPaymentOrder.dueDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.dueDate._:DueDate")); //tanggal jatuh tempo tidak boleh kosong";
+
+                    if (!valid.paymentMethod || valid.paymentMethod == '')
+                        errors["paymentMethod"] = i18n.__("UnitPaymentOrder.paymentMethod.isRequired:%s is required", i18n.__("UnitPaymentOrder.paymentMethod._:PaymentMethod")); //Term pembayaran tidak boleh kosong";
+
+                    if (!valid.currency)
+                        errors["currency"] = i18n.__("UnitPaymentOrder.currency.isRequired:%s name is required", i18n.__("UnitPaymentOrder.currency._:Currency")); //"currency tidak boleh kosong";
 
                     if (valid.items) {
                         if (valid.items.length <= 0) {
@@ -83,7 +101,17 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('unitPaymentOrder does not pass validation', errors));
                     }
-
+                    if (!valid.useVat) {
+                        valid.vatNo = "";
+                        valid.vatDate = null;
+                        valid.vatRate = 0;
+                        valid.useVat = false;
+                    }
+                    if (!valid.useIncomeTax) {
+                        valid.incomeTaxNo = "";
+                        valid.incomeTaxDate = null;
+                        valid.useIncomeTax = false;
+                    }
                     valid.unitId = new ObjectId(valid.unitId);
                     valid.supplierId = new ObjectId(valid.supplierId);
                     if (valid.category != null) {
@@ -189,20 +217,26 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
     create(unitPaymentOrder) {
         return new Promise((resolve, reject) => {
-            this._validate(unitPaymentOrder)
-                .then(validUnitPaymentOrder => {
-                    this.collection.insert(validUnitPaymentOrder)
-                        .then(id => {
-                            this.updatePO(validUnitPaymentOrder);
-                            resolve(id);
+            this._createIndexes()
+                .then((createIndexResults) => {
+                    this._validate(unitPaymentOrder)
+                        .then(validUnitPaymentOrder => {
+                            this.collection.insert(validUnitPaymentOrder)
+                                .then(id => {
+                                    this.updatePO(validUnitPaymentOrder);
+                                    resolve(id);
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
                         })
                         .catch(e => {
                             reject(e);
-                        })
+                        });
                 })
                 .catch(e => {
                     reject(e);
-                })
+                });
         });
     }
 
@@ -249,28 +283,31 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         var purchaseOrder = result;
                         for (var poItem of purchaseOrder.items) {
                             for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
-                                if (validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
-                                    for (var fulfillment of poItem.fulfillments) {
-                                        var fulfillmentNo = fulfillment.deliveryOderNo || '';
-                                        var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
-                                        if (fulfillmentNo == deliveryOrderNo) {
-                                            fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
-                                            fulfillment.invoiceNo = validUnitPaymentOrder.invoceDate;
-                                            fulfillment.interNoteDate = validUnitPaymentOrder.no;
-                                            fulfillment.interNoteNo = validUnitPaymentOrder.date;
-                                            fulfillment.interNoteValue = validUnitPaymentOrder.invoicePrice;
-                                            fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
-                                            if (validUnitPaymentOrder.incomeTaxNo) {
-                                                fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
-                                                fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
-                                                fulfillment.ppnValue = 0.1;
-                                            }
-                                            if (validUnitPaymentOrder.vatNo) {
-                                                fulfillment.pphNo = validUnitPaymentOrder.vatNo;
-                                                fulfillment.pphValue = validUnitPaymentOrder.vatRate;
-                                                fulfillment.pphDate = validUnitPaymentOrder.vatDate;
+                                for (var unitReceiptNoteItem of unitPaymentOrderItem.unitReceiptNote.items) {
+                                    if (purchaseOrder._id.equals(unitReceiptNoteItem.purchaseOrder._id) && poItem.product._id.equals(unitReceiptNoteItem.product._id) && validUnitPaymentOrder.unitId.equals(purchaseOrder.unitId)) {
+                                        for (var fulfillment of poItem.fulfillments) {
+                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                            var deliveryOrderNo = unitPaymentOrderItem.unitReceiptNote.deliveryOrder.no || '';
+                                            if (fulfillmentNo == deliveryOrderNo) {
+                                                fulfillment.invoiceDate = validUnitPaymentOrder.invoceDate;
+                                                fulfillment.invoiceNo = validUnitPaymentOrder.invoceNo;
+                                                fulfillment.interNoteDate = validUnitPaymentOrder.date;
+                                                fulfillment.interNoteNo = validUnitPaymentOrder.no;
+                                                fulfillment.interNoteValue = unitReceiptNoteItem.pricePerDealUnit;
+                                                fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
+                                                if (validUnitPaymentOrder.incomeTaxNo) {
+                                                    fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
+                                                    fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
+                                                    fulfillment.ppnValue = 0.1;
+                                                }
+                                                if (validUnitPaymentOrder.vatNo) {
+                                                    fulfillment.pphNo = validUnitPaymentOrder.vatNo;
+                                                    fulfillment.pphValue = validUnitPaymentOrder.vatRate;
+                                                    fulfillment.pphDate = validUnitPaymentOrder.vatDate;
+                                                }
                                             }
                                         }
+                                        break;
                                     }
 
                                 }
@@ -367,7 +404,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         });
     }
 
-     pdf(id) {
+    pdf(id) {
         return new Promise((resolve, reject) => {
 
             this.getSingleById(id)
@@ -389,6 +426,25 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                 });
 
         });
+    }
+
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.purchasing.collection.UnitPaymentOrder}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var noIndex = {
+            name: `ix_${map.purchasing.collection.UnitPaymentOrder}_no`,
+            key: {
+                no: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, noIndex]);
     }
 
 }
