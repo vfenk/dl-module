@@ -28,7 +28,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     },
-                    _deleted: true
+                    _deleted: false
                 }, {
                         "purchaseRequest.no": valid.purchaseRequest.no
                     }]
