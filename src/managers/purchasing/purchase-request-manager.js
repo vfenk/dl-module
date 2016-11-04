@@ -203,14 +203,15 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                                     break;
                                 }
                             }
-                            Promise.all(tasks)
+                            
+                        }
+                        Promise.all(tasks)
                                 .then(result => {
                                     resolve(result);
                                 })
                                 .catch(e => {
                                     reject(e);
                                 })
-                        }
                         
                     })
                     .catch(e => {
