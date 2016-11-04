@@ -6,6 +6,7 @@ var DLModels = require('dl-models');
 var assert = require('assert');
 var map = DLModels.map;
 var PurchaseOrder = DLModels.purchasing.PurchaseOrder;
+var PurchaseRequestManager = require('./purchase-request-manager');
 var generateCode = require('../../utils/code-generator');
 var BaseManager = require('../base-manager');
 var i18n = require('dl-i18n');
@@ -16,7 +17,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         this.moduleId = 'PO';
         this.year = (new Date()).getFullYear().toString().substring(2, 4);
         this.collection = this.db.use(map.purchasing.collection.PurchaseOrder);
+        this.PurchaseRequestManager = new PurchaseRequestManager(db, user);
     }
+
+    
 
     _validate(purchaseOrder) {
         var errors = {};
@@ -315,7 +319,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                             for (var item of validPurchaseOrder.items) {
                                                 for (var sourceItem of sourcePo.items) {
                                                     if (item.product.code == sourceItem.product.code) {
-                                                        sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity
+                                                        sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity;
+                                                        
                                                         break;
                                                     }
                                                 }
