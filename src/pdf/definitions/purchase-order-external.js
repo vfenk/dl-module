@@ -19,7 +19,7 @@ module.exports = function(pox) {
 
     var iso = pox.items.find(r => true).iso;
     var number = pox.no;
-    var currency = pox.currency.symbol;
+    var currency = pox.currency.code;
     var supplier = pox.supplier.name;
     var supplierAtt = pox.supplier.PIC;
     var supplierTel = pox.supplier.contact;
@@ -279,7 +279,10 @@ module.exports = function(pox) {
                 '\n\n\n', {
                     columns: [{
                         width: '35%',
-                        stack: ['Pembeli\n\n\n\n\n', '(_______________________)'],
+                        stack: ['Pembeli\n\n\n\n\n', {
+                            text: pox._createdBy,
+                            style: ['bold']
+                        }],
                         style: 'center'
                     }, {
                         width: '30%',
