@@ -187,24 +187,37 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     }
 
     post(listPurchaseRequest) {
+        var purchaseRequests=[];
+        var tasks=[];
         return new Promise((resolve, reject) => {
             for (var purchaseRequest of listPurchaseRequest) {
-                this._validate(purchaseRequest)
+                 purchaseRequests.push(this.getSingleByIdOrDefault(purchaseRequest.fulfillmentValue._id)) ;
+            }
+                Promise.all(purchaseRequests)
                     .then(validPurchaseRequest => {
-                        validPurchaseRequest.isPosted = true;
-                        this.collection.update(validPurchaseRequest)
-                            .then(id => {
-                                resolve(id);
-                            })
-                            .catch(e => {
-                                reject(e);
-                            });
+                        for (var pr of listPurchaseRequest) {
+                            for (var _pr of validPurchaseRequest) {
+                                if (_pr._id.equals(pr.fulfillmentValue._id)) {
+                                    _pr.isPosted = true;
+                                    tasks.push(this.update(_pr));
+                                    break;
+                                }
+                            }
+                            Promise.all(tasks)
+                                .then(result => {
+                                    resolve(result);
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                })
+                        }
+                        
                     })
                     .catch(e => {
                         reject(e);
                     });
             }
-        });
+        );
 
     }
 

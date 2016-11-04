@@ -28,7 +28,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     },
-                    _deleted: true
+                    _deleted: false
                 }, {
                         "purchaseRequest.no": valid.purchaseRequest.no
                     }]
@@ -239,7 +239,19 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 .then(validPurchaseOrderc => {
                     this.collection.insert(validPurchaseOrderc)
                         .then(id => {
-                            resolve(id);
+                            this.PurchaseRequestManager.getSingleById(validPurchaseOrderc.purchaseRequest._id)
+                            .then(PR=>{
+                                PR.isUsed=true;
+                                this.PurchaseRequestManager.update(PR)
+                                .then(results => {
+                                    resolve(id);
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
+                            })
+                            
+                            
                         })
                         .catch(e => {
                             reject(e);
@@ -249,6 +261,41 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     reject(e);
                 })
 
+        });
+    }
+
+    delete(purchaseOrder) {
+        return new Promise((resolve, reject) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
+                    this._validate(purchaseOrder)
+                        .then(validData => {
+                            validData._deleted = true;
+                            this.collection.update(validData)
+                                .then(id => {
+                                    this.PurchaseRequestManager.getSingleById(validData.purchaseRequest._id)
+                                        .then(PR=>{
+                                            PR.isUsed=false;
+                                            this.PurchaseRequestManager.update(PR)
+                                            .then(results => {
+                                                resolve(id);
+                                            })
+                                            .catch(e => {
+                                                reject(e);
+                                            });
+                                        })
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
