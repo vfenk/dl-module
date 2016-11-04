@@ -32,21 +32,21 @@ module.exports = class CurrencyManager extends BaseManager {
                     '$regex': regex
                 }
             };
-            var filterSymbol = {
-                'symbol': {
-                    '$regex': regex
-                }
-            };
-            var filterDescription = {
-                'description': {
-                    '$regex': regex
-                }
-            };
-            var $or = {
-                '$or': [filterCode, filterSymbol, filterDescription]
-            };
+            // var filterSymbol = {
+            //     'symbol': {
+            //         '$regex': regex
+            //     }
+            // };
+            // var filterDescription = {
+            //     'description': {
+            //         '$regex': regex
+            //     }
+            // };
+            // var $or = {
+            //     '$or': [filterCode, filterSymbol, filterDescription]
+            // };
 
-            query['$and'].push($or);
+            query['$and'].push(filterCode);
         }
         return query;
     }
@@ -99,6 +99,12 @@ module.exports = class CurrencyManager extends BaseManager {
     }
 
     _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.master.collection.Currency}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
 
         var codeIndex = {
             name: `ix_${map.master.collection.Currency}_code`,
@@ -108,6 +114,6 @@ module.exports = class CurrencyManager extends BaseManager {
             unique: true
         }
 
-        return this.collection.createIndexes([codeIndex]);
+        return this.collection.createIndexes([dateIndex, codeIndex]);
     }
 }

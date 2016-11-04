@@ -32,7 +32,7 @@ module.exports = class BaseManager {
             filter: {},
             asc: true
         }, paging);
-        var start = process.hrtime();
+        // var start = process.hrtime();
 
         return new Promise((resolve, reject) => {
             this._createIndexes()
@@ -40,13 +40,14 @@ module.exports = class BaseManager {
                     var query = this._getQuery(_paging);
                     this.collection
                         .where(query)
+                        .select(_paging.select)
                         .page(_paging.page, _paging.size)
                         .order(_paging.order)
                         .execute()
-                        .then(modules => {
-                            var elapsed = process.hrtime(start);
-                            console.log(elapsed);
-                            resolve(modules);
+                        .then(result => {
+                            // var elapsed = process.hrtime(start);
+                            // console.log(elapsed);
+                            resolve(result);
                         })
                         .catch(e => {
                             reject(e);
