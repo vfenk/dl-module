@@ -12,6 +12,7 @@ var DeliveryOrder = DLModels.purchasing.DeliveryOrder;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var PurchaseOrderExternalManager = require('./purchase-order-external-manager');
 var i18n = require('dl-i18n');
+var SupplierManager = require('../master/supplier-manager');
 
 // var PurchaseOrderBaseManager = require('../po/purchase-order-base-manager');
 // var DOItem = DLModels.po.DOItem;
@@ -22,6 +23,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         this.collection = this.db.use(map.purchasing.collection.DeliveryOrder);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
         this.purchaseOrderExternalManager = new PurchaseOrderExternalManager(db, user);
+        this.supplierManager = new SupplierManager(db, user);
     }
 
     _getQuery(paging) {
@@ -101,9 +103,17 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         "no": valid.no
                     }]
             });
-            Promise.all([getDeliveryderPromise])
+            var getSupplier = valid.supplier ? this.supplierManager.getSingleByIdOrDefault(valid.supplier_id): Promise.resolve(null);
+            var getPoExternal = [];
+            for (var doItem of valid.items)
+                getPoExternal.push(this.purchaseOrderExternalManager.getSingleByIdOrDefault(doItem.purchaseOrderExternal._id));
+
+            Promise.all([getDeliveryderPromise, getSupplier].concat(getPoExternal))
                 .then(results => {
                     var _module = results[0];
+                    var _supplier = results[1];
+                    var _poExternals = results.slice(2, results.length);
+
                     if (!valid.no || valid.no == '')
                         errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan tidak boleh kosong";
                     else if (_module)
@@ -117,7 +127,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         errors["supplierDoDate"] = i18n.__("DeliveryOrder.supplierDoDate.isRequired:%s is required", i18n.__("DeliveryOrder.supplierDoDate._:SupplierDoDate"));//"Tanggal surat jalan supplier tidak boleh kosong";
 
                     if (!valid.supplierId || valid.supplierId.toString() == '')
-                        errors["supplier"] = i18n.__("DeliveryOrder.supplier.name.isRequired:%s is required", i18n.__("DeliveryOrder.supplier.name._:NameSupplier")); //"Nama supplier tidak boleh kosong";
+                        errors["supplier"] = i18n.__("DeliveryOrder.supplier.name.isRequired:%s is required", i18n.__("DeliveryOrder.supplier.name._:NameSupplier")); //"Nama supplier tidak boleh kosong";    
+                    else if (!_supplier)
+                        errors["supplier"] = i18n.__("DeliveryOrder.supplier.name.isRequired:%s is not exists", i18n.__("DeliveryOrder.supplier.name._:NameSupplier")); //"Nama supplier tidak boleh kosong";
 
                     if (valid.items && valid.items.length < 1) {
                         errors["items"] = i18n.__("DeliveryOrder.items.isRequired:%s is required", i18n.__("DeliveryOrder.items.name._:Items")); //"Harus ada minimal 1 nomor po eksternal";
@@ -162,77 +174,93 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
+                    valid.supplier = _supplier;
                     valid.supplierId = new ObjectId(valid.supplier._id);
-                    valid.supplier._id = new ObjectId(valid.supplier._id);
+
                     for (var item of valid.items) {
-                        item.purchaseOrderExternalId = new ObjectId(item.purchaseOrderExternal._id);
-                        item.purchaseOrderExternal._id = new ObjectId(item.purchaseOrderExternal._id);
-                        item.purchaseOrderExternal.supplierId = new ObjectId(item.purchaseOrderExternal.supplier._id);
-                        item.purchaseOrderExternal.supplier._id = new ObjectId(item.purchaseOrderExternal.supplier._id);
-                        item.purchaseOrderExternal.currency._id = new ObjectId(item.purchaseOrderExternal.currency._id);
-                        if (item.purchaseOrderExternal.vat) {
-                            item.purchaseOrderExternal.vat._id = new ObjectId(item.purchaseOrderExternal.vat._id);
-                        }
-                        for (var exItem of item.purchaseOrderExternal.items) {
-                            exItem.purchaseRequest.unit._id = new ObjectId(exItem.purchaseRequest.unit._id);
-                            exItem.purchaseRequest.category._id = new ObjectId(exItem.purchaseRequest.category._id);
-                            exItem.purchaseRequest.unitId = new ObjectId(exItem.purchaseRequest.unit._id);
-                            exItem.purchaseRequest.categoryId = new ObjectId(exItem.purchaseRequest.category._id);
-                            if (exItem.sourcePurchaseOrder) {
-                                exItem.sourcePurchaseOrder._id = new ObjectId(exItem.sourcePurchaseOrder._id);
-                                exItem.sourcePurchaseOrder.purchaseRequest.unit._id = new ObjectId(exItem.sourcePurchaseOrder.purchaseRequest.unit._id);
-                                exItem.sourcePurchaseOrder.purchaseRequest.category._id = new ObjectId(exItem.sourcePurchaseOrder.purchaseRequest.category._id);
-                                exItem.sourcePurchaseOrder.purchaseRequest.unitId = new ObjectId(exItem.sourcePurchaseOrder.purchaseRequest.unit._id);
-                                exItem.sourcePurchaseOrder.purchaseRequest.categoryId = new ObjectId(exItem.sourcePurchaseOrder.purchaseRequest.category._id);
-                                exItem.sourcePurchaseOrder.unit._id = new ObjectId(exItem.sourcePurchaseOrder.unit._id);
-                                exItem.sourcePurchaseOrder.category._id = new ObjectId(exItem.sourcePurchaseOrder.category._id);
-                                exItem.sourcePurchaseOrder.unitId = new ObjectId(exItem.sourcePurchaseOrder.unit._id);
-                                exItem.sourcePurchaseOrder.categoryId = new ObjectId(exItem.sourcePurchaseOrder.categoryId);
+                        for (var poExternal of _poExternals) {
+                            if (item.purchaseOrderExternal._id.toString() == poExternal._id.toString()) {
+                                item.purchaseOrderExternal = poExternal;
+                                item.purchaseOrderExternalId = new ObjectId(poExternal._id);
 
-                                for (var soItem of exItem.sourcePurchaseOrder.items) {
-                                    soItem.product._id = new ObjectId(soItem.product._id);
-                                    soItem.product.uom._id = new ObjectId(soItem.product.uom._id);
-                                    soItem.defaultUom._id = new ObjectId(soItem.defaultUom._id);
+                                for (var fulfillment of item.fulfillments) {
+                                    for (var poInternal of poExternal.items) {
+                                        if (fulfillment.purchaseOrder._id.toString() == poInternal._id.toString()) {
+                                            for (var poItem of poInternal.items) {
+                                                if (fulfillment.product._id.toString() == poItem.product._id.toString()) {
+                                                    fulfillment.product = poItem.product;
+                                                    fulfillment.productId = new ObjectId(poItem.product._id);
+                                                    fulfillment.purchaseOrder = poInternal;
+                                                    fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrder._id);
+                                                    fulfillment.purchaseOrderUom._id = new ObjectId(fulfillment.purchaseOrderUom._id);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
+                                break;
                             }
-                            exItem.unitId = new ObjectId(exItem.unit._id);
-                            exItem.unit._id = new ObjectId(exItem.unit._id);
-                            exItem.categoryId = new ObjectId(exItem.category._id);
-                            exItem.category._id = new ObjectId(exItem.category._id);
-                            for (var poItem of exItem.items) {
-                                poItem.product._id = new ObjectId(poItem.product._id);
-                                poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
-                                poItem.defaultUom._id = new ObjectId(poItem.defaultUom._id);
-                                poItem.dealUom._id = new ObjectId(poItem.dealUom._id);
-                            }
-                        }
-
-                        for (var fulfillment of item.fulfillments) {
-                            fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrder._id);
-                            fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
-                            fulfillment.purchaseOrder.unitId = new ObjectId(fulfillment.purchaseOrder.unit._id);
-                            fulfillment.purchaseOrder.unit._id = new ObjectId(fulfillment.purchaseOrder.unit._id);
-                            fulfillment.purchaseOrder.categoryId = new ObjectId(fulfillment.purchaseOrder.category._id);
-                            fulfillment.purchaseOrder.category._id = new ObjectId(fulfillment.purchaseOrder.category._id);
-                            fulfillment.productId = new ObjectId(fulfillment.product._idd);
-                            fulfillment.product._id = new ObjectId(fulfillment.product._id);
                         }
                     }
+
+
+                    // for (var item of valid.items) {
+                    //     item.purchaseOrderExternalId = new ObjectId(item.purchaseOrderExternal._id);
+                    //     item.purchaseOrderExternal._id = new ObjectId(item.purchaseOrderExternal._id);
+                    //     item.purchaseOrderExternal.supplierId = new ObjectId(item.purchaseOrderExternal.supplier._id);
+                    //     item.purchaseOrderExternal.supplier._id = new ObjectId(item.purchaseOrderExternal.supplier._id);
+                    //     item.purchaseOrderExternal.currency._id = new ObjectId(item.purchaseOrderExternal.currency._id);
+                    //     if (item.purchaseOrderExternal.vat) {
+                    //         item.purchaseOrderExternal.vat._id = new ObjectId(item.purchaseOrderExternal.vat._id);
+                    //     }
+                    //     for (var exItem of item.purchaseOrderExternal.items) {
+                    //         exItem.purchaseRequest.unit._id = new ObjectId(exItem.purchaseRequest.unit._id);
+                    //         exItem.purchaseRequest.category._id = new ObjectId(exItem.purchaseRequest.category._id);
+                    //         exItem.purchaseRequest.unitId = new ObjectId(exItem.purchaseRequest.unit._id);
+                    //         exItem.purchaseRequest.categoryId = new ObjectId(exItem.purchaseRequest.category._id);
+                    //         if (exItem.sourcePurchaseOrder) {
+                    //             exItem.sourcePurchaseOrder._id = new ObjectId(exItem.sourcePurchaseOrder._id);
+                    //             exItem.sourcePurchaseOrder.purchaseRequest.unit._id = new ObjectId(exItem.sourcePurchaseOrder.purchaseRequest.unit._id);
+                    //             exItem.sourcePurchaseOrder.purchaseRequest.category._id = new ObjectId(exItem.sourcePurchaseOrder.purchaseRequest.category._id);
+                    //             exItem.sourcePurchaseOrder.purchaseRequest.unitId = new ObjectId(exItem.sourcePurchaseOrder.purchaseRequest.unit._id);
+                    //             exItem.sourcePurchaseOrder.purchaseRequest.categoryId = new ObjectId(exItem.sourcePurchaseOrder.purchaseRequest.category._id);
+                    //             exItem.sourcePurchaseOrder.unit._id = new ObjectId(exItem.sourcePurchaseOrder.unit._id);
+                    //             exItem.sourcePurchaseOrder.category._id = new ObjectId(exItem.sourcePurchaseOrder.category._id);
+                    //             exItem.sourcePurchaseOrder.unitId = new ObjectId(exItem.sourcePurchaseOrder.unit._id);
+                    //             exItem.sourcePurchaseOrder.categoryId = new ObjectId(exItem.sourcePurchaseOrder.categoryId);
+
+                    //             for (var soItem of exItem.sourcePurchaseOrder.items) {
+                    //                 soItem.product._id = new ObjectId(soItem.product._id);
+                    //                 soItem.product.uom._id = new ObjectId(soItem.product.uom._id);
+                    //                 soItem.defaultUom._id = new ObjectId(soItem.defaultUom._id);
+                    //             }
+                    //         }
+                    //         exItem.unitId = new ObjectId(exItem.unit._id);
+                    //         exItem.unit._id = new ObjectId(exItem.unit._id);
+                    //         exItem.categoryId = new ObjectId(exItem.category._id);
+                    //         exItem.category._id = new ObjectId(exItem.category._id);
+                    //         for (var poItem of exItem.items) {
+                    //             poItem.product._id = new ObjectId(poItem.product._id);
+                    //             poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
+                    //             poItem.defaultUom._id = new ObjectId(poItem.defaultUom._id);
+                    //             poItem.dealUom._id = new ObjectId(poItem.dealUom._id);
+                    //         }
+                    //     }
+
+                    //     for (var fulfillment of item.fulfillments) {
+                    //         fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrder._id);
+                    //         fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
+                    //         fulfillment.purchaseOrder.unitId = new ObjectId(fulfillment.purchaseOrder.unit._id);
+                    //         fulfillment.purchaseOrder.unit._id = new ObjectId(fulfillment.purchaseOrder.unit._id);
+                    //         fulfillment.purchaseOrder.categoryId = new ObjectId(fulfillment.purchaseOrder.category._id);
+                    //         fulfillment.purchaseOrder.category._id = new ObjectId(fulfillment.purchaseOrder.category._id);
+                    //         fulfillment.productId = new ObjectId(fulfillment.product._idd);
+                    //         fulfillment.product._id = new ObjectId(fulfillment.product._id);
+                    //     }
+                    // }
                     if (!valid.stamp)
                         valid = new DeliveryOrder(valid);
-
-                    valid.supplierId = new ObjectId(valid.supplier._id);
-                    valid.supplier._id = new ObjectId(valid.supplier._id);
-                    for (var doItem of valid.items) {
-                        doItem.purchaseOrderExternalId = new ObjectId(doItem.purchaseOrderExternal._id);
-                        doItem.purchaseOrderExternal._id = new ObjectId(doItem.purchaseOrderExternal._id);
-                        for (var fulfillment of doItem.fulfillments) {
-                            fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrder._id);
-                            fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
-                            fulfillment.productId = new ObjectId(fulfillment.product._id);
-                            fulfillment.product._id = new ObjectId(fulfillment.product._id);
-                        }
-                    }
 
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
