@@ -38,9 +38,9 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         _deleted: false
                     }]
             });
-            var getDeliveryOrder = this.deliveryOrderManager.getSingleByIdOrDefault(valid.deliveryOrder._id);
-            var getUnit = this.unitManager.getSingleByIdOrDefault(valid.unit._id);
-            var getSupplier = this.supplierManager.getSingleByIdOrDefault(valid.supplier._id);
+            var getDeliveryOrder = valid.deliveryOrde ? this.deliveryOrderManager.getSingleByIdOrDefault(valid.deliveryOrder._id): Promise.resolve(null);
+            var getUnit = valid.unit?this.unitManager.getSingleByIdOrDefault(valid.unit._id): Promise.resolve(null);
+            var getSupplier = valid.supplier ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id): Promise.resolve(null);
             var getPurchaseOrder = [];
             for (var doItem of valid.deliveryOrder.items) {
                 for (var fulfillment of doItem.fulfillments)
