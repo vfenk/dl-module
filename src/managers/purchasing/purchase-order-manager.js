@@ -145,7 +145,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             for (var _prItem of _purchaseRequest.items)
                                 if (_prItem.product._id.toString() == poItem.product._id.toString()) {
                                     poItem.product = _prItem.product;
-                                    poItem.defaultQuantity = _prItem.quantity;
                                     poItem.defaultUom = _prItem.uom;
                                     break;
                                 }
@@ -251,10 +250,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 .then(validPurchaseOrder => {
                     this.collection.insert(validPurchaseOrder)
                         .then(id => {
-                            this.PurchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
+                            this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
                                 .then(PR => {
                                     PR.isUsed = true;
-                                    this.PurchaseRequestManager.update(PR)
+                                    this.purchaseRequestManager.update(PR)
                                         .then(results => {
                                             resolve(id);
                                         })
@@ -285,10 +284,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             validData._deleted = true;
                             this.collection.update(validData)
                                 .then(id => {
-                                    this.PurchaseRequestManager.getSingleById(validData.purchaseRequest._id)
+                                    this.purchaseRequestManager.getSingleById(validData.purchaseRequest._id)
                                         .then(PR => {
                                             PR.isUsed = false;
-                                            this.PurchaseRequestManager.update(PR)
+                                            this.purchaseRequestManager.update(PR)
                                                 .then(results => {
                                                     resolve(id);
                                                 })
@@ -322,13 +321,12 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             delete validPurchaseOrder._id;
                             this.create(validPurchaseOrder)
                                 .then(id => {
-                                    this.getSingleById(validPurchaseOrder.sourcePurchaseOrderId)
+                                    this.getSingleById(validPurchaseOrder.sourcePurchaseOrder._id)
                                         .then(sourcePo => {
                                             for (var item of validPurchaseOrder.items) {
                                                 for (var sourceItem of sourcePo.items) {
                                                     if (item.product.code == sourceItem.product.code) {
                                                         sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity;
-
                                                         break;
                                                     }
                                                 }
