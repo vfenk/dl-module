@@ -103,7 +103,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         "no": valid.no
                     }]
             });
-            var getSupplier = valid.supplier ? this.supplierManager.getSingleByIdOrDefault(valid.supplier_id): Promise.resolve(null);
+            var getSupplier = valid.supplier ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
             var getPoExternal = [];
             for (var doItem of valid.items)
                 getPoExternal.push(this.purchaseOrderExternalManager.getSingleByIdOrDefault(doItem.purchaseOrderExternal._id));
