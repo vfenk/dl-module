@@ -8,6 +8,10 @@ var PurchaseRequest = DLModels.purchasing.PurchaseRequest;
 var generateCode = require('../../utils/code-generator');
 var BaseManager = require('../base-manager');
 var i18n = require('dl-i18n');
+var UnitManager = require('../master/unit-manager');
+var BudgetManager = require('../master/budget-manager');
+var CategoryManager = require('../master/category-manager');
+var ProductManager = require('../master/product-manager');
 
 module.exports = class PurchaseRequestManager extends BaseManager {
     constructor(db, user) {
@@ -15,6 +19,10 @@ module.exports = class PurchaseRequestManager extends BaseManager {
         this.moduleId = 'PR';
         this.year = (new Date()).getFullYear().toString().substring(2, 4);
         this.collection = this.db.use(map.purchasing.collection.PurchaseRequest);
+        this.unitManager = new UnitManager(db, user);
+        this.budgetManager = new BudgetManager(db, user);
+        this.categoryManager = new CategoryManager(db, user);
+        this.productManager = new ProductManager(db, user);
     }
 
     _validate(purchaseRequest) {
@@ -29,16 +37,28 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 }
 
             });
+            var getUnit = this.unitManager.getSingleByIdOrDefault(valid.unit._id);
+            var getCategory = this.categoryManager.getSingleByIdOrDefault(valid.category._id);
+            var getBudget = this.budgetManager.getSingleByIdOrDefault(valid.budget._id);
+            var getProduct = [];
+            for(var _item of valid.items)
+                getProduct.push(this.productManager.getSingleByIdOrDefault(_item.product._id));
 
-            Promise.all([getPurchaseRequestPromise])
+            Promise.all([getPurchaseRequestPromise,getUnit,getCategory,getBudget].concat(getProduct))
                 .then(results => {
                     var _module = results[0];
+                    var _unit= results[1];
+                    var _category = results[2];
+                    var _budget = results[3];
+                    var _products = results.slice(4, results.length);
                     var now = new Date();
 
                     if (!valid.date || valid.date == '' || valid.date == "undefined")
                         errors["date"] = i18n.__("PurchaseRequest.date.isRequired:%s is required", i18n.__("PurchaseRequest.date._:Date"));//"Tanggal PR tidak boleh kosong";
 
-                    if (!valid.unitId)
+                    if (!_unit)
+                        errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is not exists", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
+                    else if (!valid.unitId)
                         errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is required", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
                     else if (valid.unit) {
                         if (!valid.unit._id)
@@ -48,7 +68,9 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                         errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is required", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
 
 
-                    if (!valid.categoryId)
+                    if (!_category)
+                        errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is not exists", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
+                    else if (!valid.categoryId)
                         errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is required", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
                     else if (valid.category) {
                         if (!valid.category._id)
@@ -57,7 +79,9 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     else if (!valid.category)
                         errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is required", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
 
-                    if (!valid.budget || valid.budget.name == '')
+                    if(!_budget)
+                        errors["budget"] = i18n.__("PurchaseRequest.budget.name.isRequired:%s is not exists", i18n.__("PurchaseRequest.budget.name._:Budget")); //"Budget tidak boleh kosong";
+                    else if (!valid.budget._id)
                         errors["budget"] = i18n.__("PurchaseRequest.budget.name.isRequired:%s is required", i18n.__("PurchaseRequest.budget.name._:Budget")); //"Budget tidak boleh kosong";
 
                     if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '' || valid.expectedDeliveryDate == 'undefined')
@@ -101,6 +125,27 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     if (valid.category != null) {
                         valid.categoryId = new ObjectId(valid.category._id);
                         valid.category._id = new ObjectId(valid.category._id);
+                    }
+                    
+                    valid.unit=_unit;
+                    valid.unitId=_unit._id;
+                    
+                    valid.category=_category;
+                    valid.categoryId=_category._id;
+                    
+                    valid.budget=_budget;
+                    
+                    for(var prItem of valid.items)
+                    {
+                        for(var _product of _products)
+                        {
+                            if(prItem.product._id.toString() == _product._id.toString())
+                            {
+                                prItem.product=_product;
+                                prItem.uom=_product.uom;
+                                break;
+                            }
+                        }
                     }
 
                     if (!valid.stamp)
@@ -187,24 +232,38 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     }
 
     post(listPurchaseRequest) {
+        var purchaseRequests=[];
+        var tasks=[];
         return new Promise((resolve, reject) => {
             for (var purchaseRequest of listPurchaseRequest) {
-                this._validate(purchaseRequest)
+                 purchaseRequests.push(this.getSingleByIdOrDefault(purchaseRequest._id)) ;
+            }
+                Promise.all(purchaseRequests)
                     .then(validPurchaseRequest => {
-                        validPurchaseRequest.isPosted = true;
-                        this.collection.update(validPurchaseRequest)
-                            .then(id => {
-                                resolve(id);
-                            })
-                            .catch(e => {
-                                reject(e);
-                            });
+                        for (var pr of listPurchaseRequest) {
+                            for (var _pr of validPurchaseRequest) {
+                                if (_pr._id.equals(pr._id)) {
+                                    _pr.isPosted = true;
+                                    tasks.push(this.update(_pr));
+                                    break;
+                                }
+                            }
+                            
+                        }
+                        Promise.all(tasks)
+                                .then(result => {
+                                    resolve(result);
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                })
+                        
                     })
                     .catch(e => {
                         reject(e);
                     });
             }
-        });
+        );
 
     }
 
