@@ -38,9 +38,9 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         _deleted: false
                     }]
             });
-            var getDeliveryOrder = this.deliveryOrderManager.getSingleByIdOrDefault(valid.deliveryOrder._id);
-            var getUnit = this.unitManager.getSingleByIdOrDefault(valid.unit._id);
-            var getSupplier = this.supplierManager.getSingleByIdOrDefault(valid.supplier._id);
+            var getDeliveryOrder = valid.deliveryOrder ? this.deliveryOrderManager.getSingleByIdOrDefault(valid.deliveryOrder._id): Promise.resolve(null);
+            var getUnit = valid.unit?this.unitManager.getSingleByIdOrDefault(valid.unit._id): Promise.resolve(null);
+            var getSupplier = valid.supplier ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id): Promise.resolve(null);
             var getPurchaseOrder = [];
             for (var doItem of valid.deliveryOrder.items) {
                 for (var fulfillment of doItem.fulfillments)
@@ -335,11 +335,12 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         });
     }
 
-    getUnitReceiptNotes(_no, _unitId, _categoryId, _supplierId, _dateFrom, _dateTo) {
+    getUnitReceiptNotes(_no, _unitId, _categoryId, _supplierId, _dateFrom, _dateTo, _createdBy) {
         return new Promise((resolve, reject) => {
             var query = Object.assign({});
 
             var deleted = { _deleted: false };
+            var createdBy = { _createdBy: _createdBy };
 
             if (_no != "undefined" && _no != "") {
                 var no = { no: _no };
@@ -372,7 +373,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 };
                 Object.assign(query, date);
             }
-            Object.assign(query, deleted);
+            Object.assign(query, deleted, createdBy);
 
             this.collection
                 .where(query)
