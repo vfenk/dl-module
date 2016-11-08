@@ -206,32 +206,38 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     var now = new Date();
 
                     if (valid.refNo != '' && _module)
-                        purchaseOrderExternalError["refNo"] = i18n.__("PurchaseOrderExternal.refNo.isExists:%s is already exists", i18n.__("PurchaseOrderExternal.refNo._:RefNo")); //"No. Ref Surat Jalan sudah terdaftar"; 
+                        purchaseOrderExternalError["refNo"] = i18n.__("PurchaseOrderExternal.refNo.isExists:%s is already exists", i18n.__("PurchaseOrderExternal.refNo._:Ref No")); //"No. Ref Surat Jalan sudah terdaftar"; 
 
-                    if (!_supplier)
-                        purchaseOrderExternalError["supplierId"] = i18n.__("PurchaseOrderExternal.supplier.name.isRequired:%s is not exists", i18n.__("PurchaseOrderExternal.supplier.name._:Name")); //"Nama Supplier tidak boleh kosong";
-                    else if (!valid.supplierId || valid.supplierId.toString() == '')
+                    if (!valid.supplierId || valid.supplierId.toString() == '')
                         purchaseOrderExternalError["supplierId"] = i18n.__("PurchaseOrderExternal.supplier.name.isRequired:%s is required", i18n.__("PurchaseOrderExternal.supplier.name._:Name")); //"Nama Supplier tidak boleh kosong";
+                    else if (valid.supplier) {
+                        if (!valid.supplier._id)
+                            purchaseOrderExternalError["supplierId"] = i18n.__("PurchaseOrderExternal.supplier.name.isRequired:%s is required", i18n.__("PurchaseOrderExternal.supplier.name._:Name")); //"Nama Supplier tidak boleh kosong";
+                    } else if (!_supplier)
+                        purchaseOrderExternalError["supplierId"] = i18n.__("PurchaseOrderExternal.supplier.name.isRequired:%s is not exists", i18n.__("PurchaseOrderExternal.supplier.name._:Name")); //"Nama Supplier tidak boleh kosong";
 
                     if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
-                        purchaseOrderExternalError["expectedDeliveryDate"] = i18n.__("PurchaseOrderExternal.expectedDeliveryDate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.expectedDeliveryDate._:ExpectedDeliveryDate")); //"Tanggal tersedia tidak boleh kosong";
+                        purchaseOrderExternalError["expectedDeliveryDate"] = i18n.__("PurchaseOrderExternal.expectedDeliveryDate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.expectedDeliveryDate._:Expected Delivery Date")); //"Tanggal tersedia tidak boleh kosong";
 
                     if (!valid.date || valid.date == '')
                         purchaseOrderExternalError["date"] = i18n.__("PurchaseOrderExternal.date.isRequired:%s is required", i18n.__("PurchaseOrderExternal.date._:Date")); //"Tanggal tidak boleh kosong";
 
                     if (!valid.paymentMethod || valid.paymentMethod == '')
-                        purchaseOrderExternalError["paymentMethod"] = i18n.__("PurchaseOrderExternal.paymentMethod.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentMethod._:PaymentMethod")); //"Metode Pembayaran tidak boleh kosong";
+                        purchaseOrderExternalError["paymentMethod"] = i18n.__("PurchaseOrderExternal.paymentMethod.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentMethod._:Payment Method")); //"Metode Pembayaran tidak boleh kosong";
 
-                    if (!valid.currency._id)
+                    if (!valid.currency)
                         purchaseOrderExternalError["currency"] = i18n.__("PurchaseOrderExternal.currency.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currency._:Currency")); //"Currency tidak boleh kosong";
-                    else if (!_currency)
+                    else if (valid.currency) {
+                        if (!valid.currency._id)
+                            purchaseOrderExternalError["currency"] = i18n.__("PurchaseOrderExternal.currency.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currency._:Currency")); //"Currency tidak boleh kosong";
+                    } else if (!_currency)
                         purchaseOrderExternalError["currency"] = i18n.__("PurchaseOrderExternal.currency.isRequired:%s is not exists", i18n.__("PurchaseOrderExternal.currency._:Currency")); //"Currency tidak boleh kosong";
                     if (!valid.currencyRate || valid.currencyRate == 0)
-                        purchaseOrderExternalError["currencyRate"] = i18n.__("PurchaseOrderExternal.currencyRate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currencyRate._:CurrencyRate")); //"Rate tidak boleh kosong";
+                        purchaseOrderExternalError["currencyRate"] = i18n.__("PurchaseOrderExternal.currencyRate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currencyRate._:Currency Rate")); //"Rate tidak boleh kosong";
 
                     if (valid.paymentMethod.toUpperCase() != "CASH")
                         if (!valid.paymentDueDays || valid.paymentDueDays == '' || valid.paymentDueDays == 0)
-                            purchaseOrderExternalError["paymentDueDays"] = i18n.__("PurchaseOrderExternal.paymentDueDays.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentDueDays._:PaymentDueDays")); //"Tempo Pembayaran tidak boleh kosong";
+                            purchaseOrderExternalError["paymentDueDays"] = i18n.__("PurchaseOrderExternal.paymentDueDays.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentDueDays._:Payment Due Days")); //"Tempo Pembayaran tidak boleh kosong";
 
                     // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
                     //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
@@ -263,26 +269,26 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 var defaultUomId = new ObjectId(poItem.defaultUom._id);
                                 if (!poItem.dealQuantity || poItem.dealQuantity == 0) {
                                     poItemHasError = true;
-                                    poItemError["dealQuantity"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:DealQuantity")); //"Jumlah kesepakatan tidak boleh kosong";
+                                    poItemError["dealQuantity"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:Deal Quantity")); //"Jumlah kesepakatan tidak boleh kosong";
                                 }
                                 else if (dealUomId.equals(defaultUomId) && poItem.dealQuantity > poItem.defaultQuantity) {
                                     poItemHasError = true;
-                                    poItemError["dealQuantity"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s must not be greater than defaultQuantity", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:DealQuantity")); //"Jumlah kesepakatan tidak boleh kosong";
+                                    poItemError["dealQuantity"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s must not be greater than defaultQuantity", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:Deal Quantity")); //"Jumlah kesepakatan tidak boleh kosong";
                                 }
                                 if (!poItem.dealUom || !poItem.dealUom.unit || poItem.dealUom.unit == "") {
                                     poItemHasError = true;
-                                    poItemError["dealUom"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:DealQuantity")); //"Jumlah kesepakatan tidak boleh kosong";
+                                    poItemError["dealUom"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:Deal Quantity")); //"Jumlah kesepakatan tidak boleh kosong";
                                 }
                                 if (!poItem.pricePerDealUnit || poItem.pricePerDealUnit == 0) {
                                     poItemHasError = true;
-                                    poItemError["pricePerDealUnit"] = i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit._:PricePerDealUnit")); //"Harga tidak boleh kosong";
+                                    poItemError["pricePerDealUnit"] = i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
                                 }
                                 var price = (poItem.pricePerDealUnit.toString()).split(",");
                                 if (price[1] != undefined || price[1] != "" || price[1] != " ") {
                                     poItem.pricePerDealUnit = parseFloat(poItem.pricePerDealUnit.toString() + ".00");
                                 } else if (price[1].length() > 2) {
                                     poItemHasError = true;
-                                    poItemError["pricePerDealUnit"] = i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit.isRequired:%s is greater than 2", i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit._:PricePerDealUnit")); //"Harga tidak boleh kosong";
+                                    poItemError["pricePerDealUnit"] = i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit.isRequired:%s is greater than 2", i18n.__("PurchaseOrderExternal.items.items.pricePerDealUnit._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
                                 } else {
                                     poItem.pricePerDealUnit = poItem.pricePerDealUnit;
                                 }
@@ -343,51 +349,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         }
                     }
                     valid.items = items;
-
-                    // for (var item of valid.items) {
-                    //     item.purchaseRequest.unit._id = new ObjectId(item.purchaseRequest.unit._id);
-                    //     item.purchaseRequest.category._id = new ObjectId(item.purchaseRequest.category._id);
-                    //     item.purchaseRequest.unitId = new ObjectId(item.purchaseRequest.unit._id);
-                    //     item.purchaseRequest.categoryId = new ObjectId(item.purchaseRequest.category._id);
-                    //     if (item.sourcePurchaseOrder) {
-                    //         item.sourcePurchaseOrder._id = new ObjectId(item.sourcePurchaseOrder._id);
-                    //         item.sourcePurchaseOrder.purchaseRequest.unit._id = new ObjectId(item.sourcePurchaseOrder.purchaseRequest.unit._id);
-                    //         item.sourcePurchaseOrder.purchaseRequest.category._id = new ObjectId(item.sourcePurchaseOrder.purchaseRequest.category._id);
-                    //         item.sourcePurchaseOrder.purchaseRequest.unitId = new ObjectId(item.sourcePurchaseOrder.purchaseRequest.unit._id);
-                    //         item.sourcePurchaseOrder.purchaseRequest.categoryId = new ObjectId(item.sourcePurchaseOrder.purchaseRequest.category._id);
-                    //         item.sourcePurchaseOrder.unit._id = new ObjectId(item.sourcePurchaseOrder.unit._id);
-                    //         item.sourcePurchaseOrder.category._id = new ObjectId(item.sourcePurchaseOrder.category._id);
-                    //         item.sourcePurchaseOrder.unitId = new ObjectId(item.sourcePurchaseOrder.unit._id);
-                    //         item.sourcePurchaseOrder.categoryId = new ObjectId(item.sourcePurchaseOrder.category._id);
-
-                    //         for (var soItem of item.sourcePurchaseOrder.items) {
-                    //             soItem.product._id = new ObjectId(soItem.product._id);
-                    //             soItem.defaultUom._id = new ObjectId(soItem.defaultUom._id);
-                    //         }
-                    //     }
-                    //     item.unitId = new ObjectId(item.unit._id);
-                    //     item.unit._id = new ObjectId(item.unit._id);
-                    //     item.categoryId = new ObjectId(item.category._id);
-                    //     item.category._id = new ObjectId(item.category._id);
-
-                    //     for (var poItem of item.items) {
-                    //         poItem.product._id = new ObjectId(poItem.product._id);
-                    //         poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
-                    //         poItem.defaultUom._id = new ObjectId(poItem.defaultUom._id);
-                    //         poItem.dealUom._id = new ObjectId(poItem.dealUom._id);
-                    //     }
-                    // }
                     if (!valid.stamp)
                         valid = new PurchaseOrderExternal(valid);
                     valid.vat = _vat;
-                    // if (valid.vat) {
-                    //     if (valid.vat._id)
-                    //         valid.vat._id = new ObjectId(valid.vat._id);
-                    //     else
-                    //         valid.vat = null;
-                    // }
-                    // else
-                    //     valid.vat = null;
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })
@@ -565,9 +529,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
-    
-    _getRomanNumeral(_number)
-    {
+
+    _getRomanNumeral(_number) {
         var listRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXXII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX", "XXXI"];
         return listRoman[_number];
     }
