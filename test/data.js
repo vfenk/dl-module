@@ -13,6 +13,10 @@ module.exports = {
     transaction: {
         purchaseRequest: require('./data-util/transaction/purchase-request-data-util'),
         purchaseOrder: require('./data-util/transaction/purchase-order-data-util'),
-        purchaseOrderExternal: require('./data-util/transaction/purchase-order-external-data-util')
+        purchaseOrderExternal: require('./data-util/transaction/purchase-order-external-data-util'),
+        deliveryOrder: require('./data-util/transaction/delivery-order-data-util'),
+        unitReceiptNote: require('./data-util/transaction/unit-receipt-note-data-util'),
+        unitPaymentOrder: require('./data-util/transaction/unit-payment-order-data-util'),
+        unitPaymentPriceCorrectionNote: require('./data-util/transaction/unit-payment-price-correction-note-data-util')
     }
 };
