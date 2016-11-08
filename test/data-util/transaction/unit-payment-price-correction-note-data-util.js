@@ -13,7 +13,8 @@ class UnitPaymentPriceCorrectionNoteDataUtil {
                 .then(manager => {
                     Promise.all([unitPaymentOrder.getNew()])
                         .then(results => {
-                            var itemsUnitPaymentPriceCorrectionNote = results[0].items.map(unitPaymentOrder => {
+                            var dataUnitPaymentOrder=results[0];
+                            var itemsUnitPaymentPriceCorrectionNote = dataUnitPaymentOrder.items.map(unitPaymentOrder => {
                                 return unitPaymentOrder.unitReceiptNote.items.map(unitReceiptNoteItem => { 
                                         return {
                                             purchaseOrderId: unitReceiptNoteItem.purchaseOrderId,
@@ -37,8 +38,8 @@ class UnitPaymentPriceCorrectionNoteDataUtil {
                             var data = {
                                 no: `UT/UPPCN/${codeGenerator()}`,
                                 date: new Date(),
-                                unitPaymentOrderId: results[0]._id,
-                                unitPaymentOrder: results[0],
+                                unitPaymentOrderId: dataUnitPaymentOrder._id,
+                                unitPaymentOrder: dataUnitPaymentOrder,
                                 invoiceCorrectionNo: `UT/UPPCN/Invoice/${codeGenerator()}`,
                                 invoiceCorrectionDate: new Date(),
                                 incomeTaxCorrectionNo: `UT/UPPCN/PPN/${codeGenerator()}`,

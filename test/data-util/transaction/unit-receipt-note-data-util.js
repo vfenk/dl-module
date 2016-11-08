@@ -14,7 +14,11 @@ class UnitReceiptNoteDataUtil {
                 .then(manager => {
                     Promise.all([unit.getTestData(), supplier.getTestData(), deliveryOrder.getNew()])
                         .then(results => {
-                            var doItems = results[2].items.map(doItem => { 
+                            var dataUnit=results[0];
+                            var dataSupplier=results[1];
+                            var dataDeliveryOrder=results[2];
+
+                            var doItems = dataDeliveryOrder.items.map(doItem => { 
                                 var item = doItem.fulfillments.map(fulfillment => {
                                     return fulfillment.purchaseOrder.items.map(poItem => {
                                         return {
@@ -38,13 +42,13 @@ class UnitReceiptNoteDataUtil {
                             doItems = [].concat.apply([], doItems);
                             var data = {
                                 no: `UT/URN/${codeGenerator()}`,
-                                unitId: results[0]._id,
-                                unit: results[0],
+                                unitId: dataUnit._id,
+                                unit: dataUnit,
                                 date: new Date(),
-                                supplierId: results[1]._id,
-                                supplier: results[1],
-                                deliveryOrderId: results[2]._id,
-                                deliveryOrder: results[2],
+                                supplierId: dataSupplier._id,
+                                supplier: dataSupplier,
+                                deliveryOrderId: dataDeliveryOrder._id,
+                                deliveryOrder: dataDeliveryOrder,
                                 remark: 'Unit Test',
                                 items: doItems
                             };

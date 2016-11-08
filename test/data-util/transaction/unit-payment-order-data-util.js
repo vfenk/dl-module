@@ -17,18 +17,24 @@ class UnitPaymentOrderDataUtil {
                 .then(manager => {
                     Promise.all([unit.getTestData(), category.getTestData(), currency.getTestData(), vat.getTestData(), supplier.getTestData(), unitReceiptNote.getNew()])
                         .then(results => {
+                            var dataUnit=results[0];
+                            var dataCategory=results[1];
+                            var dataCurrency=results[2];
+                            var dataVat=results[3]; 
+                            var dataSupplier=results[4];
+                            var dataUnitReceiptNote=results[5];
                             var data = {
                                 no: `UT/UPO/${codeGenerator()}`,
-                                unitId: results[0]._id,
-                                unit: results[0],
+                                unitId: dataUnit._id,
+                                unit: dataUnit,
                                 date: new Date(),
-                                categoryId: results[1]._id,
-                                category: results[1],
-                                currency: results[2],
-                                vat: results[3],
+                                categoryId: dataCategory._id,
+                                category: dataCategory,
+                                currency: dataCurrency,
+                                vat: dataVat,
                                 paymentMethod: 'CASH',
-                                supplierId: results[4]._id,
-                                supplier: results[4],
+                                supplierId: dataSupplier._id,
+                                supplier: dataSupplier,
                                 invoceNo: `UT/INVOICE/${codeGenerator()}`,
                                 invoceDate: new Date(),
                                 incomeTaxNo: `UT/PPN/${codeGenerator()}`,
@@ -41,8 +47,8 @@ class UnitPaymentOrderDataUtil {
                                 vatRate: 2,
                                 remark: 'Unit Test Unit Payment Order',
                                 items: [{
-                                    unitReceiptNoteId: results[5]._id,
-                                    unitReceiptNote: results[5]
+                                    unitReceiptNoteId: dataUnitReceiptNote._id,
+                                    unitReceiptNote: dataUnitReceiptNote
                                 }]
                             };
                             manager.create(data)
