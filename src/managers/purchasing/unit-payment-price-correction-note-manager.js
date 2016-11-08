@@ -436,12 +436,6 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                         unitPaymentPriceCorrectionNoteItem.purchaseOrder = _purchaseOrder;
                                                         unitPaymentPriceCorrectionNoteItem.purchaseOrderId = new ObjectId(_purchaseOrder._id);
                                                     }
-<<<<<<< HEAD
-                                                    _unitPaymentPriceCorrectionNoteItem.purchaseOrder = _purchaseOrder; 
-                                                    _unitPaymentPriceCorrectionNoteItem.purchaseOrderId = new ObjectId(_purchaseOrder._id);
-
-=======
->>>>>>> refs/remotes/upstream/dev
                                                 }
                                             }
                                         }

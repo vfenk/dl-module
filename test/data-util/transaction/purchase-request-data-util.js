@@ -5,6 +5,7 @@ var codeGenerator = require('../../../src/utils/code-generator');
 var unit = require('../master/unit-data-util');
 var category = require('../master/category-data-util');
 var product = require('../master/product-data-util');
+var budget = require('../master/budget-data-util');
 
 class PurchaseRequestDataUtil {
     getNew() {
@@ -12,16 +13,13 @@ class PurchaseRequestDataUtil {
             helper
                 .getManager(PurchaseRequestManager)
                 .then(manager => {
-                    Promise.all([unit.getTestData(), category.getTestData(), product.getTestData()])
+                    Promise.all([unit.getTestData(), category.getTestData(), product.getTestData(),budget.getTestData()])
                         .then(results => {
                             var data = {
                                 no: `UT/PR/${codeGenerator()}`,
                                 date: new Date(),
                                 expectedDeliveryDate: new Date(),
-                                budget: {
-                                    code: 'UT/BUDGET/01',
-                                    name: 'BUDGET-01'
-                                },
+                                budget: result[3],
                                 unitId: results[0]._id,
                                 unit: results[0],
                                 categoryId: results[1]._id,
