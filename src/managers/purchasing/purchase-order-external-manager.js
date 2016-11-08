@@ -91,16 +91,15 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     this.collection.insert(validPurchaseOrderExternal)
                         .then(id => {
                             var tasks = [];
-                            var getPOItemById = [];
+                            var getPOInternalById = [];
                             for (var data of validPurchaseOrderExternal.items) {
-                                getPOItemById.push(this.purchaseOrderManager.getSingleById(data._id));
+                                getPOInternalById.push(this.purchaseOrderManager.getSingleById(data._id));
                             }
-                            Promise.all(getPOItemById)
+                            Promise.all(getPOInternalById)
                                 .then(results => {
-                                    for (var result of results) {
-                                        var poItem = result;
-                                        poItem.isPosted = true;
-                                        tasks.push(this.purchaseOrderManager.update(poItem));
+                                    for (var poInternal of results) {
+                                        poInternal.isPosted = true;
+                                        tasks.push(this.purchaseOrderManager.update(poInternal));
                                     }
                                     Promise.all(tasks)
                                         .then(results => {
@@ -134,16 +133,15 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             this.collection.update(validData)
                                 .then(id => {
                                     var tasks = [];
-                                    var getPOItemById = [];
+                                    var getPOInternalById = [];
                                     for (var data of validData.items) {
-                                        getPOItemById.push(this.purchaseOrderManager.getSingleById(data._id));
+                                        getPOInternalById.push(this.purchaseOrderManager.getSingleById(data._id));
                                     }
-                                    Promise.all(getPOItemById)
+                                    Promise.all(getPOInternalById)
                                         .then(results => {
-                                            for (var result of results) {
-                                                var poItem = result;
-                                                poItem.isPosted = false;
-                                                tasks.push(this.purchaseOrderManager.update(poItem));
+                                            for (var poInternal of results) {
+                                                poInternal.isPosted = false;
+                                                tasks.push(this.purchaseOrderManager.update(poInternal));
 
                                             }
                                             Promise.all(tasks)
@@ -498,7 +496,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         var stamp = now / 1000 | 0;
         var code = stamp.toString();
         var year = now.getFullYear();
-        var month = now.getMonth();
+        var month = this._getRomanNumeral(now.getMonth());
         var initial = 'AS';
         var div = "UMUM";
         var unit = '';
@@ -566,5 +564,11 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         }
 
         return this.collection.createIndexes([dateIndex, noIndex]);
+    }
+    
+    _getRomanNumeral(_number)
+    {
+        var listRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXXII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX", "XXXI"];
+        return listRoman[_number];
     }
 };
