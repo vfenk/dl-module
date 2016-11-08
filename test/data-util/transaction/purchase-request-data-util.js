@@ -15,22 +15,27 @@ class PurchaseRequestDataUtil {
                 .then(manager => {
                     Promise.all([unit.getTestData(), category.getTestData(), product.getTestData(),budget.getTestData()])
                         .then(results => {
+                            var unit = results[0];
+                            var category = results[1];
+                            var product = results[2];
+                            var budget = results[3];
+                            
                             var data = {
                                 no: `UT/PR/${codeGenerator()}`,
                                 date: new Date(),
                                 expectedDeliveryDate: new Date(),
-                                budget: result[3],
-                                unitId: results[0]._id,
-                                unit: results[0],
-                                categoryId: results[1]._id,
-                                category: results[1],
+                                budget: budget,
+                                unitId: unit._id,
+                                unit: unit,
+                                categoryId: category._id,
+                                category: category,
 
                                 isPosted: false,
                                 remark: 'Unit Test',
                                 items: [{
-                                    product: results[2],
+                                    product: product,
                                     quantity: 10,
-                                    uom: results[2].uom,
+                                    uom: product.uom,
                                     remark: ''
                                 }]
                             };
