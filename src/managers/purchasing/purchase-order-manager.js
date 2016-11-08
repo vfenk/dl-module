@@ -645,7 +645,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
             }
             else {
-                if(unit="undefined")
+                if(unit=="undefined")
                 {
                      this.collection.aggregate(
                     [{
