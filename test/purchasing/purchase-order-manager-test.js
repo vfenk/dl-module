@@ -1,9 +1,7 @@
 'use strict';
 
 var should = require('should');
-var helper = require("../helper");
-var assert = require('assert');
-var validator = require('dl-models').validator.master;
+var helper = require("../helper"); 
 var validatorPurchasing = require('dl-models').validator.purchasing;
 var PurchaseOrderBaseManager = require("../../src/managers/purchasing/purchase-order-manager");
 var purchaseOrderManager = null;
