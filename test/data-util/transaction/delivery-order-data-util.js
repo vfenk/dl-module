@@ -13,7 +13,9 @@ class PurchaseRequestDataUtil {
                 .then(manager => {
                     Promise.all([supplier.getTestData(), poExternal.getNew()])
                         .then(results => {
-                            var poExt = results[1].items.map(poInternal => {
+                            var poEks=results[1];
+                            var dataSupplier=results[0];
+                            var poExt = poEks.items.map(poInternal => {
                                 return poInternal.items.map(poItem => {
                                     return {
                                         purchaseOrderId: poInternal._id,
@@ -35,13 +37,13 @@ class PurchaseRequestDataUtil {
                                 refNo: '',
                                 date: new Date(),
                                 supplierDoDate: new Date(),
-                                supplierId: results[0]._id,
-                                supplier: results[0],
+                                supplierId: dataSupplier._id,
+                                supplier: dataSupplier,
                                 isPosted: false,
                                 remark: 'Unit Test Delivery Order',
                                 items: [{
-                                    purchaseOrderExternalId: results[1]._id,
-                                    purchaseOrderExternal: results[1],
+                                    purchaseOrderExternalId: poEks._id,
+                                    purchaseOrderExternal: poEks,
                                     fulfillments: poExt 
                                 }]
                             };
