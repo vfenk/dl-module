@@ -10,7 +10,7 @@ module.exports = function (unitPaymentCorrection) {
             product: item.product,
             pricePerUnit: item.pricePerUnit,
             priceTotal: item.priceTotal,
-            prNo: item.purchaseRequest.no,
+            prNo: item.purchaseOrder.purchaseRequest.no,
         };
     });
 
