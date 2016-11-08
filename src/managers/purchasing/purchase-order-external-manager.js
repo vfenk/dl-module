@@ -248,9 +248,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
                     //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
 
-                    if (valid.items && valid.items.length < 1)
-                        purchaseOrderExternalError["items"] = i18n.__("PurchaseOrderExternal.items.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items._:Items")); //"Harus ada minimal 1 po internal";
-                    else {
+                    if (valid.items && valid.items.length > 0) {
                         var purchaseOrderExternalItemErrors = [];
                         var poItemExternalHasError = false;
                         for (var purchaseOrder of valid.items) {
@@ -310,6 +308,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         if (poItemExternalHasError)
                             purchaseOrderExternalError["items"] = purchaseOrderExternalItemErrors;
                     }
+                    else
+                        purchaseOrderExternalError["items"] = i18n.__("PurchaseOrderExternal.items.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items._:Items")); //"Harus ada minimal 1 po internal";
 
 
                     // 2c. begin: check if data has any error, reject if it has.
