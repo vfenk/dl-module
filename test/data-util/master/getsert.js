@@ -1,6 +1,6 @@
 var helper = require('../../helper');
 var user = {
-    username: 'unit-test'
+    username: 'dev'
 };
 
 
