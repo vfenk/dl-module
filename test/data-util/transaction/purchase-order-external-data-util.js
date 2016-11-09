@@ -8,12 +8,12 @@ var vat = require('../master/vat-data-util');
 var po = require('./purchase-order-data-util');
 
 class PurchaseOrderExternalDataUtil {
-    getNew() {
+    getNew(purchaseOrder) {
         return new Promise((resolve, reject) => {
             helper
                 .getManager(PoExternalManager)
                 .then(manager => {
-                    Promise.all([supplier.getTestData(), currency.getTestData(), vat.getTestData(), po.getNew()])
+                    Promise.all([supplier.getTestData(), currency.getTestData(), vat.getTestData(), po.getPosted(), po.getPosted()])
                         .then(results => {
                             var poItems = results[3].items.map(poItem => {
                                 return {
