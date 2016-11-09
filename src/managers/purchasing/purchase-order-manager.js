@@ -28,17 +28,18 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             valid._id = valid._id || new ObjectId();
 
             var getPurchaseOrderPromise = this.collection.firstOrDefault({
-                "$and": [{ 
+                "$and": [{
                     _deleted: false
                 }, {
-                    "purchaseRequestId": new ObjectId(valid.purchaseRequestId)
-                }]
+                        "purchaseRequestId": new ObjectId(valid.purchaseRequestId)
+                    }]
             });
+
             var getPurchaseRequest = valid.purchaseRequestId && valid.purchaseRequestId.toString().trim() != '' ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
 
             Promise.all([getPurchaseOrderPromise, getPurchaseRequest])
                 .then(results => {
-                    var _purchaseOrder = results[0] || {_id:new ObjectId()};
+                    var _purchaseOrder = results[0] || { _id: new ObjectId() };
                     var _purchaseRequest = results[1];
                     var now = new Date();
 
@@ -46,42 +47,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";
                     else if (_purchaseRequest && !_purchaseRequest.isPosted)
                         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isPosted:%s is need to be posted", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest harus sudah dipost";
-                    else if (_purchaseOrder._id.toString() != valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
-                        errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
-                    // else {
-                    //     var itemError = {};
-                    //     if (!_purchaseRequest.unit)
-                    //         itemError["unit"] = i18n.__("PurchaseOrder.unit.isRequired:%s is required", i18n.__("PurchaseOrder.unit._:Unit")); //"Nama unit yang mengajukan tidak boleh kosong";
-
-                    //     if (!_purchaseRequest.category)
-                    //         itemError["category"] = i18n.__("PurchaseOrder.category.isRequired:%s is required", i18n.__("PurchaseOrder.category._:Category")); //"Kategori tidak boleh kosong";
-
-                    //     if (!_purchaseRequest.no)
-                    //         itemError["no"] = i18n.__("PurchaseOrder.purchaseRequest.no.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest.no._:No")); //"No. PR tidak boleh kosong";
-                    //     else if (_module && _module.sourcePurchaseOrder == null && valid.sourcePurchaseOrder == null)
-                    //         itemError["no"] = i18n.__("PurchaseOrder.purchaseRequest.no.isExists:%s is already exists", i18n.__("PurchaseOrder.purchaseRequest.no.._:No")); //"No. PR sudah terdaftar";
-                    //     //pending
-                    //     // if (!valid.purchaseRequest.date)
-                    //     //     itemError["date"] = "Tanggal PR tidak boleh kosong";
-                    //     // else {
-                    //     //     var _prDate = new Date(valid.purchaseRequest.date);
-                    //     //     if (_prDate > now)
-                    //     //         itemError["date"] = "Tanggal PR tidak boleh lebih besar dari tanggal hari ini";
-                    //     // }
-
-                    //     // if (valid.purchaseRequest.expectedDeliveryDate && valid.purchaseRequest.date) {
-                    //     //     var _prDate = new Date(valid.purchaseRequest.date);
-                    //     //     var _expectedDate = new Date(valid.purchaseRequest.expectedDeliveryDate);
-                    //     //     if (_prDate > _expectedDate)
-                    //     //         itemError["expectedDeliveryDate"] = "Tanggal PR tidak boleh lebih besar dari tanggal tersedia";
-                    //     // }
-
-                    //     for (var prop in itemError) {
-                    //         errors["purchaseRequest"] = itemError;
-                    //         break;
-                    //     }
-                    // }
-
+                    if (valid.sourcePurchaseOrder != null) {
+                        if (_purchaseOrder._id.toString() != valid.sourcePurchaseOrder._id.toString() && _purchaseOrder._id.toString() != valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
+                            errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
+                    }
                     if (valid.items.length > 0) {
                         var itemErrors = [];
                         for (var item of valid.items) {
@@ -102,10 +71,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                                 itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isGreater:%s is greater than the first PO", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh lebih besar dari PO asal";
                                                 break;
                                             }
-                                            // else if (item.defaultQuantity == sourcePoItem.defaultQuantity) {
-                                            //     itemError["defaultQuantity"] = "Jumlah default tidak boleh sama dengan PO asal";
-                                            //     break;
-                                            // }
                                         }
                                     }
                                 }
@@ -169,8 +134,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     _getQuery(paging) {
         var deletedFilter = {
-                _deleted: false
-            },
+            _deleted: false
+        },
             keywordFilter = {};
 
         var query = {};
@@ -253,25 +218,24 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
-                    this.collection.insert(validPurchaseOrder)
-                        .then(id => {
-                            this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
-                                .then(PR => {
-                                    PR.isUsed = true;
-                                    this.purchaseRequestManager.update(PR)
-                                        .then(results => {
+                    this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
+                        .then(PR => {
+                            PR.isUsed = true;
+                            validPurchaseOrder.purchaseRequest = PR;
+                            this.purchaseRequestManager.update(PR)
+                                .then(results => {
+                                    this.collection.insert(validPurchaseOrder)
+                                        .then(id => {
                                             resolve(id);
                                         })
                                         .catch(e => {
                                             reject(e);
                                         });
                                 })
-
-
+                                .catch(e => {
+                                    reject(e);
+                                });
                         })
-                        .catch(e => {
-                            reject(e);
-                        });
                 })
                 .catch(e => {
                     reject(e);
@@ -437,39 +401,39 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 };
             }
             else
-            if (unitId != "undefined" && unitId != "") {
-                query = {
-                    unitId: new ObjectId(unitId)
-                };
-            }
-            else if (categoryId != "undefined" && categoryId != "") {
-                query = {
-                    categoryId: new ObjectId(categoryId)
-                };
-            }
-            else if (PODLNo != "undefined" && PODLNo != "") {
-                query = {
-                    "purchaseOrderExternal.no": PODLNo
-                };
-            }
-            else if (PRNo != "undefined" && PRNo != "") {
-                query = {
-                    "purchaseRequest.no": PRNo
-                };
-            }
-            else if (supplierId != "undefined" && supplierId != "") {
-                query = {
-                    supplierId: new ObjectId(supplierId)
-                };
-            }
-            else if (dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
-                query = {
-                    date: {
-                        $gte: dateFrom,
-                        $lte: dateTo
-                    }
-                };
-            }
+                if (unitId != "undefined" && unitId != "") {
+                    query = {
+                        unitId: new ObjectId(unitId)
+                    };
+                }
+                else if (categoryId != "undefined" && categoryId != "") {
+                    query = {
+                        categoryId: new ObjectId(categoryId)
+                    };
+                }
+                else if (PODLNo != "undefined" && PODLNo != "") {
+                    query = {
+                        "purchaseOrderExternal.no": PODLNo
+                    };
+                }
+                else if (PRNo != "undefined" && PRNo != "") {
+                    query = {
+                        "purchaseRequest.no": PRNo
+                    };
+                }
+                else if (supplierId != "undefined" && supplierId != "") {
+                    query = {
+                        supplierId: new ObjectId(supplierId)
+                    };
+                }
+                else if (dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
+                    query = {
+                        date: {
+                            $gte: dateFrom,
+                            $lte: dateTo
+                        }
+                    };
+                }
             query = Object.assign(query, {
                 _createdBy: this.user.username,
                 _deleted: false
@@ -489,25 +453,25 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             if (startdate != undefined && enddate != undefined && startdate != "" && enddate != "") {
 
                 this.collection.aggregate(
-                        [{
-                            $match: {
+                    [{
+                        $match: {
+                            $and: [{
                                 $and: [{
-                                    $and: [{
-                                            "date": {
-                                                $gte: startdate,
-                                                $lte: enddate
-                                            }
-                                        }, {
-                                            "_deleted": false
-                                        }
-
-                                    ]
+                                    "date": {
+                                        $gte: startdate,
+                                        $lte: enddate
+                                    }
                                 }, {
+                                        "_deleted": false
+                                    }
+
+                                ]
+                            }, {
                                     "purchaseOrderExternal.isPosted": true
                                 }]
 
-                            }
-                        }, {
+                        }
+                    }, {
                             $unwind: "$items"
                         }, {
                             $group: {
@@ -519,8 +483,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 }
                             }
                         }]
-                    )
-                    .toArray(function(err, result) {
+                )
+                    .toArray(function (err, result) {
                         assert.equal(err, null);
                         console.log(result);
                         resolve(result);
@@ -529,16 +493,16 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             }
             else {
                 this.collection.aggregate(
-                        [{
-                            $match: {
+                    [{
+                        $match: {
 
-                                $and: [{
-                                    "purchaseOrderExternal.isPosted": true
-                                }, {
+                            $and: [{
+                                "purchaseOrderExternal.isPosted": true
+                            }, {
                                     "_deleted": false
                                 }]
-                            },
-                        }, {
+                        },
+                    }, {
                             $unwind: "$items"
                         }, {
                             $group: {
@@ -550,8 +514,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 }
                             }
                         }]
-                    )
-                    .toArray(function(err, result) {
+                )
+                    .toArray(function (err, result) {
                         assert.equal(err, null);
                         console.log(result);
                         resolve(result);
@@ -566,8 +530,45 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             if (startdate != undefined && enddate != undefined && startdate != "" && enddate != "") {
                 if (unit == undefined) {
                     this.collection.aggregate(
-                            [{
-                                $match: {
+                        [{
+                            $match: {
+                                $and: [{
+                                    $and: [{
+                                        "date": {
+                                            $gte: startdate,
+                                            $lte: enddate
+                                        }
+                                    }, {
+                                            "_deleted": false
+                                        }]
+                                }, {
+                                        "purchaseOrderExternal.isPosted": true
+                                    }]
+                            }
+
+                        }, {
+                                $unwind: "$items"
+                            }, {
+                                $group: {
+                                    _id: "$unit.subDivision",
+                                    "pricetotal": {
+                                        $sum: {
+                                            $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
+                                        }
+                                    }
+                                }
+                            }]
+                    )
+                        .toArray(function (err, result) {
+                            assert.equal(err, null);
+                            resolve(result);
+                        });
+                }
+                else {
+                    this.collection.aggregate(
+                        [{
+                            $match: {
+                                $and: [{
                                     $and: [{
                                         $and: [{
                                             "date": {
@@ -575,53 +576,16 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                                 $lte: enddate
                                             }
                                         }, {
-                                            "_deleted": false
-                                        }]
-                                    }, {
-                                        "purchaseOrderExternal.isPosted": true
-                                    }]
-                                }
-
-                            }, {
-                                $unwind: "$items"
-                            }, {
-                                $group: {
-                                    _id: "$unit.subDivision",
-                                    "pricetotal": {
-                                        $sum: {
-                                            $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
-                                        }
-                                    }
-                                }
-                            }]
-                        )
-                        .toArray(function(err, result) {
-                            assert.equal(err, null);
-                            resolve(result);
-                        });
-                }
-                else {
-                    this.collection.aggregate(
-                            [{
-                                $match: {
-                                    $and: [{
-                                        $and: [{
-                                            $and: [{
-                                                "date": {
-                                                    $gte: startdate,
-                                                    $lte: enddate
-                                                }
-                                            }, {
                                                 "_deleted": false
                                             }]
-                                        }, {
+                                    }, {
                                             "purchaseOrderExternal.isPosted": true
                                         }]
-                                    }, {
+                                }, {
                                         "unit.division": unit
                                     }]
-                                }
-                            }, {
+                            }
+                        }, {
                                 $unwind: "$items"
                             }, {
                                 $group: {
@@ -633,8 +597,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                     }
                                 }
                             }]
-                        )
-                        .toArray(function(err, result) {
+                    )
+                        .toArray(function (err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -645,16 +609,16 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             else {
                 if (unit == undefined) {
                     this.collection.aggregate(
-                            [{
-                                $match: {
-                                    $and: [{
-                                        "purchaseOrderExternal.isPosted": true
-                                    }, {
+                        [{
+                            $match: {
+                                $and: [{
+                                    "purchaseOrderExternal.isPosted": true
+                                }, {
                                         "_deleted": false
                                     }]
-                                }
+                            }
 
-                            }, {
+                        }, {
                                 $unwind: "$items"
                             }, {
                                 $group: {
@@ -666,27 +630,27 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                     }
                                 }
                             }]
-                        )
-                        .toArray(function(err, result) {
+                    )
+                        .toArray(function (err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
                 }
                 else {
                     this.collection.aggregate(
-                            [{
-                                $match: {
+                        [{
+                            $match: {
+                                $and: [{
                                     $and: [{
-                                        $and: [{
-                                            "purchaseOrderExternal.isPosted": true
-                                        }, {
+                                        "purchaseOrderExternal.isPosted": true
+                                    }, {
                                             "_deleted": false
                                         }]
-                                    }, {
+                                }, {
                                         "unit.division": unit
                                     }]
-                                }
-                            }, {
+                            }
+                        }, {
                                 $unwind: "$items"
                             }, {
                                 $group: {
@@ -698,8 +662,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                     }
                                 }
                             }]
-                        )
-                        .toArray(function(err, result) {
+                    )
+                        .toArray(function (err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -714,25 +678,25 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") {
                 this.collection.aggregate(
-                        [{
-                            $match: {
+                    [{
+                        $match: {
+                            $and: [{
                                 $and: [{
-                                    $and: [{
-                                            "date": {
-                                                $gte: startdate,
-                                                $lte: enddate
-                                            }
-                                        }, {
-                                            "_deleted": false
-                                        }
-
-                                    ]
+                                    "date": {
+                                        $gte: startdate,
+                                        $lte: enddate
+                                    }
                                 }, {
+                                        "_deleted": false
+                                    }
+
+                                ]
+                            }, {
                                     "purchaseOrderExternal.isPosted": true
                                 }]
 
-                            }
-                        }, {
+                        }
+                    }, {
                             $unwind: "$items"
                         }, {
                             $group: {
@@ -744,8 +708,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 }
                             }
                         }]
-                    )
-                    .toArray(function(err, result) {
+                )
+                    .toArray(function (err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
@@ -753,16 +717,16 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             }
             else {
                 this.collection.aggregate(
-                        [{
-                            $match: {
+                    [{
+                        $match: {
 
-                                $and: [{
-                                    "purchaseOrderExternal.isPosted": true
-                                }, {
+                            $and: [{
+                                "purchaseOrderExternal.isPosted": true
+                            }, {
                                     "_deleted": false
                                 }]
-                            }
-                        }, {
+                        }
+                    }, {
                             $unwind: "$items"
                         }, {
                             $group: {
@@ -774,8 +738,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 }
                             }
                         }]
-                    )
-                    .toArray(function(err, result) {
+                )
+                    .toArray(function (err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
