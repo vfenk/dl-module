@@ -42,7 +42,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             var getCategory = valid.categoryId && valid.categoryId.toString().trim() != '' ? this.categoryManager.getSingleByIdOrDefault(valid.categoryId) : Promise.resolve(null);
             var getBudget = valid.budgetId && valid.budgetId.toString().trim() != '' ? this.budgetManager.getSingleByIdOrDefault(valid.budgetId) : Promise.resolve(null);
             var getProduct = [];
-
+            
             valid.items = valid.items instanceof Array ? valid.items : [];
             for (var _item of valid.items)
                 getProduct.push(_item.productId && _item.productId.toString().trim() != '' ? this.productManager.getSingleByIdOrDefault(_item.productId) : Promise.resolve(null));

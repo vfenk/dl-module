@@ -450,7 +450,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     getDataPOUnit(startdate, enddate) {
         return new Promise((resolve, reject) => {
-            if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") {
+            if (startdate != undefined && enddate != undefined && startdate != "" && enddate != "") {
 
                 this.collection.aggregate(
                     [{
@@ -527,8 +527,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     getDataPODetailUnit(startdate, enddate, unit) {
         return new Promise((resolve, reject) => {
-            if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") {
-                if (unit == "undefined") {
+            if (startdate != undefined && enddate != undefined && startdate != "" && enddate != "") {
+                if (unit == undefined) {
                     this.collection.aggregate(
                         [{
                             $match: {
@@ -607,7 +607,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
             }
             else {
-                if (unit = "undefined") {
+                if (unit == undefined) {
                     this.collection.aggregate(
                         [{
                             $match: {
