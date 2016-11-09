@@ -226,13 +226,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
     create(deliveryOrder) {
         return new Promise((resolve, reject) => {
+            var tasks = [];
+            var tasksPoExternal = [];
+            var getPurchaseOrderById = [];
             this._createIndexes()
                 .then((createIndexResults) => {
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
                             validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
                             //UPDATE PO INTERNAL
-                            var getPurchaseOrderById = [];
                             var poId = new ObjectId();
                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {

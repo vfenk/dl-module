@@ -31,7 +31,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     _getQuery(paging) {
         var deletedFilter = {
             _deleted: false
-        }, keywordFilter = {};
+        },
+            keywordFilter = {};
 
         var query = {};
         if (paging.keyword) {
@@ -77,7 +78,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 '$or': [filterPODLNo, filterPrNo, filterRefPO, filterPOItem, filterSupplierName]
             };
         }
-        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
+        query = {
+            '$and': [deletedFilter, paging.filter, keywordFilter]
+        }
         return query;
     }
 
@@ -176,9 +179,19 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = purchaseOrderGroup;
 
-            var getCurrency = valid.currency && valid.currency._id ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
-            var getSupplier = valid.supplier && valid.supplier._id ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
-            var getVat = valid.vat && valid.vat._id ? this.vatManager.getSingleByIdOrDefault(valid.vat._id) : Promise.resolve(null);
+            var getPurchaseOrderPromise = this.collection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        "refNo": valid.refNo
+                    }]
+            });
+            var getCurrency = valid.currency ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
+            var getSupplier = valid.supplier ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
+            var getVat = valid.vat ? this.vatManager.getSingleByIdOrDefault(valid.vat._id) : Promise.resolve(null);
+
 
             var getPOInternal = [];
             for (var po of valid.items)
@@ -224,6 +237,18 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     if (valid.paymentMethod.toUpperCase() != "CASH")
                         if (!valid.paymentDueDays || valid.paymentDueDays == '' || valid.paymentDueDays == 0)
                             purchaseOrderExternalError["paymentDueDays"] = i18n.__("PurchaseOrderExternal.paymentDueDays.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentDueDays._:Payment Due Days")); //"Tempo Pembayaran tidak boleh kosong";
+
+                    if ((valid.freightCostBy || '').toString() == '')
+                        purchaseOrderExternalError["freightCostBy"] = i18n.__("PurchaseOrderExternal.freightCostBy.isRequired:%s is required", i18n.__("PurchaseOrderExternal.freightCostBy._:FreightCostBy")); //"Tempo Pembayaran tidak boleh kosong";
+
+                    // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
+                    //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
+
+                    // if (valid.useVat == undefined || valid.useVat.toString() === '')
+                    //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
+
+                    // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
+                    //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
 
                     if (valid.items && valid.items.length > 0) {
                         var purchaseOrderExternalItemErrors = [];
@@ -271,12 +296,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         } else {
                                             poItem.pricePerDealUnit = poItem.pricePerDealUnit;
                                         }
-
                                         if (!poItem.conversion || poItem.conversion == '') {
                                             poItemHasError = true;
                                             poItemError["conversion"] = i18n.__("PurchaseOrderExternal.items.items.conversion.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.conversion._:Conversion")); //"Konversi tidak boleh kosong";
                                         }
-
                                         purchaseOrderItemErrors.push(poItemError);
                                     }
                                     if (poItemHasError) {
