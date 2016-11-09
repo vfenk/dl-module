@@ -110,7 +110,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 .then(results => {
                     var _module = results[0];
                     var _supplier = results[1];
-                    var _poExternals = results.slice(2, results.length);
+                    var _poExternals = results.slice(2, results.length) || [];
 
                     if (!valid.no || valid.no == '')
                         errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan tidak boleh kosong";
@@ -140,6 +140,16 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             if (!doItem.purchaseOrderExternal) {
                                 purchaseOrderExternalItemHasErrors = true;
                                 purchaseOrderExternalError["purchaseOrderExternal"] = i18n.__("DeliveryOrder.items.purchaseOrderExternal.isRequired:%s is required", i18n.__("DeliveryOrder.items.purchaseOrderExternal._:PurchaseOrderExternal")); //"Purchase order external tidak boleh kosong";
+                            } else {
+                                for (var _poExternal of _poExternals) {
+                                    if (_poExternal._id.toString() == doItem.purchaseOrderExternal._id.toString()) {
+                                        if (!_poExternal.isPosted) {
+                                            purchaseOrderExternalItemHasErrors = true;
+                                            purchaseOrderExternalError["purchaseOrderExternal"] = i18n.__("DeliveryOrder.items.purchaseOrderExternal.isPosted:%s is need to be posted", i18n.__("DeliveryOrder.items.purchaseOrderExternal._:PurchaseOrderExternal"));
+                                        }
+                                        break;
+                                    }
+                                }
                             }
 
                             for (var doFulfillment of doItem.fulfillments || []) {
@@ -222,6 +232,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         .then(validDeliveryOrder => {
                             validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
                             //UPDATE PO INTERNAL
+                            var getPurchaseOrderById = [];
                             var poId = new ObjectId();
                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
@@ -272,7 +283,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                             //UPDATE PO EXTERNAL
                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                                                 var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                var getPurchaseOrderById = [];
+                                                getPurchaseOrderById = [];
                                                 for (var poExternalItem of purchaseOrderExternal.items) {
                                                     getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(poExternalItem._id));
                                                 }
@@ -409,7 +420,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                             //UPDATE PO EXTERNAL
                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                                                 var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                var getPurchaseOrderById = [];
+                                                getPurchaseOrderById = [];
                                                 for (var poExternalItem of purchaseOrderExternal.items) {
                                                     getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(poExternalItem._id));
                                                 }
@@ -548,7 +559,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                             //UPDATE PO EXTERNAL
                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                                                 var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                var getPurchaseOrderById = [];
+                                                getPurchaseOrderById = [];
                                                 for (var poExternalItem of purchaseOrderExternal.items) {
                                                     getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(poExternalItem._id));
                                                 }
