@@ -236,7 +236,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 if (po._id.toString() == purchaseOrder._id.toString()) {
                                     if (po.isPosted) {
                                         poItemHasError = true;
-                                        purchaseOrderError["no"] = i18n.__("PurchaseOrderExternal.items.no.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.no._:No")); //"Purchase order internal tidak boleh kosong";
+                                        purchaseOrderError["no"] = i18n.__("PurchaseOrderExternal.items.no.isRequired:%s is need to be posted", i18n.__("PurchaseOrderExternal.items.no._:No")); //"Purchase order internal tidak boleh kosong";
                                     }
                                     if (!purchaseOrder.no || purchaseOrder.no == "") {
                                         poItemHasError = true;
