@@ -75,6 +75,7 @@ it('#03. should success when posting purchase-order-external', function(done) {
                 .then(poe => {
                     purchaseOrderExternal = poe;
                     purchaseOrderExternal.isPosted.should.equal(true);
+                    done();
                 })
                 .catch(e => {
                     done(e);
