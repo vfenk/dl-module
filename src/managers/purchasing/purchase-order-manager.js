@@ -25,15 +25,13 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = purchaseOrder;
+            valid._id = valid._id || new ObjectId();
 
-            var getPurchaseOrderPromise = this.collection.singleOrDefault({
+            var getPurchaseOrderPromise = this.collection.firstOrDefault({
                 "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    },
                     _deleted: false
                 }, {
-                        "purchaseRequest.no": valid.purchaseRequest.no
+                        "purchaseRequestId": new ObjectId(valid.purchaseRequestId)
                     }]
             });
 
@@ -41,7 +39,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
             Promise.all([getPurchaseOrderPromise, getPurchaseRequest])
                 .then(results => {
-                    var _module = results[0];
+                    var _purchaseOrder = results[0] || { _id: new ObjectId() };
                     var _purchaseRequest = results[1];
                     var now = new Date();
 
@@ -49,8 +47,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";
                     else if (_purchaseRequest && !_purchaseRequest.isPosted)
                         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isPosted:%s is need to be posted", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest harus sudah dipost";
-                    else if (_purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
-                    
+                    if (valid.sourcePurchaseOrder != null) {
+                        if (_purchaseOrder._id.toString() != valid.sourcePurchaseOrder._id.toString() && _purchaseOrder._id.toString() != valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
+                            errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
+                    }
                     if (valid.items.length > 0) {
                         var itemErrors = [];
                         for (var item of valid.items) {

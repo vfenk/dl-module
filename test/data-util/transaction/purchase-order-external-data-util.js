@@ -13,7 +13,7 @@ class PurchaseOrderExternalDataUtil {
             helper
                 .getManager(PoExternalManager)
                 .then(manager => {
-                    Promise.all([supplier.getTestData(), currency.getTestData(), vat.getTestData(), po.getNew()])
+                    Promise.all([supplier.getTestData(), currency.getTestData(), vat.getTestData(), po.getPosted(), po.getPosted()])
                         .then(results => {
                             var poItems = results[3].items.map(poItem => {
                                 return {
