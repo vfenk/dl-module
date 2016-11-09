@@ -36,51 +36,17 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         "purchaseRequest.no": valid.purchaseRequest.no
                     }]
             });
-            var getPurchaseRequest = this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequest._id);
+            var getPurchaseRequest = valid.purchaseRequest && valid.purchaseRequest._id ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequest._id) : Promise.resolve(null);
 
             Promise.all([getPurchaseOrderPromise, getPurchaseRequest])
                 .then(results => {
                     var _module = results[0];
                     var _purchaseRequest = results[1];
                     var now = new Date();
-
-                    // if (_purchaseRequest) {
-                    //     var itemError = {};
-                    //     if (!valid.purchaseRequest.unit)
-                    //         itemError["unit"] = i18n.__("PurchaseOrder.unit.isRequired:%s is required", i18n.__("PurchaseOrder.unit._:Unit")); //"Nama unit yang mengajukan tidak boleh kosong";
-
-                    //     if (!valid.purchaseRequest.category)
-                    //         itemError["category"] = i18n.__("PurchaseOrder.category.isRequired:%s is required", i18n.__("PurchaseOrder.category._:Category")); //"Kategori tidak boleh kosong";
-
-                    //     if (!valid.purchaseRequest.no)
-                    //         itemError["no"] = i18n.__("PurchaseOrder.purchaseRequest.no.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest.no._:No")); //"No. PR tidak boleh kosong";
-                    //     else if (_module && _module.sourcePurchaseOrder == null && valid.sourcePurchaseOrder == null)
-                    //         itemError["no"] = i18n.__("PurchaseOrder.purchaseRequest.no.isExists:%s is already exists", i18n.__("PurchaseOrder.purchaseRequest.no.._:No")); //"No. PR sudah terdaftar";
-                    //     //pending
-                    //     // if (!valid.purchaseRequest.date)
-                    //     //     itemError["date"] = "Tanggal PR tidak boleh kosong";
-                    //     // else {
-                    //     //     var _prDate = new Date(valid.purchaseRequest.date);
-                    //     //     if (_prDate > now)
-                    //     //         itemError["date"] = "Tanggal PR tidak boleh lebih besar dari tanggal hari ini";
-                    //     // }
-
-                    //     // if (valid.purchaseRequest.expectedDeliveryDate && valid.purchaseRequest.date) {
-                    //     //     var _prDate = new Date(valid.purchaseRequest.date);
-                    //     //     var _expectedDate = new Date(valid.purchaseRequest.expectedDeliveryDate);
-                    //     //     if (_prDate > _expectedDate)
-                    //     //         itemError["expectedDeliveryDate"] = "Tanggal PR tidak boleh lebih besar dari tanggal tersedia";
-                    //     // }
-
-                    //     for (var prop in itemError) {
-                    //         errors["purchaseRequest"] = itemError;
-                    //         break;
-                    //     }
-                    // }
-                    // else
-                    if (!_purchaseRequest)
+                    
+                    if (!valid.purchaseRequest._id)
                         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";                  
-                    else if (!_purchaseRequest._id)
+                    else if (!_purchaseRequest)
                         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";                  
 
                     if (valid.items.length > 0) {
