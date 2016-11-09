@@ -358,17 +358,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             }
             Promise.all(getPOExternalById)
                 .then(_purchaseOrderExternalList => {
-
-                    // for (var _purchaseOrderExternal of listPurchaseOrderExternal) {
-                    //     for (var _poExternal of _purchaseOrderExternalList) {
-                    //         if (_poExternal._id.equals(_purchaseOrderExternal._id)) {
-                    //             _purchaseOrderExternal = _poExternal;
-                    //             _purchaseOrderExternal.isPosted = true;
-                    //             tasks.push(this.update(_purchaseOrderExternal));
-                    //             break;
-                    //         }
-                    //     }
-                    // }
                     Promise.all(getPOItemById)
                         .then(_purchaseOrderList => {
                             for (var _purchaseOrderExternal of listPurchaseOrderExternal) {

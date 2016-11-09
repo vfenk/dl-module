@@ -14,9 +14,6 @@ var PurchaseOrderExternalManager = require('./purchase-order-external-manager');
 var i18n = require('dl-i18n');
 var SupplierManager = require('../master/supplier-manager');
 
-// var PurchaseOrderBaseManager = require('../po/purchase-order-base-manager');
-// var DOItem = DLModels.po.DOItem;
-
 module.exports = class DeliveryOrderManager extends BaseManager {
     constructor(db, user) {
         super(db, user);

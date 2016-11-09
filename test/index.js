@@ -30,5 +30,6 @@ describe('#dl-module', function (done) {
     // test('@purchasing/unit-payment-order', './purchasing/unit-payment-order-test');
 
     test('@purchasing/purchase-request/create', './purchasing/purchase-request/create');
+    test('@purchasing/purchase-request/create', './purchasing/purchase-request/post');
     test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
 })

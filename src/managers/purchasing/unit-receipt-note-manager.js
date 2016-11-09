@@ -126,7 +126,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                             valid.supplier = _supplier;
                             valid.deliveryOrderId = new ObjectId(_deliveryOrder._id);
                             valid.deliveryOrder = _deliveryOrder;
-                            
+
                             for (var item of valid.items) {
                                 for (var _po of _purchaseOrderList) {
                                     var _poId = new ObjectId(item.purchaseOrder._id);
@@ -147,7 +147,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                         break;
                                     }
                                 }
-                                
+
                             }
 
                             if (!valid.stamp)
@@ -223,9 +223,6 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
             this._validate(unitReceiptNote)
                 .then(validUnitReceiptNote => {
                     validUnitReceiptNote.no = this.generateNo(validUnitReceiptNote.unit.code);
-                    validUnitReceiptNote.unitId = new ObjectId(validUnitReceiptNote.unitId);
-                    validUnitReceiptNote.supplierId = new ObjectId(validUnitReceiptNote.supplierId);
-                    validUnitReceiptNote.deliveryOrderId = new ObjectId(validUnitReceiptNote.deliveryOrderId);
 
                     //Update PO Internal
                     for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
@@ -279,6 +276,137 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 .catch(e => {
                     reject(e);
                 })
+        });
+    }
+
+    update(unitReceiptNote) {
+        return new Promise((resolve, reject) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
+                    this._validate(unitReceiptNote)
+                        .then(validUnitReceiptNote => {
+                            //Update PO Internal
+                            for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
+                                for (var fulfillment of doItem.fulfillments)
+                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                            }
+
+                            Promise.all(getPurchaseOrderById)
+                                .then(results => {
+                                    for (var purchaseOrder of results) {
+                                        for (var poItem of purchaseOrder.items) {
+                                            for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
+                                                if (unitReceiptNoteItem.purchaseOrderId.equals(purchaseOrder._id) && validUnitReceiptNote.unitId.equals(purchaseOrder.unitId)) {
+                                                    if (unitReceiptNoteItem.product._id.equals(poItem.product._id)) {
+                                                        for (var fulfillment of poItem.fulfillments) {
+                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                            var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
+
+                                                            if (fulfillmentNo == deliveryOrderNo && fulfillment.unitReceiptNoteNo == validUnitReceiptNote.no) {
+                                                                fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
+                                                                fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
+                                                                fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
+                                                                fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
+                                                            }
+                                                        }
+                                                    }
+                                                    unitReceiptNoteItem.purchaseOrder = purchaseOrder;
+                                                }
+                                            }
+                                        }
+                                        tasks.push(this.purchaseOrderManager.update(purchaseOrder));
+                                    }
+                                    Promise.all(tasks)
+                                        .then(results => {
+                                            this.collection.update(validUnitReceiptNote)
+                                                .then(id => {
+                                                    resolve(id);
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                });
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        })
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                })
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
+    delete(unitReceiptNote) {
+        return new Promise((resolve, reject) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
+                    this._validate(unitReceiptNote)
+                        .then(validUnitReceiptNote => {
+                            validUnitReceiptNote._deleted = true;
+                            //Update PO Internal
+                            for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
+                                for (var fulfillment of doItem.fulfillments)
+                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                            }
+
+                            Promise.all(getPurchaseOrderById)
+                                .then(results => {
+                                    for (var purchaseOrder of results) {
+                                        for (var poItem of purchaseOrder.items) {
+                                            for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
+                                                if (unitReceiptNoteItem.purchaseOrderId.equals(purchaseOrder._id) && validUnitReceiptNote.unitId.equals(purchaseOrder.unitId)) {
+                                                    if (unitReceiptNoteItem.product._id.equals(poItem.product._id)) {
+                                                        for (var fulfillment of poItem.fulfillments) {
+                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                            var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
+
+                                                            if (fulfillmentNo == deliveryOrderNo && fulfillment.unitReceiptNoteNo == validUnitReceiptNote.no) {
+                                                                fulfillment.unitReceiptNoteNo = "";
+                                                                fulfillment.unitReceiptNoteDate = "";
+                                                                fulfillment.unitReceiptNoteDeliveredQuantity = 0;
+                                                                fulfillment.unitReceiptDeliveredUom = {};
+                                                            }
+                                                        }
+                                                    }
+                                                    unitReceiptNoteItem.purchaseOrder = purchaseOrder;
+                                                }
+                                            }
+                                        }
+                                        tasks.push(this.purchaseOrderManager.update(purchaseOrder));
+                                    }
+                                    Promise.all(tasks)
+                                        .then(results => {
+                                            this.collection.update(validUnitReceiptNote)
+                                                .then(id => {
+                                                    resolve(id);
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                });
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        })
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                })
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 

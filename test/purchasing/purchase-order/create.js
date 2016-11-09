@@ -17,10 +17,10 @@ before('#00. connect db', function(done) {
     helper.getDb()
         .then(db => {
             purchaseRequestManager = new PurchaseRequestManager(db, {
-                username: 'unit-test'
+                username: 'dev'
             });
             purchaseOrderManager = new PurchaseOrderManager(db, {
-                username: 'unit-test'
+                username: 'dev'
             });
 
             purchaseRequestDataUtil.getNew()
@@ -38,24 +38,64 @@ before('#00. connect db', function(done) {
         });
 });
 
-it('#01. should success when create new data', function(done) {
+it('#01. should failed when create new purchase-order with unposted purchase-request', function(done) {
     purchaseOrderDataUtil.getNew(purchaseRequest)
         .then(po => {
             purchaseOrder = po;
             validatePO(purchaseOrder);
+            done(purchaseRequest, "purchase-request cannot be used to create purchase-order due unposted status");
+        })
+        .catch(e => {
+            e.errors.should.have.property('purchaseRequest');
             done();
+        });
+});
+
+it('#02. should success when create new purchase-order with posted purchase-request', function(done) {
+
+    purchaseRequestManager.post([purchaseRequest])
+        .then(purchaseRequestIds => {
+            var prId = purchaseRequestIds[0];
+            purchaseRequestManager.getSingleById(prId)
+                .then(pr => {
+                    purchaseRequest = pr;
+                    purchaseOrderDataUtil.getNew(purchaseRequest)
+                        .then(po => {
+                            purchaseOrder = po;
+                            validatePO(purchaseOrder);
+                            done();
+                        })
+                        .catch(e => {
+                            done(e);
+                        });
+                })
+                .catch(e => {
+                    done(e);
+                });
         })
         .catch(e => {
             done(e);
         });
 });
 
+it('#03. purchase-request.isUsed should be true after create purchase-order', function(done) {
+    var prId = purchaseRequest._id;
+    purchaseRequestManager.getSingleById(prId)
+        .then(pr => {
+            purchaseRequest = pr;
+            validatePR(purchaseRequest);
+            purchaseRequest.isUsed.should.equal(true, "purchase-request.isPosted should be true after posted");
+            done();
+        })
+        .catch(e => {
+            done(e);
+        });
+}); 
 
-it('#02. purchase-order items should the same as purchase-request items', function(done) {
+it('#04. purchase-order items should the same as purchase-request items', function(done) {
     purchaseOrder.items.length.should.equal(purchaseRequest.items.length);
-    for(var poItem of purchaseOrder.items)
-    {
-        var prItem = purchaseRequest.items.find(prItem=>{
+    for (var poItem of purchaseOrder.items) {
+        var prItem = purchaseRequest.items.find(prItem => {
             return poItem.product._id.toString() == prItem.product._id.toString();
         });
         prItem.should.not.equal(null, "an item in purchase-order not found in purchase-request");

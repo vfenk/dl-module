@@ -17,7 +17,7 @@ module.exports = {
             _getDb()
                 .then(db => {
                     resolve(new ManagerType(db, {
-                        username: 'unit-test'
+                        username: 'dev'
                     }));
                 })
                 .catch(e => {
