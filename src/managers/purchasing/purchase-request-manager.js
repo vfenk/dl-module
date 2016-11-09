@@ -37,12 +37,15 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 }
 
             });
-            var getUnit = this.unitManager.getSingleByIdOrDefault(valid.unit._id);
-            var getCategory = this.categoryManager.getSingleByIdOrDefault(valid.category._id);
-            var getBudget = this.budgetManager.getSingleByIdOrDefault(valid.budget._id);
+            var getUnit = valid.unitId && valid.unitId.toString().trim() != '' ? this.unitManager.getSingleByIdOrDefault(valid.unitId) : Promise.resolve(null);
+            var getCategory = valid.categoryId && valid.categoryId.toString().trim() != '' ? this.categoryManager.getSingleByIdOrDefault(valid.unitId) : Promise.resolve(null);
+            var getBudget = valid.budget && valid.budget.toString().trim() != '' ? this.budgetManager.getSingleByIdOrDefault(valid.budget._id) : Promise.resolve(null);
             var getProduct = [];
-            for(var _item of valid.items)
-                getProduct.push(this.productManager.getSingleByIdOrDefault(_item.product._id));
+            for(var _item of valid.items){
+                var prod= _item.product._id && _item.product._id.toString().trim() != '' ? this.productManager.getSingleByIdOrDefault(_item.product._id) : Promise.resolve(null);
+                getProduct.push(this.prod);
+            }
+
 
             Promise.all([getPurchaseRequestPromise,getUnit,getCategory,getBudget].concat(getProduct))
                 .then(results => {
