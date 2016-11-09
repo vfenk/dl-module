@@ -181,17 +181,13 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     _id: {
                         '$ne': new ObjectId(valid._id)
                     }
-                }, {
-                        "refNo": valid.refNo
-                    }]
+                }]
             });
-            var getCurrency = valid.currency ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
-            var getSupplier = valid.supplier ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
-            var getVat = valid.vat ? this.vatManager.getSingleByIdOrDefault(valid.vat._id) : Promise.resolve(null);
-
+            var getCurrency = valid.currency && valid.currency._id ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
+            var getSupplier = valid.supplier && valid.supplier._id ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
+            var getVat = valid.vat && valid.vat._id ? this.vatManager.getSingleByIdOrDefault(valid.vat._id) : Promise.resolve(null);
 
             var getPOInternal = [];
-
             for (var po of valid.items)
                 getPOInternal.push(this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
 
@@ -214,7 +210,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         if (!valid.supplier._id)
                             purchaseOrderExternalError["supplierId"] = i18n.__("PurchaseOrderExternal.supplier.name.isRequired:%s is required", i18n.__("PurchaseOrderExternal.supplier.name._:Name")); //"Nama Supplier tidak boleh kosong";
                     } else if (!_supplier)
-                        purchaseOrderExternalError["supplierId"] = i18n.__("PurchaseOrderExternal.supplier.name.isRequired:%s is not exists", i18n.__("PurchaseOrderExternal.supplier.name._:Name")); //"Nama Supplier tidak boleh kosong";
+                        purchaseOrderExternalError["supplierId"] = i18n.__("PurchaseOrderExternal.supplier.name.isRequired:%s is required", i18n.__("PurchaseOrderExternal.supplier.name._:Name")); //"Nama Supplier tidak boleh kosong";
 
                     if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '')
                         purchaseOrderExternalError["expectedDeliveryDate"] = i18n.__("PurchaseOrderExternal.expectedDeliveryDate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.expectedDeliveryDate._:Expected Delivery Date")); //"Tanggal tersedia tidak boleh kosong";
@@ -231,22 +227,14 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         if (!valid.currency._id)
                             purchaseOrderExternalError["currency"] = i18n.__("PurchaseOrderExternal.currency.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currency._:Currency")); //"Currency tidak boleh kosong";
                     } else if (!_currency)
-                        purchaseOrderExternalError["currency"] = i18n.__("PurchaseOrderExternal.currency.isRequired:%s is not exists", i18n.__("PurchaseOrderExternal.currency._:Currency")); //"Currency tidak boleh kosong";
+                        purchaseOrderExternalError["currency"] = i18n.__("PurchaseOrderExternal.currency.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currency._:Currency")); //"Currency tidak boleh kosong";
+
                     if (!valid.currencyRate || valid.currencyRate == 0)
                         purchaseOrderExternalError["currencyRate"] = i18n.__("PurchaseOrderExternal.currencyRate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currencyRate._:Currency Rate")); //"Rate tidak boleh kosong";
 
                     if (valid.paymentMethod.toUpperCase() != "CASH")
                         if (!valid.paymentDueDays || valid.paymentDueDays == '' || valid.paymentDueDays == 0)
                             purchaseOrderExternalError["paymentDueDays"] = i18n.__("PurchaseOrderExternal.paymentDueDays.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentDueDays._:Payment Due Days")); //"Tempo Pembayaran tidak boleh kosong";
-
-                    // if ((valid.paymentMethod.toUpperCase() != "CASH") && !valid.paymentDueDays || valid.paymentDueDays == '')
-                    //     purchaseOrderExternalError["paymentDueDays"] = "Tempo Pembayaran tidak boleh kosong";
-
-                    // if (valid.useVat == undefined || valid.useVat.toString() === '')
-                    //     purchaseOrderExternalError["useVat"] = "Pengenaan PPn harus dipilih";
-
-                    // if (valid.useIncomeTax == undefined || valid.useIncomeTax.toString() === '')
-                    //     purchaseOrderExternalError["useIncomeTax"] = "Pengenaan PPh harus dipilih";
 
                     if (valid.items && valid.items.length > 0) {
                         var purchaseOrderExternalItemErrors = [];
@@ -310,7 +298,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     }
                     else
                         purchaseOrderExternalError["items"] = i18n.__("PurchaseOrderExternal.items.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items._:Items")); //"Harus ada minimal 1 po internal";
-
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(purchaseOrderExternalError).length > 0) {
