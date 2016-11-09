@@ -234,11 +234,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             var poItemHasError = false;
                             for (var po of _poInternals) {
                                 if (po._id.toString() == purchaseOrder._id.toString()) {
-                                    if (po.isPosted) {
+                                    if (po.isPosted && !valid._id) {
                                         poItemHasError = true;
-                                        purchaseOrderError["no"] = i18n.__("PurchaseOrderExternal.items.no.isRequired:%s is need to be posted", i18n.__("PurchaseOrderExternal.items.no._:No")); //"Purchase order internal tidak boleh kosong";
-                                    }
-                                    if (!purchaseOrder.no || purchaseOrder.no == "") {
+                                        purchaseOrderError["no"] = i18n.__("PurchaseOrderExternal.items.isPosted:%s is already used", i18n.__("PurchaseOrderExternal.items._:Purchase Order Internal ")); //"Purchase order internal tidak boleh kosong";
+                                    } else if (!purchaseOrder.no || purchaseOrder.no == "") {
                                         poItemHasError = true;
                                         purchaseOrderError["no"] = i18n.__("PurchaseOrderExternal.items.no.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.no._:No")); //"Purchase order internal tidak boleh kosong";
                                     }
@@ -294,7 +293,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             purchaseOrderExternalError["items"] = purchaseOrderExternalItemErrors;
                     }
                     else
-                        purchaseOrderExternalError["items"] = i18n.__("PurchaseOrderExternal.items.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items._:Items")); //"Harus ada minimal 1 po internal";
+                        purchaseOrderExternalError["items"] = i18n.__("PurchaseOrderExternal.items.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items._:Purchase Order Internal")); //"Harus ada minimal 1 po internal";
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(purchaseOrderExternalError).length > 0) {
@@ -346,7 +345,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     }
 
     post(listPurchaseOrderExternal) {
-        var tasks = [];
+        var tasksUpdatePoInternal = [];
+        var tasksUpdatePoEksternal = [];
         var getPOItemById = [];
         var getPOExternalById = [];
         return new Promise((resolve, reject) => {
@@ -365,7 +365,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     if (_poExternal._id.equals(_purchaseOrderExternal._id)) {
                                         _purchaseOrderExternal = _poExternal;
                                         _purchaseOrderExternal.isPosted = true;
-                                        tasks.push(this.update(_purchaseOrderExternal));
+                                        tasksUpdatePoEksternal.push(this.update(_purchaseOrderExternal));
 
                                         for (var _poExternalItem of _purchaseOrderExternal.items) {
                                             for (var _purchaseOrder of _purchaseOrderList) {
@@ -400,7 +400,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                                             }
                                                         }
                                                     }
-                                                    tasks.push(this.purchaseOrderManager.update(_purchaseOrder));
+                                                    tasksUpdatePoInternal.push(this.purchaseOrderManager.update(_purchaseOrder));
                                                     break;
                                                 }
                                             }
@@ -410,9 +410,15 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     }
                                 }
                             }
-                            Promise.all(tasks)
-                                .then(result => {
-                                    resolve(result);
+                            Promise.all(tasksUpdatePoInternal)
+                                .then(_listIdPoInternal => {
+                                    Promise.all(tasksUpdatePoEksternal)
+                                        .then(_listIdPoEksternal => {
+                                            resolve(_listIdPoEksternal);
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        })
                                 })
                                 .catch(e => {
                                     reject(e);
