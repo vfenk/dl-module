@@ -38,9 +38,9 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         _deleted: false
                     }]
             });
-            var getDeliveryOrder = valid.deliveryOrder ? this.deliveryOrderManager.getSingleByIdOrDefault(valid.deliveryOrder._id): Promise.resolve(null);
-            var getUnit = valid.unit?this.unitManager.getSingleByIdOrDefault(valid.unit._id): Promise.resolve(null);
-            var getSupplier = valid.supplier ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id): Promise.resolve(null);
+            var getDeliveryOrder = valid.deliveryOrder && valid.deliveryOrder._id ? this.deliveryOrderManager.getSingleByIdOrDefault(valid.deliveryOrder._id) : Promise.resolve(null);
+            var getUnit = valid.unit && valid.unit._id ? this.unitManager.getSingleByIdOrDefault(valid.unit._id) : Promise.resolve(null);
+            var getSupplier = valid.supplier && valid.supplier._id ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
             var getPurchaseOrder = [];
             for (var doItem of valid.deliveryOrder.items) {
                 for (var fulfillment of doItem.fulfillments)
@@ -59,13 +59,13 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                             if (_unitReceiptNote)
                                 errors["no"] = i18n.__("UnitReceiptNote.no.isExists:%s is already exists", i18n.__("UnitReceiptNote.no._:No")); //"No. bon unit sudah terdaftar";
 
-                            if (!_unit)
-                                errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is not exists", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
-                            else if (valid.unit) {
+                            if (valid.unit) {
                                 if (!valid.unit._id)
                                     errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
                             }
                             else if (!valid.unit)
+                                errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
+                            else if (!_unit)
                                 errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
 
                             if (!_supplier)
@@ -81,7 +81,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                 errors["date"] = i18n.__("UnitReceiptNote.date.isRequired:%s is required", i18n.__("UnitReceiptNote.date._:Date")); //"Tanggal tidak boleh kosong";
 
                             if (!_deliveryOrder)
-                                errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s  not exists", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No.")); //"No. surat jalan tidak boleh kosong";
+                                errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s is required", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No.")); //"No. surat jalan tidak boleh kosong";
                             else if (valid.deliveryOrder) {
                                 if (!valid.deliveryOrder._id)
                                     errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s is required", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No")); //"No. surat jalan tidak boleh kosong";
@@ -126,24 +126,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                             valid.supplier = _supplier;
                             valid.deliveryOrderId = new ObjectId(_deliveryOrder._id);
                             valid.deliveryOrder = _deliveryOrder;
-
-                            // valid.deliveryOrder.supplierId = new ObjectId(valid.deliveryOrder.supplier._id);
-                            // valid.deliveryOrder.supplier._id = new ObjectId(valid.deliveryOrder.supplier._id);
-                            // for (var doItem of valid.deliveryOrder.items) {
-                            //     doItem.purchaseOrderExternalId = new ObjectId(doItem.purchaseOrderExternal._id);
-                            //     doItem.purchaseOrderExternal._id = new ObjectId(doItem.purchaseOrderExternal._id);
-                            //     for (var fulfillment of doItem.fulfillments) {
-                            //         fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrder._id);
-                            //         fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
-                            //         fulfillment.purchaseOrder.unitId = new ObjectId(fulfillment.purchaseOrder.unit._id);
-                            //         fulfillment.purchaseOrder.unit._id = new ObjectId(fulfillment.purchaseOrder.unit._id);
-                            //         fulfillment.purchaseOrder.categoryId = new ObjectId(fulfillment.purchaseOrder.category._id);
-                            //         fulfillment.purchaseOrder.category._id = new ObjectId(fulfillment.purchaseOrder.category._id);
-                            //         fulfillment.productId = new ObjectId(fulfillment.product._id);
-                            //         fulfillment.product._id = new ObjectId(fulfillment.product._id);
-                            //     }
-                            // }
-
+                            
                             for (var item of valid.items) {
                                 for (var _po of _purchaseOrderList) {
                                     var _poId = new ObjectId(item.purchaseOrder._id);
@@ -164,19 +147,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                         break;
                                     }
                                 }
-                                // item.product._id = new ObjectId(item.product._id);
-                                // item.purchaseOrderId = new ObjectId(item.purchaseOrder._id);
-                                // item.purchaseOrder._id = new ObjectId(item.purchaseOrder._id);
-                                // item.purchaseOrder.unitId = new ObjectId(item.purchaseOrder.unit._id);
-                                // item.purchaseOrder.unit._id = new ObjectId(item.purchaseOrder.unit._id);
-                                // item.purchaseOrder.categoryId = new ObjectId(item.purchaseOrder.category._id);
-                                // item.purchaseOrder.category._id = new ObjectId(item.purchaseOrder.category._id);
-                                // item.purchaseOrder.currency._id = new ObjectId(item.currency._id);
-                                // for (var poItem of item.purchaseOrder.items) {
-                                //     poItem.product._id = new ObjectId(poItem.product.uom._id);
-                                //     poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
-                                //     poItem.defaultUom._id = new ObjectId(poItem.product.uom._id);
-                                // }
+                                
                             }
 
                             if (!valid.stamp)
