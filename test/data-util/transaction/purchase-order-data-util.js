@@ -16,7 +16,7 @@ class PurchaseOrderDataUtil {
     getNew(pr) {
         return new Promise((resolve, reject) => {
 
-            var getPr = pr ? Promise.resolve(pr) : PurchaseRequest.getNew();
+            var getPr = pr ? Promise.resolve(pr) : PurchaseRequest.getPosted();
 
             helper
                 .getManager(PurchaseOrderManager)
@@ -45,7 +45,7 @@ class PurchaseOrderDataUtil {
                                         // remark: '',
                                         // fulfillments: []
                                 };
-                            })
+                            });
 
                             var data = {
                                 no: `UT/PO/${codeGenerator()}`,

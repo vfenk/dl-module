@@ -21,7 +21,7 @@ describe('#dl-module', function (done) {
     // test('@master/vat-manager', './master/vat-manager-test');
     // test('@master/budget-manager', './master/budget-manager-test');
     // //Purchasing 
-    // test('@purchasing/purchase-order-base-manager', './purchasing/purchase-order-manager-test');
+    test('@purchasing/purchase-order-base-manager', './purchasing/purchase-order-manager-test');
     // test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
     // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
     // test('@purchasing/unit-receipt-note', './purchasing/unit-receipt-note-manager-test');
@@ -30,6 +30,7 @@ describe('#dl-module', function (done) {
     // test('@purchasing/unit-payment-order', './purchasing/unit-payment-order-test');
 
     test('@purchasing/purchase-request/create', './purchasing/purchase-request/create');
-    test('@purchasing/purchase-request/create', './purchasing/purchase-request/post');
+    test('@purchasing/purchase-request/post', './purchasing/purchase-request/post');
     test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
+    test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
 })
