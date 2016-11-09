@@ -47,8 +47,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     if (!valid.purchaseRequest._id)
                         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";                  
                     else if (!_purchaseRequest)
-                        errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";                  
-
+                        errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";
                     if (valid.items.length > 0) {
                         var itemErrors = [];
                         for (var item of valid.items) {
@@ -217,25 +216,24 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
             this._validate(purchaseOrder)
                 .then(validPurchaseOrder => {
-                    this.collection.insert(validPurchaseOrder)
-                        .then(id => {
-                            this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
-                                .then(PR => {
-                                    PR.isUsed = true;
-                                    this.purchaseRequestManager.update(PR)
-                                        .then(results => {
+                    this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
+                        .then(PR => {
+                            PR.isUsed = true;
+                            validPurchaseOrder.purchaseRequest = PR;
+                            this.purchaseRequestManager.update(PR)
+                                .then(results => {
+                                    this.collection.insert(validPurchaseOrder)
+                                        .then(id => {
                                             resolve(id);
                                         })
                                         .catch(e => {
                                             reject(e);
                                         });
                                 })
-
-
+                                .catch(e => {
+                                    reject(e);
+                                });
                         })
-                        .catch(e => {
-                            reject(e);
-                        });
                 })
                 .catch(e => {
                     reject(e);
