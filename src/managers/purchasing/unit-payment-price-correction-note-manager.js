@@ -111,11 +111,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
                                 if (_purchaseOrderId.equals(_unitReceiptNoteItem.purchaseOrder._id) && _productId.equals(_unitReceiptNoteItem.product._id)) {
                                     item.purchaseOrderId = new ObjectId(_unitReceiptNoteItem.purchaseOrder._id);
-                                    item.purchaseOrder = _unitReceiptNoteItem.purchaseOrder;
+                                    item.purchaseOrder = _unitReceiptNoteItem.purchaseOrder; 
                                     item.purchaseOrder._id = new ObjectId(_unitReceiptNoteItem.purchaseOrder._id);
                                     item.productId = new ObjectId(_unitReceiptNoteItem.product._id);
                                     item.product = _unitReceiptNoteItem.product;
-                                    item.product._id = new ObjectId(_unitReceiptNoteItem.product._id);
+                                    item.product._id = new ObjectId(_unitReceiptNoteItem.product._id); 
                                     item.quantity = _unitReceiptNoteItem.deliveredQuantity;
                                     item.uom = _unitReceiptNoteItem.deliveredUom;
                                     item.uomId = new ObjectId(_unitReceiptNoteItem.deliveredUom._id);
@@ -343,6 +343,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 .then((createIndexResults) => {
                     this._validate(unitPaymentPriceCorrectionNote)
                         .then(validData => {
+                            var getPurchaseOrderById = [];
+                            var tasks = [];
                             //Update PO Internal
                             var poId = new ObjectId();
                             for (var _item of validData.items) {
@@ -412,6 +414,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 .then((createIndexResults) => {
                     this._validate(unitPaymentPriceCorrectionNote)
                         .then(validData => {
+                            var tasks = [];
+                            var getPurchaseOrderById = [];
                             validData._deleted = true;
                             //Update PO Internal
                             var poId = new ObjectId();

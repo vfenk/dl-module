@@ -1,8 +1,7 @@
 'use strict';
 
 var should = require('should');
-var helper = require("../helper");
-var validator = require('dl-models').validator.master;
+var helper = require("../helper"); 
 var validatorPurchasing = require('dl-models').validator.purchasing;
 var PurchaseOrderExternalManager = require("../../src/managers/purchasing/purchase-order-external-manager"); 
 var purchaseOrderExternalManager = null; 
@@ -38,8 +37,7 @@ it('#01. should success when create new data', function (done) {
 var purchaseOrderExternal;
 it(`#02. should success when get created data with id`, function (done) {
     purchaseOrderExternalManager.pdf(purchaseOrderExternalId.toString())
-        .then(data => {
-            validatorPurchasing.purchaseOrderExternal(data);
+        .then(data => { 
             data.should.instanceof(Object);
             purchaseOrderExternal = data;
             done();
@@ -74,7 +72,7 @@ it(`#04. should success when get created data with id`, function (done) {
         })
 });
 
-it(`#05. should success when update created data`, function (done) {
+it(`#05. should success when update data`, function (done) {
     purchaseOrderExternal.remark += '[updated]'; 
     purchaseOrderExternalManager.update(purchaseOrderExternal)
         .then(id => {
@@ -97,30 +95,7 @@ it(`#06. should success when get updated data with id`, function (done) {
         })
 });
 
-it(`#07. should success when delete data`, function (done) {
-    purchaseOrderExternalManager.delete(purchaseOrderExternal)
-        .then(id => {
-            purchaseOrderExternalId.toString().should.equal(id.toString());
-            done();
-        })
-        .catch(e => {
-            done(e);
-        });
-});
-
-it(`#08. should _deleted=true`, function (done) {
-    purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
-        .then(data => {
-            data._deleted.should.be.Boolean();
-            data._deleted.should.equal(true);
-            done();
-        })
-        .catch(e => {
-            done(e);
-        })
-});
-
-it(`#09. should success when post`, function (done) {
+it(`#07. should success when post`, function (done) {
     var listPurchaseOrderExternal = [];
     listPurchaseOrderExternal.push(purchaseOrderExternal);
     purchaseOrderExternalManager.post(listPurchaseOrderExternal)
@@ -132,7 +107,7 @@ it(`#09. should success when post`, function (done) {
         })
 });
 
-it(`#10. should isPosted=true`, function (done) {
+it(`#08. should isPosted=true`, function (done) {
     purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
         .then(data => {
             data.isPosted.should.be.Boolean();
@@ -143,3 +118,27 @@ it(`#10. should isPosted=true`, function (done) {
             done(e);
         })
 });
+
+it(`#09. should success when delete data`, function (done) {
+    purchaseOrderExternalManager.delete(purchaseOrderExternal)
+        .then(id => {
+            purchaseOrderExternalId.toString().should.equal(id.toString());
+            done();
+        })
+        .catch(e => {
+            done(e);
+        });
+});
+
+it(`#10. should _deleted=true`, function (done) {
+    purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
+        .then(data => {
+            data._deleted.should.be.Boolean();
+            data._deleted.should.equal(true);
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
