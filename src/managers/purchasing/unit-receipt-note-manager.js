@@ -237,8 +237,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                             for (var purchaseOrder of results) {
                                 for (var poItem of purchaseOrder.items) {
                                     for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
-                                        if (unitReceiptNoteItem.purchaseOrderId.equals(purchaseOrder._id) && validUnitReceiptNote.unitId.equals(purchaseOrder.unitId)) {
-                                            if (unitReceiptNoteItem.product._id.equals(poItem.product._id)) {
+                                        if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
+                                            if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
                                                 for (var fulfillment of poItem.fulfillments) {
                                                     var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                     var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
@@ -360,8 +360,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                     for (var purchaseOrder of results) {
                                         for (var poItem of purchaseOrder.items) {
                                             for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
-                                                if (unitReceiptNoteItem.purchaseOrderId.equals(purchaseOrder._id) && validUnitReceiptNote.unitId.equals(purchaseOrder.unitId)) {
-                                                    if (unitReceiptNoteItem.product._id.equals(poItem.product._id)) {
+                                                if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
+                                                    if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
                                                         for (var fulfillment of poItem.fulfillments) {
                                                             var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
@@ -481,8 +481,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                     for (var purchaseOrder of results) {
                                         for (var poItem of purchaseOrder.items) {
                                             for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
-                                                if (unitReceiptNoteItem.purchaseOrderId.equals(purchaseOrder._id) && validUnitReceiptNote.unitId.equals(purchaseOrder.unitId)) {
-                                                    if (unitReceiptNoteItem.product._id.equals(poItem.product._id)) {
+                                                if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
+                                                    if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
                                                         for (var fulfillment of poItem.fulfillments) {
                                                             var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
