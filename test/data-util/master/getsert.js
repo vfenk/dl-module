@@ -29,6 +29,9 @@ module.exports = function(data, Manager, filterCallback) {
                                     reject(e);
                                 });
                         }
+                    })
+                    .catch(e => {
+                        reject(e);
                     });
             })
             .catch(e => {
