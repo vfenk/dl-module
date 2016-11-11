@@ -1,5 +1,6 @@
 'use strict';
 var _getSert = require('./getsert');
+var division = require('./division-data-util');
 
 class UnitDataUtil {
     getSert(unit) {
@@ -11,13 +12,28 @@ class UnitDataUtil {
         }));
     }
     getTestData() {
-        var testData = {
-            code: 'UT/UNIT/01',
-            division: 'Div Unit Test',
-            subDivision: 'Sub Div Unit Test',
-            description: ''
-        };
-        return Promise.resolve(this.getSert(testData));
+        return new Promise((resolve, reject) => {
+            division.getTestData()
+                .then(div => {
+                    var testData = {
+                        code: 'UT/UNIT/01',
+                        divisionId: div._id,
+                        division: div,
+                        name: 'Test Unit',
+                        description: ''
+                    };
+                    this.getSert(testData)
+                        .then(data => {
+                            resolve(data);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
     }
 }
 module.exports = new UnitDataUtil();

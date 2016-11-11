@@ -167,6 +167,8 @@ module.exports = function (purchaseRequest) {
         }
     }];
 
+    var getDateexpected= purchaseRequest.expectedDeliveryDate && purchaseRequest.expectedDeliveryDate.toString().trim() != '' ?  moment(purchaseRequest.expectedDeliveryDate).format(locale.date.format) : '-';
+
     var footer = [
         '\n', {
             stack: [{
@@ -180,7 +182,7 @@ module.exports = function (purchaseRequest) {
                             stack: [':', ':', ':']
                         }, {
                             width: '*',
-                            stack: [purchaseRequest.category.name, `${moment(purchaseRequest.expectedDeliveryDate).format(locale.date.format)}`, purchaseRequest.remark]
+                            stack: [purchaseRequest.category.name, `${getDateexpected}`, purchaseRequest.remark]
                         },]
                 }]
             }

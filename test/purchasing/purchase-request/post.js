@@ -17,27 +17,10 @@ before('#00. connect db', function(done) {
         .catch(e => {
             done(e);
         });
-});
-
-it('#01. should error when create with empty data ', function(done) {
-    purchaseRequestManager.create({})
-        .then(id => {
-            done("should error when create with empty data");
-        })
-        .catch(e => {
-            try {
-                // e.errors.should.have.property('code');
-                // e.errors.should.have.property('name');
-                done();
-            }
-            catch (ex) {
-                done(ex);
-            }
-        });
-});
+}); 
 
 var purchaseRequest;
-it('#02. should success when create new data', function(done) {
+it('#01. should success when create new data', function(done) {
     dataUtil.getNew()
         .then(pr => {
             purchaseRequest = pr;
@@ -47,4 +30,24 @@ it('#02. should success when create new data', function(done) {
         .catch(e => {
             done(e);
         });
-}); 
+});
+
+it('#02. should success when post', function(done) {
+    purchaseRequestManager.post([purchaseRequest])
+        .then(purchaseRequestIds => {
+            var prId = purchaseRequestIds[0];
+            purchaseRequestManager.getSingleById(prId)
+                .then(pr => {
+                    purchaseRequest = pr;
+                    validatePR(purchaseRequest);
+                    purchaseRequest.isPosted.should.equal(true, "purchase-request.isPosted should be true after posted");
+                    done();
+                })
+                .catch(e => {
+                    done(e);
+                });
+        })
+        .catch(e => {
+            done(e);
+        });
+});

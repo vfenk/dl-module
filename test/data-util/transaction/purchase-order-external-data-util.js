@@ -8,47 +8,43 @@ var vat = require('../master/vat-data-util');
 var po = require('./purchase-order-data-util');
 
 class PurchaseOrderExternalDataUtil {
-    getNew() {
+    getNew(purchaseOrders) {
         return new Promise((resolve, reject) => {
             helper
                 .getManager(PoExternalManager)
                 .then(manager => {
-                    Promise.all([supplier.getTestData(), currency.getTestData(), vat.getTestData(), po.getNew()])
+                    var getPurchaseOrders = purchaseOrders ? purchaseOrders.map(purchaseOrder => Promise.resolve(purchaseOrder)) : [po.getNew(), po.getNew()];
+                    Promise.all([supplier.getTestData(), currency.getTestData(), vat.getTestData()].concat(getPurchaseOrders))
                         .then(results => {
-                            var poItems = results[3].items.map(poItem => {
-                                return {
-                                    product: poItem.product,
-                                    defaultQuantity: poItem.defaultQuantity,
-                                    defaultUom: poItem.defaultUom,
-                                    dealQuantity: 90,
-                                    dealUom: poItem.dealUom,
-                                    realizationQuantity: poItem.realizationOrder,
-                                    pricePerDealUnit: 500,
-                                    currency: poItem.currency,
-                                    currencyRate: poItem.currencyRate,
-                                    conversion: 5,
-                                    isClosed: false,
-                                    remark: '',
-                                    fulfillments: []
-                                };
-                            });
+                            var supplier = results[0];
+                            var currency = results[1];
+                            var vat = results[2];
+                            var po01 = results[3];
+                            var po02 = results[4];
 
-                            poItems = [].concat.apply([], poItems);
+                            for (var po of[po01, po02]) {
+                                for (var poItem of po.items) {
+                                    poItem.currency = currency;
+                                    poItem.currencyRate = currency.rate;
+                                    poItem.dealQuantity = poItem.defaultQuantity;
+                                    poItem.dealUom = poItem.defaultUom;
+                                    poItem.pricePerDealUnit = poItem.product.price * 1.05;
+                                }
+                            }
 
                             var data = {
                                 no: `UT/PO External/${codeGenerator()}`,
                                 refNo: '',
-                                supplierId: results[0]._id,
-                                supplier: results[0],
-                                freightCostBy: '',
-                                unit: results[0],
-                                currency: results[1],
-                                currencyRate: results[1].rate,
+                                supplierId: supplier._id,
+                                supplier: supplier,
+                                freightCostBy: 'Penjual',
+                                currency: currency,
+                                currencyRate: currency.rate,
                                 paymentMethod: 'CASH',
                                 paymentDueDays: 0,
-                                vat: results[2],
-                                useVat: false,
-                                vatRate: results[2].rate,
+                                vat: vat,
+                                useVat: vat != undefined,
+                                vatRate: vat.rate,
                                 useIncomeTax: false,
                                 date: new Date(),
                                 expectedDeliveryDate: new Date(),
@@ -56,39 +52,7 @@ class PurchaseOrderExternalDataUtil {
                                 isPosted: false,
                                 isClosed: false,
                                 remark: '',
-                                items: [{
-                                    _id: results[3]._id,
-                                    no: results[3].no,
-                                    refNo: results[3].refNo,
-                                    iso: results[3].iso,
-                                    realizationOrderId: results[3].realizationOrderId,
-                                    realizationOrder: results[3].realizationOrder,
-                                    purchaseRequestId: results[3].purchaseRequestId,
-                                    purchaseRequest: results[3].purchaseRequest,
-                                    buyerId: results[3].buyerId,
-                                    buyer: results[3].buyer,
-                                    purchaseOrderExternalId: results[3].purchaseOrderExternalId,
-                                    purchaseOrderExternal: results[3].purchaseOrderExternal,
-                                    sourcePurchaseOrderId: results[3].sourcePurchaseOrderId,
-                                    sourcePurchaseOrder: results[3].sourcePurchaseOrder,
-                                    supplierId: results[3].supplierId,
-                                    supplier: results[3].supplier,
-                                    unitId: results[3].unitId,
-                                    unit: results[1],
-                                    categoryId: results[2]._id,
-                                    category: results[2], 
-                                    vat: results[3].vat,
-                                    useVat: false,
-                                    vatRate: 0,
-                                    useIncomeTax: false,
-                                    date: new Date(),
-                                    expectedDeliveryDate: new Date(),
-                                    actualDeliveryDate: new Date(),
-                                    isPosted: true,
-                                    isClosed: false,
-                                    remark: 'Unit Test PO Internal',
-                                    items: poItems 
-                                }]
+                                items: [po01, po02]
                             };
                             manager.create(data)
                                 .then(id => {
