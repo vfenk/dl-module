@@ -9,6 +9,7 @@ module.exports = {
             SupplierManager: require("./src/managers/master/supplier-manager"),
             ProductManager: require("./src/managers/master/product-manager"),
             CategoryManager: require('./src/managers/master/category-manager'),
+            DivisionManager: require('./src/managers/master/division-manager'),
             UnitManager: require('./src/managers/master/unit-manager'),
             UomManager: require('./src/managers/master/uom-manager'),
             CurrencyManager: require('./src/managers/master/currency-manager'),
