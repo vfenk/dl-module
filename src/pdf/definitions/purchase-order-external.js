@@ -75,7 +75,7 @@ module.exports = function(pox) {
         }, {
             width: '35%',
             stack: [
-                `Solo, ${moment(pox.date).format(locale.date.format)} `, {
+                `Sukoharjo, ${moment(pox.date).format(locale.date.format)} `, {
                     text: [
                         'Mohon', {
                             text: ' di-fax kembali',
