@@ -29,13 +29,13 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        "no": valid.no
-                    }, {
-                        _deleted: false
-                    }]
+                    "no": valid.no
+                }, {
+                    _deleted: false
+                }]
             });
 
-            var getUnitPaymentOrder = this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id);
+            var getUnitPaymentOrder = valid.unitPaymentOrder ? this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id) : Promise.resolve(null);
 
             Promise.all([getUnitPaymentPriceCorrectionNote, getUnitPaymentOrder])
                 .then(results => {
@@ -111,11 +111,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
                                 if (_purchaseOrderId.equals(_unitReceiptNoteItem.purchaseOrder._id) && _productId.equals(_unitReceiptNoteItem.product._id)) {
                                     item.purchaseOrderId = new ObjectId(_unitReceiptNoteItem.purchaseOrder._id);
-                                    item.purchaseOrder = _unitReceiptNoteItem.purchaseOrder; 
+                                    item.purchaseOrder = _unitReceiptNoteItem.purchaseOrder;
                                     item.purchaseOrder._id = new ObjectId(_unitReceiptNoteItem.purchaseOrder._id);
                                     item.productId = new ObjectId(_unitReceiptNoteItem.product._id);
                                     item.product = _unitReceiptNoteItem.product;
-                                    item.product._id = new ObjectId(_unitReceiptNoteItem.product._id); 
+                                    item.product._id = new ObjectId(_unitReceiptNoteItem.product._id);
                                     item.quantity = _unitReceiptNoteItem.deliveredQuantity;
                                     item.uom = _unitReceiptNoteItem.deliveredUom;
                                     item.uomId = new ObjectId(_unitReceiptNoteItem.deliveredUom._id);
@@ -469,5 +469,26 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         });
     }
 
+    pdfReturNote(id) {
+        return new Promise((resolve, reject) => {
+            this.getSingleById(id)
+                .then(unitReceiptNote => {
+                    var getDefinition = require('../../pdf/definitions/unit-payment-correction-retur-note');
+                    var definition = getDefinition(unitReceiptNote);
 
+                    var generatePdf = require('../../pdf/pdf-generator');
+                    generatePdf(definition)
+                        .then(binary => {
+                            resolve(binary);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+
+        });
+    }
 }
