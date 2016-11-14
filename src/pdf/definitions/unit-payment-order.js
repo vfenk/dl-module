@@ -51,7 +51,7 @@ module.exports = function (unitPaymentOrder) {
                 columns: [{
                     width: '60%',
                     stack: [{
-                        text: '"DANLIRIS"',
+                        text: '"DAN LIRIS"',
                         style: ['size20', 'bold']
                     }, {
                             text: 'INDUSTRIAL & TRADING CO.LTD.',
@@ -110,7 +110,7 @@ module.exports = function (unitPaymentOrder) {
                         style: ['size08', "underline"]
                     },
                         {
-                            text: 'Untuk: ' + unitPaymentOrder.unit.division + ' ' + unitPaymentOrder.unit.subDivision,
+                            text: '' + unitPaymentOrder.unit.division + ' ' + unitPaymentOrder.unit.subDivision,
                             style: ['size08']
                         }]
 
@@ -165,7 +165,7 @@ module.exports = function (unitPaymentOrder) {
                 text: item.product,
                 style: ['size07', 'left']
             }, {
-                text: parseFloat(item.price).toLocaleString(locale, locale.currency),
+                text: parseFloat(item.price).toLocaleString(locale, locale.currencyNotaItern),
                 style: ['size07', 'right']
             }, {
                 text: parseFloat(item.price * item.quantity).toLocaleString(locale, locale.decimal),
@@ -221,7 +221,7 @@ module.exports = function (unitPaymentOrder) {
                         style: 'left'
                     }, {
                             width: '20%',
-                            stack: ['RP     ' + parseFloat(vat).toLocaleString(locale, locale.currency)],
+                            stack: ['RP     ' + parseFloat(vat).toLocaleString(locale, locale.currencyNotaItern)],
                             style: 'left'
                         }, {
                             width: '25%',
@@ -230,18 +230,18 @@ module.exports = function (unitPaymentOrder) {
                         },
                         {
                             width: '25%',
-                            stack: [parseFloat(incomeTax).toLocaleString(locale, locale.currency)],
+                            stack: [parseFloat(incomeTax).toLocaleString(locale, locale.currencyNotaItern)],
                             style: 'right'
                         }]
                 },
                 {
                     columns: [{
                         width: '30%',
-                        stack: ['Pbyr Ke Kontraktor '],
+                        stack: ['Jumlah dibayar Ke Supplier '],
                         style: 'left'
                     }, {
                             width: '20%',
-                            stack: ['RP     ' + parseFloat((sum + incomeTax) - vat).toLocaleString(locale, locale.currency)],
+                            stack: ['RP     ' + parseFloat((sum + incomeTax) - vat).toLocaleString(locale, locale.currencyNotaItern)],
                             style: 'left'
                         }, {
                             width: '25%',
@@ -250,7 +250,7 @@ module.exports = function (unitPaymentOrder) {
                         },
                         {
                             width: '25%',
-                            stack: [parseFloat(sum + incomeTax).toLocaleString(locale, locale.currency)],
+                            stack: [parseFloat(sum + incomeTax).toLocaleString(locale, locale.currencyNotaItern)],
                             style: 'right'
                         }]
                 },
@@ -303,6 +303,15 @@ module.exports = function (unitPaymentOrder) {
                     }, {
                             width: '75%',
                             stack: [unitPaymentOrder.remark || ''],
+                            style: 'left'
+                        },
+                        {
+                            width: '25%',
+                            stack: ['Nomor Faktur Pajak PPN:'],
+                            style: 'left'
+                        }, {
+                            width: '75%',
+                            stack: [unitPaymentOrder.incomeTaxCorrectionNo ||''],
                             style: 'left'
                         }]
                 }
