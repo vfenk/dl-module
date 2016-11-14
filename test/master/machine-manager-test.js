@@ -101,13 +101,11 @@ it(`#05. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             // validate.product(data);
-            data.code.should.equal(createdData.code);
             data.name.should.equal(createdData.name);
-            data.unit.should.equal(createdData.unit);
             data.process.should.equal(createdData.process);
             data.manufacture.should.equal(createdData.manufacture);
             data.year.should.equal(createdData.year);
-            data.machineCondition.should.equal(createdData.machineCondition);
+            data.condition.should.equal(createdData.condition);
             done();
         })
         .catch(e => {
