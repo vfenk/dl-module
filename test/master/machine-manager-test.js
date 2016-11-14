@@ -1,24 +1,29 @@
 var helper = require("../helper");
 var MachineManager = require("../../src/managers/master/machine-manager");
 var instanceManager = null;
+var UnitUtil = require('../data-util/master/unit-data-util');
 require("should");
 
 function getData() {
-    var Machine = require('dl-models').master.Machine;
-    var machine = new Machine();
+    return Promise.resolve(UnitUtil.getTestData())
+        .then(unit => {
+            var Machine = require('dl-models').master.Machine;
+            var machine = new Machine();
 
-    var now = new Date();
-    var stamp = now / 1000 | 0;
-    var code = stamp.toString(36);
+            var now = new Date();
+            var stamp = now / 1000 | 0;
+            var code = stamp.toString(36);
 
-    machine.name = `name [${code}]`;
-    machine.unit = `division [${code}]`;
-    machine.process = `subdivision [${code}]`;
-    machine.manufacture=`manufacture [${code}]`;
-    machine.year = now.getFullYear();
-    machine.machineCondition=`machine condition [${code}]`;
+            machine.name = `name [${code}]`;
+            machine.unitId = unit._id;
+            machine.unit = unit;
+            machine.process = `subdivision [${code}]`;
+            machine.manufacture=`manufacture [${code}]`;
+            machine.year = now.getFullYear();
+            machine.condition=`condition [${code}]`;
 
-    return machine;
+            return machine;
+        });
 }
 
 before('#00. connect db', function (done) {
@@ -77,11 +82,10 @@ it(`#03. should success when get created data with id`, function (done) {
 it(`#04. should success when update created data`, function (done) {
 
     createdData.name += '[updated]';
-    createdData.unit += '[updated]';
     createdData.process += '[updated]';
     createdData.manufacture += '[updated]';
     createdData.year += '[updated]';
-    createdData.machineCondition += '[updated]';
+    createdData.condition += '[updated]';
 
     instanceManager.update(createdData)
         .then(id => {
