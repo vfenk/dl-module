@@ -4,7 +4,7 @@ module.exports = function(unitReceiptNote) {
 
     var items = [].concat.apply([], unitReceiptNote.items);
 
-    var iso = "FM.FP-GB-15-005/R2";
+    var iso = "FM.PB-00-06-006";
     var number = unitReceiptNote.no;
 
     var locale = global.config.locale;
