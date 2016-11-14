@@ -59,6 +59,10 @@ module.exports = function(pox) {
                 }
 
             ]
+        },{
+            alignment: "center",
+            text: 'ORDER PEMBELIAN',
+            style: ['size09', 'bold']
         },
         '\n'
     ];
