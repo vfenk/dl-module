@@ -79,7 +79,7 @@ module.exports = function (purchaseRequest) {
                         stack: [':', ':']
                     }, {
                         width: '*',
-                        stack: [purchaseRequest.unit.subDivision, purchaseRequest.no]
+                        stack: [purchaseRequest.unit.name, purchaseRequest.no]
                     }],
                 style: ['size08']
 
@@ -92,7 +92,7 @@ module.exports = function (purchaseRequest) {
                 width: '30%',
                 columns: [{
                     width: '*',
-                    stack: [`Solo, ${moment(purchaseRequest.date).format(locale.date.format)} `],
+                    stack: [`Sukoharjo, ${moment(purchaseRequest.date).format(locale.date.format)} `],
                     alignment: "right",
                 }],
                 style: ['size08']
@@ -201,7 +201,7 @@ module.exports = function (purchaseRequest) {
             text: 'BAGIAN PEMBELIAN',
             style: 'tableHeader'
         }, {
-            text: 'KABAG PRODUKSI',
+            text: 'KEPALA BAGIAN',
             style: 'tableHeader'
         }, {
             text: 'YANG MEMERLUKAN',
