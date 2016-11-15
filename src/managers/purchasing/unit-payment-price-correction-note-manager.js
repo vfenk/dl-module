@@ -241,7 +241,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         .then(validData => {
                             var tasks = [];
                             var getPurchaseOrderById = [];
-                            validData.no = this.generateNo(validData.unitPaymentOrder.unit.code, validData.unitPaymentOrder.category.code);
+                            validData.no = this.generateNo(validData.unitPaymentOrder.division.code, validData.unitPaymentOrder.category.code);
                             //Update PO Internal
                             var poId = new ObjectId();
                             for (var _item of validData.items) {

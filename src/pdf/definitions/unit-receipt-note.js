@@ -13,39 +13,39 @@ module.exports = function(unitReceiptNote) {
     moment.locale(locale.name);
 
     var header = [{
-        columns: [{
-            alignment: "center",
-            text: 'BON PENERIMAAN BARANG',
-            style: ['size10', 'bold']
-        },
-        {
-            columns: [{
-                width: '*',
-                stack: [{
-                    text: 'PT DAN LIRIS',
-                    style: ['size15', 'bold']
-                }, {
-                    text: 'BANARAN SUKOHARJO',
-                    style: ['size09']
+        alignment: "center",
+        text: 'BON PENERIMAAN BARANG',
+        style: ['size10', 'bold']
+    }, {
+        columns: [
+            {
+                columns: [{
+                    width: '*',
+                    stack: [{
+                        text: 'PT DAN LIRIS',
+                        style: ['size15', 'bold']
+                    }, {
+                        text: 'BANARAN SUKOHARJO',
+                        style: ['size09']
+                    }]
                 }]
-            }]
 
-        },
-        {
-            columns: [{
-                width: '*',
-                stack: [{
-                    alignment: "right",
-                    text: ' ',
-                    style: ['size08', 'bold']
-                }, {
-                    alignment: "right",
-                    text: iso,
-                    style: ['size08', 'bold']
+            },
+            {
+                columns: [{
+                    width: '*',
+                    stack: [{
+                        alignment: "right",
+                        text: ' ',
+                        style: ['size15', 'bold']
+                    }, {
+                        alignment: "right",
+                        text: iso,
+                        style: ['size08', 'bold']
+                    }]
                 }]
-            }]
 
-        }]
+            }]
     }];
 
     var subHeader = [{
@@ -79,7 +79,7 @@ module.exports = function(unitReceiptNote) {
                     stack: [':', ':']
                 }, {
                     width: '*',
-                    stack: [unitReceiptNote.unit.subDivision, unitReceiptNote.no]
+                    stack: [unitReceiptNote.unit.name, unitReceiptNote.no]
                 }],
                 style: ['size08']
             }
