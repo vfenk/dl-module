@@ -72,10 +72,10 @@ module.exports = class MachineManager extends BaseManager {
                     if (!valid.name || valid.name == '')
                         errors["name"] = i18n.__("Machine.name.isExists:%s is required", i18n.__("Machine.name._:Name")); //"Nama harus diisi";
                     else if (_machine) {
-                        errors["name"] = i18n.__("Machine.name.isExists:%s is required", i18n.__("Machine.name._:Node")); //"Kode sudah ada";
+                        errors["name"] = i18n.__("Machine.name.isExists:%s is already exists", i18n.__("Machine.name._:Name")); //"Nama sudah ada";
                     }
                     if(!_unit)
-                        errors["unit"] = i18n.__("Machine.unit.isExists:%s is not exists", i18n.__("Machine.unit._:Node")); //"Unit tidak ada";
+                        errors["unit"] = i18n.__("Machine.unit.isExists:%s is not exists", i18n.__("Machine.unit._:Unit")); //"Unit tidak ada";
 
                     // 2c. begin: check if data has any error, reject if it has.
                      if (Object.getOwnPropertyNames(errors).length > 0) {
