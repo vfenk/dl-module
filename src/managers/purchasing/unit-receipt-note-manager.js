@@ -297,6 +297,15 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                     else
                                                         _item.isClosed = true;
                                                 }
+                                                for (var _fulfillment of _item.fulfillments) {
+                                                    if (_fulfillment.realizationQuantity.length > 0) {
+                                                        _deliveryOrder.isPosted = true;
+                                                        break;
+                                                    } else {
+                                                        _deliveryOrder.isPosted = false;
+                                                    }
+                                                }
+
                                                 if (!_item.isClosed) {
                                                     _deliveryOrder.isClosed = false;
                                                     break;
@@ -412,6 +421,14 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                             else
                                                                 _item.isClosed = true;
                                                         }
+                                                        for (var _fulfillment of _item.fulfillments) {
+                                                            if (_fulfillment.realizationQuantity.length > 0) {
+                                                                _deliveryOrder.isPosted = true;
+                                                                break;
+                                                            } else {
+                                                                _deliveryOrder.isPosted = false;
+                                                            }
+                                                        }
                                                         if (!_item.isClosed) {
                                                             _deliveryOrder.isClosed = false;
                                                             break;
@@ -517,7 +534,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                                         }
                                                                     }
                                                                     if (_index != null) {
-                                                                        fulfillment.realizationQuantity.splice(_index, 1);
+                                                                        _fulfillment.realizationQuantity.splice(_index, 1);
                                                                     }
                                                                     break;
                                                                 }
@@ -536,6 +553,14 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                             }
                                                             else
                                                                 _item.isClosed = true;
+                                                        }
+                                                        for (var _fulfillment of _item.fulfillments) {
+                                                            if (_fulfillment.realizationQuantity.length > 0) {
+                                                                _deliveryOrder.isPosted = true;
+                                                                break;
+                                                            } else {
+                                                                _deliveryOrder.isPosted = false;
+                                                            }
                                                         }
                                                         if (!_item.isClosed) {
                                                             _deliveryOrder.isClosed = false;
