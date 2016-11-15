@@ -8,6 +8,7 @@ module.exports = function (unitPaymentOrder) {
             return {
                 product: receiptNoteItem.product.name,
                 prNo: receiptNoteItem.purchaseOrder.purchaseRequest.no,
+                unitReceiptNoteNo: unitPaymentOrderItem.unitReceiptNote.no,
                 quantity: receiptNoteItem.deliveredQuantity,
                 uom: receiptNoteItem.deliveredUom.unit,
                 price: receiptNoteItem.pricePerDealUnit
@@ -25,10 +26,10 @@ module.exports = function (unitPaymentOrder) {
     var iso = "FM-6.00-06-012/R2";
     var number = unitPaymentOrder.no;
 
-    var locale = global.config.locale;  
+    var locale = global.config.locale;
 
     var moment = require('moment');
-    moment.locale(locale.name); 
+    moment.locale(locale.name);
 
     var initialValue = {
         price: 0,
@@ -39,10 +40,10 @@ module.exports = function (unitPaymentOrder) {
         .map(item => item.price * item.quantity)
         .reduce(function (prev, curr, index, arr) {
             return prev + curr;
-        }, 0); 
- 
+        }, 0);
+
     var incomeTax = unitPaymentOrder.incomeTaxNo != '' ? sum * 0.1 : 0;
-    var vat = unitPaymentOrder.vatNo != '' ? sum * (unitPaymentOrder.vatRate/100) : 0; 
+    var vat = unitPaymentOrder.vatNo != '' ? sum * (unitPaymentOrder.vatRate / 100) : 0;
 
     var header = [{
         columns: [
@@ -54,20 +55,20 @@ module.exports = function (unitPaymentOrder) {
                         text: '"DAN LIRIS"',
                         style: ['size20', 'bold']
                     }, {
-                            text: 'INDUSTRIAL & TRADING CO.LTD.',
-                            style: ['size08']
-                        }, {
-                            text: 'Kel. Banaran Kec. Grogol Kab. Sukoharjo',
-                            style: ['size08']
-                        },
-                        {
-                            text: 'Telp. (0271) 714400',
-                            style: ['size08']
-                        }]
+                        text: 'INDUSTRIAL & TRADING CO.LTD.',
+                        style: ['size08']
+                    }, {
+                        text: 'Kel. Banaran Kec. Grogol Kab. Sukoharjo',
+                        style: ['size08']
+                    },
+                    {
+                        text: 'Telp. (0271) 714400',
+                        style: ['size08']
+                    }]
                 }, {
-                        width: '28%',
-                        stack: ['NOTA KREDIT']
-                    },],
+                    width: '28%',
+                    stack: ['NOTA KREDIT']
+                },],
                 style: ['size20', "bold"]
 
             },
@@ -80,18 +81,18 @@ module.exports = function (unitPaymentOrder) {
                         text: iso,
                         style: ['size08']
                     }, {
-                            alignment: "left",
-                            text: 'SUKOHARJO, '+`${moment(unitPaymentOrder.date).format(locale.date.format)}`,
-                            style: ['size09']
-                        }, {
-                            alignment: "left",
-                            text: '( ' + unitPaymentOrder.supplier.code + ' )  ' + unitPaymentOrder.supplier.name,
-                            style: ['size09']
-                        }, {
-                            alignment: "left",
-                            text: unitPaymentOrder.supplier.address,
-                            style: ['size09']
-                        }
+                        alignment: "left",
+                        text: 'SUKOHARJO, ' + `${moment(unitPaymentOrder.date).format(locale.date.format)}`,
+                        style: ['size09']
+                    }, {
+                        alignment: "left",
+                        text: '( ' + unitPaymentOrder.supplier.code + ' )  ' + unitPaymentOrder.supplier.name,
+                        style: ['size09']
+                    }, {
+                        alignment: "left",
+                        text: unitPaymentOrder.supplier.address,
+                        style: ['size09']
+                    }
                     ]
                 }],
                 style: ['size08']
@@ -109,10 +110,10 @@ module.exports = function (unitPaymentOrder) {
                         text: 'Nota Pembelian ' + unitPaymentOrder.category.name + '      No. ' + number,
                         style: ['size08', "underline"]
                     },
-                        {
-                            text: '' + unitPaymentOrder.unit.division + ' ' + unitPaymentOrder.unit.subDivision,
-                            style: ['size08']
-                        }]
+                    {
+                        text: '' + unitPaymentOrder.unit.division + ' ' + unitPaymentOrder.unit.subDivision,
+                        style: ['size08']
+                    }]
 
                 }],
                 style: ['size09']
@@ -122,7 +123,7 @@ module.exports = function (unitPaymentOrder) {
 
     var line = [{
         canvas: [{
-    	       type: 'line',
+            type: 'line',
             x1: 0,
             y1: 5,
             x2: 378,
@@ -132,61 +133,69 @@ module.exports = function (unitPaymentOrder) {
         ]
     }, '\n'];
 
-    var thead = [{
-        text: 'No.',
-        style: 'tableHeader'
-    }, {
-            text: 'Banyak',
+    var thead = [
+        {
+            text: 'No.',
             style: 'tableHeader'
         }, {
-            text: 'Keterangan',
-            style: 'tableHeader'
-        }, {
-            text: 'Harga',
+            text: 'Nama Barang',
             style: 'tableHeader'
         }, {
             text: 'Jumlah',
+            style: 'tableHeader'
+        }, {
+            text: 'Harga Satuan',
+            style: 'tableHeader'
+        }, {
+            text: 'Harga Total',
             style: 'tableHeader'
         },
         {
             text: 'Nomor Order',
             style: 'tableHeader'
-        }];
-
+        },
+        {
+            text: 'Nomor Bon Unit',
+            style: 'tableHeader'
+        }
+    ];
 
     var tbody = items.map(function (item, index) {
         return [{
             text: (index + 1).toString() || '',
             style: ['size07', 'center']
         }, {
-                text: item.quantity + ' ' + item.uom,
-                style: ['size07', 'right']
-            }, {
-                text: item.product,
-                style: ['size07', 'left']
-            }, {
-                text: parseFloat(item.price).toLocaleString(locale, locale.currencyNotaItern),
-                style: ['size07', 'right']
-            }, {
-                text: parseFloat(item.price * item.quantity).toLocaleString(locale, locale.decimal),
-                style: ['size07', 'right']
-            }, {
-                text: item.prNo,
-                style: ['size07', 'center']
-            }];
+            text: item.product,
+            style: ['size07', 'left']
+        }, {
+            text: item.quantity + ' ' + item.uom,
+            style: ['size07', 'right']
+        }, {
+            text: parseFloat(item.price).toLocaleString(locale, locale.currencyNotaItern),
+            style: ['size07', 'right']
+        }, {
+            text: parseFloat(item.price * item.quantity).toLocaleString(locale, locale.decimal),
+            style: ['size07', 'right']
+        }, {
+            text: item.prNo,
+            style: ['size07', 'center']
+        }, {
+            text: item.unitReceiptNoteNo,
+            style: ['size07', 'center']
+        }];
     });
 
     tbody = tbody.length > 0 ? tbody : [
         [{
             text: "tidak ada barang",
             style: ['size08', 'center'],
-            colSpan: 6
-        }, "", "", "", ""]
+            colSpan: 7
+        }, "", "", "", "", ""]
     ];
 
     var table = [{
         table: {
-            widths: ['5%', '15%', '30%', '15%', '15%', '20%'],
+            widths: ['5%', '25%', '15%', '10%', '15%', '15%', '15%'],
             headerRows: 1,
             body: [].concat([thead], tbody)
         }
@@ -200,121 +209,121 @@ module.exports = function (unitPaymentOrder) {
                     stack: [''],
                     style: 'center'
                 }, {
-                        width: '20%',
-                        stack: [''],
-                        style: 'center'
-                    }, {
-                        width: '25%',
-                        stack: ['Jumlah . . . . . . . . . . . . . . RP'],
-                        style: 'left'
-                    },
-                    {
-                        width: '25%',
-                        stack: [parseFloat(sum).toLocaleString(locale, locale.decimal)],
-                        style: 'right'
-                    }]
+                    width: '20%',
+                    stack: [''],
+                    style: 'center'
+                }, {
+                    width: '25%',
+                    stack: ['Jumlah . . . . . . . . . . . . . . RP'],
+                    style: 'left'
+                },
+                {
+                    width: '25%',
+                    stack: [parseFloat(sum).toLocaleString(locale, locale.decimal)],
+                    style: 'right'
+                }]
             },
-                {
-                    columns: [{
-                        width: '30%',
-                        stack: ['PPh '+unitPaymentOrder.vat.name +' '+ unitPaymentOrder.vatRate+' %' ],
-                        style: 'left'
-                    }, {
-                            width: '20%',
-                            stack: ['RP     ' + parseFloat(vat).toLocaleString(locale, locale.currencyNotaItern)],
-                            style: 'left'
-                        }, {
-                            width: '25%',
-                            stack: ['PPn 10 %. . . . . . . . . . . . . RP '],
-                            style: 'left'
-                        },
-                        {
-                            width: '25%',
-                            stack: [parseFloat(incomeTax).toLocaleString(locale, locale.currencyNotaItern)],
-                            style: 'right'
-                        }]
+            {
+                columns: [{
+                    width: '30%',
+                    stack: ['PPh ' + unitPaymentOrder.vat.name + ' ' + unitPaymentOrder.vatRate + ' %'],
+                    style: 'left'
+                }, {
+                    width: '20%',
+                    stack: ['RP     ' + parseFloat(vat).toLocaleString(locale, locale.currencyNotaItern)],
+                    style: 'left'
+                }, {
+                    width: '25%',
+                    stack: ['PPn 10 %. . . . . . . . . . . . . RP '],
+                    style: 'left'
                 },
                 {
-                    columns: [{
-                        width: '30%',
-                        stack: ['Jumlah dibayar Ke Supplier '],
-                        style: 'left'
-                    }, {
-                            width: '20%',
-                            stack: ['RP     ' + parseFloat((sum + incomeTax) - vat).toLocaleString(locale, locale.currencyNotaItern)],
-                            style: 'left'
-                        }, {
-                            width: '25%',
-                            stack: ['T O T A L. . . . . . . . . . . . . . RP'],
-                            style: 'left'
-                        },
-                        {
-                            width: '25%',
-                            stack: [parseFloat(sum + incomeTax).toLocaleString(locale, locale.currencyNotaItern)],
-                            style: 'right'
-                        }]
+                    width: '25%',
+                    stack: [parseFloat(incomeTax).toLocaleString(locale, locale.currencyNotaItern)],
+                    style: 'right'
+                }]
+            },
+            {
+                columns: [{
+                    width: '30%',
+                    stack: ['Jumlah dibayar Ke Supplier '],
+                    style: 'left'
+                }, {
+                    width: '20%',
+                    stack: ['RP     ' + parseFloat((sum + incomeTax) - vat).toLocaleString(locale, locale.currencyNotaItern)],
+                    style: 'left'
+                }, {
+                    width: '25%',
+                    stack: ['T O T A L. . . . . . . . . . . . . . RP'],
+                    style: 'left'
                 },
                 {
-                    columns: [{
-                        width: '25%',
-                        stack: ['\nTerbilang :'],
-                        style: 'left'
-                    }, {
-                            width: '75%',
-                            stack: ['\n' + say((sum + incomeTax) - vat)],
-                            style: 'left'
-                        }]
+                    width: '25%',
+                    stack: [parseFloat(sum + incomeTax).toLocaleString(locale, locale.currencyNotaItern)],
+                    style: 'right'
+                }]
+            },
+            {
+                columns: [{
+                    width: '25%',
+                    stack: ['\nTerbilang :'],
+                    style: 'left'
+                }, {
+                    width: '75%',
+                    stack: ['\n' + say((sum + incomeTax) - vat)],
+                    style: 'left'
+                }]
+            },
+            {
+                columns: [{
+                    width: '25%',
+                    stack: ['\nPerjanjian Pembayaran :'],
+                    style: 'left'
+                }, {
+                    width: '75%',
+                    stack: ['\n' + `${moment(unitPaymentOrder.dueDate).format(locale.date.format)}`],
+                    style: 'left'
+                }]
+            },
+            {
+                columns: [{
+                    width: '25%',
+                    stack: ['Nota :'],
+                    style: 'left'
+                }, {
+                    width: '25%',
+                    stack: ['' + unitPaymentOrder.invoceNo],
+                    style: 'left'
+                }, {
+                    width: '25%',
+                    stack: ['Barang Datang :'],
+                    style: 'left'
+                }, {
+                    width: '75%',
+                    stack: [`${moment(maxReceiptNoteDate).format(locale.date.format)}`],
+                    style: 'left'
+                }]
+            },
+            {
+                columns: [{
+                    width: '25%',
+                    stack: ['Ket :'],
+                    style: 'left'
+                }, {
+                    width: '75%',
+                    stack: [unitPaymentOrder.remark || ''],
+                    style: 'left'
                 },
                 {
-                    columns: [{
-                        width: '25%',
-                        stack: ['\nPerjanjian Pembayaran :'],
-                        style: 'left'
-                    }, {
-                            width: '75%',
-                            stack: ['\n'+`${moment(unitPaymentOrder.dueDate).format(locale.date.format)}`],
-                            style: 'left'
-                        }]
-                },
-                {
-                    columns: [{
-                        width: '25%',
-                        stack: ['Nota :'],
-                        style: 'left'
-                    }, {
-                            width: '25%',
-                            stack: [''+unitPaymentOrder.invoceNo],
-                            style: 'left'
-                        }, {
-                            width: '25%',
-                            stack: ['Barang Datang :'],
-                            style: 'left'
-                        }, {
-                            width: '75%',
-                            stack: [`${moment(maxReceiptNoteDate).format(locale.date.format)}`],
-                            style: 'left'
-                        }]
-                },
-                {
-                    columns: [{
-                        width: '25%',
-                        stack: ['Ket :'],
-                        style: 'left'
-                    }, {
-                            width: '75%',
-                            stack: [unitPaymentOrder.remark || ''],
-                            style: 'left'
-                        },
-                        {
-                            width: '25%',
-                            stack: ['Nomor Faktur Pajak PPN:'],
-                            style: 'left'
-                        }, {
-                            width: '75%',
-                            stack: [unitPaymentOrder.incomeTaxCorrectionNo ||''],
-                            style: 'left'
-                        }]
-                }
+                    width: '25%',
+                    stack: ['Nomor Faktur Pajak PPN:'],
+                    style: 'left'
+                }, {
+                    width: '75%',
+                    stack: [unitPaymentOrder.incomeTaxCorrectionNo || ''],
+                    style: 'left'
+                }]
+            }
             ],
             style: ['size08']
         }
@@ -328,19 +337,19 @@ module.exports = function (unitPaymentOrder) {
                     stack: ['Diperiksa,\nVerifikasi\n\n\n\n', '(_______________________)'],
                     style: 'center'
                 }, {
-                        width: '25%',
-                        stack: ['Mengetahui,\nPimpinan Bagian\n\n\n\n', '(_______________________)'],
-                        style: 'center'
-                    }, {
-                        width: '25%',
-                        stack: ['Tanda Terima,\nBagian Pembelian\n\n\n\n', '(_______________________)'],
-                        style: 'center'
-                    },
-                    {
-                        width: '25%',
-                        stack: ['Dibuat Oleh,\n\n\n\n\n', '(_______' + unitPaymentOrder._createdBy + '_______)'],
-                        style: 'center'
-                    }]
+                    width: '25%',
+                    stack: ['Mengetahui,\nPimpinan Bagian\n\n\n\n', '(_______________________)'],
+                    style: 'center'
+                }, {
+                    width: '25%',
+                    stack: ['Tanda Terima,\nBagian Pembelian\n\n\n\n', '(_______________________)'],
+                    style: 'center'
+                },
+                {
+                    width: '25%',
+                    stack: ['Dibuat Oleh,\n\n\n\n\n', '(_______' + unitPaymentOrder._createdBy + '_______)'],
+                    style: 'center'
+                }]
             }
             ],
             style: ['size08']
