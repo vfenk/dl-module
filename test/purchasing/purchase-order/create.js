@@ -2,13 +2,13 @@ require("should");
 var helper = require("../../helper");
 
 var purchaseRequestDataUtil = require('../../data').transaction.purchaseRequest;
-var validatePR = require("dl-models").validator.purchasing.purchaseRequest;
+var validatePurchaseRequest = require("dl-models").validator.purchasing.purchaseRequest;
 var PurchaseRequestManager = require("../../../src/managers/purchasing/purchase-request-manager");
 var purchaseRequestManager = null;
 var purchaseRequest;
 
 var purchaseOrderDataUtil = require('../../data').transaction.purchaseOrder;
-var validatePO = require("dl-models").validator.purchasing.purchaseOrder;
+var validatePurchaseOrder = require("dl-models").validator.purchasing.purchaseOrder;
 var PurchaseOrderManager = require("../../../src/managers/purchasing/purchase-order-manager");
 var purchaseOrderManager = null;
 var purchaseOrder;
@@ -26,7 +26,7 @@ before('#00. connect db', function(done) {
             purchaseRequestDataUtil.getNew()
                 .then(pr => {
                     purchaseRequest = pr;
-                    validatePR(purchaseRequest);
+                    validatePurchaseRequest(purchaseRequest);
                     done();
                 })
                 .catch(e => {
@@ -42,7 +42,7 @@ it('#01. should failed when create new purchase-order with unposted purchase-req
     purchaseOrderDataUtil.getNew(purchaseRequest)
         .then(po => {
             purchaseOrder = po;
-            validatePO(purchaseOrder);
+            validatePurchaseOrder(purchaseOrder);
             done(purchaseRequest, "purchase-request cannot be used to create purchase-order due unposted status");
         })
         .catch(e => {
@@ -62,7 +62,7 @@ it('#02. should success when create new purchase-order with posted purchase-requ
                     purchaseOrderDataUtil.getNew(purchaseRequest)
                         .then(po => {
                             purchaseOrder = po;
-                            validatePO(purchaseOrder);
+                            validatePurchaseOrder(purchaseOrder);
                             done();
                         })
                         .catch(e => {
@@ -78,21 +78,40 @@ it('#02. should success when create new purchase-order with posted purchase-requ
         });
 });
 
-it('#03. purchase-request.isUsed should be true after create purchase-order', function(done) {
+it('#03. purchase-request.isUsed should be true after create purchase-order and purchase-request.purchaseOrderIds should contains puchase-orderId', function(done) {
     var prId = purchaseRequest._id;
     purchaseRequestManager.getSingleById(prId)
         .then(pr => {
             purchaseRequest = pr;
-            validatePR(purchaseRequest);
+            validatePurchaseRequest(purchaseRequest);
             purchaseRequest.isUsed.should.equal(true, "purchase-request.isPosted should be true after posted");
+            purchaseRequest.purchaseOrderIds.find(poId => {
+                return poId.toString() == purchaseOrder._id.toString();
+            }).should.not.equal(null, "purchase-request.purchaseOrderIds should contains purchase-order._id");
             done();
         })
         .catch(e => {
             done(e);
         });
-}); 
+});
 
-it('#04. purchase-order items should the same as purchase-request items', function(done) {
+it('#04. purchase-request.purchaseOrderIds should contains puchase-orderId', function(done) {
+    var prId = purchaseRequest._id;
+    purchaseRequestManager.getSingleById(prId)
+        .then(pr => {
+            purchaseRequest = pr;
+            validatePurchaseRequest(purchaseRequest);
+            purchaseRequest.purchaseOrderIds.find(poId => {
+                return poId.toString() == purchaseOrder._id.toString();
+            }).should.not.equal(null, "purchase-request.purchaseOrderIds should contains purchase-order._id");
+            done();
+        })
+        .catch(e => {
+            done(e);
+        });
+});
+
+it('#05. purchase-order items should be the same as purchase-request items', function(done) {
     purchaseOrder.items.length.should.equal(purchaseRequest.items.length);
     for (var poItem of purchaseOrder.items) {
         var prItem = purchaseRequest.items.find(prItem => {
@@ -103,4 +122,4 @@ it('#04. purchase-order items should the same as purchase-request items', functi
         poItem.defaultUom._id.toString().should.equal(prItem.uom._id.toString(), "purchase-order-item.defaultUom does not equal purchase-request-item.uom");
     }
     done();
-});
+}); 
