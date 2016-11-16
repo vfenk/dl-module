@@ -128,8 +128,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
     delete(purchaseOrderExternal) {
         return new Promise((resolve, reject) => {
-            this._createIndexes()
-                .then((createIndexResults) => {
+            // this._createIndexes()
+            //     .then((createIndexResults) => {
                     this._validate(purchaseOrderExternal)
                         .then(validData => {
                             validData._deleted = true;
@@ -167,10 +167,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                })
-                .catch(e => {
-                    reject(e);
-                });
+                // })
+                // .catch(e => {
+                //     reject(e);
+                // });
         });
     }
 

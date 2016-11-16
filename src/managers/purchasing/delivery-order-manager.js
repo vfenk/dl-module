@@ -236,8 +236,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var now = new Date();
             var stamp = now / 1000 | 0;
             var code = stamp.toString();
-            this._createIndexes()
-                .then((createIndexResults) => {
+            // this._createIndexes()
+            //     .then((createIndexResults) => {
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
                             validDeliveryOrder.refNo = `${code}-${validDeliveryOrder.no}`;
@@ -364,10 +364,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                })
-                .catch(e => {
-                    reject(e);
-                });
+                // })
+                // .catch(e => {
+                //     reject(e);
+                // });
         });
     }
 
@@ -376,8 +376,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var tasks = [];
             var tasksPoExternal = [];
             var getPurchaseOrderById = [];
-            this._createIndexes()
-                .then((createIndexResults) => {
+            // this._createIndexes()
+            //     .then((createIndexResults) => {
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
                             //UPDATE PO INTERNAL
@@ -505,10 +505,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                })
-                .catch(e => {
-                    reject(e);
-                });
+                // })
+                // .catch(e => {
+                //     reject(e);
+                // });
         });
     }
 
@@ -517,8 +517,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var tasks = [];
             var tasksPoExternal = [];
             var getPurchaseOrderById = [];
-            this._createIndexes()
-                .then((createIndexResults) => {
+            // this._createIndexes()
+            //     .then((createIndexResults) => {
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
                             validDeliveryOrder._deleted = true;
@@ -647,10 +647,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                })
-                .catch(e => {
-                    reject(e);
-                });
+                // })
+                // .catch(e => {
+                //     reject(e);
+                // });
         });
     }
 

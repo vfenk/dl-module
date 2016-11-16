@@ -350,8 +350,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         var tasksUpdatePoInternal = [];
         var getPurchaseOrderById = [];
         return new Promise((resolve, reject) => {
-            this._createIndexes()
-                .then((createIndexResults) => {
+            // this._createIndexes()
+            //     .then((createIndexResults) => {
                     this._validate(unitReceiptNote)
                         .then(validUnitReceiptNote => {
                             //Update PO Internal
@@ -467,10 +467,10 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                })
-                .catch(e => {
-                    reject(e);
-                });
+                // })
+                // .catch(e => {
+                //     reject(e);
+                // });
         });
     }
 
@@ -478,8 +478,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         var tasksUpdatePoInternal = [];
         var getPurchaseOrderById = [];
         return new Promise((resolve, reject) => {
-            this._createIndexes()
-                .then((createIndexResults) => {
+            // this._createIndexes()
+            //     .then((createIndexResults) => {
                     this._validate(unitReceiptNote)
                         .then(validUnitReceiptNote => {
                             validUnitReceiptNote._deleted = true;
@@ -599,10 +599,10 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                })
-                .catch(e => {
-                    reject(e);
-                });
+                // })
+                // .catch(e => {
+                //     reject(e);
+                // });
         });
     }
 
