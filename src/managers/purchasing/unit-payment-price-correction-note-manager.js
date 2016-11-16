@@ -143,7 +143,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
     _getQuery(paging) {
         var deletedFilter = {
-            _deleted: false
+            _deleted: false,
+            $or: [
+                { priceCorrectionType: "Harga Satuan" },
+                { priceCorrectionType: "Harga Total" }
+            ]
         },
             keywordFilter = {};
 
@@ -178,24 +182,6 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
             '$and': [deletedFilter, paging.filter, keywordFilter]
         }
         return query;
-    }
-
-    _createIndexes() {
-        var createdDateIndex = {
-            name: `ix_${map.master.collection.PurchaseOrder}__createdDate`,
-            key: {
-                _createdDate: -1
-            }
-        }
-        var poNoIndex = {
-            name: `ix_${map.master.collection.PurchaseOrder}_no`,
-            key: {
-                no: -1
-            },
-            unique: true
-        }
-
-        return this.collection.createIndexes([createdDateIndex, poNoIndex]);
     }
 
     pdf(id) {
@@ -235,8 +221,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
     create(unitPaymentPriceCorrectionNote) {
         return new Promise((resolve, reject) => {
-            this._createIndexes()
-                .then((createIndexResults) => {
+            // this._createIndexes()
+            //     .then((createIndexResults) => {
                     this._validate(unitPaymentPriceCorrectionNote)
                         .then(validData => {
                             var tasks = [];
@@ -266,7 +252,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                                 fulfillmentPoItem.priceCorrectionDate = validData.date;
                                                                 fulfillmentPoItem.priceCorrectionNo = validData.no;
                                                                 fulfillmentPoItem.priceCorrectionPriceTotal = (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate);
-                                                                fulfillmentPoItem.priceCorrectionRemark = validData.remark;
+                                                                fulfillmentPoItem.priceCorrectionRemark = `Koreksi ${validData.priceCorrectionType}`;
                                                                 break;
                                                             }
                                                         }
@@ -300,23 +286,23 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         .catch(e => {
                             reject(e);
                         });
-                })
-                .catch(e => {
-                    reject(e);
-                });
+                // })
+                // .catch(e => {
+                //     reject(e);
+                // });
         });
     }
 
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.purchasing.collection.UnitPaymentPriceCorrectionNote}__updatedDate`,
+            name: `ix_${map.purchasing.collection.UnitPaymentCorrectionNote}__updatedDate`,
             key: {
                 _updatedDate: -1
             }
         }
 
         var noIndex = {
-            name: `ix_${map.purchasing.collection.UnitPaymentPriceCorrectionNote}_no`,
+            name: `ix_${map.purchasing.collection.UnitPaymentCorrectionNote}_no`,
             key: {
                 no: 1
             },
@@ -328,8 +314,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
     update(unitPaymentPriceCorrectionNote) {
         return new Promise((resolve, reject) => {
-            this._createIndexes()
-                .then((createIndexResults) => {
+            // this._createIndexes()
+            //     .then((createIndexResults) => {
                     this._validate(unitPaymentPriceCorrectionNote)
                         .then(validData => {
                             var getPurchaseOrderById = [];
@@ -357,7 +343,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                                 fulfillmentPoItem.priceCorrectionDate = validData.date;
                                                                 fulfillmentPoItem.priceCorrectionNo = validData.no;
                                                                 fulfillmentPoItem.priceCorrectionPriceTotal = (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate);
-                                                                fulfillmentPoItem.priceCorrectionRemark = validData.remark;
+                                                                fulfillmentPoItem.priceCorrectionRemark = `Koreksi ${validData.priceCorrectionType}`;
                                                                 break;
                                                             }
                                                         }
@@ -390,17 +376,17 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         .catch(e => {
                             reject(e);
                         });
-                })
-                .catch(e => {
-                    reject(e);
-                });
+                // })
+                // .catch(e => {
+                //     reject(e);
+                // });
         });
     }
 
     delete(unitPaymentPriceCorrectionNote) {
         return new Promise((resolve, reject) => {
-            this._createIndexes()
-                .then((createIndexResults) => {
+            // this._createIndexes()
+            //     .then((createIndexResults) => {
                     this._validate(unitPaymentPriceCorrectionNote)
                         .then(validData => {
                             var tasks = [];
@@ -462,10 +448,10 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         .catch(e => {
                             reject(e);
                         });
-                })
-                .catch(e => {
-                    reject(e);
-                });
+                // })
+                // .catch(e => {
+                //     reject(e);
+                // });
         });
     }
 
