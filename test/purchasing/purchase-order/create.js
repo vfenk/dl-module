@@ -104,3 +104,19 @@ it('#04. purchase-order items should the same as purchase-request items', functi
     }
     done();
 });
+
+it('#05. should failed when create new purchase-order with already used purchase-request', function(done) {
+    purchaseOrderDataUtil.getNew(purchaseRequest)
+        .then(po => {
+            purchaseOrder = po;
+            purchaseOrder.purchaseRequest = purchaseRequest;
+            purchaseOrder.purchaseRequestId = purchaseRequest._id;
+            validatePO(purchaseOrder);
+            done(purchaseRequest, "purchase-request cannot be used to create purchase-order due unposted status");
+        })
+        .catch(e => {
+            e.errors.should.have.property('purchaseRequest');
+            done();
+        });
+});
+

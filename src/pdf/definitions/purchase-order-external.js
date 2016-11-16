@@ -59,6 +59,10 @@ module.exports = function(pox) {
                 }
 
             ]
+        },{
+            alignment: "center",
+            text: 'ORDER PEMBELIAN',
+            style: ['size09', 'bold']
         },
         '\n'
     ];
@@ -75,7 +79,7 @@ module.exports = function(pox) {
         }, {
             width: '35%',
             stack: [
-                `Solo, ${moment(pox.date).format(locale.date.format)} `, {
+                `Sukoharjo, ${moment(pox.date).format(locale.date.format)} `, {
                     text: [
                         'Mohon', {
                             text: ' di-fax kembali',

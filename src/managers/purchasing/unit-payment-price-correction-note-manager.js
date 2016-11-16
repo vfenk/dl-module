@@ -6,14 +6,14 @@ var assert = require('assert');
 var map = DLModels.map;
 var i18n = require('dl-i18n');
 var PurchaseOrderManager = require('./purchase-order-manager');
-var UnitPaymentPriceCorrectionNote = DLModels.purchasing.UnitPaymentPriceCorrectionNote;
+var UnitPaymentCorrectionNote = DLModels.purchasing.UnitPaymentCorrectionNote;
 var UnitPaymentOrderManager = require('./unit-payment-order-manager');
 var BaseManager = require('../base-manager');
 
 module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
-        this.collection = this.db.use(map.purchasing.collection.UnitPaymentPriceCorrectionNote);
+        this.collection = this.db.use(map.purchasing.collection.UnitPaymentCorrectionNote);
         this.unitPaymentOrderManager = new UnitPaymentOrderManager(db, user);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
     }
@@ -29,13 +29,13 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        "no": valid.no
-                    }, {
-                        _deleted: false
-                    }]
+                    "no": valid.no
+                }, {
+                    _deleted: false
+                }]
             });
 
-            var getUnitPaymentOrder = this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id);
+            var getUnitPaymentOrder = valid.unitPaymentOrder ? this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id) : Promise.resolve(null);
 
             Promise.all([getUnitPaymentPriceCorrectionNote, getUnitPaymentOrder])
                 .then(results => {
@@ -111,11 +111,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
                                 if (_purchaseOrderId.equals(_unitReceiptNoteItem.purchaseOrder._id) && _productId.equals(_unitReceiptNoteItem.product._id)) {
                                     item.purchaseOrderId = new ObjectId(_unitReceiptNoteItem.purchaseOrder._id);
-                                    item.purchaseOrder = _unitReceiptNoteItem.purchaseOrder; 
+                                    item.purchaseOrder = _unitReceiptNoteItem.purchaseOrder;
                                     item.purchaseOrder._id = new ObjectId(_unitReceiptNoteItem.purchaseOrder._id);
                                     item.productId = new ObjectId(_unitReceiptNoteItem.product._id);
                                     item.product = _unitReceiptNoteItem.product;
-                                    item.product._id = new ObjectId(_unitReceiptNoteItem.product._id); 
+                                    item.product._id = new ObjectId(_unitReceiptNoteItem.product._id);
                                     item.quantity = _unitReceiptNoteItem.deliveredQuantity;
                                     item.uom = _unitReceiptNoteItem.deliveredUom;
                                     item.uomId = new ObjectId(_unitReceiptNoteItem.deliveredUom._id);
@@ -129,7 +129,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                     }
 
                     if (!valid.stamp)
-                        valid = new UnitPaymentPriceCorrectionNote(valid);
+                        valid = new UnitPaymentCorrectionNote(valid);
 
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
@@ -241,7 +241,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         .then(validData => {
                             var tasks = [];
                             var getPurchaseOrderById = [];
-                            validData.no = this.generateNo(validData.unitPaymentOrder.unit.code, validData.unitPaymentOrder.category.code);
+                            validData.no = this.generateNo(validData.unitPaymentOrder.division.code, validData.unitPaymentOrder.category.code);
                             //Update PO Internal
                             var poId = new ObjectId();
                             for (var _item of validData.items) {
@@ -469,5 +469,26 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         });
     }
 
+    pdfReturNote(id) {
+        return new Promise((resolve, reject) => {
+            this.getSingleById(id)
+                .then(unitReceiptNote => {
+                    var getDefinition = require('../../pdf/definitions/unit-payment-correction-retur-note');
+                    var definition = getDefinition(unitReceiptNote);
 
+                    var generatePdf = require('../../pdf/pdf-generator');
+                    generatePdf(definition)
+                        .then(binary => {
+                            resolve(binary);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+
+        });
+    }
 }
