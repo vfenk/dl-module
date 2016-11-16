@@ -257,14 +257,14 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
 
      _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.production.spinning.winding.collection.SpinningProductQuality}__updatedDate`,
+            name: `ix_${map.production.spinning.winding.collection.WindingQualitySampling}__updatedDate`,
             key: {
                 _updatedDate: -1
             }
         }
 
         var codeIndex = {
-            name: `ix_${map.production.spinning.winding.collection.SpinningProductQuality}_spinning_date_machineId_threadName`,
+            name: `ix_${map.production.spinning.winding.collection.WindingQualitySampling}_spinning_date_machineId_threadName`,
             key: {
                 spinning: 1,
                 date: 1,
