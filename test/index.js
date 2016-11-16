@@ -21,7 +21,8 @@ describe('#dl-module', function(done) {
     // test('@master/currency-manager', './master/currency-manager-test');
     // test('@master/vat-manager', './master/vat-manager-test');
     // test('@master/budget-manager', './master/budget-manager-test');
-    test('@master/machine-manager', './master/machine-manager-test');
+    // test('@master/machine-manager', './master/machine-manager-test');
+    test('@master/uster-classification-manager', './master/uster-classification-manager-test');
     // //Purchasing 
     // test('@purchasing/purchase-order-manager', './purchasing/purchase-order-manager-test');
     // test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
@@ -31,8 +32,12 @@ describe('#dl-module', function(done) {
     // test('@purchasing/unit-payment-price-correction-note', './purchasing/unit-payment-price-correction-note-manager-test');
     // test('@purchasing/unit-payment-order', './purchasing/unit-payment-order-test');
 
-    test('@purchasing/purchase-request/create', './purchasing/purchase-request/create');
-    test('@purchasing/purchase-request/post', './purchasing/purchase-request/post');
-    test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
-    test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
+    // test('@purchasing/purchase-request/create', './purchasing/purchase-request/create');
+    // test('@purchasing/purchase-request/post', './purchasing/purchase-request/post');
+    // test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
+    // test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
+    
+    //  test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+
+
 })
