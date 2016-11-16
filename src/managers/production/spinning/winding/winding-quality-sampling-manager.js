@@ -139,34 +139,34 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                             _usterGreatThen = a;
                     }
                     if (!valid.spinning || valid.spinning == '')
-                        errors["spinning"] = i18n.__("SpinningProductQuality.spinning.isRequired:%s is required", i18n.__("SpinningProductQuality.spinning._:Spinning")); //"Spinning harus diisi ";
+                        errors["spinning"] = i18n.__("WindingQualitySampling.spinning.isRequired:%s is required", i18n.__("WindingQualitySampling.spinning._:Spinning")); //"Spinning harus diisi ";
                     else if(_windingQuality)
-                        errors["spinning"] = i18n.__(`SpinningProductQuality.spinning.isRequired:%s with same Product, Machine and Date is already exists`, i18n.__("SpinningProductQuality.spinning._:Spinning")); //"Spinning dengan produk, mesin dan tanggal yang sama tidak boleh";
+                        errors["spinning"] = i18n.__(`WindingQualitySampling.spinning.isRequired:%s with same Product, Machine and Date is already exists`, i18n.__("WindingQualitySampling.spinning._:Spinning")); //"Spinning dengan produk, mesin dan tanggal yang sama tidak boleh";
 
                     if (!valid.date || valid.date == '')
-                        errors["date"] = i18n.__("SpinningProductQuality.date.isExists:%s is required", i18n.__("SpinningProductQuality.date._:date")); //"Tanggal tidak boleh kosong";
+                        errors["date"] = i18n.__("WindingQualitySampling.date.isExists:%s is required", i18n.__("WindingQualitySampling.date._:date")); //"Tanggal tidak boleh kosong";
                     else if (dateProcess > dateNow)
-                        errors["date"] = i18n.__("SpinningProductQuality.date.isGreater:%s is greater than today", i18n.__("SpinningProductQuality.date._:Date"));//"Tanggal tidak boleh lebih besar dari tanggal hari ini";
+                        errors["date"] = i18n.__("WindingQualitySampling.date.isGreater:%s is greater than today", i18n.__("WindingQualitySampling.date._:Date"));//"Tanggal tidak boleh lebih besar dari tanggal hari ini";
 
                     if (!valid.machine)
-                        errors["machine"] = i18n.__("SpinningProductQuality.machine.name.isRequired:%s is required", i18n.__("SpinningProductQuality.machine.name._:Machine")); //"Nama Mesin tidak boleh kosong";
+                        errors["machine"] = i18n.__("WindingQualitySampling.machine.name.isRequired:%s is required", i18n.__("WindingQualitySampling.machine.name._:Machine")); //"Nama Mesin tidak boleh kosong";
                     else if(!_machine)
-                        errors["machine"] = i18n.__("SpinningProductQuality.machine.name.isRequired:%s is not exists", i18n.__("SpinningProductQuality.machine.name._:Machine")); //"Mesin sudah tidak ada di master mesin";
+                        errors["machine"] = i18n.__("WindingQualitySampling.machine.name.isRequired:%s is not exists", i18n.__("WindingQualitySampling.machine.name._:Machine")); //"Mesin sudah tidak ada di master mesin";
 
                     if (!valid.threadName)
-                        errors["threadName"] = i18n.__("SpinningProductQuality.threadName.isRequired:%s is required", i18n.__("SpinningProductQuality.threadName._:Thread")); //"Nama Benang tidak boleh kosong";
+                        errors["threadName"] = i18n.__("WindingQualitySampling.threadName.isRequired:%s is required", i18n.__("WindingQualitySampling.threadName._:Thread")); //"Nama Benang tidak boleh kosong";
                     else if(!_usterGreatThen && !_usterLessThen)
-                        errors["threadName"] = i18n.__("SpinningProductQuality.threadName.isRequired:%s has no uster classification", i18n.__("SpinningProductQuality.threadName._:Thread")); //"Benang tidak memiliki klassifikasi Uster";
+                        errors["threadName"] = i18n.__("WindingQualitySampling.threadName.isRequired:%s has no uster classification", i18n.__("WindingQualitySampling.threadName._:Thread")); //"Benang tidak memiliki klassifikasi Uster";
 
 
                     if (!valid.U || valid.U == 0)
-                        errors["U"] = i18n.__("SpinningProductQuality.U.isRequired:%s is required", i18n.__("SpinningProductQuality.U._:U")); //"U tidak boleh kosong";
+                        errors["U"] = i18n.__("WindingQualitySampling.U.isRequired:%s is required", i18n.__("WindingQualitySampling.U._:U")); //"U tidak boleh kosong";
 
                     if (!valid.sys || valid.sys == 0)
-                        errors["sys"] = i18n.__("SpinningProductQuality.sys.isRequired:%s is required", i18n.__("SpinningProductQuality.sys._:Sys")); //"Sys tidak boleh kosong";
+                        errors["sys"] = i18n.__("WindingQualitySampling.sys.isRequired:%s is required", i18n.__("WindingQualitySampling.sys._:Sys")); //"Sys tidak boleh kosong";
 
                     if (!valid.elongation || valid.elongation == 0)
-                        errors["elongation"] = i18n.__("SpinningProductQuality.elongation.isRequired:%s is required", i18n.__("SpinningProductQuality.elongation._:Elongation")); //"Elongation tidak boleh kosong";
+                        errors["elongation"] = i18n.__("WindingQualitySampling.elongation.isRequired:%s is required", i18n.__("WindingQualitySampling.elongation._:Elongation")); //"Elongation tidak boleh kosong";
 
                     // 2c. begin: check if data has any error, reject if it has.
                      if (Object.getOwnPropertyNames(errors).length > 0) {
@@ -257,14 +257,15 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
 
      _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.production.spinning.winding.collection.SpinningProductQuality}__updatedDate`,
+            name: `ix_${map.production.spinning.winding.collection.WindingQualitySampling}__updatedDate`,
+
             key: {
                 _updatedDate: -1
             }
         }
 
         var codeIndex = {
-            name: `ix_${map.production.spinning.winding.collection.SpinningProductQuality}_spinning_date_machineId_threadName`,
+            name: `ix_${map.production.spinning.winding.collection.WindingQualitySampling}_spinning_date_machineId_threadName`,
             key: {
                 spinning: 1,
                 date: 1,

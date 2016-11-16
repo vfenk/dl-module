@@ -37,7 +37,8 @@ describe('#dl-module', function(done) {
     // test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
     // test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
     
-    //  test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+     test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+
 
 
 })
