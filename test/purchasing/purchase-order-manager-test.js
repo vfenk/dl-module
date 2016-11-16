@@ -1,13 +1,13 @@
 'use strict';
 
 var should = require('should');
-var helper = require("../helper"); 
+var helper = require("../helper");
 var validatorPurchasing = require('dl-models').validator.purchasing;
 var PurchaseOrderBaseManager = require("../../src/managers/purchasing/purchase-order-manager");
 var purchaseOrderManager = null;
 var purchaseOrder = require('../data').transaction.purchaseOrder;
 
-before('#00. connect db', function (done) {
+before('#00. connect db', function(done) {
     helper.getDb()
         .then(db => {
             purchaseOrderManager = new PurchaseOrderBaseManager(db, {
@@ -21,7 +21,7 @@ before('#00. connect db', function (done) {
 });
 
 var purchaseOrderId;
-it('#01. should success when create new data purchase order', function (done) {
+it('#01. should success when create new data purchase order', function(done) {
     purchaseOrder.getNew()
         .then(data => {
             data._id.should.be.Object();
@@ -33,13 +33,15 @@ it('#01. should success when create new data purchase order', function (done) {
         })
 });
 
-it('#02. should success when split purchase order', function (done) {
-    purchaseOrderManager.getSingleByQuery({ _id: purchaseOrderId })
-        .then(result => { 
-            result.sourcePurchaseOrderId=result._id;
-            result.sourcePurchaseOrder=result;
+it('#02. should success when split purchase order', function(done) {
+    purchaseOrderManager.getSingleByQuery({
+            _id: purchaseOrderId
+        })
+        .then(result => {
+            result.sourcePurchaseOrderId = result._id;
+            result.sourcePurchaseOrder = result;
             for (var purchaseOrderItem of result.items) {
-                purchaseOrderItem.defaultQuantity = 50;
+                purchaseOrderItem.defaultQuantity = 1;
             }
             purchaseOrderManager.split(result)
                 .then(id => {
@@ -48,16 +50,18 @@ it('#02. should success when split purchase order', function (done) {
                 })
                 .catch(e => {
                     done(e);
-                })
+                });
         })
         .catch(e => {
             done(e);
-        })
+        });
 });
 
 var purchaseOrder;
-it(`#03. should success when get created data purchase order with id`, function (done) {
-    purchaseOrderManager.getSingleByQuery({ _id: purchaseOrderId })
+it(`#03. should success when get created data purchase order with id`, function(done) {
+    purchaseOrderManager.getSingleByQuery({
+            _id: purchaseOrderId
+        })
         .then(data => {
             validatorPurchasing.purchaseOrder(data);
             data.should.instanceof(Object);
@@ -66,10 +70,10 @@ it(`#03. should success when get created data purchase order with id`, function 
         })
         .catch(e => {
             done(e);
-        })
+        });
 });
 
-it(`#04. should success when update created data purchase order`, function (done) {
+it(`#04. should success when update created data purchase order`, function(done) {
     purchaseOrder.remark += '[updated]';
     purchaseOrderManager.update(purchaseOrder)
         .then(id => {
@@ -81,18 +85,20 @@ it(`#04. should success when update created data purchase order`, function (done
         });
 });
 
-it(`#05. should success when get updated data purchase order with id`, function (done) {
-    purchaseOrderManager.getSingleByQuery({ _id: purchaseOrderId })
+it(`#05. should success when get updated data purchase order with id`, function(done) {
+    purchaseOrderManager.getSingleByQuery({
+            _id: purchaseOrderId
+        })
         .then(data => {
             data.no.should.equal(purchaseOrder.no);
             done();
         })
         .catch(e => {
             done(e);
-        })
+        });
 });
 
-it(`#06. should success when delete data purchase order`, function (done) {
+it(`#06. should success when delete data purchase order`, function(done) {
     purchaseOrderManager.delete(purchaseOrder)
         .then(id => {
             purchaseOrderId.toString().should.equal(id.toString());
@@ -103,8 +109,10 @@ it(`#06. should success when delete data purchase order`, function (done) {
         });
 });
 
-it(`#07. should _deleted=true`, function (done) {
-    purchaseOrderManager.getSingleByQuery({ _id: purchaseOrderId })
+it(`#07. should _deleted=true`, function(done) {
+    purchaseOrderManager.getSingleByQuery({
+            _id: purchaseOrderId
+        })
         .then(data => {
             data._deleted.should.be.Boolean();
             data._deleted.should.equal(true);
@@ -112,5 +120,5 @@ it(`#07. should _deleted=true`, function (done) {
         })
         .catch(e => {
             done(e);
-        })
+        });
 });

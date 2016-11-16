@@ -79,7 +79,7 @@ module.exports = function (purchaseRequest) {
                         stack: [':', ':']
                     }, {
                         width: '*',
-                        stack: [purchaseRequest.unit.subDivision, purchaseRequest.no]
+                        stack: [purchaseRequest.unit.name, purchaseRequest.no]
                     }],
                 style: ['size08']
 

@@ -31,18 +31,16 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             var valid = purchaseRequest;
 
             var getPurchaseRequestPromise = this.collection.singleOrDefault({
-
                 _id: {
                     '$ne': new ObjectId(valid._id)
                 }
-
             });
 
             var getUnit = valid.unitId && valid.unitId.toString().trim() != '' ? this.unitManager.getSingleByIdOrDefault(valid.unitId) : Promise.resolve(null);
             var getCategory = valid.categoryId && valid.categoryId.toString().trim() != '' ? this.categoryManager.getSingleByIdOrDefault(valid.categoryId) : Promise.resolve(null);
             var getBudget = valid.budgetId && valid.budgetId.toString().trim() != '' ? this.budgetManager.getSingleByIdOrDefault(valid.budgetId) : Promise.resolve(null);
             var getProduct = [];
-            
+
             valid.items = valid.items instanceof Array ? valid.items : [];
             for (var _item of valid.items)
                 getProduct.push(_item.productId && _item.productId.toString().trim() != '' ? this.productManager.getSingleByIdOrDefault(_item.productId) : Promise.resolve(null));
@@ -151,8 +149,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 })
                 .catch(e => {
                     reject(e);
-                })
-
+                });
         });
     }
 
@@ -174,13 +171,13 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 }
             };
 
-            var filterUnitDivision = {
-                "unit.division": {
+            var filterUnitDivisionName = {
+                "unit.division.name": {
                     '$regex': regex
                 }
             };
-            var filterUnitSubDivision = {
-                "unit.subDivision": {
+            var filterUnitName = {
+                "unit.name": {
                     '$regex': regex
                 }
             };
@@ -192,7 +189,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             };
 
             keywordFilter = {
-                '$or': [filterNo, filterUnitDivision, filterUnitSubDivision, filterCategory]
+                '$or': [filterNo, filterUnitDivisionName, filterUnitName, filterCategory]
             };
         }
         query = {

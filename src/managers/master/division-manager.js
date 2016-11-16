@@ -6,17 +6,15 @@ require("mongodb-toolkit");
 
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var Unit = DLModels.master.Unit;
+var Division = DLModels.master.Division;
 var BaseManager = require('../base-manager');
 var i18n = require('dl-i18n');
-var DivisionManager = require('./division-manager');
 
-module.exports = class UnitManager extends BaseManager {
+module.exports = class DivisionManager extends BaseManager {
 
     constructor(db, user) {
         super(db, user);
-        this.collection = this.db.use(map.master.collection.Unit);
-        this.divisionManager = new DivisionManager(db, user);
+        this.collection = this.db.use(map.master.collection.Division);
     }
 
     _getQuery(paging) {
@@ -29,19 +27,19 @@ module.exports = class UnitManager extends BaseManager {
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterDivisionName = {
-                'division.name': {
+            var filterDivision = {
+                'name': {
                     '$regex': regex
                 }
             };
-            var filterName = {
+            var filterSubDivision = {
                 'name': {
                     '$regex': regex
                 }
             };
 
             var $or = {
-                '$or': [filterDivisionName, filterName]
+                '$or': [filterDivision, filterSubDivision]
             };
 
             query['$and'].push($or);
@@ -54,7 +52,7 @@ module.exports = class UnitManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = unit;
             // 1. begin: Declare promises.
-            var getUnitPromise = this.collection.singleOrDefault({
+            var getunitPromise = this.collection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
@@ -63,51 +61,43 @@ module.exports = class UnitManager extends BaseManager {
                     code: valid.code
                 }]
             });
-            var getDivision = valid.divisionId && (valid.divisionId||'').toString().trim().length > 0 ? this.divisionManager.getSingleByIdOrDefault(valid.divisionId) : Promise.resolve(null);
 
             // 2. begin: Validation.
-            Promise.all([getUnitPromise, getDivision])
+            Promise.all([getunitPromise])
                 .then(results => {
-                    var _unit = results[0];
-                    var _division = results[1];
+                    var _division = results[0];
 
                     if (!valid.code || valid.code == '')
-                        errors["code"] = i18n.__("Unit.code.isRequired:%s is required", i18n.__("Unit.code._:Code")); // "Kode tidak boleh kosong.";
-                    else if (_unit) {
-                        errors["code"] = i18n.__("Unit.code.isExists:%s is already exists", i18n.__("Unit.code._:Code")); // "Kode sudah terdaftar.";
+                        errors["code"] = i18n.__("Division.code.isRequired:%s is required", i18n.__("Division.code._:Code")); //"Divisi Tidak Boleh Kosong";
+                    else if (_division) {
+                        errors["code"] = i18n.__("Division.code.isExists:%s is already exists", i18n.__("Division.code._:Code")); //"Perpaduan Divisi dan Sub Divisi sudah terdaftar";
                     }
 
-                    if (!_division)
-                        errors["division"] = i18n.__("Unit.division.isRequired:%s is required", i18n.__("Unit.division._:Division")); //"Divisi Tidak Boleh Kosong";
-
                     if (!valid.name || valid.name == '')
-                        errors["name"] = i18n.__("Unit.name.isRequired:%s is required", i18n.__("Unit.name._:Name")); //"Sub Divisi Tidak Boleh Kosong";
-
+                        errors["name"] = i18n.__("Division.name.isRequired:%s is required", i18n.__("Division.name._:Name")); //"Sub Divisi Tidak Boleh Kosong";
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-                    valid = new Unit(unit);
-                    valid.divisionId = _division._id;
-                    valid.division = _division;
-
+                    valid = new Division(unit);
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })
                 .catch(e => {
                     reject(e);
-                })
+                });
         });
     }
+    
     _createIndexes() {
         var dateIndex = {
             name: `ix_${map.master.collection.Unit}__updatedDate`,
             key: {
                 _updatedDate: -1
             }
-        }
+        };
 
         var codeIndex = {
             name: `ix_${map.master.collection.Unit}_code`,
@@ -115,7 +105,7 @@ module.exports = class UnitManager extends BaseManager {
                 code: 1
             },
             unique: true
-        }
+        };
 
         return this.collection.createIndexes([dateIndex, codeIndex]);
     }

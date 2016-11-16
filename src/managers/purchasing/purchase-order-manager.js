@@ -31,8 +31,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 "$and": [{
                     _deleted: false
                 }, {
-                        "purchaseRequestId": new ObjectId(valid.purchaseRequestId)
-                    }]
+                    "purchaseRequestId": new ObjectId(valid.purchaseRequestId)
+                }]
             });
 
             var getPurchaseRequest = valid.purchaseRequestId && valid.purchaseRequestId.toString().trim() != '' ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
@@ -47,8 +47,11 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";
                     else if (_purchaseRequest && !_purchaseRequest.isPosted)
                         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isPosted:%s is need to be posted", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest harus sudah dipost";
-                    if (valid.sourcePurchaseOrder != null) {
+                    else if (valid.sourcePurchaseOrder != null) {
                         if (_purchaseOrder._id.toString() != valid.sourcePurchaseOrder._id.toString() && _purchaseOrder._id.toString() != valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
+                            errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
+                    } else if (valid.sourcePurchaseOrder == null) {
+                        if (_purchaseOrder._id.toString() != valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
                             errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
                     }
                     if (valid.items.length > 0) {
@@ -212,35 +215,38 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     }
 
     create(purchaseOrder) {
-        purchaseOrder = new PurchaseOrder(purchaseOrder);
-
         return new Promise((resolve, reject) => {
-            purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
-            this._validate(purchaseOrder)
-                .then(validPurchaseOrder => {
-                    this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
-                        .then(PR => {
-                            PR.isUsed = true;
-                            validPurchaseOrder.purchaseRequest = PR;
-                            this.purchaseRequestManager.update(PR)
-                                .then(results => {
-                                    this.collection.insert(validPurchaseOrder)
-                                        .then(id => {
-                                            resolve(id);
+            this._createIndexes()
+                .then((createIndexResults) => {
+                    purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
+                    this._validate(purchaseOrder)
+                        .then(validPurchaseOrder => {
+                            this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
+                                .then(PR => {
+                                    PR.isUsed = true;
+                                    validPurchaseOrder.purchaseRequest = PR;
+                                    this.purchaseRequestManager.update(PR)
+                                        .then(results => {
+                                            this.collection.insert(validPurchaseOrder)
+                                                .then(id => {
+                                                    resolve(id);
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                });
                                         })
                                         .catch(e => {
                                             reject(e);
                                         });
                                 })
-                                .catch(e => {
-                                    reject(e);
-                                });
                         })
+                        .catch(e => {
+                            reject(e);
+                        });
                 })
                 .catch(e => {
                     reject(e);
-                })
-
+                });
         });
     }
 
@@ -462,27 +468,27 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         $lte: enddate
                                     }
                                 }, {
-                                        "_deleted": false
-                                    }
+                                    "_deleted": false
+                                }
 
                                 ]
                             }, {
-                                    "purchaseOrderExternal.isPosted": true
-                                }]
+                                "purchaseOrderExternal.isPosted": true
+                            }]
 
                         }
                     }, {
-                            $unwind: "$items"
-                        }, {
-                            $group: {
-                                _id: "$unit.division",
-                                "pricetotal": {
-                                    $sum: {
-                                        $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
-                                    }
+                        $unwind: "$items"
+                    }, {
+                        $group: {
+                            _id: "$unit.division",
+                            "pricetotal": {
+                                $sum: {
+                                    $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
                                 }
                             }
-                        }]
+                        }
+                    }]
                 )
                     .toArray(function (err, result) {
                         assert.equal(err, null);
@@ -499,21 +505,21 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             $and: [{
                                 "purchaseOrderExternal.isPosted": true
                             }, {
-                                    "_deleted": false
-                                }]
+                                "_deleted": false
+                            }]
                         },
                     }, {
-                            $unwind: "$items"
-                        }, {
-                            $group: {
-                                _id: "$unit.division",
-                                "pricetotal": {
-                                    $sum: {
-                                        $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
-                                    }
+                        $unwind: "$items"
+                    }, {
+                        $group: {
+                            _id: "$unit.division",
+                            "pricetotal": {
+                                $sum: {
+                                    $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
                                 }
                             }
-                        }]
+                        }
+                    }]
                 )
                     .toArray(function (err, result) {
                         assert.equal(err, null);
@@ -539,25 +545,25 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                             $lte: enddate
                                         }
                                     }, {
-                                            "_deleted": false
-                                        }]
-                                }, {
-                                        "purchaseOrderExternal.isPosted": true
+                                        "_deleted": false
                                     }]
+                                }, {
+                                    "purchaseOrderExternal.isPosted": true
+                                }]
                             }
 
                         }, {
-                                $unwind: "$items"
-                            }, {
-                                $group: {
-                                    _id: "$unit.subDivision",
-                                    "pricetotal": {
-                                        $sum: {
-                                            $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
-                                        }
+                            $unwind: "$items"
+                        }, {
+                            $group: {
+                                _id: "$unit.subDivision",
+                                "pricetotal": {
+                                    $sum: {
+                                        $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
                                     }
                                 }
-                            }]
+                            }
+                        }]
                     )
                         .toArray(function (err, result) {
                             assert.equal(err, null);
@@ -576,27 +582,27 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                                 $lte: enddate
                                             }
                                         }, {
-                                                "_deleted": false
-                                            }]
-                                    }, {
-                                            "purchaseOrderExternal.isPosted": true
+                                            "_deleted": false
                                         }]
-                                }, {
-                                        "unit.division": unit
+                                    }, {
+                                        "purchaseOrderExternal.isPosted": true
                                     }]
+                                }, {
+                                    "unit.division": unit
+                                }]
                             }
                         }, {
-                                $unwind: "$items"
-                            }, {
-                                $group: {
-                                    _id: "$unit.subDivision",
-                                    "pricetotal": {
-                                        $sum: {
-                                            $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
-                                        }
+                            $unwind: "$items"
+                        }, {
+                            $group: {
+                                _id: "$unit.subDivision",
+                                "pricetotal": {
+                                    $sum: {
+                                        $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
                                     }
                                 }
-                            }]
+                            }
+                        }]
                     )
                         .toArray(function (err, result) {
                             assert.equal(err, null);
@@ -614,22 +620,22 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 $and: [{
                                     "purchaseOrderExternal.isPosted": true
                                 }, {
-                                        "_deleted": false
-                                    }]
+                                    "_deleted": false
+                                }]
                             }
 
                         }, {
-                                $unwind: "$items"
-                            }, {
-                                $group: {
-                                    _id: "$unit.subDivision",
-                                    "pricetotal": {
-                                        $sum: {
-                                            $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
-                                        }
+                            $unwind: "$items"
+                        }, {
+                            $group: {
+                                _id: "$unit.subDivision",
+                                "pricetotal": {
+                                    $sum: {
+                                        $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
                                     }
                                 }
-                            }]
+                            }
+                        }]
                     )
                         .toArray(function (err, result) {
                             assert.equal(err, null);
@@ -644,24 +650,24 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                     $and: [{
                                         "purchaseOrderExternal.isPosted": true
                                     }, {
-                                            "_deleted": false
-                                        }]
-                                }, {
-                                        "unit.division": unit
+                                        "_deleted": false
                                     }]
+                                }, {
+                                    "unit.division": unit
+                                }]
                             }
                         }, {
-                                $unwind: "$items"
-                            }, {
-                                $group: {
-                                    _id: "$unit.subDivision",
-                                    "pricetotal": {
-                                        $sum: {
-                                            $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
-                                        }
+                            $unwind: "$items"
+                        }, {
+                            $group: {
+                                _id: "$unit.subDivision",
+                                "pricetotal": {
+                                    $sum: {
+                                        $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
                                     }
                                 }
-                            }]
+                            }
+                        }]
                     )
                         .toArray(function (err, result) {
                             assert.equal(err, null);
@@ -687,27 +693,27 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         $lte: enddate
                                     }
                                 }, {
-                                        "_deleted": false
-                                    }
+                                    "_deleted": false
+                                }
 
                                 ]
                             }, {
-                                    "purchaseOrderExternal.isPosted": true
-                                }]
+                                "purchaseOrderExternal.isPosted": true
+                            }]
 
                         }
                     }, {
-                            $unwind: "$items"
-                        }, {
-                            $group: {
-                                _id: "$category.name",
-                                "pricetotal": {
-                                    $sum: {
-                                        $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
-                                    }
+                        $unwind: "$items"
+                    }, {
+                        $group: {
+                            _id: "$category.name",
+                            "pricetotal": {
+                                $sum: {
+                                    $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
                                 }
                             }
-                        }]
+                        }
+                    }]
                 )
                     .toArray(function (err, result) {
                         assert.equal(err, null);
@@ -723,21 +729,21 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             $and: [{
                                 "purchaseOrderExternal.isPosted": true
                             }, {
-                                    "_deleted": false
-                                }]
+                                "_deleted": false
+                            }]
                         }
                     }, {
-                            $unwind: "$items"
-                        }, {
-                            $group: {
-                                _id: "$category.name",
-                                "pricetotal": {
-                                    $sum: {
-                                        $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
-                                    }
+                        $unwind: "$items"
+                    }, {
+                        $group: {
+                            _id: "$category.name",
+                            "pricetotal": {
+                                $sum: {
+                                    $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
                                 }
                             }
-                        }]
+                        }
+                    }]
                 )
                     .toArray(function (err, result) {
                         assert.equal(err, null);
