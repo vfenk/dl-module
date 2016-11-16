@@ -14,6 +14,7 @@ module.exports = {
             CurrencyManager: require('./src/managers/master/currency-manager'),
             VatManager: require('./src/managers/master/vat-manager'),
             BudgetManager: require('./src/managers/master/budget-manager'),
+            ThreadSpecificationManager: require('./src/managers/master/thread-specification-manager'),
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
