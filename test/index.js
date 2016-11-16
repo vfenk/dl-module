@@ -22,7 +22,7 @@ describe('#dl-module', function(done) {
     // test('@master/vat-manager', './master/vat-manager-test');
     // test('@master/budget-manager', './master/budget-manager-test');
     // test('@master/machine-manager', './master/machine-manager-test');
-    // test('@master/uster-classification-manager', './master/uster-classification-manager-test');
+    test('@master/uster-classification-manager', './master/uster-classification-manager-test');
     // //Purchasing 
     // test('@purchasing/purchase-order-manager', './purchasing/purchase-order-manager-test');
     // test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
@@ -38,6 +38,7 @@ describe('#dl-module', function(done) {
     // test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
     
      test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+
 
 
 })
