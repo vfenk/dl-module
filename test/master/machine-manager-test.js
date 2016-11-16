@@ -53,16 +53,20 @@ it('#01. should success when read data', function (done) {
 
 var createdId;
 it('#02. should success when create new data', function (done) {
-    var data = getData();
-    instanceManager.create(data)
-        .then(id => {
-            id.should.be.Object();
-            createdId = id;
-            done();
+    getData().then(data => {
+            instanceManager.create(data)
+                .then(id => {
+                    id.should.be.Object();
+                    createdId = id;
+                    done();
+                })
+                .catch(e => {
+                    done(e);
+                });
         })
         .catch(e => {
             done(e);
-        })
+        });
 });
 
 var createdData;
