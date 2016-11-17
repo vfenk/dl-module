@@ -24,9 +24,9 @@ class DeliveryOrderDataUtil {
                                         purchaseOrder: poInternal,
                                         productId: poItem.product._id,
                                         product: poItem.product,
-                                        purchaseOrderQuantity: 90,
+                                        purchaseOrderQuantity: poItem.defaultQuantity,
                                         purchaseOrderUom: poItem.dealUom,
-                                        deliveredQuantity: 90,
+                                        deliveredQuantity: poItem.defaultQuantity-1,
                                         remark: ''
                                     }
                                 })
