@@ -295,7 +295,7 @@ it('#11. should error when create new data with product has no uster classificat
                                 done("Should not be able to create data with same product has no uster classification");
                             })
                             .catch(e => {
-                                e.errors.should.have.property('threadName');
+                                e.errors.should.have.property('uster');
                                 done();
                             })
                 })

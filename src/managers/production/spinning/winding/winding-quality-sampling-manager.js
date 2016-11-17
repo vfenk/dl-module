@@ -66,7 +66,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
         return query;
     }
 
-    _validate(windingQualitySampling) {
+     _validate(windingQualitySampling) {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = windingQualitySampling;
@@ -83,7 +83,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                     },{
                         date : dateProcess
                     },{
-                        threadName : valid.threadName
+                        threadName : valid.threadName ? valid.threadName : ''
                     },{
                         machineId : new ObjectId(valid.machineId)
                     },{
@@ -97,7 +97,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                 page : 1,
                 filter : {
                     '$and' : [{
-                        threadName : valid.threadName
+                        threadName : valid.threadName ? valid.threadName : ''
                     },{
                         ipi : {'$gte' : _ipi}
                     }]
@@ -111,7 +111,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                 page : 1,
                 filter : {
                     '$and' : [{
-                        threadName : valid.threadName
+                        threadName : valid.threadName ? valid.threadName : ''
                     },{
                         ipi : {'$lt' : _ipi}
                     }]
@@ -130,13 +130,17 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                     var _machine = result[1];
                     var _usterGreatThen = null;
                     var _usterLessThen = null;
-                    if(result[2].data.length > 0){
-                        for(var a of result[2].data)
-                            _usterLessThen = a;
+                    if(result[2]){
+                        if(result[2].data.length > 0){
+                            for(var a of result[2].data)
+                                _usterLessThen = a;
+                        }
                     }
-                    if(result[3].data.length > 0){
-                        for(var a of result[3].data)
-                            _usterGreatThen = a;
+                    if(result[3]){
+                        if(result[3].data.length > 0){
+                            for(var a of result[3].data)
+                                _usterGreatThen = a;
+                        }
                     }
                     if (!valid.spinning || valid.spinning == '')
                         errors["spinning"] = i18n.__("WindingQualitySampling.spinning.isRequired:%s is required", i18n.__("WindingQualitySampling.spinning._:Spinning")); //"Spinning harus diisi ";
@@ -144,19 +148,19 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                         errors["spinning"] = i18n.__(`WindingQualitySampling.spinning.isRequired:%s with same Product, Machine and Date is already exists`, i18n.__("WindingQualitySampling.spinning._:Spinning")); //"Spinning dengan produk, mesin dan tanggal yang sama tidak boleh";
 
                     if (!valid.date || valid.date == '')
-                        errors["date"] = i18n.__("WindingQualitySampling.date.isExists:%s is required", i18n.__("WindingQualitySampling.date._:date")); //"Tanggal tidak boleh kosong";
+                        errors["date"] = i18n.__("WindingQualitySampling.date.isRequired:%s is required", i18n.__("WindingQualitySampling.date._:Date")); //"Tanggal tidak boleh kosong";
                     else if (dateProcess > dateNow)
                         errors["date"] = i18n.__("WindingQualitySampling.date.isGreater:%s is greater than today", i18n.__("WindingQualitySampling.date._:Date"));//"Tanggal tidak boleh lebih besar dari tanggal hari ini";
 
                     if (!valid.machine)
                         errors["machine"] = i18n.__("WindingQualitySampling.machine.name.isRequired:%s is required", i18n.__("WindingQualitySampling.machine.name._:Machine")); //"Nama Mesin tidak boleh kosong";
                     else if(!_machine)
-                        errors["machine"] = i18n.__("WindingQualitySampling.machine.name.isRequired:%s is not exists", i18n.__("WindingQualitySampling.machine.name._:Machine")); //"Mesin sudah tidak ada di master mesin";
+                        errors["machine"] = i18n.__("WindingQualitySampling.machine.name.isNotExist:%s is not exists", i18n.__("WindingQualitySampling.machine.name._:Machine")); //"Mesin sudah tidak ada di master mesin";
 
-                    if (!valid.threadName)
-                        errors["threadName"] = i18n.__("WindingQualitySampling.threadName.isRequired:%s is required", i18n.__("WindingQualitySampling.threadName._:Thread")); //"Nama Benang tidak boleh kosong";
-                    else if(!_usterGreatThen && !_usterLessThen)
-                        errors["threadName"] = i18n.__("WindingQualitySampling.threadName.isRequired:%s has no uster classification", i18n.__("WindingQualitySampling.threadName._:Thread")); //"Benang tidak memiliki klassifikasi Uster";
+                    if (!valid.uster)
+                        errors["uster"] = i18n.__("WindingQualitySampling.uster.isRequired:%s is required", i18n.__("WindingQualitySampling.uster._:Uster")); //"Nama Benang tidak boleh kosong";
+                    if(!_usterGreatThen && !_usterLessThen)
+                        errors["uster"] = i18n.__("WindingQualitySampling.uster.isRequired:%s has no uster classification", i18n.__("WindingQualitySampling.uster._:Uster")); //"Benang tidak memiliki klassifikasi Uster";
 
 
                     if (!valid.U || valid.U == 0)
