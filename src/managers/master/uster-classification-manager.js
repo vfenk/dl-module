@@ -146,9 +146,10 @@ module.exports = class UsterClassificationManager extends BaseManager {
         }
 
         var codeIndex = {
-            name: `ix_${map.master.collection.UsterClassification}_productId`,
+            name: `ix_${map.master.collection.UsterClassification}_productId_grade`,
             key: {
-                productId: 1
+                productId: 1,
+                grade: 1
             },
             unique: true
         }
