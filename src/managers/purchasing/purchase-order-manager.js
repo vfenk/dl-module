@@ -196,24 +196,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return query;
     }
 
-    _createIndexes() {
-        var createdDateIndex = {
-            name: `ix_${map.master.collection.PurchaseOrder}__createdDate`,
-            key: {
-                _createdDate: -1
-            }
-        }
-        var poNoIndex = {
-            name: `ix_${map.master.collection.PurchaseOrder}_no`,
-            key: {
-                no: -1
-            },
-            unique: true
-        }
-
-        return this.collection.createIndexes([createdDateIndex, poNoIndex]);
-    }
-
     create(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._createIndexes()
@@ -481,7 +463,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         $unwind: "$items"
                     }, {
                         $group: {
-                            _id: "$unit.division",
+                            _id: "$unit.division.name",
                             "pricetotal": {
                                 $sum: {
                                     $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -512,7 +494,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         $unwind: "$items"
                     }, {
                         $group: {
-                            _id: "$unit.division",
+                            _id: "$unit.division.name",
                             "pricetotal": {
                                 $sum: {
                                     $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -556,7 +538,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             $unwind: "$items"
                         }, {
                             $group: {
-                                _id: "$unit.subDivision",
+                                _id: "$unit.name",
                                 "pricetotal": {
                                     $sum: {
                                         $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -588,14 +570,14 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         "purchaseOrderExternal.isPosted": true
                                     }]
                                 }, {
-                                    "unit.division": unit
+                                    "unit.division.name": unit
                                 }]
                             }
                         }, {
                             $unwind: "$items"
                         }, {
                             $group: {
-                                _id: "$unit.subDivision",
+                                _id: "$unit.name",
                                 "pricetotal": {
                                     $sum: {
                                         $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -628,7 +610,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             $unwind: "$items"
                         }, {
                             $group: {
-                                _id: "$unit.subDivision",
+                                _id: "$unit.name",
                                 "pricetotal": {
                                     $sum: {
                                         $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -653,14 +635,14 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         "_deleted": false
                                     }]
                                 }, {
-                                    "unit.division": unit
+                                    "unit.division.name": unit
                                 }]
                             }
                         }, {
                             $unwind: "$items"
                         }, {
                             $group: {
-                                _id: "$unit.subDivision",
+                                _id: "$unit.name",
                                 "pricetotal": {
                                     $sum: {
                                         $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
