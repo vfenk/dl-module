@@ -35,7 +35,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 }]
             });
 
-            var getUnitPaymentOrder = valid.unitPaymentOrder ? this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id) : Promise.resolve(null);
+            var getUnitPaymentOrder = valid.unitPaymentOrder && ObjectId.isValid(valid.unitPaymentOrder._id) ? this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id) : Promise.resolve(null);
 
             Promise.all([getUnitPaymentPriceCorrectionNote, getUnitPaymentOrder])
                 .then(results => {
@@ -221,8 +221,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
     create(unitPaymentPriceCorrectionNote) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(unitPaymentPriceCorrectionNote)
                         .then(validData => {
                             var tasks = [];
@@ -233,7 +233,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                             for (var _item of validData.items) {
                                 if (!poId.equals(_item.purchaseOrder._id)) {
                                     poId = new ObjectId(_item.purchaseOrder._id);
-                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(_item.purchaseOrder._id));
+                                    if (ObjectId.isValid(_item.purchaseOrder._id))
+                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(_item.purchaseOrder._id));
                                 }
                             }
 
@@ -286,10 +287,10 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
@@ -314,8 +315,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
     update(unitPaymentPriceCorrectionNote) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(unitPaymentPriceCorrectionNote)
                         .then(validData => {
                             var getPurchaseOrderById = [];
@@ -325,7 +326,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                             for (var _item of validData.items) {
                                 if (!poId.equals(_item.purchaseOrder._id)) {
                                     poId = new ObjectId(_item.purchaseOrder._id);
-                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(_item.purchaseOrder._id));
+                                    if (ObjectId.isValid(_item.purchaseOrder._id))
+                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(_item.purchaseOrder._id));
                                 }
                             }
                             Promise.all(getPurchaseOrderById)
@@ -376,17 +378,17 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
     delete(unitPaymentPriceCorrectionNote) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(unitPaymentPriceCorrectionNote)
                         .then(validData => {
                             var tasks = [];
@@ -397,7 +399,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                             for (var _item of validData.items) {
                                 if (!poId.equals(_item.purchaseOrder._id)) {
                                     poId = new ObjectId(_item.purchaseOrder._id);
-                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(_item.purchaseOrder._id));
+                                    if (ObjectId.isValid(_item.purchaseOrder._id))
+                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(_item.purchaseOrder._id));
                                 }
                             }
                             Promise.all(getPurchaseOrderById)
@@ -448,10 +451,10 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
