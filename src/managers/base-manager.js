@@ -35,8 +35,8 @@ module.exports = class BaseManager {
         // var start = process.hrtime();
 
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     var query = this._getQuery(_paging);
                     this.collection
                         .where(query)
@@ -52,18 +52,18 @@ module.exports = class BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
 
     create(data) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(data)
                         .then(validData => {
                             this.collection.insert(validData)
@@ -77,17 +77,17 @@ module.exports = class BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
     update(data) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(data)
                         .then(validData => {
                             this.collection.update(validData)
@@ -101,17 +101,17 @@ module.exports = class BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
     delete(data) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(data)
                         .then(validData => {
                             validData._deleted = true;
@@ -126,10 +126,10 @@ module.exports = class BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
