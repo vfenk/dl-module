@@ -196,10 +196,28 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return query;
     }
 
+    _createIndexes() {
+        var createdDateIndex = {
+            name: `ix_${map.master.collection.PurchaseOrder}__createdDate`,
+            key: {
+                _createdDate: -1
+            }
+        }
+        var poNoIndex = {
+            name: `ix_${map.master.collection.PurchaseOrder}_no`,
+            key: {
+                no: -1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([createdDateIndex, poNoIndex]);
+    }
+
     create(purchaseOrder) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
                     this._validate(purchaseOrder)
                         .then(validPurchaseOrder => {
@@ -225,17 +243,17 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
     delete(purchaseOrder) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(purchaseOrder)
                         .then(validData => {
                             validData._deleted = true;
@@ -260,10 +278,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 

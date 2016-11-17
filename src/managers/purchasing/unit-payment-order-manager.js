@@ -197,8 +197,8 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
     create(unitPaymentOrder) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(unitPaymentOrder)
                         .then(validUnitPaymentOrder => {
                             validUnitPaymentOrder.no = this.generateNo(validUnitPaymentOrder.division.code, validUnitPaymentOrder.category.code);
@@ -214,17 +214,17 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
     update(unitPaymentOrder) {
         return new Promise((resolve, reject) => {
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(unitPaymentOrder)
                         .then(validUnitPaymentOrder => {
                             this.collection.update(validUnitPaymentOrder)
@@ -239,10 +239,10 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
@@ -315,8 +315,8 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
             var tasks = [];
             var tasksPoExternal = [];
             var getPurchaseOrderById = [];
-            // this._createIndexes()
-            //     .then((createIndexResults) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
                     this._validate(unitPaymentOrder)
                         .then(validUnitPaymentOrder => {
                             validUnitPaymentOrder._deleted = true;
@@ -383,10 +383,10 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         .catch(e => {
                             reject(e);
                         });
-                // })
-                // .catch(e => {
-                //     reject(e);
-                // });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
