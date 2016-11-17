@@ -25,7 +25,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
             var getUnitReceiptNote;
             if (valid) {
                 for (var item of valid.items) {
-                    getUnitReceiptNote.push(bjectId.isValid(item.unitReceiptNoteId) ? this.unitReceiptNote.getSingleByIdOrDefault(item.unitReceiptNoteId) : Promise.resolve(null));
+                    getUnitReceiptNote.push(ObjectId.isValid(item.unitReceiptNoteId) ? this.unitReceiptNote.getSingleByIdOrDefault(item.unitReceiptNoteId) : Promise.resolve(null));
                 }
             }
             var getUnitPaymentOrderPromise = this.collection.singleOrDefault({
