@@ -35,7 +35,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 }]
             });
 
-            var getPurchaseRequest = valid.purchaseRequestId && valid.purchaseRequestId.toString().trim() != '' ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
+            var getPurchaseRequest = ObjectId.isValid(valid.purchaseRequestId) ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
 
             Promise.all([getPurchaseOrderPromise, getPurchaseRequest])
                 .then(results => {
@@ -472,7 +472,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         console.log(result);
                         resolve(result);
@@ -503,7 +503,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         console.log(result);
                         resolve(result);
@@ -547,7 +547,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -586,7 +586,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -619,7 +619,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -651,7 +651,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -697,7 +697,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
@@ -727,7 +727,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
