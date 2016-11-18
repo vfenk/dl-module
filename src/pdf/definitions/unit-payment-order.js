@@ -98,8 +98,7 @@ module.exports = function (unitPaymentOrder) {
                 style: ['size08']
             }
         ]
-    }, '\n']
-
+    }, '\n'] 
     var subHeader = [{
         columns: [
             {
@@ -111,7 +110,7 @@ module.exports = function (unitPaymentOrder) {
                         style: ['size08', "underline"]
                     },
                     {
-                        text: '' + unitPaymentOrder.unit.division + ' ' + unitPaymentOrder.unit.subDivision,
+                        text: '' + unitPaymentOrder.division.name,
                         style: ['size08']
                     }]
 

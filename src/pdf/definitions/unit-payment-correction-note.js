@@ -74,7 +74,7 @@ module.exports = function (unitPaymentCorrection) {
                 }]
         }, {
             width: '*',
-            text: `Untuk : (${unitPaymentCorrection.unitPaymentOrder.unit.code}) ${unitPaymentCorrection.unitPaymentOrder.unit.subDivision}`,
+            text: `Untuk : ${unitPaymentCorrection.unitPaymentOrder.division.name}`,
             style: ['size09']
         }, '\n'
     ];
