@@ -8,7 +8,7 @@ var map = DLModels.map;
 var WindingQualitySampling = DLModels.production.spinning.winding.WindingQualitySampling;
 var ProductManager = require('../../../master/product-manager');
 var MachineManager = require('../../../master/machine-manager');
-var UsterManager = require('../../../master/uster-classification-manager');
+var UsterManager = require('../../../master/uster-manager');
 var BaseManager = require('../../../base-manager');
 var i18n = require('dl-i18n');
 
@@ -19,8 +19,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
         this.collection = this.db.collection(map.production.spinning.winding.collection.WindingQualitySampling);
         this.productManager = new ProductManager(db, user);
         this.machineManager = new MachineManager(db, user);
-        this.usterManagerIpiLess = new UsterManager(db, user);
-        this.usterManagerIpiGreat = new UsterManager(db, user);
+        this.usterManager = new UsterManager(db, user);
     }
 
     _getQuery(paging) {
@@ -83,65 +82,22 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                     },{
                         date : dateProcess
                     },{
-                        threadName : valid.threadName ? valid.threadName : ''
+                        usterId : valid.usterId && ObjectId.isValid(valid.uster._id) ? (new ObjectId(valid.uster._id)) : ''
                     },{
-                        machineId : new ObjectId(valid.machineId)
+                        machineId : valid.machine && ObjectId.isValid(valid.machine._id) ? (new ObjectId(valid.machine._id)) : ''
                     },{
                         spinning : valid.spinning
                 }]
             });
-            var getMachine = valid.machine && valid.machine._id ? this.machineManager.getSingleByIdOrDefault(valid.machine._id) : Promise.resolve(null);
-            var _ipi = (!valid.thin ? 0 : valid.thin) + (!valid.thick ? 0 : valid.thick) + (!valid.neps ? 0 : valid.neps);
-            var queryGreat = {
-                size : 1,
-                page : 1,
-                filter : {
-                    '$and' : [{
-                        threadName : valid.threadName ? valid.threadName : ''
-                    },{
-                        ipi : {'$gte' : _ipi}
-                    }]
-                },
-                order : {
-                    "ipi" : 1
-                }
-            };
-            var queryLess = {
-                size : 1,
-                page : 1,
-                filter : {
-                    '$and' : [{
-                        threadName : valid.threadName ? valid.threadName : ''
-                    },{
-                        ipi : {'$lt' : _ipi}
-                    }]
-                },
-                order : {
-                    "ipi" : -1
-                }
-            };
-            var getUsterGreaterThenIpi = valid.threadName ? this.usterManagerIpiGreat.read(queryGreat) : Promise.resolve(null);
-            var getUsterLessThenIpi = valid.threadName ? this.usterManagerIpiLess.read(queryLess) : Promise.resolve(null);
-            
+            var getMachine = valid.machine && ObjectId.isValid(valid.machine._id) ? this.machineManager.getSingleByIdOrDefault(valid.machine._id) : Promise.resolve(null);
+            var getUster = valid.uster && ObjectId.isValid(valid.uster._id) ? this.usterManager.getSingleByIdOrDefault(valid.uster._id) : Promise.resolve(null);            
+
             // 2. begin: Validation.
-            Promise.all([getWindingQuality, getMachine, getUsterLessThenIpi, getUsterGreaterThenIpi])
+            Promise.all([getWindingQuality, getMachine, getUster])
                 .then(result =>{
                     var _windingQuality = result[0];
                     var _machine = result[1];
-                    var _usterGreatThen = null;
-                    var _usterLessThen = null;
-                    if(result[2]){
-                        if(result[2].data.length > 0){
-                            for(var a of result[2].data)
-                                _usterLessThen = a;
-                        }
-                    }
-                    if(result[3]){
-                        if(result[3].data.length > 0){
-                            for(var a of result[3].data)
-                                _usterGreatThen = a;
-                        }
-                    }
+                    var _uster = result[2];
                     if (!valid.spinning || valid.spinning == '')
                         errors["spinning"] = i18n.__("WindingQualitySampling.spinning.isRequired:%s is required", i18n.__("WindingQualitySampling.spinning._:Spinning")); //"Spinning harus diisi ";
                     else if(_windingQuality)
@@ -159,9 +115,8 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
 
                     if (!valid.uster)
                         errors["uster"] = i18n.__("WindingQualitySampling.uster.isRequired:%s is required", i18n.__("WindingQualitySampling.uster._:Uster")); //"Nama Benang tidak boleh kosong";
-                    if(!_usterGreatThen && !_usterLessThen)
+                    if(!_uster)
                         errors["uster"] = i18n.__("WindingQualitySampling.uster.isRequired:%s has no uster classification", i18n.__("WindingQualitySampling.uster._:Uster")); //"Benang tidak memiliki klassifikasi Uster";
-
 
                     if (!valid.U || valid.U == 0)
                         errors["U"] = i18n.__("WindingQualitySampling.U.isRequired:%s is required", i18n.__("WindingQualitySampling.U._:U")); //"U tidak boleh kosong";
@@ -177,18 +132,41 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                         var ValidationError = require('../../../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }
+                    if(!valid.thin) valid.thin = 0;
+                    if(!valid.thick) valid.thick = 0;
+                    if(!valid.neps) valid.neps = 0;
                     valid.machine = _machine;
                     valid.machineId = new ObjectId(_machine._id);
-                    if(_usterGreatThen){
-                        valid.uster = _usterGreatThen;
-                        valid.usterId = new ObjectId(_usterGreatThen._id);
-                    }else if(_usterLessThen){
-                        valid.uster = _usterLessThen;
-                        valid.usterId = new ObjectId(_usterLessThen._id);
+                    valid.uster = _uster;
+                    valid.usterId = new ObjectId(_uster._id);
+                    valid.ipi = valid.thin + valid.thick + valid.neps;
+                    var tampClassification1 = {"ipi" : 0, "grade" : ''};
+                    var tampClassification2 = {"ipi" : 0, "grade" : ''};
+                    if(valid.uster && valid.uster.classifications.length > 0){
+                        for(var a of valid.uster.classifications){
+                            if(a.ipi >= valid.ipi){
+                                if(tampClassification1.ipi == 0)
+                                {
+                                    tampClassification1.ipi = a.ipi;
+                                    tampClassification1.grade = a.grade;
+                                }else if(a.ipi < tampClassification1.ipi){
+                                    tampClassification1.ipi = a.ipi;
+                                    tampClassification1.grade = a.grade;
+                                }
+                            }
+                            if(tampClassification2.ipi < a.ipi){
+                                tampClassification2.ipi = a.ipi;
+                                tampClassification2.grade = a.grade;
+                            }
+                        }
                     }
+                    if(tampClassification1.grade != '')
+                        valid.grade = tampClassification1.grade;
+                    else
+                        valid.grade = tampClassification2.grade;
+
                     if(valid.date)
                         valid.date = dateProcess;
-                    valid.ipi = _ipi;
                     
                     if(!valid.stamp)
                         valid = new WindingQualitySampling(valid);
@@ -207,15 +185,23 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
             var query = {};
             if(startDate && !endDate){
                 query = {
-                    "date" : {
-                        "$gte" : new Date(startDate)
-                    }
+                    "$and" : [{
+                        "date" : {
+                            "$gte" : new Date(startDate)
+                        }
+                     },{
+                        _deleted : false
+                     }]
                 };
             }else if(!startDate && endDate){
                 query = {
-                    "date" : {
-                        "$lte" : new Date(endDate)
-                    }
+                    "$and" : [{
+                        "date" : {
+                            "$lte" : new Date(endDate)
+                        }
+                    },{
+                        _deleted : false
+                    }]
                 };
             }else if(startDate && endDate){
                 query = {
@@ -227,6 +213,8 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                         "date" : {
                             "$lte" : new Date(endDate)
                         }
+                    },{
+                         _deleted : false
                     }]
                 };
             }else if(!startDate && !endDate){
@@ -239,6 +227,8 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                         "date" : {
                             "$lte" : now
                         }
+                    },{
+                         _deleted : false
                     }]
                 };
             }
@@ -269,12 +259,12 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
         }
 
         var codeIndex = {
-            name: `ix_${map.production.spinning.winding.collection.WindingQualitySampling}_spinning_date_machineId_threadName`,
+            name: `ix_${map.production.spinning.winding.collection.WindingQualitySampling}_spinning_date_machineId_usterId`,
             key: {
                 spinning: 1,
                 date: 1,
                 machineId: 1,
-                threadName: 1
+                usterId: 1
             },
             unique: true
         }
