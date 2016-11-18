@@ -110,7 +110,7 @@ module.exports = function (unitPaymentOrder) {
                         style: ['size08', "underline"]
                     },
                     {
-                        text: '' + unitPaymentOrder.division.name,
+                        text: 'Untuk: ' + unitPaymentOrder.division.name,
                         style: ['size08']
                     }]
 
