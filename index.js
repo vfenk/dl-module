@@ -16,7 +16,7 @@ module.exports = {
             VatManager: require('./src/managers/master/vat-manager'),
             BudgetManager: require('./src/managers/master/budget-manager'),
             MachineManager: require('./src/managers/master/machine-manager'),
-            Uster: require('./src/managers/master/uster-manager')
+            UsterManager: require('./src/managers/master/uster-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
