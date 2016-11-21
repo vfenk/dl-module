@@ -250,10 +250,23 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                             var _unitReceiptNoteNo = fulfillmentPoItem.unitReceiptNoteNo || '';
 
                                                             if (unitPaymentPriceCorrectionNoteItem.unitReceiptNoteNo == _unitReceiptNoteNo && validData.unitPaymentOrder.no == _unitPaymentOrderNo) {
-                                                                fulfillmentPoItem.priceCorrectionDate = validData.date;
-                                                                fulfillmentPoItem.priceCorrectionNo = validData.no;
-                                                                fulfillmentPoItem.priceCorrectionPriceTotal = (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate);
-                                                                fulfillmentPoItem.priceCorrectionRemark = `Koreksi ${validData.priceCorrectionType}`;
+                                                                if(fulfillmentPoItem.correctionNo)
+                                                                {
+                                                                    fulfillmentPoItem.correctionDate = validData.date;
+                                                                    fulfillmentPoItem.correctionNo = validData.no;
+                                                                    fulfillmentPoItem.correctionQuantity = unitPaymentPriceCorrectionNoteItem.quantity;
+                                                                    fulfillmentPoItem.correctionPriceTotal = (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate);
+                                                                    fulfillmentPoItem.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
+                                                                }
+                                                                else{
+                                                                    var _fulfillment = fulfillmentPoItem;
+                                                                    _fulfillment.correctionDate = validData.date;
+                                                                    _fulfillment.correctionNo = validData.no;
+                                                                    _fulfillment.correctionQuantity = unitPaymentQuantityCorrectionNoteItem.quantity;
+                                                                    _fulfillment.correctionPriceTotal = (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate);
+                                                                    _fulfillment.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
+                                                                    _poItem.fulfillments.push(_fulfillment);
+                                                                }
                                                                 break;
                                                             }
                                                         }
@@ -342,10 +355,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                             var _unitReceiptNoteNo = fulfillmentPoItem.unitReceiptNoteNo || '';
 
                                                             if (unitPaymentPriceCorrectionNoteItem.unitReceiptNoteNo == _unitReceiptNoteNo && validData.unitPaymentOrder.no == _unitPaymentOrderNo) {
-                                                                fulfillmentPoItem.priceCorrectionDate = validData.date;
-                                                                fulfillmentPoItem.priceCorrectionNo = validData.no;
-                                                                fulfillmentPoItem.priceCorrectionPriceTotal = (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate);
-                                                                fulfillmentPoItem.priceCorrectionRemark = `Koreksi ${validData.priceCorrectionType}`;
+                                                                fulfillmentPoItem.correctionDate = validData.date;
+                                                                fulfillmentPoItem.correctionNo = validData.no;
+                                                                fulfillmentPoItem.correctionQuantity = unitPaymentPriceCorrectionNoteItem.quantity;
+                                                                fulfillmentPoItem.correctionPriceTotal = (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate);
+                                                                fulfillmentPoItem.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
                                                                 break;
                                                             }
                                                         }
@@ -415,10 +429,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                             var _unitReceiptNoteNo = fulfillmentPoItem.unitReceiptNoteNo || '';
 
                                                             if (unitPaymentPriceCorrectionNoteItem.unitReceiptNoteNo == _unitReceiptNoteNo && validData.unitPaymentOrder.no == _unitPaymentOrderNo) {
-                                                                delete fulfillmentPoItem.priceCorrectionDate;
-                                                                delete fulfillmentPoItem.priceCorrectionNo;
-                                                                delete fulfillmentPoItem.priceCorrectionPriceTotal;
-                                                                delete fulfillmentPoItem.priceCorrectionRemark;
+                                                                delete fulfillmentPoItem.correctionDate;
+                                                                delete fulfillmentPoItem.correctionNo;
+                                                                delete fulfillmentPoItem.correctionQuantity;
+                                                                delete fulfillmentPoItem.correctionPriceTotal;
+                                                                delete fulfillmentPoItem.correctionRemark;
                                                                 break;
                                                             }
                                                         }
