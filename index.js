@@ -17,7 +17,8 @@ module.exports = {
             BudgetManager: require('./src/managers/master/budget-manager'),
             ThreadSpecificationManager: require('./src/managers/master/thread-specification-manager'),
             MachineManager: require('./src/managers/master/machine-manager'),
-            UsterClassification: require('./src/managers/master/uster-classification-manager')
+            UsterClassification: require('./src/managers/master/uster-classification-manager'),
+            LotMachineManager: require('./src/managers/master/lot-machine-manager'),
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
@@ -31,7 +32,8 @@ module.exports = {
         production : {
             spinning : {
                 winding : {
-                    WindingQualitySampling : require('./src/managers/production/spinning/winding/winding-quality-sampling-manager')
+                    WindingQualitySampling : require('./src/managers/production/spinning/winding/winding-quality-sampling-manager'),
+                    WindingProductionOutput : require('./src/managers/production/spinning/winding/winding-production-output-manager')
                 }
             }
         }
