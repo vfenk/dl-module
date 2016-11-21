@@ -518,10 +518,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-    getDataPODetailUnit(startdate, enddate, unit) {
+    getDataPODetailUnit(startdate, enddate, divisi) {
         return new Promise((resolve, reject) => {
             if (startdate != undefined && enddate != undefined && startdate != "" && enddate != "") {
-                if (unit == undefined) {
+                if (divisi == undefined) {
                     this.collection.aggregate(
                         [{
                             $match: {
@@ -575,7 +575,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         "purchaseOrderExternal.isPosted": true
                                     }]
                                 }, {
-                                    "unit.division.name": unit
+                                    "unit.division.name": divisi
                                 }]
                             }
                         }, {
@@ -600,7 +600,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
             }
             else {
-                if (unit == undefined) {
+                if (divisi == undefined) {
                     this.collection.aggregate(
                         [{
                             $match: {
@@ -640,7 +640,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         "_deleted": false
                                     }]
                                 }, {
-                                    "unit.division.name": unit
+                                    "unit.division.name": divisi
                                 }]
                             }
                         }, {
