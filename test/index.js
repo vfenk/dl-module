@@ -23,8 +23,9 @@ describe('#dl-module', function(done) {
     // test('@master/vat-manager', './master/vat-manager-test');
     // test('@master/budget-manager', './master/budget-manager-test');
     // test('@master/machine-manager', './master/machine-manager-test');
-    test('@master/thread-specification-manager', './master/thread-specification-manager-test');
-     test('@master/uster-classification-manager', './master/uster-classification-manager-test');
+   // test('@master/thread-specification-manager', './master/thread-specification-manager-test');
+   //  test('@master/uster-classification-manager', './master/uster-classification-manager-test');
+    // test('@master/lot-machine-manager', './master/lot-machine-manager-test');
 
     // //Purchasing 
     // test('@purchasing/purchase-order-manager', './purchasing/purchase-order-manager-test');
@@ -43,7 +44,7 @@ describe('#dl-module', function(done) {
     //Production
     
      test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
-
+    test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
 
 })
