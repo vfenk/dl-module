@@ -26,7 +26,7 @@ module.exports = {
             PurchaseRequestManager: require('./src/managers/purchasing/purchase-request-manager'),
             UnitPaymentPriceCorrectionNoteManager: require('./src/managers/purchasing/unit-payment-price-correction-note-manager'),
             UnitPaymentOrderManager: require('./src/managers/purchasing/unit-payment-order-manager'),
-            UnitPaymentQuantityCorrectionNoteManager: require('./src/managers/purchasing/unit-quantity-price-correction-note-manager')
+            UnitPaymentQuantityCorrectionNoteManager: require('./src/managers/purchasing/unit-payment-quantity-correction-note-manager')
         },
         production : {
             spinning : {
