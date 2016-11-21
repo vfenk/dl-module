@@ -123,7 +123,7 @@ it('#03. should success when read data', function (done) {
 });
 
 var createdId;
-it('#04. should success when create new data uster classification', function (done) {
+it('#04. should success when create new data thread specification', function (done) {
     var data = getData();
     data.product = product;
     data.productId = product._id;
@@ -169,7 +169,7 @@ it(`#06. should success when update created data`, function (done) {
         });
 });
 
-it(`#08. should success when get updated data with id`, function (done) {
+it(`#07. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             validator.threadSpecification(data);
@@ -183,7 +183,7 @@ it(`#08. should success when get updated data with id`, function (done) {
         })
 });
 
-it(`#09. should success when delete data`, function (done) {
+it(`#08. should success when delete data`, function (done) {
     instanceManager.delete(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -194,7 +194,7 @@ it(`#09. should success when delete data`, function (done) {
         });
 });
 
-it(`#10. should _deleted=true`, function (done) {
+it(`#19. should _deleted=true`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             validator.threadSpecification(data);
