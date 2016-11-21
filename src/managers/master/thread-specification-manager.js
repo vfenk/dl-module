@@ -66,7 +66,7 @@ module.exports = class ThreadSpecificationManager extends BaseManager {
                 } ]
             });
 
-            var getProduct = valid.productId && valid.productId.toString().trim() != '' ? this.productManager.getSingleByIdOrDefault(valid.productId) : Promise.resolve(null);
+            var getProduct = valid.productId && ObjectId.isValid(valid.productId) ? this.productManager.getSingleByIdOrDefault(valid.productId) : Promise.resolve(null);
             
              Promise.all([getThreadSpecificationPromise, getProduct])
              .then(results =>{
