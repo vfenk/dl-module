@@ -205,12 +205,17 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         .then(validPurchaseOrder => {
                             this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
                                 .then(PR => {
-                                    PR.isUsed = true;
+                                    validPurchaseOrder.purchaseRequestId = PR._id;
                                     validPurchaseOrder.purchaseRequest = PR;
-                                    this.purchaseRequestManager.update(PR)
-                                        .then(results => {
-                                            this.collection.insert(validPurchaseOrder)
-                                                .then(id => {
+
+                                    this.collection.insert(validPurchaseOrder)
+                                        .then(id => {
+                                            PR.isUsed = true;
+                                            PR.purchaseOrderIds = PR.purchaseOrderIds || [];
+                                            PR.purchaseOrderIds.push(id);
+
+                                            this.purchaseRequestManager.update(PR)
+                                                .then(results => {
                                                     resolve(id);
                                                 })
                                                 .catch(e => {

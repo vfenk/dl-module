@@ -43,4 +43,9 @@ describe('#dl-module', function(done) {
     test('@purchasing/unit-payment-order/create', './purchasing/unit-payment-order/create');
     test('@purchasing/unit-payment-price-correction-note/create', './purchasing/unit-payment-price-correction-note/create');
     test('@purchasing/unit-payment-quantity-correction-note/create', './purchasing/unit-payment-quantity-correction-note/create');
+    
+    test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+
+
+
 })

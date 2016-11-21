@@ -383,7 +383,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             key: {
                 no: 1
             },
-            unique: true
+            //unique: true
         }
 
         return this.collection.createIndexes([dateIndex, noIndex]);
