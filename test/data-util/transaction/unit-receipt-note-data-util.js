@@ -24,7 +24,7 @@ class UnitReceiptNoteDataUtil {
                                         return {
                                             product: fulfillment.product,
                                             deliveredQuantity: fulfillment.deliveredQuantity,
-                                            deliveredUom: fulfillment.deliveredUom,
+                                            deliveredUom: fulfillment.purchaseOrderUom,
                                             purchaseOrderQuantity: fulfillment.purchaseOrderQuantity,
                                             pricePerDealUnit: poItem.pricePerDealUnit,
                                             currency: poItem.currency,

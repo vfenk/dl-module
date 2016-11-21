@@ -77,6 +77,38 @@ class PurchaseOrderExternalDataUtil {
                 });
         });
     }
+
+    getPosted() {
+        return new Promise((resolve, reject) => {
+            this.getNew()
+                .then(poe => {
+                    helper
+                        .getManager(PoExternalManager)
+                        .then(manager => {
+                            manager.post([poe])
+                                .then(ids => {
+                                    var id = ids[0];
+                                    manager.getSingleById(id)
+                                        .then(data => {
+                                            resolve(data);
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        });
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
 }
 
 module.exports = new PurchaseOrderExternalDataUtil();
