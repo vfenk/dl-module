@@ -8,12 +8,18 @@ var validatorMaster = require('dl-models').validator.master;
 var WindingProductionOutputManager = require("../../../../src/managers/production/spinning/winding/winding-production-output-manager");
 var MachineManager = require("../../../../src/managers/master/machine-manager");
 var ProductManager = require("../../../../src/managers/master/product-manager");
+var LotMachineManager = require("../../../../src/managers/master/lot-machine-manager");
+var ThreadSpecificationManager = require("../../../../src/managers/master/thread-specification-manager");
 var UomUtil = require('../../../data-util/master/uom-data-util');
 var UnitUtil = require('../../../data-util/master/unit-data-util');
 var instanceManager = null;
 var instanceManagerMachine = null;
 var instanceManagerProduct = null;
+var instanceManagerLotMachine = null;
+var instanceManagerThreadSpecification = null;
 var Machine = require('dl-models').master.Machine;
+var ThreadSpecification = require('dl-models').master.ThreadSpecification;
+var LotMachine = require('dl-models').master.LotMachine;
 var Product = require('dl-models').master.Product;
 
 function getData() {
@@ -55,6 +61,35 @@ function getDataProduct(){
         });
 }
 
+function getLotMachineData() {
+    var LotMachine = require('dl-models').master.LotMachine;
+    var lotMachine = new LotMachine();
+    
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
+    
+    lotMachine.rpm = 100;
+    lotMachine.ne = 150;
+    lotMachine.constant = 15;
+    lotMachine.lot=`lot [${code}]`;
+    return lotMachine;
+}
+
+function getThreadSpecificationData() {
+    var ThreadSpecification = require('dl-models').master.ThreadSpecification;
+    var threadSpecification = new ThreadSpecification();
+    
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
+
+    threadSpecification.rpm = 100;
+    threadSpecification.spindle = 150;
+    threadSpecification.tpi = 15;
+    return threadSpecification;
+}
+
 function getDataMachine() {
     return Promise.resolve(UnitUtil.getTestData())
         .then(unit => {
@@ -84,6 +119,12 @@ before('#00. connect db', function (done) {
                 username: 'unit-test'
             });
             instanceManagerMachine = new MachineManager(db, {
+                username: 'unit-test'
+            });
+            instanceManagerLotMachine = new LotMachineManager(db, {
+                username: 'unit-test'
+            });
+            instanceManagerThreadSpecification= new ThreadSpecificationManager(db, {
                 username: 'unit-test'
             });
             instanceManagerProduct = new ProductManager(db, {
@@ -160,7 +201,69 @@ it(`#04. should success when get created data Machine with id`, function (done) 
         })
 });
 
-it('#05. should success when read data', function (done) {
+var lotMachineId;
+it('#05. should success when create new data Lot Machine', function (done) {
+    var data =getLotMachineData();
+    data.productId = product._id;
+    data.product = product;
+    data.machineId = machine._id;
+    data.machine = machine;
+        instanceManagerLotMachine.create(data)
+            .then(id => {
+                id.should.be.Object();
+                lotMachineId = id;
+                done();
+            })
+            .catch(e => {
+            done(e);
+            })
+});
+
+var lotMachine;
+it(`#06. should success when get created data Lot Machine with id`, function (done) {
+    instanceManagerLotMachine.getSingleByQuery({ _id: lotMachineId })
+        .then(data => {
+            validatorMaster.lotMachine(data);
+            data.should.instanceof(Object);
+            lotMachine = data;
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
+var threadSpecificationId;
+it('#07. should success when create new data threadSpecification', function (done) {
+    var data =getThreadSpecificationData();
+    data.productId = product._id;
+    data.product = product;
+        instanceManagerThreadSpecification.create(data)
+            .then(id => {
+                id.should.be.Object();
+                threadSpecificationId = id;
+                done();
+            })
+            .catch(e => {
+            done(e);
+            })
+});
+
+var threadSpecification;
+it(`#08. should success when get created data threadSpecification with id`, function (done) {
+    instanceManagerThreadSpecification.getSingleByQuery({ _id: threadSpecificationId })
+        .then(data => {
+            validatorMaster.threadSpecification(data);
+            data.should.instanceof(Object);
+            threadSpecification = data;
+            done();
+        })
+        .catch(e => {
+            done(e);
+        })
+});
+
+it('#09. should success when read data', function (done) {
     instanceManager.read()
         .then(documents => {
             //process documents
@@ -173,11 +276,14 @@ it('#05. should success when read data', function (done) {
 });
 
 var createdId;
-it('#06. should success when create new data', function (done) {
+it('#10. should success when create new data', function (done) {
     var data = getData();
     data.machine = machine;
     data.machineId = machine._id;
-    data.threadName = product.name;
+    data.lotMachine = lotMachine;
+    data.lotMachineId = lotMachine._id;
+    data.threadSpecification = threadSpecification;
+    data.threadSpecificationId = threadSpecification._id;
     data.product = product;
     data.productId = product._id;
     instanceManager.create(data)
@@ -192,10 +298,9 @@ it('#06. should success when create new data', function (done) {
 });
 
 var createdData;
-it(`#07. should success when get created data with id`, function (done) {
+it(`#11. should success when get created data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
-            // validate.product(data);
             data.should.instanceof(Object);
             createdData = data;
             done();
@@ -205,7 +310,7 @@ it(`#07. should success when get created data with id`, function (done) {
         })
 });
 
-it(`#08. should success when update created data`, function (done) {
+it(`#12. should success when update created data`, function (done) {
     
     var newDate = new Date();
     newDate.setDate(newDate.getDate() + (-1));
@@ -229,7 +334,7 @@ it(`#08. should success when update created data`, function (done) {
 });
 
 
-it(`#09. should success when get updated data with id`, function (done) {
+it(`#13. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             validator.spinning.winding.windingProductionOutput(data);
@@ -246,7 +351,7 @@ it(`#09. should success when get updated data with id`, function (done) {
         })
 });
 
-it(`#10. should success when delete data`, function (done) {
+it(`#14. should success when delete data`, function (done) {
     instanceManager.delete(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -257,7 +362,7 @@ it(`#10. should success when delete data`, function (done) {
         });
 });
 
-it(`#11. should _deleted=true`, function (done) {
+it(`#15. should _deleted=true`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             validator.spinning.winding.windingProductionOutput(data);
