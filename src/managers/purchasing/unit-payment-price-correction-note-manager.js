@@ -262,7 +262,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                                     var _fulfillment = fulfillmentPoItem;
                                                                     _fulfillment.correctionDate = validData.date;
                                                                     _fulfillment.correctionNo = validData.no;
-                                                                    _fulfillment.correctionQuantity = unitPaymentQuantityCorrectionNoteItem.quantity;
+                                                                    _fulfillment.correctionQuantity = unitPaymentPriceCorrectionNoteItem.quantity;
                                                                     _fulfillment.correctionPriceTotal = (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate);
                                                                     _fulfillment.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
                                                                     _poItem.fulfillments.push(_fulfillment);
