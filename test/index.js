@@ -17,7 +17,7 @@ describe('#dl-module', function(done) {
     // test('@master/buyer-manager', './master/buyer-manager-test');
     // test('@master/product-manager', './master/product-manager-test');
     // test('@master/division-manager', './master/division-manager-test');
-    // test('@master/unit-manager', './master/unit-manager-test');
+     //test('@master/unit-manager', './master/unit-manager-test');
     // test('@master/category-manager', './master/category-manager-test');
     // test('@master/currency-manager', './master/currency-manager-test');
     // test('@master/vat-manager', './master/vat-manager-test');
@@ -43,7 +43,7 @@ describe('#dl-module', function(done) {
 
     //Production
     
-     test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+    // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
 
