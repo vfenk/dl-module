@@ -109,16 +109,17 @@ it(`#03. should success when get created data product with id`, function (done) 
         })
 });
 
-it('#04. should error when create new data with same code', function (done) {
+it('#04. should error when create new data with same product', function (done) {
     getData().then(data => {
-        data.code = usterData.code;
+        data.product = usterData.product;
+        data.productId = usterData.productId;
         instanceManager.create(data)
             .then(id => {
                 id.should.be.Object();
-                done("Should not be able to create data with same code");
+                done("Should not be able to create data with same product");
             })
             .catch(e => {
-                e.errors.should.have.property('code');
+                e.errors.should.have.property('product');
                 done();
             })
 	})
