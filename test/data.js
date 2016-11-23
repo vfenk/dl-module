@@ -17,6 +17,7 @@ module.exports = {
         deliveryOrder: require('./data-util/transaction/delivery-order-data-util'),
         unitReceiptNote: require('./data-util/transaction/unit-receipt-note-data-util'),
         unitPaymentOrder: require('./data-util/transaction/unit-payment-order-data-util'),
-        unitPaymentPriceCorrectionNote: require('./data-util/transaction/unit-payment-price-correction-note-data-util')
+        unitPaymentPriceCorrectionNote: require('./data-util/transaction/unit-payment-price-correction-note-data-util'),
+        unitPaymentQuantityCorrectionNote: require('./data-util/transaction/unit-payment-quantity-correction-note-data-util')
     }
 };

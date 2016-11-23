@@ -38,14 +38,15 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     _deleted: false
                 }]
             });
-            var getDeliveryOrder = valid.deliveryOrder && valid.deliveryOrder._id ? this.deliveryOrderManager.getSingleByIdOrDefault(valid.deliveryOrder._id) : Promise.resolve(null);
-            var getUnit = valid.unit && valid.unit._id ? this.unitManager.getSingleByIdOrDefault(valid.unit._id) : Promise.resolve(null);
-            var getSupplier = valid.supplier && valid.supplier._id ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
+            var getDeliveryOrder = valid.deliveryOrder && ObjectId.isValid(valid.deliveryOrder._id) ? this.deliveryOrderManager.getSingleByIdOrDefault(valid.deliveryOrder._id) : Promise.resolve(null);
+            var getUnit = valid.unit && ObjectId.isValid(valid.unit._id) ? this.unitManager.getSingleByIdOrDefault(valid.unit._id) : Promise.resolve(null);
+            var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
             var getPurchaseOrder = [];
             if (valid.deliveryOrder) {
                 for (var doItem of valid.deliveryOrder.items) {
                     for (var fulfillment of doItem.fulfillments)
-                        getPurchaseOrder.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                        if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                            getPurchaseOrder.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
                 }
             }
             else
@@ -228,7 +229,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         for (var fulfillment of doItem.fulfillments)
                             if (!poId.equals(fulfillment.purchaseOrder._id)) {
                                 poId = new ObjectId(fulfillment.purchaseOrder._id);
-                                getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                                if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
                             }
                     }
 
@@ -360,7 +362,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                 for (var fulfillment of doItem.fulfillments)
                                     if (!poId.equals(fulfillment.purchaseOrder._id)) {
                                         poId = new ObjectId(fulfillment.purchaseOrder._id);
-                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                                        if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                                            getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
                                     }
                             }
 
@@ -489,7 +492,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                 for (var fulfillment of doItem.fulfillments)
                                     if (!poId.equals(fulfillment.purchaseOrder._id)) {
                                         poId = new ObjectId(fulfillment.purchaseOrder._id);
-                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                                        if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                                            getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
                                     }
                             }
 

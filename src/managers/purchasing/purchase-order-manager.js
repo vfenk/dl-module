@@ -35,7 +35,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 }]
             });
 
-            var getPurchaseRequest = valid.purchaseRequestId && valid.purchaseRequestId.toString().trim() != '' ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
+            var getPurchaseRequest = ObjectId.isValid(valid.purchaseRequestId) ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
 
             Promise.all([getPurchaseOrderPromise, getPurchaseRequest])
                 .then(results => {
@@ -196,24 +196,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return query;
     }
 
-    _createIndexes() {
-        var createdDateIndex = {
-            name: `ix_${map.master.collection.PurchaseOrder}__createdDate`,
-            key: {
-                _createdDate: -1
-            }
-        }
-        var poNoIndex = {
-            name: `ix_${map.master.collection.PurchaseOrder}_no`,
-            key: {
-                no: -1
-            },
-            unique: true
-        }
-
-        return this.collection.createIndexes([createdDateIndex, poNoIndex]);
-    }
-
     create(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._createIndexes()
@@ -223,12 +205,17 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         .then(validPurchaseOrder => {
                             this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
                                 .then(PR => {
-                                    PR.isUsed = true;
+                                    validPurchaseOrder.purchaseRequestId = PR._id;
                                     validPurchaseOrder.purchaseRequest = PR;
-                                    this.purchaseRequestManager.update(PR)
-                                        .then(results => {
-                                            this.collection.insert(validPurchaseOrder)
-                                                .then(id => {
+
+                                    this.collection.insert(validPurchaseOrder)
+                                        .then(id => {
+                                            PR.isUsed = true;
+                                            PR.purchaseOrderIds = PR.purchaseOrderIds || [];
+                                            PR.purchaseOrderIds.push(id);
+
+                                            this.purchaseRequestManager.update(PR)
+                                                .then(results => {
                                                     resolve(id);
                                                 })
                                                 .catch(e => {
@@ -481,7 +468,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         $unwind: "$items"
                     }, {
                         $group: {
-                            _id: "$unit.division",
+                            _id: "$unit.division.name",
                             "pricetotal": {
                                 $sum: {
                                     $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -490,7 +477,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         console.log(result);
                         resolve(result);
@@ -512,7 +499,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         $unwind: "$items"
                     }, {
                         $group: {
-                            _id: "$unit.division",
+                            _id: "$unit.division.name",
                             "pricetotal": {
                                 $sum: {
                                     $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -521,7 +508,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         console.log(result);
                         resolve(result);
@@ -531,10 +518,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-    getDataPODetailUnit(startdate, enddate, unit) {
+    getDataPODetailUnit(startdate, enddate, divisi) {
         return new Promise((resolve, reject) => {
             if (startdate != undefined && enddate != undefined && startdate != "" && enddate != "") {
-                if (unit == undefined) {
+                if (divisi == undefined) {
                     this.collection.aggregate(
                         [{
                             $match: {
@@ -556,7 +543,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             $unwind: "$items"
                         }, {
                             $group: {
-                                _id: "$unit.subDivision",
+                                _id: "$unit.name",
                                 "pricetotal": {
                                     $sum: {
                                         $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -565,7 +552,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -588,14 +575,14 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         "purchaseOrderExternal.isPosted": true
                                     }]
                                 }, {
-                                    "unit.division": unit
+                                    "unit.division.name": divisi
                                 }]
                             }
                         }, {
                             $unwind: "$items"
                         }, {
                             $group: {
-                                _id: "$unit.subDivision",
+                                _id: "$unit.name",
                                 "pricetotal": {
                                     $sum: {
                                         $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -604,7 +591,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -613,7 +600,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
             }
             else {
-                if (unit == undefined) {
+                if (divisi == undefined) {
                     this.collection.aggregate(
                         [{
                             $match: {
@@ -628,7 +615,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             $unwind: "$items"
                         }, {
                             $group: {
-                                _id: "$unit.subDivision",
+                                _id: "$unit.name",
                                 "pricetotal": {
                                     $sum: {
                                         $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -637,7 +624,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -653,14 +640,14 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         "_deleted": false
                                     }]
                                 }, {
-                                    "unit.division": unit
+                                    "unit.division.name": divisi
                                 }]
                             }
                         }, {
                             $unwind: "$items"
                         }, {
                             $group: {
-                                _id: "$unit.subDivision",
+                                _id: "$unit.name",
                                 "pricetotal": {
                                     $sum: {
                                         $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -669,7 +656,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -715,7 +702,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
@@ -745,7 +732,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
