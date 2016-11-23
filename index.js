@@ -19,6 +19,7 @@ module.exports = {
             MachineManager: require('./src/managers/master/machine-manager'),
             UsterClassification: require('./src/managers/master/uster-classification-manager'),
             LotMachineManager: require('./src/managers/master/lot-machine-manager'),
+            YarnEquivalentConversion: require('./src/managers/master/yarn-equivalent-conversion-manager'),
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
