@@ -13,7 +13,6 @@ function getData() {
         .then(product => {
             var uster = new Uster();
 
-            uster.code = CodeGenerator();
             uster.product = product;
             uster.productId = product._id;
             uster.classifications = [];

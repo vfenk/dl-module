@@ -8,6 +8,7 @@ var map = DLModels.map;
 var UsterClassification = DLModels.master.UsterClassification;
 var Uster = DLModels.master.Uster;
 var ProductManager = require('./product-manager');
+var CodeGenerator = require('../../utils/code-generator');
 var BaseManager = require('../base-manager');
 var i18n = require('dl-i18n');
 
@@ -64,7 +65,7 @@ module.exports = class UsterManager extends BaseManager {
                 }, {
                     _deleted : false
                 },{
-                    code : valid.code
+                    productId : valid.product && ObjectId.isValid(valid.product._id) ? (new ObjectId(valid.product._id)) : ''
                 }]   
             });
             var getProduct = valid.product && ObjectId.isValid(valid.product._id) ? this.productManager.getSingleByIdOrDefault(valid.product._id) : Promise.resolve(null);
@@ -74,13 +75,11 @@ module.exports = class UsterManager extends BaseManager {
                     var _uster = result[0];
                     var _product = result[1];
 
-                    if(!valid.code)
-                        errors["code"] = i18n.__("Uster.code.isRequired:%s is required", i18n.__("Uster.code._:Code")); //"Kode uster tidak boleh kosong";
-                    else if(_uster)
-                        errors["code"] = i18n.__(`Uster.code.isExist:%s is alredy Exist`, i18n.__("Uster.code._:Code")); //"Kode uster sudah ada di database";
-
                     if(!_product)
                         errors["product"] = i18n.__("Uster.product.isNotExists:%s is not exists", i18n.__("Uster.product._:Product")); //"Benang sudah tidak ada di master produk";
+                    else if(_uster)
+                        errors["product"] = i18n.__("Uster.product.isNotExists:%s is exists in other uster", i18n.__("Uster.product._:Product")); //"Benang sudah tidak ada di master produk";
+
                     
                     if(valid.classifications && valid.classifications.length > 0){
                         var classificationError = [];
@@ -101,6 +100,8 @@ module.exports = class UsterManager extends BaseManager {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }
+                    if(!valid.code)
+                        valid.code = CodeGenerator();
 
                     var item = [];
                     for(var a of valid.classifications){

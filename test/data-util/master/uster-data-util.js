@@ -42,7 +42,6 @@ class UsterDataUtil {
                         Bad.neps = 75;
                         Bad.grade = "Bad";
                         var testData = {
-                            code: 'PC 30',
                             productId: product._id,
                             product: product,
                             classifications: []
