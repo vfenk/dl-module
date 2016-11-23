@@ -68,7 +68,7 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
                 .then(results => {
                     var _yarnEquivalentConversion = results[0];
 
-                    if (!valid.name || valid.ne == '')
+                    if (!valid.ne || valid.ne == '')
                         errors["ne"] =  i18n.__("YarnEquivalentConversion.ne.isRequired:%s is required", i18n.__("YarnEquivalentConversion.ne._:Ne"));
                     
                    if (!valid.conversionRatio || valid.conversionRatio == 0)
@@ -80,7 +80,7 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-                    valid = new Vat(vat);
+                    valid = new YarnEquivalentConversion(yarnEquivalentConversion);
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
                 })
