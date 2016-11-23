@@ -80,7 +80,6 @@ function getNewData() {
     var stamp = now / 1000 | 0;
     var code = stamp.toString(36);
     
-    lotMachine.threadName = product.name;
     lotMachine.productId = product._id;
     lotMachine.product = product;
     lotMachine.machineId = machine._id;
