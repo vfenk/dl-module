@@ -5,6 +5,8 @@ require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var LotMachine= DLModels.master.LotMachine;
+var Product= DLModels.master.Product;
+var Machine= DLModels.master.Machine;
 var ProductManager = require('../master/product-manager');
 var MachineManager = require('../master/machine-manager');
 var BaseManager = require('../base-manager');
@@ -98,8 +100,10 @@ module.exports = class LotMachineManager extends BaseManager {
                     var ValidationError = require('../../validation-error');
                     reject(new ValidationError('data does not pass validation', errors));
                 }
-
+                valid.machine=new Machine(_machine);
+                valid.product=new Product(_product);
                 valid = new LotMachine(lotMachine);
+                
                 valid.stamp(this.user.username, 'manager');
                 resolve(valid);
              })
@@ -107,6 +111,10 @@ module.exports = class LotMachineManager extends BaseManager {
                     reject(e);
                 })
         });
+
+    }
+
+    getLotbyProductId(productId){
 
     }
 
