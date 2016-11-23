@@ -475,7 +475,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                             }
                                                                         }
                                                                     }
-                                                                    this.collection.insert(validDeliveryOrder)
+                                                                    this.collection.update(validDeliveryOrder)
                                                                         .then(id => {
                                                                             resolve(id);
                                                                         })
@@ -627,7 +627,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                             }
                                                                         }
                                                                     }
-                                                                    this.collection.insert(validDeliveryOrder)
+                                                                    this.collection.update(validDeliveryOrder)
                                                                         .then(id => {
                                                                             resolve(id);
                                                                         })
