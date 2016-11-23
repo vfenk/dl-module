@@ -22,10 +22,10 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = unitPaymentOrder;
-            var getUnitReceiptNote;
+            var getUnitReceiptNote = [];
             if (valid) {
                 for (var item of valid.items) {
-                    getUnitReceiptNote = item.unitReceiptNoteId ? this.unitReceiptNote.getSingleByIdOrDefault(item.unitReceiptNoteId) : Promise.resolve(null);
+                    getUnitReceiptNote.push(ObjectId.isValid(item.unitReceiptNoteId) ? this.unitReceiptNote.getSingleByIdOrDefault(item.unitReceiptNoteId) : Promise.resolve(null));
                 }
             }
             var getUnitPaymentOrderPromise = this.collection.singleOrDefault({
@@ -45,14 +45,14 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     var _module = results[0];
                     var now = new Date();
                     var getURN = results[1];
-                    if (!valid.unitId)
-                        errors["unit"] = i18n.__("UnitPaymentOrder.unit.isRequired:%s is required", i18n.__("UnitPaymentOrder.unit._:Unit")); //"Unit tidak boleh kosong";
-                    else if (valid.unit) {
-                        if (!valid.unit._id)
-                            errors["unit"] = i18n.__("UnitPaymentOrder.unit.isRequired:%s is required", i18n.__("UnitPaymentOrder.unit._:Unit")); //"Unit tidak boleh kosong";
+                    if (!valid.divisionId)
+                        errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
+                    else if (valid.division) {
+                        if (!valid.division._id)
+                            errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
                     }
-                    else if (!valid.unit)
-                        errors["unit"] = i18n.__("UnitPaymentOrder.unit.isRequired:%s is required", i18n.__("UnitPaymentOrder.unit._:Unit")); //"Unit tidak boleh kosong";
+                    else if (!valid.division)
+                        errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
 
                     if (!valid.date || valid.date == '')
                         errors["date"] = i18n.__("UnitPaymentOrder.date.isRequired:%s is required", i18n.__("UnitPaymentOrder.date._:Date")); //tanggal surat perintah bayar tidak boleh kosong";
@@ -114,8 +114,8 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         valid.incomeTaxDate = null;
                         valid.useIncomeTax = false;
                     }
-                    valid.divisionId = new ObjectId(valid.unitId);
-                    valid.division = valid.unit;
+                    valid.divisionId = new ObjectId(valid.divisionId);
+                    valid.division = valid.division;
                     valid.division._id = new ObjectId(valid.division._id);
                     valid.supplierId = new ObjectId(valid.supplierId);
                     valid.supplier._id = new ObjectId(valid.supplierId);
@@ -131,13 +131,14 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         valid.vat._id = new ObjectId(valid.vat._id);
                     }
 
-                    for (var item of valid.items) { 
-                            if (new ObjectId(item.unitReceiptNoteId).equals(new ObjectId(getURN._id)))
-                            {
-                                item.unitReceiptNoteId = new ObjectId(getURN._id);
-                                item.unitReceiptNote._id = new ObjectId(getURN._id);
+                    for (var item of valid.items) {
+                        for (var _urn of getURN) {
+                            if (new ObjectId(item.unitReceiptNoteId).equals(new ObjectId(_urn._id))) {
+                                item.unitReceiptNoteId = new ObjectId(_urn._id);
+                                item.unitReceiptNote._id = new ObjectId(_urn._id);
                                 break;
-                            } 
+                            }
+                        }
                     }
 
                     if (!valid.stamp) {
@@ -201,11 +202,16 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                 .then((createIndexResults) => {
                     this._validate(unitPaymentOrder)
                         .then(validUnitPaymentOrder => {
-                            validUnitPaymentOrder.no = this.generateNo(validUnitPaymentOrder.unit.code, validUnitPaymentOrder.category.code);
+                            validUnitPaymentOrder.no = this.generateNo(validUnitPaymentOrder.division.code, validUnitPaymentOrder.category.code);
                             this.collection.insert(validUnitPaymentOrder)
                                 .then(id => {
-                                    this.updatePO(validUnitPaymentOrder);
-                                    resolve(id);
+                                    this.updatePO(validUnitPaymentOrder)
+                                        .then(result => {
+                                            resolve(id);
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        });
                                 })
                                 .catch(e => {
                                     reject(e);
@@ -229,8 +235,13 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         .then(validUnitPaymentOrder => {
                             this.collection.update(validUnitPaymentOrder)
                                 .then(id => {
-                                    this.updatePO(validUnitPaymentOrder);
-                                    resolve(id);
+                                    this.updatePO(validUnitPaymentOrder)
+                                        .then(result => {
+                                            resolve(id);
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        });
                                 })
                                 .catch(e => {
                                     reject(e);
@@ -255,7 +266,8 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
             for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
                 for (var doItem of unitPaymentOrderItem.unitReceiptNote.deliveryOrder.items)
                     for (var fulfillment of doItem.fulfillments) {
-                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillment.purchaseOrder._id));
+                        if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                            getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillment.purchaseOrder._id));
                     }
             }
             Promise.all(getPurchaseOrderById)
@@ -310,6 +322,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
         });
     }
+
     delete(unitPaymentOrder) {
         return new Promise((resolve, reject) => {
             var tasks = [];
@@ -326,7 +339,8 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                     for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
                                         for (var doItem of unitPaymentOrderItem.unitReceiptNote.deliveryOrder.items)
                                             for (var fulfillment of doItem.fulfillments) {
-                                                getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillment.purchaseOrder._id));
+                                                if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillment.purchaseOrder._id));
                                             }
                                     }
                                     Promise.all(getPurchaseOrderById)
