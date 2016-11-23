@@ -101,6 +101,7 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 var _Lm=null;
                 var _Ts=null;
                 var now = new Date();
+                valid.product=_product;
                 if(_lotmachine.data.length > 0){
                     for(var a of _lotmachine.data)
                     {
