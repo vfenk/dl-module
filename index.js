@@ -17,7 +17,6 @@ module.exports = {
             BudgetManager: require('./src/managers/master/budget-manager'),
             ThreadSpecificationManager: require('./src/managers/master/thread-specification-manager'),
             MachineManager: require('./src/managers/master/machine-manager'),
-            UsterClassification: require('./src/managers/master/uster-classification-manager'),
             LotMachineManager: require('./src/managers/master/lot-machine-manager'),
             YarnEquivalentConversion: require('./src/managers/master/yarn-equivalent-conversion-manager'),
             UsterManager: require('./src/managers/master/uster-manager')
