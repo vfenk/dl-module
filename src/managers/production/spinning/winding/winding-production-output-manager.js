@@ -111,10 +111,10 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                     
                 }
                 if(_threadSpecification.data.length > 0){
-                    for(var a of _threadSpecification.data)
+                    for(var b of _threadSpecification.data)
                     {
-                        if(a.productId==valid.productId)
-                            _Ts = a;
+                        if(b.productId==valid.productId)
+                            _Ts = b;
                     }
                 }
                 if (!valid.spinning || valid.spinning == '')
@@ -208,8 +208,11 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
         }
 
         var codeIndex = {
-            name: `ix_${map.production.spinning.winding.collection.WindingProductionOutput}_productId`,
+            name: `ix_${map.production.spinning.winding.collection.WindingProductionOutput}_spinning_date_machineId_productId`,
             key: {
+                spinning: 1,
+                date: 1,
+                machineId: 1,
                 productId: 1
             },
             unique: true
