@@ -669,7 +669,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     getDataPOCategory(startdate, enddate) {
         return new Promise((resolve, reject) => {
-            if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") {
+            if (startdate != undefined && enddate != undefined && startdate != "" && enddate != "") {
                 this.collection.aggregate(
                     [{
                         $match: {

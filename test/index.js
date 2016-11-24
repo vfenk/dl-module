@@ -7,6 +7,7 @@ function test(name, path) {
 
 describe('#dl-module', function(done) {
     this.timeout(2 * 60000);
+
     // Auth
     // test('@auth/account-manager', './auth/account-manager-test');
     // test('@auth/role-manager', './auth/role-manager-test');
@@ -23,6 +24,9 @@ describe('#dl-module', function(done) {
     test('@master/vat-manager', './master/vat-manager-test');
     test('@master/budget-manager', './master/budget-manager-test');
     test('@master/machine-manager', './master/machine-manager-test');
+    test('@master/lot-machine-manager', './master/lot-machine-manager-test');
+    test('@master/yarn-equivalent-conversion-manager', './master/yarn-equivalent-conversion-manager-test');
+    test('@master/thread-specification-manager', './master/thread-specification-manager-test');
     
     //Purchasing 
     // test('@purchasing/purchase-request-manager', './purchasing/purchase-request-manager-test');
@@ -44,8 +48,10 @@ describe('#dl-module', function(done) {
     test('@purchasing/unit-payment-price-correction-note/create', './purchasing/unit-payment-price-correction-note/create');
     test('@purchasing/unit-payment-quantity-correction-note/create', './purchasing/unit-payment-quantity-correction-note/create');
     
+    //Production
+    
     test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
-
+    test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
 
 })
