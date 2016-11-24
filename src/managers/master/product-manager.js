@@ -46,7 +46,24 @@ module.exports = class ProductManager extends BaseManager {
 
             query['$and'].push($or);
         }
-        
+        if (paging.tags)
+        {
+            var regex = new RegExp(paging.tags, "i");
+            var filterName = {
+                'name': {
+                    '$regex': regex
+                }
+            };
+            var filterTags = {
+                'tags': {
+                    '$regex': regex
+                }
+            };
+            var $or = {
+                '$or': [filterTags, filterName]
+            };
+            query['$and'].push($or);
+        }
         return query;
     }
 
