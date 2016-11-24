@@ -58,6 +58,24 @@ function getDataMachine() {
         });
 }
 
+function getNewData() {
+            var WindingQualitySampling = require('dl-models').production.spinning.winding.WindingQualitySampling;
+            var windingQualitySampling = new WindingQualitySampling();
+
+            var now = new Date();
+
+            windingQualitySampling.spinning = 'SPINNING 1';
+            windingQualitySampling.date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            windingQualitySampling.U = 50;
+            windingQualitySampling.thin = 1;
+            windingQualitySampling.thick = 15;
+            windingQualitySampling.neps = 48;
+            windingQualitySampling.sys = 10;
+            windingQualitySampling.elongation=10;
+
+            return windingQualitySampling;
+}
+
 before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
@@ -153,7 +171,9 @@ it(`#05. should success when get created data with id`, function (done) {
 });
 
 it('#06. should error when create new data with same uster, machine, spinning and date', function (done) {
-    getData().then(data => {
+    var data = getNewData();
+        data.uster = createdData.uster;
+        data.usterId = createdData.usterId;
         data.machine = machine;
         data.machineId = machine._id;
         instanceManager.create(data)
@@ -165,14 +185,11 @@ it('#06. should error when create new data with same uster, machine, spinning an
                 e.errors.should.have.property('spinning');
                 done();
             })
-    })
-    .catch(e => {
-        done(e);
-    })
+            
 });
 
 it('#07. should error when create new data with product has no uster classification', function (done) {
-    getData().then(data => {
+    var data = getNewData();
         data.uster = {};
         data.usterId = {};
         data.machine = machine;
@@ -186,14 +203,10 @@ it('#07. should error when create new data with product has no uster classificat
                 e.errors.should.have.property('uster');
                 done();
             })
-    })
-    .catch(e => {
-        done(e);
-    })
 });
 
 it('#08. should error when create new data with product has no machine', function (done) {
-    getData().then(data => {
+    var data = getNewData();
         instanceManager.create(data)
             .then(id => {
                 id.should.be.Object();
@@ -203,10 +216,6 @@ it('#08. should error when create new data with product has no machine', functio
                 e.errors.should.have.property('machine');
                 done();
             })
-    })
-    .catch(e => {
-        done(e);
-    })
 });
 
 it(`#09. should success when update created data`, function (done) {

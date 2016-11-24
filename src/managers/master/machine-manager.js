@@ -67,7 +67,8 @@ module.exports = class MachineManager extends BaseManager {
                 .then(results => {
                     var _machine = results[0];
                     var _unit = results[1];
-                    valid.code = CodeGenerator();
+                    if(!valid.code)
+                        valid.code = CodeGenerator();
                     
                     if (!valid.name || valid.name == '')
                         errors["name"] = i18n.__("Machine.name.isExists:%s is required", i18n.__("Machine.name._:Name")); //"Nama harus diisi";
