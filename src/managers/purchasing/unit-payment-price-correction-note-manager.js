@@ -228,6 +228,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                             var tasks = [];
                             var getPurchaseOrderById = [];
                             validData.no = generateCode();
+                            if(validData.unitPaymentOrder.useIncomeTax)
+                                validData.returNoteNo = generateCode();
                             //Update PO Internal
                             var poId = new ObjectId();
                             for (var _item of validData.items) {
