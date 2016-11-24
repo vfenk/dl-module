@@ -15,8 +15,11 @@ module.exports = {
             CurrencyManager: require('./src/managers/master/currency-manager'),
             VatManager: require('./src/managers/master/vat-manager'),
             BudgetManager: require('./src/managers/master/budget-manager'),
+            ThreadSpecificationManager: require('./src/managers/master/thread-specification-manager'),
             MachineManager: require('./src/managers/master/machine-manager'),
-            Uster: require('./src/managers/master/uster-manager')
+            LotMachineManager: require('./src/managers/master/lot-machine-manager'),
+            YarnEquivalentConversion: require('./src/managers/master/yarn-equivalent-conversion-manager'),
+            UsterManager: require('./src/managers/master/uster-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
@@ -31,7 +34,8 @@ module.exports = {
         production : {
             spinning : {
                 winding : {
-                    WindingQualitySampling : require('./src/managers/production/spinning/winding/winding-quality-sampling-manager')
+                    WindingQualitySampling : require('./src/managers/production/spinning/winding/winding-quality-sampling-manager'),
+                    WindingProductionOutput : require('./src/managers/production/spinning/winding/winding-production-output-manager')
                 }
             }
         }
