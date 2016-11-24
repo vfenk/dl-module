@@ -61,6 +61,8 @@ module.exports = class LotMachineManager extends BaseManager {
                         }
                     }, {
                             productId: new ObjectId(valid.productId)
+                        },{
+                            machineId: new ObjectId(valid.machineId)
                         }]
                 },
                 {
@@ -110,6 +112,26 @@ module.exports = class LotMachineManager extends BaseManager {
 
     }
 
+    getLotbyMachineProduct(_productId,_machineId){
+        return new Promise((resolve, reject) => {
+            var query={
+                        "machineId":new ObjectId(_machineId),
+                        "productId" : new ObjectId(_productId)
+            };
+            query = Object.assign(query, {
+                _deleted: false
+            });
+
+            this.collection.find(query).toArray()
+                .then(Lot => {
+                    resolve(Lot);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        })
+    }
+
     _createIndexes() {
         var dateIndex = {
             name: `ix_${map.master.collection.LotMachine}__updatedDate`,
@@ -119,9 +141,10 @@ module.exports = class LotMachineManager extends BaseManager {
         }
 
         var codeIndex = {
-            name: `ix_${map.master.collection.LotMachine}_productId`,
+            name: `ix_${map.master.collection.LotMachine}_productId_machineId`,
             key: {
-                productId: 1
+                productId: 1,
+                machineId:1
             },
             unique: true
         }
