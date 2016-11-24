@@ -91,14 +91,14 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
     } 
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.master.collection.Vat}__updatedDate`,
+            name: `ix_${map.master.collection.YarnEquivalentConversion}__updatedDate`,
             key: {
                 _updatedDate: -1
             }
         }
 
         var neRatioIndex = {
-            name: `ix_${map.master.collection.Vat}_ne_conversionRatio`,
+            name: `ix_${map.master.collection.YarnEquivalentConversion}_ne_conversionRatio`,
             key: {
                 ne: 1,
                 conversionRatio: 1
