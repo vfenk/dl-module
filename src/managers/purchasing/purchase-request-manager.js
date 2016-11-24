@@ -199,7 +199,6 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     }
 
     create(purchaseRequest) {
-        //purchaseRequest = new PurchaseRequest(purchaseRequest);
         return new Promise((resolve, reject) => {
             var dateFormat = "MMYY";
             var locale = 'id-ID';
@@ -207,7 +206,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             moment.locale(locale);
             this._validate(purchaseRequest)
                 .then(validPurchaseRequest => {
-                    validPurchaseRequest.no = `${validPurchaseRequest.budget.code}${validPurchaseRequest.unit.code}${validPurchaseRequest.category.code}${moment(validPurchaseRequest.date).format(dateFormat)}${generateCode()}`;
+                    validPurchaseRequest.no = generateCode();
                     if (validPurchaseRequest.expectedDeliveryDate == "undefined") {
                         validPurchaseRequest.expectedDeliveryDate = "";
                     }

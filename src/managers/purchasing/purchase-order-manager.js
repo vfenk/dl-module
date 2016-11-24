@@ -200,7 +200,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             this._createIndexes()
                 .then((createIndexResults) => {
-                    purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
+                    purchaseOrder.no = generateCode();
                     this._validate(purchaseOrder)
                         .then(validPurchaseOrder => {
                             this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
