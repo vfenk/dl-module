@@ -72,13 +72,23 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
             var valid = windingProductionOutput;
             // 1. begin: Declare promises.
             var getWindingProductionOutputPromise = this.collection.singleOrDefault({
-                    "$and": [{
-                        _id: {
-                            '$ne': new ObjectId(valid._id)
-                        }
-                    }, {
-                            _deleted:false
-                        }]
+                    "$and" : [{
+                        _id : {
+                            "$ne" : new ObjectId(valid._id)
+                    }
+                    },{
+                        _deleted : false
+                    },{
+                        date : dateProcess
+                    },{
+                        productId : valid.productId && ObjectId.isValid(valid.product._id) ? (new ObjectId(valid.product._id)) : ''
+                    },{
+                        machineId : valid.machine && ObjectId.isValid(valid.machine._id) ? (new ObjectId(valid.machine._id)) : ''
+                    },{
+                        spinning : valid.spinning
+                    },{
+                        shift : valid.shift
+                }]
             });
 
             var getProduct = valid.productId && ObjectId.isValid(valid.productId) ? this.productManager.getSingleByIdOrDefault(valid.productId) : Promise.resolve(null);
@@ -208,10 +218,11 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
         }
 
         var codeIndex = {
-            name: `ix_${map.production.spinning.winding.collection.WindingProductionOutput}_spinning_date_machineId_productId`,
+            name: `ix_${map.production.spinning.winding.collection.WindingProductionOutput}_spinning_date_shift_machineId_productId`,
             key: {
                 spinning: 1,
                 date: 1,
+                shift:1,
                 machineId: 1,
                 productId: 1
             },
