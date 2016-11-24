@@ -79,9 +79,9 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                     },{
                         _deleted : false
                     },{
-                        date : dateProcess
+                        date : valid.date
                     },{
-                        productId : valid.productId && ObjectId.isValid(valid.product._id) ? (new ObjectId(valid.product._id)) : ''
+                        productId : valid.productId && ObjectId.isValid(valid.productId) ? (new ObjectId(valid.productId)) : ''
                     },{
                         machineId : valid.machine && ObjectId.isValid(valid.machine._id) ? (new ObjectId(valid.machine._id)) : ''
                     },{
@@ -115,7 +115,7 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 if(_lotmachine.data.length > 0){
                     for(var a of _lotmachine.data)
                     {
-                        if(a.productId==valid.productId)
+                        if(a.productId==valid.productId && a.machineId==valid.machineId)
                             _Lm = a;
                     }
                     
@@ -176,12 +176,12 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 }
 
                 if (!_Lm)
-                    errors["product"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is not exists", i18n.__("WindingProductionOutput.lotMachine._:LotMachine")); 
+                    errors["lotMachine"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is not exists", i18n.__("WindingProductionOutput.lotMachine._:LotMachine")); 
                 else if (!valid.lotMachineId)
-                    errors["product"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is required", i18n.__("WindingProductionOutput.lotMachine._:LotMachine"));
+                    errors["lotMachine"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is required", i18n.__("WindingProductionOutput.lotMachine._:LotMachine"));
                 else if (valid.lotMachine) {
                     if (!valid.lotMachine._id)
-                        errors["product"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is required", i18n.__("WindingProductionOutput.lotMachine._:LotMachine"));
+                        errors["lotMachine"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is required", i18n.__("WindingProductionOutput.lotMachine._:LotMachine"));
                 }
 
                 if (!_Ts)
