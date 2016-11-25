@@ -133,6 +133,24 @@ module.exports = class BaseManager {
         });
     }
 
+     _delete(id) {
+
+        if (id === '')
+            return Promise.resolve(null); 
+        else {
+            return this.collection.deleteOne({
+                    _id: id
+                })
+                .then(result => {
+                    return result.n == 1;
+                })
+                .catch(e => {
+
+                    throw e;
+                });
+        }
+    }
+
     getSingleById(id) {
         return new Promise((resolve, reject) => {
             if (id === '')
