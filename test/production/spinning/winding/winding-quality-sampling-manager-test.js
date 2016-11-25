@@ -21,7 +21,6 @@ function getData() {
 
             var now = new Date();
 
-            windingQualitySampling.spinning = 'SPINNING 1';
             windingQualitySampling.date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             windingQualitySampling.U = 50;
             windingQualitySampling.thin = 1;
@@ -36,6 +35,8 @@ function getData() {
         });
 }
 
+var _unit;
+var _unitId;
 function getDataMachine() {
     return Promise.resolve(UnitUtil.getTestData())
         .then(unit => {
@@ -53,6 +54,8 @@ function getDataMachine() {
             machine.manufacture=`manufacture [${code}]`;
             machine.year = now.getFullYear();
             machine.machineCondition=`machine condition [${code}]`;
+            _unit = unit;
+            _unitId = unit._id;
 
             return machine;
         });
@@ -64,7 +67,6 @@ function getNewData() {
 
             var now = new Date();
 
-            windingQualitySampling.spinning = 'SPINNING 1';
             windingQualitySampling.date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             windingQualitySampling.U = 50;
             windingQualitySampling.thin = 1;
@@ -141,6 +143,8 @@ it('#04. should success when create new data', function (done) {
     getData().then(data => {
         data.machine = machine;
         data.machineId = machine._id;
+        data.spinning = _unit;
+        data.unitId = _unit._id;
         instanceManager.create(data)
             .then(id => {
                 id.should.be.Object();
@@ -176,6 +180,8 @@ it('#06. should error when create new data with same uster, machine, spinning an
         data.usterId = createdData.usterId;
         data.machine = machine;
         data.machineId = machine._id;
+        data.spinning = _unit;
+        data.unitId = _unit._id;
         instanceManager.create(data)
             .then(id => {
                 id.should.be.Object();
@@ -194,6 +200,8 @@ it('#07. should error when create new data with product has no uster classificat
         data.usterId = {};
         data.machine = machine;
         data.machineId = machine._id;
+        data.spinning = _unit;
+        data.unitId = _unit._id;
         instanceManager.create(data)
             .then(id => {
                 id.should.be.Object();
@@ -205,12 +213,14 @@ it('#07. should error when create new data with product has no uster classificat
             })
 });
 
-it('#08. should error when create new data with product has no machine', function (done) {
+it('#08. should error when create new data without machine', function (done) {
     var data = getNewData();
+        data.spinning = _unit;
+        data.unitId = _unit._id;
         instanceManager.create(data)
             .then(id => {
                 id.should.be.Object();
-                done("Should not be able to create data with product has no machine");
+                done("Should not be able to create data without machine");
             })
             .catch(e => {
                 e.errors.should.have.property('machine');
@@ -218,12 +228,26 @@ it('#08. should error when create new data with product has no machine', functio
             })
 });
 
-it(`#09. should success when update created data`, function (done) {
+it('#09. should error when create new data without spinning', function (done) {
+    var data = getNewData();
+        data.machine = machine;
+        data.machineId = machine._id;
+        instanceManager.create(data)
+            .then(id => {
+                id.should.be.Object();
+                done("Should not be able to create data without spinning");
+            })
+            .catch(e => {
+                e.errors.should.have.property('spinning');
+                done();
+            })
+});
+
+it(`#10. should success when update created data`, function (done) {
     
     var newDate = new Date();
     newDate.setDate(newDate.getDate() + (-1));
 
-    createdData.spinning += ' [updated]';
     createdData.date = newDate;
     createdData.U += 1;
     createdData.thin += 5;
@@ -244,11 +268,10 @@ it(`#09. should success when update created data`, function (done) {
 });
 
 
-it(`#10. should success when get updated data with id`, function (done) {
+it(`#11. should success when get updated data with id`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             validator.production.spinning.winding.windingQualitySampling(data);
-            data.spinning.should.equal(createdData.spinning);
             data.U.should.equal(createdData.U);
             data.thin.should.equal(createdData.thin);
             data.thick.should.equal(createdData.thick);
@@ -263,7 +286,7 @@ it(`#10. should success when get updated data with id`, function (done) {
         })
 });
 
-it(`#11. should success when delete data`, function (done) {
+it(`#12. should success when delete data`, function (done) {
     instanceManager.delete(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -274,7 +297,7 @@ it(`#11. should success when delete data`, function (done) {
         });
 });
 
-it(`#12. should _deleted=true`, function (done) {
+it(`#13. should _deleted=true`, function (done) {
     instanceManager.getSingleByQuery({ _id: createdId })
         .then(data => {
             validator.production.spinning.winding.windingQualitySampling(data);
