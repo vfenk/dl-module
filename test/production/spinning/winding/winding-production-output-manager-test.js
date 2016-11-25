@@ -23,20 +23,24 @@ var LotMachine = require('dl-models').master.LotMachine;
 var Product = require('dl-models').master.Product;
 
 function getData() {
-    var WindingProductionOutput = require('dl-models').production.spinning.winding.WindingProductionOutput;
-    var windingProductionOutput = new WindingProductionOutput();
+    return Promise.resolve(UnitUtil.getTestData())
+        .then(unit => {
+            var WindingProductionOutput = require('dl-models').production.spinning.winding.WindingProductionOutput;
+            var windingProductionOutput = new WindingProductionOutput();
 
-    var now = new Date();
+            var now = new Date();
 
-    windingProductionOutput.spinning = 'SPINNING 1';
-    windingProductionOutput.date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    windingProductionOutput.shift = 'Shift 1';
-    windingProductionOutput.threadWeight = 1.89;
-    windingProductionOutput.goodCone = 5;
-    windingProductionOutput.badCone = 5;
-    windingProductionOutput.drum = 10;
+            windingProductionOutput.unit = unit;
+            windingProductionOutput.unitId = unit._id;
+            windingProductionOutput.date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            windingProductionOutput.shift = 'Shift 1';
+            windingProductionOutput.threadWeight = 1.89;
+            windingProductionOutput.goodCone = 5;
+            windingProductionOutput.badCone = 5;
+            windingProductionOutput.drum = 10;
 
-    return windingProductionOutput;
+            return windingProductionOutput;
+        })
 }
 
 function getDataProduct(){
