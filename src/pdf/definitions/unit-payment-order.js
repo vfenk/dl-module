@@ -67,7 +67,8 @@ module.exports = function (unitPaymentOrder) {
                     }]
                 }, {
                     width: '28%',
-                    stack: ['NOTA KREDIT']
+                    stack: ['NOTA KREDIT'],
+                    style: ['size20', 'bold']
                 },],
                 style: ['size20', "bold"]
 
@@ -98,7 +99,8 @@ module.exports = function (unitPaymentOrder) {
                 style: ['size08']
             }
         ]
-    }, '\n'] 
+    }, '\n']
+
     var subHeader = [{
         columns: [
             {
@@ -106,7 +108,7 @@ module.exports = function (unitPaymentOrder) {
                 columns: [{
                     width: '70%',
                     stack: [{
-                        text: 'Nota Pembelian ' + unitPaymentOrder.category.name + '      No. ' + number,
+                        text: 'Nota Pembelian ' + unitPaymentOrder.category.name + '                      No. ' + number,
                         style: ['size08', "underline"]
                     },
                     {
@@ -173,7 +175,7 @@ module.exports = function (unitPaymentOrder) {
             text: parseFloat(item.price).toLocaleString(locale, locale.currencyNotaItern),
             style: ['size07', 'right']
         }, {
-            text: parseFloat(item.price * item.quantity).toLocaleString(locale, locale.decimal),
+            text: parseFloat(item.price * item.quantity).toLocaleString(locale, locale.currencyNotaItern),
             style: ['size07', 'right']
         }, {
             text: item.prNo,
@@ -213,12 +215,12 @@ module.exports = function (unitPaymentOrder) {
                     style: 'center'
                 }, {
                     width: '25%',
-                    stack: ['Jumlah . . . . . . . . . . . . . . RP'],
+                    stack: ['Jumlah . . . . . . . . . . . . . . . RP'],
                     style: 'left'
                 },
                 {
                     width: '25%',
-                    stack: [parseFloat(sum).toLocaleString(locale, locale.decimal)],
+                    stack: [parseFloat(sum).toLocaleString(locale, locale.currencyNotaItern)],
                     style: 'right'
                 }]
             },
@@ -233,7 +235,7 @@ module.exports = function (unitPaymentOrder) {
                     style: 'left'
                 }, {
                     width: '25%',
-                    stack: ['PPn 10 %. . . . . . . . . . . . . RP '],
+                    stack: ['PPn 10 %. . . . . . . . . . . . . . RP '],
                     style: 'left'
                 },
                 {
@@ -287,7 +289,7 @@ module.exports = function (unitPaymentOrder) {
             {
                 columns: [{
                     width: '25%',
-                    stack: ['Nota :'],
+                    stack: ['Invoce :'],
                     style: 'left'
                 }, {
                     width: '25%',
@@ -309,7 +311,7 @@ module.exports = function (unitPaymentOrder) {
                     stack: ['Ket :'],
                     style: 'left'
                 }, {
-                    width: '75%',
+                    width: '25%',
                     stack: [unitPaymentOrder.remark || ''],
                     style: 'left'
                 },
@@ -318,10 +320,32 @@ module.exports = function (unitPaymentOrder) {
                     stack: ['Nomor Faktur Pajak PPN:'],
                     style: 'left'
                 }, {
-                    width: '75%',
-                    stack: [unitPaymentOrder.incomeTaxCorrectionNo || ''],
+                    width: '25%',
+                    stack: [unitPaymentOrder.incomeTaxNo || ''],
                     style: 'left'
-                }]
+                }
+                ]
+            },
+            {
+                columns: [{
+                    width: '25%',
+                    stack: [''],
+                    style: 'left'
+                }, {
+                    width: '25%',
+                    stack: [''],
+                    style: 'left'
+                },
+                {
+                    width: '25%',
+                    stack: ['Pembayaran: '],
+                    style: 'left'
+                }, {
+                    width: '25%',
+                    stack: [unitPaymentOrder.paymentMethod || ''],
+                    style: 'left'
+                }
+                ]
             }
             ],
             style: ['size08']
