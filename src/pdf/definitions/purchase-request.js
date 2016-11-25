@@ -73,13 +73,13 @@ module.exports = function (purchaseRequest) {
                 width: '40%',
                 columns: [{
                     width: '35%',
-                    stack: ['BAGIAN', 'Nomor']
+                    stack: ['Bagian', 'Budget' , 'Nomor']
                 }, {
                         width: '5%',
-                        stack: [':', ':']
+                        stack: [':', ':', ':']
                     }, {
                         width: '*',
-                        stack: [purchaseRequest.unit.name, purchaseRequest.no]
+                        stack: [purchaseRequest.unit.name, purchaseRequest.budget.name, purchaseRequest.no]
                     }],
                 style: ['size08']
 
@@ -103,7 +103,7 @@ module.exports = function (purchaseRequest) {
     var opening = {
         text: [
             '\n', {
-                text: 'MOHON DIBELIKAN/DIUSAHAKAN BARANG TERSEBUT DIBAWAH INI : '
+                text: 'Mohon dibelikan/diusahakan barang tersebut dibawah ini : '
             },
             '\n\n'
         ],
@@ -176,7 +176,7 @@ module.exports = function (purchaseRequest) {
                     width: '60%',
                     columns: [{
                         width: '50%',
-                        stack: ['KATEGORI', 'DIMINTA DATANG', 'KETERANGAN']
+                        stack: ['Kategori', 'Diminta Datang', 'Keterangan']
                     }, {
                             width: '3%',
                             stack: [':', ':', ':']
