@@ -36,7 +36,8 @@ module.exports = {
                 winding : {
                     WindingQualitySampling : require('./src/managers/production/spinning/winding/winding-quality-sampling-manager'),
                     WindingProductionOutput : require('./src/managers/production/spinning/winding/winding-production-output-manager')
-                }
+                },
+                DailySpinningProductionReportManager : require('./src/managers/production/spinning/daily-spinning-production-report-manager')
             }
         }
     }
