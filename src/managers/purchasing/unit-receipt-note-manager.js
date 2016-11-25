@@ -11,6 +11,7 @@ var DeliveryOrderManager = require('./delivery-order-manager');
 var UnitManager = require('../master/unit-manager');
 var SupplierManager = require('../master/supplier-manager');
 var BaseManager = require('../base-manager');
+var generateCode = require('../../utils/code-generator');
 
 module.exports = class UnitReceiptNoteManager extends BaseManager {
     constructor(db, user) {
@@ -221,7 +222,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
             var getPurchaseOrderById = [];
             this._validate(unitReceiptNote)
                 .then(validUnitReceiptNote => {
-                    validUnitReceiptNote.no = this.generateNo(validUnitReceiptNote.unit.code);
+                    validUnitReceiptNote.no = generateCode();
 
                     //Update PO Internal
                     var poId = new ObjectId();
@@ -251,7 +252,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                         fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
                                                         fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
                                                         break;
-                                                    } else if (fulfillmentNo == deliveryOrderNo) {
+                                                    } else if (fulfillmentNo == deliveryOrderNo && fulfillment.unitReceiptNoteNo) {
                                                         var _fulfillment = fulfillment;
                                                         _fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
                                                         _fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;

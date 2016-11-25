@@ -12,7 +12,7 @@ module.exports = {
             },
             currencyNotaItern: {
                 style: 'decimal',
-                minimumFractionDigits: 2,
+                minimumFractionDigits: 4,
                 maximumFractionDigits: 4 
             },
             decimal: {

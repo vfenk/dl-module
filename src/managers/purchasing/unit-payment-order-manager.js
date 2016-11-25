@@ -9,6 +9,7 @@ var UnitPaymentOrder = DLModels.purchasing.UnitPaymentOrder;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitReceiptNoteManager = require('./unit-receipt-note-manager');
 var BaseManager = require('../base-manager');
+var generateCode = require('../../utils/code-generator');
 
 module.exports = class UnitPaymentOrderManager extends BaseManager {
     constructor(db, user) {
@@ -202,7 +203,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                 .then((createIndexResults) => {
                     this._validate(unitPaymentOrder)
                         .then(validUnitPaymentOrder => {
-                            validUnitPaymentOrder.no = this.generateNo(validUnitPaymentOrder.division.code, validUnitPaymentOrder.category.code);
+                            validUnitPaymentOrder.no = generateCode();
                             this.collection.insert(validUnitPaymentOrder)
                                 .then(id => {
                                     this.updatePO(validUnitPaymentOrder)
