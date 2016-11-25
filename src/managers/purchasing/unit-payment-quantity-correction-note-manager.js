@@ -61,6 +61,9 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                     if (!valid.invoiceCorrectionNo || valid.invoiceCorrectionNo == '')
                         errors["invoiceCorrectionNo"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo._:Invoice Correction No"));
 
+                    if (!valid.releaseOrderNoteNo || valid.releaseOrderNoteNo == '')
+                        errors["releaseOrderNoteNo"] = i18n.__("UnitPaymentQuantityCorrectionNote.releaseOrderNoteNo.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.releaseOrderNoteNo._:Release Order Note No"));
+
                     if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
                         errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
@@ -228,7 +231,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                             var tasks = [];
                             var getPurchaseOrderById = [];
                             validData.no = generateCode();
-                            if(validData.unitPaymentOrder.useIncomeTax)
+                            if (validData.unitPaymentOrder.useIncomeTax)
                                 validData.returNoteNo = generateCode();
                             //Update PO Internal
                             var poId = new ObjectId();
@@ -257,18 +260,17 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                 _correction.correctionDate = validData.date;
                                                                 _correction.correctionNo = validData.no;
                                                                 _correction.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
-                                                                
+
                                                                 if (!fulfillmentPoItem.correction) {
                                                                     fulfillmentPoItem.correction = [];
                                                                     _correction.correctionQuantity = fulfillmentPoItem.unitReceiptNoteDeliveredQuantity - unitPaymentQuantityCorrectionNoteItem.quantity;
-                                                                }else{
-                                                                    var sum=0;
-                                                                    for(var corr of fulfillmentPoItem.correction)
-                                                                    {
-                                                                        if(corr.correctionRemark == "Koreksi Jumlah")
+                                                                } else {
+                                                                    var sum = 0;
+                                                                    for (var corr of fulfillmentPoItem.correction) {
+                                                                        if (corr.correctionRemark == "Koreksi Jumlah")
                                                                             sum += corr.correctionQuantity;
                                                                     }
-                                                                     _correction.correctionQuantity = fulfillmentPoItem.unitReceiptNoteDeliveredQuantity - unitPaymentQuantityCorrectionNoteItem.quantity - sum;
+                                                                    _correction.correctionQuantity = fulfillmentPoItem.unitReceiptNoteDeliveredQuantity - unitPaymentQuantityCorrectionNoteItem.quantity - sum;
                                                                 }
                                                                 _correction.correctionPriceTotal = _correction.correctionQuantity * unitPaymentQuantityCorrectionNoteItem.pricePerUnit * unitPaymentQuantityCorrectionNoteItem.currency.rate;
                                                                 fulfillmentPoItem.correction.push(_correction);
