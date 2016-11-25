@@ -122,7 +122,7 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 if(_lotmachine.data.length > 0){
                     for(var a of _lotmachine.data)
                     {
-                        if(a.productId==valid.productId && a.machineId==valid.machineId)
+                        if(a.productId==valid.productId && a.machineId==valid.machineId) {
                         // if(a._id.toString() == valid.lotMachineId.toString()) {
                             _Lm = a;
                             break;
@@ -133,7 +133,7 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 if(_threadSpecification.data.length > 0){
                     for(var b of _threadSpecification.data)
                     {
-                        if(b.productId==valid.productId)
+                        if(b.productId==valid.productId) {
                         // if(b._id.toString() == valid.threadSpecificationId.toString()) {
                             _Ts = b;
                             break;
