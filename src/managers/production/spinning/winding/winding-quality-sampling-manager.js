@@ -82,7 +82,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                     },{
                         date : dateProcess
                     },{
-                        usterId : valid.usterId && ObjectId.isValid(valid.uster._id) ? (new ObjectId(valid.uster._id)) : ''
+                        usterId : valid.uster && ObjectId.isValid(valid.uster._id) ? (new ObjectId(valid.uster._id)) : ''
                     },{
                         machineId : valid.machine && ObjectId.isValid(valid.machine._id) ? (new ObjectId(valid.machine._id)) : ''
                     },{
@@ -116,10 +116,12 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                     if (!valid.uster)
                         errors["uster"] = i18n.__("WindingQualitySampling.uster.isRequired:%s is required", i18n.__("WindingQualitySampling.uster._:Uster")); //"Nama Benang tidak boleh kosong";
                     if(!_uster)
-                        errors["uster"] = i18n.__("WindingQualitySampling.uster.isRequired:%s has no uster classification", i18n.__("WindingQualitySampling.uster._:Uster")); //"Benang tidak memiliki klassifikasi Uster";
+                        errors["uster"] = i18n.__("WindingQualitySampling.uster.hasNoUster:%s has no uster classification", i18n.__("WindingQualitySampling.uster._:Uster")); //"Benang tidak memiliki klassifikasi Uster";
 
                     if (!valid.U || valid.U == 0)
                         errors["U"] = i18n.__("WindingQualitySampling.U.isRequired:%s is required", i18n.__("WindingQualitySampling.U._:U")); //"U tidak boleh kosong";
+                    else if(valid.U > 100)
+                        errors["U"] = i18n.__("WindingQualitySampling.U.shouldNot:%s should not be more than 100", i18n.__("WindingQualitySampling.U._:U")); //"U tidak boleh kosong";
 
                     if (!valid.sys || valid.sys == 0)
                         errors["sys"] = i18n.__("WindingQualitySampling.sys.isRequired:%s is required", i18n.__("WindingQualitySampling.sys._:Sys")); //"Sys tidak boleh kosong";
@@ -179,58 +181,50 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
         });
     }
 
-    getWindingQualitySamplingReportByDate(startDate, endDate){
+    getWindingQualitySamplingReportByDate(startDate, endDate, spinning, machine, uster, grade){
         return new Promise((resolve, reject) => {
+            var query = Object.assign({});
+            var deleted = { _deleted: false };
+            Object.assign(query, deleted);
+            if(spinning){
+                var _spinning = {spinning : spinning}
+                Object.assign(query, _spinning);
+            }
+            if(machine){
+                var _machine = {machineId : new ObjectId(machine)}
+                Object.assign(query, _machine);
+            }
+            if(uster){
+                var _uster = {usterId : new ObjectId(uster)}
+                Object.assign(query, _uster);
+            }
+            if(grade){
+                var _grade = {grade : grade}
+                Object.assign(query, _grade);
+            }
             var now = new Date();
-            var query = {};
             if(startDate && !endDate){
-                query = {
-                    "$and" : [{
-                        "date" : {
-                            "$gte" : new Date(startDate)
-                        }
-                     },{
-                        _deleted : false
-                     }]
-                };
+                var queryDate = { date : { $gte : new Date(startDate) } };
+                Object.assign(query, queryDate);
             }else if(!startDate && endDate){
-                query = {
-                    "$and" : [{
-                        "date" : {
-                            "$lte" : new Date(endDate)
-                        }
-                    },{
-                        _deleted : false
-                    }]
-                };
+                var queryDate = { date : { $lte : new Date(endDate) } };
+                Object.assign(query, queryDate);
             }else if(startDate && endDate){
-                query = {
-                    "$and" : [{
-                        "date":{
-                            "$gte" : new Date(startDate)
+                var queryDate = { 
+                    date:{
+                        $gte : new Date(startDate),
+                        $lte : new Date(endDate)
                         }
-                    },{
-                        "date" : {
-                            "$lte" : new Date(endDate)
-                        }
-                    },{
-                         _deleted : false
-                    }]
-                };
+                    };
+                Object.assign(query, queryDate);
             }else if(!startDate && !endDate){
-                query = {
-                    "$and" : [{
-                        "date":{
-                            "$gte" : new Date(1900, 1, 1)
+                var queryDate = {
+                        date:{
+                            $gte : new Date(1900, 1, 1),
+                            $lte : now
                         }
-                    },{
-                        "date" : {
-                            "$lte" : now
-                        }
-                    },{
-                         _deleted : false
-                    }]
-                };
+                    };
+                Object.assign(query, queryDate);
             }
             var order = {
                 "date" : -1
