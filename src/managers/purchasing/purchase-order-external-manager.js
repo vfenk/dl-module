@@ -88,7 +88,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return new Promise((resolve, reject) => {
             this._validate(purchaseOrderExternal)
                 .then(validPurchaseOrderExternal => {
-                    validPurchaseOrderExternal.no = this.generatePOno();
+                    validPurchaseOrderExternal.no = generateCode();
                     validPurchaseOrderExternal.supplierId = new ObjectId(validPurchaseOrderExternal.supplierId);
                     validPurchaseOrderExternal.supplier._id = new ObjectId(validPurchaseOrderExternal.supplier._id);
                     this.collection.insert(validPurchaseOrderExternal)

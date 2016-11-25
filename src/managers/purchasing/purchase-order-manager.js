@@ -115,7 +115,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             for (var _prItem of _purchaseRequest.items)
                                 if (_prItem.product._id.toString() == poItem.product._id.toString()) {
                                     poItem.product = _prItem.product;
-                                    poItem.defaultUom = _prItem.uom;
+                                    poItem.defaultUom = _prItem.product.uom;
                                     break;
                                 }
                         }
@@ -200,7 +200,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             this._createIndexes()
                 .then((createIndexResults) => {
-                    purchaseOrder.no = `${this.moduleId}${this.year}${generateCode()}`;
+                    purchaseOrder.no = generateCode();
                     this._validate(purchaseOrder)
                         .then(validPurchaseOrder => {
                             this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
@@ -276,11 +276,11 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             this.getSingleById(purchaseOrder.sourcePurchaseOrderId)
                 .then(_purchaseOrder => {
+                    delete purchaseOrder._id;
                     purchaseOrder.sourcePurchaseOrder = _purchaseOrder;
                     purchaseOrder.sourcePurchaseOrderId = _purchaseOrder._id;
                     this._validate(purchaseOrder)
                         .then(validPurchaseOrder => {
-                            delete validPurchaseOrder._id;
                             this.create(validPurchaseOrder)
                                 .then(id => {
                                     this.getSingleById(validPurchaseOrder.sourcePurchaseOrder._id)
@@ -669,7 +669,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     getDataPOCategory(startdate, enddate) {
         return new Promise((resolve, reject) => {
-            if (startdate != "undefined" && enddate != "undefined" && startdate != "" && enddate != "") {
+            if (startdate != undefined && enddate != undefined && startdate != "" && enddate != "") {
                 this.collection.aggregate(
                     [{
                         $match: {

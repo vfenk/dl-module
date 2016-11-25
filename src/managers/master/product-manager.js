@@ -46,6 +46,7 @@ module.exports = class ProductManager extends BaseManager {
 
             query['$and'].push($or);
         }
+        
         return query;
     }
 
