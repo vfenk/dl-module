@@ -138,7 +138,7 @@ module.exports = function (purchaseRequest) {
                 text: item.product.name,
                 style: ['size07', 'center']
             }, {
-                text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.uom.unit,
+                text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.product.uom.unit,
                 style: ['size07', 'center']
             }, {
                 text: '',
