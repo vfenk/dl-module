@@ -1,8 +1,8 @@
 var global = require('../../global');
 
-module.exports = function(pox) {
+module.exports = function (pox) {
 
-    var items = pox.items.map(po => {
+    var _items = pox.items.map(po => {
         return po.items.map(poItem => {
             // var productName = [poItem.product.name, po.refNo].filter(r => r && r.toString().trim() != '').join("\n");
             return {
@@ -15,7 +15,25 @@ module.exports = function(pox) {
         });
     });
 
-    items = [].concat.apply([], items);
+    _items = [].concat.apply([], _items);
+
+    var items = [];
+    _items.reduce(function (res, value) {
+        if (!res[value.product]) {
+            res[value.product] = {
+                product: value.product,
+                quantity: 0,
+                prNo: "",
+                uom: value.uom,
+                price: value.price
+            };
+            items.push(res[value.product])
+        }
+        res[value.product].quantity += value.quantity;
+        res[value.product].prNo = `${res[value.product].prNo}\n${value.prNo}`;
+        return res;
+    }, {});
+
 
     var iso = pox.items.find(r => true).iso;
     var number = pox.no;
@@ -24,46 +42,46 @@ module.exports = function(pox) {
     var supplierAtt = pox.supplier.PIC;
     var supplierTel = pox.supplier.contact;
 
-    var locale = global.config.locale; 
+    var locale = global.config.locale;
 
     var moment = require('moment');
-    moment.locale(locale.name); 
+    moment.locale(locale.name);
 
     var header = [{
-            text: 'PT. DAN LIRIS',
-            style: 'bold'
+        text: 'PT. DAN LIRIS',
+        style: 'bold'
+    }, {
+        columns: [{
+            width: '50%',
+            stack: [
+                'Head Office   : ',
+                'Kelurahan Banaran',
+                'Kecamatan Grogol',
+                'Sukoharjo 57193 - INDONESIA',
+                'PO.BOX 166 Solo 57100',
+                'Telp. (0271) 740888, 714400',
+                'Fax. (0271) 735222, 740777'
+            ],
+            style: ['size07', 'bold']
         }, {
-            columns: [{
-                    width: '50%',
-                    stack: [
-                        'Head Office   : ',
-                        'Kelurahan Banaran',
-                        'Kecamatan Grogol',
-                        'Sukoharjo 57193 - INDONESIA',
-                        'PO.BOX 166 Solo 57100',
-                        'Telp. (0271) 740888, 714400',
-                        'Fax. (0271) 735222, 740777'
-                    ],
-                    style: ['size07', 'bold']
-                }, {
-                    stack: [{
-                        text: iso,
-                        alignment: "right",
-                        style: ['size09', 'bold']
-                    }, {
-                        text: number,
-                        alignment: "right",
-                        style: ['size08']
-                    }]
+            stack: [{
+                text: iso,
+                alignment: "right",
+                style: ['size09', 'bold']
+            }, {
+                text: number,
+                alignment: "right",
+                style: ['size08']
+            }]
 
-                }
+        }
 
-            ]
-        },{
-            alignment: "center",
-            text: 'ORDER PEMBELIAN',
-            style: ['size09', 'bold']
-        },
+        ]
+    }, {
+        alignment: "center",
+        text: 'ORDER PEMBELIAN',
+        style: ['size09', 'bold']
+    },
         '\n'
     ];
 
@@ -137,12 +155,12 @@ module.exports = function(pox) {
         style: ['size08', 'bold', 'center']
     }];
 
-    var tbody = items.map(function(item) {
+    var tbody = items.map(function (item) {
         return [{
-            stack: [item.product, {
-                text: item.prNo,
-                style: ['bold']
-            }],
+            stack: [{
+                text: item.product,
+                style: 'bold'
+            }, item.prNo],
             style: ['size07']
         }, {
             text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + ' ' + item.uom,
@@ -181,13 +199,13 @@ module.exports = function(pox) {
         price: 0,
         quntity: 0
     };
-    
+
     var sum = (items.length > 0 ? items : [initialValue])
         .map(item => item.price * item.quantity)
-        .reduce(function(prev, curr, index, arr) {
+        .reduce(function (prev, curr, index, arr) {
             return prev + curr;
         }, 0);
- 
+
     var vat = pox.useIncomeTax ? sum * 0.1 : 0;
 
     var tfoot = [
@@ -248,58 +266,58 @@ module.exports = function(pox) {
     var footer = [
         '\n', {
             stack: [{
+                columns: [{
+                    width: '40%',
                     columns: [{
                         width: '40%',
-                        columns: [{
-                            width: '40%',
-                            stack: ['Ongkos Kirim', 'Pembayaran']
-                        }, {
-                            width: '3%',
-                            stack: [':', ':']
-                        }, {
-                            width: '*',
-                            stack: [`Ditanggung ${pox.freightCostBy}`, `${pox.paymentMethod}, ${pox.paymentDueDays} hari setelah terima barang`]
-                        }, ]
+                        stack: ['Ongkos Kirim', 'Pembayaran']
                     }, {
-                        width: '20%',
-                        text: ''
+                        width: '3%',
+                        stack: [':', ':']
                     }, {
-                        width: '40%',
-                        columns: [{
-                            width: '45%',
-                            stack: ['Delivery', 'Lain-lain']
-                        }, {
-                            width: '3%',
-                            stack: [':', ':']
-                        }, {
-                            width: '*',
-                            stack: [{
-                                text: `${moment(pox.expectedDeliveryDate).format(locale.date.format)}`,
-                                style: ['bold']
-                            }, `${pox.remark}`]
-                        }]
+                        width: '*',
+                        stack: [`Ditanggung ${pox.freightCostBy}`, `${pox.paymentMethod}, ${pox.paymentDueDays} hari setelah terima barang`]
+                    },]
+                }, {
+                    width: '20%',
+                    text: ''
+                }, {
+                    width: '40%',
+                    columns: [{
+                        width: '45%',
+                        stack: ['Delivery', 'Lain-lain']
+                    }, {
+                        width: '3%',
+                        stack: [':', ':']
+                    }, {
+                        width: '*',
+                        stack: [{
+                            text: `${moment(pox.expectedDeliveryDate).format(locale.date.format)}`,
+                            style: ['bold']
+                        }, `${pox.remark}`]
                     }]
-                },
+                }]
+            },
                 '\n\n\n', {
-                    columns: [{
-                        width: '35%',
-                        stack: ['Pembeli\n\n\n\n\n', {
-                            text: pox._createdBy,
-                            style: ['bold']
-                        }],
-                        style: 'center'
-                    }, {
-                        width: '30%',
-                        text: ''
-                    }, {
-                        width: '35%',
-                        stack: ['Penjual\n\n\n\n\n', {
-                            text: supplier,
-                            style: ['bold']
-                        }],
-                        style: 'center'
-                    }, ]
-                }
+                columns: [{
+                    width: '35%',
+                    stack: ['Pembeli\n\n\n\n\n', {
+                        text: pox._createdBy,
+                        style: ['bold']
+                    }],
+                    style: 'center'
+                }, {
+                    width: '30%',
+                    text: ''
+                }, {
+                    width: '35%',
+                    stack: ['Penjual\n\n\n\n\n', {
+                        text: supplier,
+                        style: ['bold']
+                    }],
+                    style: 'center'
+                },]
+            }
             ],
             style: ['size08']
         }

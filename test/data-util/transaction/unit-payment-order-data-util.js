@@ -3,7 +3,7 @@ var helper = require('../../helper');
 var UnitPaymentOrderManager = require('../../../src/managers/purchasing/unit-payment-order-manager');
 var codeGenerator = require('../../../src/utils/code-generator');
 var supplier = require('../master/supplier-data-util');
-var unit = require('../master/unit-data-util');
+var division = require('../master/division-data-util');
 var currency = require('../master/currency-data-util');
 var category = require('../master/category-data-util');
 var vat = require('../master/vat-data-util');
@@ -15,9 +15,9 @@ class UnitPaymentOrderDataUtil {
             helper
                 .getManager(UnitPaymentOrderManager)
                 .then(manager => {
-                    Promise.all([unit.getTestData(), category.getTestData(), currency.getTestData(), vat.getTestData(), supplier.getTestData(), unitReceiptNote.getNew()])
+                    Promise.all([division.getTestData(), category.getTestData(), currency.getTestData(), vat.getTestData(), supplier.getTestData(), unitReceiptNote.getNew()])
                         .then(results => {
-                            var dataUnit=results[0];
+                            var dataDivision=results[0];
                             var dataCategory=results[1];
                             var dataCurrency=results[2];
                             var dataVat=results[3]; 
@@ -25,8 +25,8 @@ class UnitPaymentOrderDataUtil {
                             var dataUnitReceiptNote=results[5];
                             var data = {
                                 no: `UT/UPO/${codeGenerator()}`,
-                                unitId: dataUnit._id,
-                                unit: dataUnit,
+                                divisionId: dataDivision._id,
+                                division: dataDivision,
                                 date: new Date(),
                                 categoryId: dataCategory._id,
                                 category: dataCategory,

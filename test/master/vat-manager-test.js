@@ -7,9 +7,12 @@ require("should");
 
 function getData() {
     var Vat = require('dl-models').master.Vat;
+    var now = new Date();
+    var stamp = now / 1000 | 0;
+    var code = stamp.toString(36);
     var vat = new Vat();
  
-    vat.name = "Pasal 22";
+    vat.name = `Pasal 22[${code}]`;
     vat.rate = 1.5; 
     vat.description = "";
     return vat;

@@ -96,7 +96,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             var tasks = [];
                             var getPOInternalById = [];
                             for (var data of validPurchaseOrderExternal.items) {
-                                getPOInternalById.push(this.purchaseOrderManager.getSingleById(data._id));
+                                if (ObjectId.isValid(data._id))
+                                    getPOInternalById.push(this.purchaseOrderManager.getSingleById(data._id));
                             }
                             Promise.all(getPOInternalById)
                                 .then(results => {
@@ -138,7 +139,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     var tasks = [];
                                     var getPOInternalById = [];
                                     for (var data of validData.items) {
-                                        getPOInternalById.push(this.purchaseOrderManager.getSingleById(data._id));
+                                        if (ObjectId.isValid(data._id))
+                                            getPOInternalById.push(this.purchaseOrderManager.getSingleById(data._id));
                                     }
                                     Promise.all(getPOInternalById)
                                         .then(results => {
@@ -185,17 +187,19 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        "refNo": valid.refNo
-                    }]
+                    "refNo": valid.refNo
+                }]
             });
-            var getCurrency = valid.currency ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
-            var getSupplier = valid.supplier ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
-            var getVat = valid.vat ? this.vatManager.getSingleByIdOrDefault(valid.vat._id) : Promise.resolve(null);
+            var getCurrency = valid.currency && ObjectId.isValid(valid.currency._id) ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
+            var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
+            var getVat = valid.vat && ObjectId.isValid(valid.vat._id) ? this.vatManager.getSingleByIdOrDefault(valid.vat._id) : Promise.resolve(null);
 
 
             var getPOInternal = [];
-            for (var po of valid.items)
-                getPOInternal.push(this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
+            for (var po of valid.items) {
+                if (ObjectId.isValid(po._id))
+                    getPOInternal.push(this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
+            }
 
             Promise.all([getSupplier, getCurrency, getVat].concat(getPOInternal))
                 .then(results => {
@@ -376,7 +380,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             for (var purchaseOrderExternal of listPurchaseOrderExternal) {
                 getPOExternalById.push(this.getSingleByIdOrDefault(purchaseOrderExternal._id));
                 for (var data of purchaseOrderExternal.items) {
-                    getPOItemById.push(this.purchaseOrderManager.getSingleByIdOrDefault(data._id));
+                    if (ObjectId.isValid(data._id))
+                        getPOItemById.push(this.purchaseOrderManager.getSingleByIdOrDefault(data._id));
                 }
             }
             Promise.all(getPOExternalById)
