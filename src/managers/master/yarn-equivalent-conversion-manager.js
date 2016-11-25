@@ -108,5 +108,23 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
 
         return this.collection.createIndexes([dateIndex, neRatioIndex]);
     }
- 
+
+    _getByNe(ne) {
+        return new Promise((resolve, reject) => {
+            if (ne === '')
+                resolve(null);
+
+            var query = {
+                ne: ne,
+                _deleted: false
+            };
+            this.getSingleByQueryOrDefault(query)
+                .then(module => {
+                    resolve(module);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
 }
