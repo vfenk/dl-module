@@ -115,7 +115,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             for (var _prItem of _purchaseRequest.items)
                                 if (_prItem.product._id.toString() == poItem.product._id.toString()) {
                                     poItem.product = _prItem.product;
-                                    poItem.defaultUom = _prItem.uom;
+                                    poItem.defaultUom = _prItem.product.uom;
                                     break;
                                 }
                         }
