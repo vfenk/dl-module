@@ -5,8 +5,6 @@ require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var LotMachine= DLModels.master.LotMachine;
-var Product= DLModels.master.Product;
-var Machine= DLModels.master.Machine;
 var ProductManager = require('../master/product-manager');
 var MachineManager = require('../master/machine-manager');
 var BaseManager = require('../base-manager');
@@ -63,6 +61,8 @@ module.exports = class LotMachineManager extends BaseManager {
                         }
                     }, {
                             productId: new ObjectId(valid.productId)
+                        },{
+                            machineId: new ObjectId(valid.machineId)
                         }]
                 },
                 {
@@ -100,10 +100,8 @@ module.exports = class LotMachineManager extends BaseManager {
                     var ValidationError = require('../../validation-error');
                     reject(new ValidationError('data does not pass validation', errors));
                 }
-                valid.machine=new Machine(_machine);
-                valid.product=new Product(_product);
+
                 valid = new LotMachine(lotMachine);
-                
                 valid.stamp(this.user.username, 'manager');
                 resolve(valid);
              })
@@ -114,8 +112,24 @@ module.exports = class LotMachineManager extends BaseManager {
 
     }
 
-    getLotbyProductId(productId){
+    getLotbyMachineProduct(_productId,_machineId){
+        return new Promise((resolve, reject) => {
+            var query={
+                        "machineId":new ObjectId(_machineId),
+                        "productId" : new ObjectId(_productId)
+            };
+            query = Object.assign(query, {
+                _deleted: false
+            });
 
+            this.collection.find(query).toArray()
+                .then(Lot => {
+                    resolve(Lot);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        })
     }
 
     _createIndexes() {
@@ -127,9 +141,10 @@ module.exports = class LotMachineManager extends BaseManager {
         }
 
         var codeIndex = {
-            name: `ix_${map.master.collection.LotMachine}_productId`,
+            name: `ix_${map.master.collection.LotMachine}_productId_machineId`,
             key: {
-                productId: 1
+                productId: 1,
+                machineId:1
             },
             unique: true
         }

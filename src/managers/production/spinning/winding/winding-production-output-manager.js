@@ -72,13 +72,23 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
             var valid = windingProductionOutput;
             // 1. begin: Declare promises.
             var getWindingProductionOutputPromise = this.collection.singleOrDefault({
-                    "$and": [{
-                        _id: {
-                            '$ne': new ObjectId(valid._id)
-                        }
-                    }, {
-                            _deleted:false
-                        }]
+                    "$and" : [{
+                        _id : {
+                            "$ne" : new ObjectId(valid._id)
+                    }
+                    },{
+                        _deleted : false
+                    },{
+                        date : valid.date
+                    },{
+                        productId : valid.productId && ObjectId.isValid(valid.productId) ? (new ObjectId(valid.productId)) : ''
+                    },{
+                        machineId : valid.machine && ObjectId.isValid(valid.machine._id) ? (new ObjectId(valid.machine._id)) : ''
+                    },{
+                        spinning : valid.spinning
+                    },{
+                        shift : valid.shift
+                }]
             });
 
             var getProduct = valid.productId && ObjectId.isValid(valid.productId) ? this.productManager.getSingleByIdOrDefault(valid.productId) : Promise.resolve(null);
@@ -105,16 +115,16 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 if(_lotmachine.data.length > 0){
                     for(var a of _lotmachine.data)
                     {
-                        if(a.productId==valid.productId)
+                        if(a.productId==valid.productId && a.machineId==valid.machineId)
                             _Lm = a;
                     }
                     
                 }
                 if(_threadSpecification.data.length > 0){
-                    for(var a of _threadSpecification.data)
+                    for(var b of _threadSpecification.data)
                     {
-                        if(a.productId==valid.productId)
-                            _Ts = a;
+                        if(b.productId==valid.productId)
+                            _Ts = b;
                     }
                 }
                 if (!valid.spinning || valid.spinning == '')
@@ -166,12 +176,12 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 }
 
                 if (!_Lm)
-                    errors["product"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is not exists", i18n.__("WindingProductionOutput.lotMachine._:LotMachine")); 
+                    errors["lotMachine"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is not exists", i18n.__("WindingProductionOutput.lotMachine._:LotMachine")); 
                 else if (!valid.lotMachineId)
-                    errors["product"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is required", i18n.__("WindingProductionOutput.lotMachine._:LotMachine"));
+                    errors["lotMachine"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is required", i18n.__("WindingProductionOutput.lotMachine._:LotMachine"));
                 else if (valid.lotMachine) {
                     if (!valid.lotMachine._id)
-                        errors["product"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is required", i18n.__("WindingProductionOutput.lotMachine._:LotMachine"));
+                        errors["lotMachine"] = i18n.__("WindingProductionOutput.lotMachine.isRequired:%s is required", i18n.__("WindingProductionOutput.lotMachine._:LotMachine"));
                 }
 
                 if (!_Ts)
@@ -208,8 +218,12 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
         }
 
         var codeIndex = {
-            name: `ix_${map.production.spinning.winding.collection.WindingProductionOutput}_productId`,
+            name: `ix_${map.production.spinning.winding.collection.WindingProductionOutput}_spinning_date_shift_machineId_productId`,
             key: {
+                spinning: 1,
+                date: 1,
+                shift:1,
+                machineId: 1,
                 productId: 1
             },
             unique: true
