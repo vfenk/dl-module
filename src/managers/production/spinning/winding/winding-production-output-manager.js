@@ -162,6 +162,9 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                         errors["unit"] = i18n.__("WindingProductionOutput.unit.isRequired:%s is required", i18n.__("WindingProductionOutput.unit._:Unit"));
                 
                 }
+                else if(!valid.unit){
+                    errors["unit"] = i18n.__("WindingProductionOutput.unit.isRequired:%s is required", i18n.__("WindingProductionOutput.unit._:Unit"));
+                }
                 
 
                 if (!valid.date || valid.date == '')
