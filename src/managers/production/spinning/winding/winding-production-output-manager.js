@@ -125,7 +125,7 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                         {
                             if(a.productId==valid.productId && a.machineId==valid.machineId) {
                             // if(a._id.toString() == valid.lotMachineId.toString()) {
-                                _Lm = a;
+                                _Lm = a; break;
                             }
                         }
                     }
@@ -138,7 +138,7 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                         {
                             if(b.productId=valid.productId) {
                             // if(b._id.toString() == valid.threadSpecificationId.toString()) {
-                                _Ts = b;
+                                _Ts = b; break;
                             }
                         }
                     }
