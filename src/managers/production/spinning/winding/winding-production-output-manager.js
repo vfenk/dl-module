@@ -118,28 +118,32 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 var _Ts=null;
                 var now = new Date();
                 valid.product=_product;
-
-                if(_lotmachine.data.length > 0){
-                    for(var a of _lotmachine.data)
-                    {
-                        if(a.productId==valid.productId && a.machineId==valid.machineId) {
-                        // if(a._id.toString() == valid.lotMachineId.toString()) {
-                            _Lm = a;
-                            break;
+                if(_lotmachine)
+                {
+                    if(_lotmachine.data.length > 0){
+                        for(var a of _lotmachine.data)
+                        {
+                            if(a.productId==valid.productId && a.machineId==valid.machineId) {
+                            // if(a._id.toString() == valid.lotMachineId.toString()) {
+                                _Lm = a; break;
+                            }
                         }
                     }
                 }
-
-                if(_threadSpecification.data.length > 0){
-                    for(var b of _threadSpecification.data)
-                    {
-                        if(b.productId==valid.productId) {
-                        // if(b._id.toString() == valid.threadSpecificationId.toString()) {
-                            _Ts = b;
-                            break;
+                
+                if(_threadSpecification)
+                {
+                    if(_threadSpecification.data.length > 0){
+                        for(var b of _threadSpecification.data)
+                        {
+                            if(b.productId=valid.productId) {
+                            // if(b._id.toString() == valid.threadSpecificationId.toString()) {
+                                _Ts = b; break;
+                            }
                         }
                     }
                 }
+                
                 
                 if(_module){
                     errors["shift"] = i18n.__(`WindingProductionOutput.shift.isRequired:%s with same Product, Machine, Spinning and Date is already exists`, i18n.__("WindingQualitySampling.shift._:Shift")); //"Spinning dengan produk, mesin dan tanggal,shift,dan mesin yang sama tidak boleh";
@@ -157,6 +161,9 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                     if (!valid.unit._id)
                         errors["unit"] = i18n.__("WindingProductionOutput.unit.isRequired:%s is required", i18n.__("WindingProductionOutput.unit._:Unit"));
                 
+                }
+                else if(!valid.unit){
+                    errors["unit"] = i18n.__("WindingProductionOutput.unit.isRequired:%s is required", i18n.__("WindingProductionOutput.unit._:Unit"));
                 }
                 
 
@@ -212,12 +219,12 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 }
 
                 if (!_Ts)
-                    errors["threadSpecification"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is not exists", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification")); 
+                    errors["product"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is not exists", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification")); 
                 else if (!valid.threadSpecificationId)
-                    errors["threadSpecification"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is required", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification"));
+                    errors["product"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is required", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification"));
                 else if (valid.threadSpecification) {
                     if (!valid.threadSpecification._id)
-                        errors["threadSpecification"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is required", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification"));
+                        errors["product"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is required", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification"));
                 }
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
