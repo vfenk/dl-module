@@ -118,9 +118,6 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 var _Ts=null;
                 var now = new Date();
                 valid.product=_product;
-                valid.unitId=new ObjectId(_unit._id);
-                valid.machineId=new ObjectId(_machine._id);
-                valid.productId=new ObjectId(_product._id);
                 if(_lotmachine)
                 {
                     if(_lotmachine.data.length > 0){
@@ -129,7 +126,6 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                             if(a.productId==valid.productId && a.machineId==valid.machineId) {
                             // if(a._id.toString() == valid.lotMachineId.toString()) {
                                 _Lm = a;
-                                break;
                             }
                         }
                     }
@@ -140,10 +136,9 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                     if(_threadSpecification.data.length > 0){
                         for(var b of _threadSpecification.data)
                         {
-                            if(b.productId==valid.productId) {
+                            if(b.productId=valid.productId) {
                             // if(b._id.toString() == valid.threadSpecificationId.toString()) {
                                 _Ts = b;
-                                break;
                             }
                         }
                     }
@@ -233,7 +228,9 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                     var ValidationError = require('../../../../validation-error');
                     reject(new ValidationError('data does not pass validation', errors));
                 }
-                
+                valid.unitId=new ObjectId(_unit._id);
+                valid.machineId=new ObjectId(_machine._id);
+                valid.productId=new ObjectId(_product._id);
 
                 valid = new WindingProductionOutput(windingProductionOutput);
                 valid.stamp(this.user.username, 'manager');
