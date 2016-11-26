@@ -8,8 +8,12 @@ module.exports = {
             currency: {
                 style: 'decimal',
                 minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-
+                maximumFractionDigits: 2 
+            },
+            currencyNotaItern: {
+                style: 'decimal',
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 4 
             },
             decimal: {
                 style: 'decimal',

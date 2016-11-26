@@ -73,13 +73,13 @@ module.exports = function (purchaseRequest) {
                 width: '40%',
                 columns: [{
                     width: '35%',
-                    stack: ['BAGIAN', 'Nomor']
+                    stack: ['Bagian', 'Budget' , 'Nomor']
                 }, {
                         width: '5%',
-                        stack: [':', ':']
+                        stack: [':', ':', ':']
                     }, {
                         width: '*',
-                        stack: [purchaseRequest.unit.subDivision, purchaseRequest.no]
+                        stack: [purchaseRequest.unit.name, purchaseRequest.budget.name, purchaseRequest.no]
                     }],
                 style: ['size08']
 
@@ -92,7 +92,7 @@ module.exports = function (purchaseRequest) {
                 width: '30%',
                 columns: [{
                     width: '*',
-                    stack: [`Solo, ${moment(purchaseRequest.date).format(locale.date.format)} `],
+                    stack: [`Sukoharjo, ${moment(purchaseRequest.date).format(locale.date.format)} `],
                     alignment: "right",
                 }],
                 style: ['size08']
@@ -103,7 +103,7 @@ module.exports = function (purchaseRequest) {
     var opening = {
         text: [
             '\n', {
-                text: 'MOHON DIBELIKAN/DIUSAHAKAN BARANG TERSEBUT DIBAWAH INI : '
+                text: 'Mohon dibelikan/diusahakan barang tersebut dibawah ini : '
             },
             '\n\n'
         ],
@@ -138,7 +138,7 @@ module.exports = function (purchaseRequest) {
                 text: item.product.name,
                 style: ['size07', 'center']
             }, {
-                text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.uom.unit,
+                text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.product.uom.unit,
                 style: ['size07', 'center']
             }, {
                 text: '',
@@ -176,7 +176,7 @@ module.exports = function (purchaseRequest) {
                     width: '60%',
                     columns: [{
                         width: '50%',
-                        stack: ['KATEGORI', 'DIMINTA DATANG', 'KETERANGAN']
+                        stack: ['Kategori', 'Diminta Datang', 'Keterangan']
                     }, {
                             width: '3%',
                             stack: [':', ':', ':']
@@ -201,7 +201,7 @@ module.exports = function (purchaseRequest) {
             text: 'BAGIAN PEMBELIAN',
             style: 'tableHeader'
         }, {
-            text: 'KABAG PRODUKSI',
+            text: 'KEPALA BAGIAN',
             style: 'tableHeader'
         }, {
             text: 'YANG MEMERLUKAN',

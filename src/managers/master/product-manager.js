@@ -46,6 +46,7 @@ module.exports = class ProductManager extends BaseManager {
 
             query['$and'].push($or);
         }
+        
         return query;
     }
 
@@ -65,7 +66,7 @@ module.exports = class ProductManager extends BaseManager {
                 }]
             });
             
-            var getUom = valid.uom && valid.uom._id ? this.uomManager.getSingleByIdOrDefault(valid.uom._id) : Promise.resolve(null);
+            var getUom = valid.uom && ObjectId.isValid(valid.uom._id) ? this.uomManager.getSingleByIdOrDefault(valid.uom._id) : Promise.resolve(null);
             // 2. begin: Validation.
             Promise.all([getProductPromise, getUom])
                 .then(results => {
