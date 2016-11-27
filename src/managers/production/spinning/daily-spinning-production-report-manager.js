@@ -354,7 +354,7 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
 
         return new Promise((resolve, reject) => {
             var p1 = this.getFromDB(firstDay, lastDay, now, unitId);
-            var p2 = this.productCollection.find({"tags" : {$regex : ".*Benang Spinning.*"}}).toArray();
+            var p2 = this.productCollection.find({"tags" : {$regex : ".*BENANG SPINNING.*"}}).toArray();
 
             Promise.all([p1, p2])
                 .then(results => {
