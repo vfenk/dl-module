@@ -124,16 +124,16 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
     }
 
     addOutput(data) {
-        var now = new Date();
+        var date = new Date(data.date);
 
         return new Promise((resolve, reject) => {
-            this._getByDateAndUnit(now, data.unitId)
+            this._getByDateAndUnit(date, data.unitId)
                 .then(result => {
                     if (result == null) {
                         result = {};
                         result.entries = [];
 
-                        var savedDate = new Date(now);
+                        var savedDate = new Date(date);
                         savedDate.setHours(0, 0, 0, 0);
 
                         result.date = savedDate;
@@ -232,17 +232,18 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
             if (_unitId === '')
                 resolve(null);
 
-            var todayStartHour = new Date();
-            todayStartHour.setHours(6, 0, 0, 0);
+            // var todayStartHour = new Date();
+            // todayStartHour.setHours(6, 0, 0, 0);
 
-            var inputDate = new Date(_date);
+            // var inputDate = new Date(_date);
 
-            if (inputDate < todayStartHour) {
-                todayStartHour.setDate(todayStartHour.getDate() - 1);
-            }
+            // if (inputDate < todayStartHour) {
+            //     todayStartHour.setDate(todayStartHour.getDate() - 1);
+            // }
 
-            _filterDate = todayStartHour;
+            // _filterDate = todayStartHour;
 
+            _filterDate = new Date(_date);
             _filterDate.setHours(0, 0, 0, 0);
 
             var query = {
