@@ -1,6 +1,6 @@
 var helper = require('../../helper');
 var user = {
-    username: 'unit-test'
+    username: 'dev'
 };
 
 
@@ -29,6 +29,9 @@ module.exports = function(data, Manager, filterCallback) {
                                     reject(e);
                                 });
                         }
+                    })
+                    .catch(e => {
+                        reject(e);
                     });
             })
             .catch(e => {

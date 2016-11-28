@@ -1,3 +1,5 @@
+var global = require('../../global');
+
 module.exports = function (purchaseRequest) {
 
     var items = [].concat.apply([], purchaseRequest.items);
@@ -5,21 +7,10 @@ module.exports = function (purchaseRequest) {
     var iso = "FM-6.00-06-004/R1";
     var number = purchaseRequest.no;
 
-    var locale = 'id-ID';
-    var dateLocaleOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    var dateFormat = "DD-MMMM-YYYY";
+    var locale = global.config.locale; 
 
     var moment = require('moment');
-    moment.locale(locale);
-
-    var numberLocaleOptions = {
-        style: 'decimal',
-        maximumFractionDigits: 4
-    };
+    moment.locale(locale.name); 
 
     var header = [{
         columns: [{
@@ -41,10 +32,10 @@ module.exports = function (purchaseRequest) {
                     }]
             }]
 
-           }]
+        }]
     }];
 
-var line = [{
+    var line = [{
         canvas: [{
     	       type: 'line',
             x1: 0,
@@ -56,15 +47,15 @@ var line = [{
         ]
     }, '\n'];
 
-    var subheader= [{
+    var subheader = [{
         columns: [{
             columns: [{
                 width: '*',
                 stack: [{
-                        text: iso,
-                        style: ['size09', 'bold'],
-                        alignment: "right"
-                    },
+                    text: iso,
+                    style: ['size09', 'bold'],
+                    alignment: "right"
+                },
                     {
                         text: 'ORDER PEMESANAN',
                         style: ['size09', 'bold'],
@@ -73,22 +64,22 @@ var line = [{
                     }]
             }]
 
-           }]
+        }]
     }];
 
-    var subheader2=[{
+    var subheader2 = [{
         columns: [
             {
                 width: '40%',
                 columns: [{
                     width: '35%',
-                    stack: ['BAGIAN', 'Nomor']
+                    stack: ['Bagian', 'Budget' , 'Nomor']
                 }, {
                         width: '5%',
-                        stack: [':', ':']
+                        stack: [':', ':', ':']
                     }, {
                         width: '*',
-                        stack: [purchaseRequest.unit.subDivision, purchaseRequest.no]
+                        stack: [purchaseRequest.unit.name, purchaseRequest.budget.name, purchaseRequest.no]
                     }],
                 style: ['size08']
 
@@ -101,7 +92,7 @@ var line = [{
                 width: '30%',
                 columns: [{
                     width: '*',
-                    stack: [ `Solo, ${moment(purchaseRequest.date).format(dateFormat)} `],
+                    stack: [`Sukoharjo, ${moment(purchaseRequest.date).format(locale.date.format)} `],
                     alignment: "right",
                 }],
                 style: ['size08']
@@ -109,19 +100,20 @@ var line = [{
         ]
     }];
 
-    var opening =  {
+    var opening = {
         text: [
             '\n', {
-                text: 'MOHON DIBELIKAN/DIUSAHAKAN BARANG TERSEBUT DIBAWAH INI : '},
+                text: 'Mohon dibelikan/diusahakan barang tersebut dibawah ini : '
+            },
             '\n\n'
         ],
         style: ['size09']
     };
 
     var thead = [{
-            text: 'NO',
-            style: 'tableHeader'
-        }, {
+        text: 'NO',
+        style: 'tableHeader'
+    }, {
             text: 'KODE',
             style: 'tableHeader'
         }, {
@@ -135,30 +127,30 @@ var line = [{
             style: 'tableHeader'
         }];
 
-    var tbody = items.map(function(item, index) {
+    var tbody = items.map(function (item, index) {
         return [{
-                    text: (index+1).toString() || '',
-                    style: ['size07', 'center']
-                },{
-                    text: item.product.code ,
-                    style: ['size07', 'left']
-                }, {
-                    text: item.product.name,
-                    style: ['size07', 'center']
-                }, {
-                    text:parseFloat(item.quantity).toLocaleString(locale, numberLocaleOptions) +" "+ item.uom.unit,
-                    style: ['size07', 'center']
-                }, {
-                    text: '',
-                    style: ['size07', 'left']
-                }];
+            text: (index + 1).toString() || '',
+            style: ['size07', 'center']
+        }, {
+                text: item.product.code,
+                style: ['size07', 'left']
+            }, {
+                text: item.product.name,
+                style: ['size07', 'center']
+            }, {
+                text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.product.uom.unit,
+                style: ['size07', 'center']
+            }, {
+                text: '',
+                style: ['size07', 'left']
+            }];
     });
 
     var tfoot = [[{
-            text: " ",
-            style: ['size08', 'center']
-        }, "", "", "", ""]];
-    
+        text: " ",
+        style: ['size08', 'center']
+    }, "", "", "", ""]];
+
     tbody = tbody.length > 0 ? tbody : [
         [{
             text: "tidak ada barang",
@@ -171,43 +163,45 @@ var line = [{
         table: {
             widths: ['5%', '20%', '40%', '10%', '25%'],
             headerRows: 1,
-            body: [].concat([thead],tbody,tfoot)
+            body: [].concat([thead], tbody, tfoot)
         }
     }];
+
+    var getDateexpected= purchaseRequest.expectedDeliveryDate && purchaseRequest.expectedDeliveryDate.toString().trim() != '' ?  moment(purchaseRequest.expectedDeliveryDate).format(locale.date.format) : '-';
 
     var footer = [
         '\n', {
             stack: [{
+                columns: [{
+                    width: '60%',
                     columns: [{
-                        width: '60%',
-                        columns: [{
-                            width: '50%',
-                            stack: ['KATEGORI','DIMINTA DATANG', 'KETERANGAN']
-                        }, {
+                        width: '50%',
+                        stack: ['Kategori', 'Diminta Datang', 'Keterangan']
+                    }, {
                             width: '3%',
                             stack: [':', ':', ':']
                         }, {
                             width: '*',
-                            stack: [purchaseRequest.category.name,`${moment(purchaseRequest.expectedDeliveryDate).format(dateFormat)}`,purchaseRequest.remark]
-                        }, ]
-                    }]
-                }
+                            stack: [purchaseRequest.category.name, `${getDateexpected}`, purchaseRequest.remark]
+                        },]
+                }]
+            }
             ],
             style: ['size08']
         }, '\n'
     ];
 
     var thead2 = [{
-            text: 'BAGIAN ANGGARAN',
-            style: 'tableHeader'
-        }, {
+        text: 'BAGIAN ANGGARAN',
+        style: 'tableHeader'
+    }, {
             text: 'ACC MENGETAHUI',
             style: 'tableHeader'
         }, {
             text: 'BAGIAN PEMBELIAN',
             style: 'tableHeader'
         }, {
-            text: 'KABAG PRODUKSI',
+            text: 'KEPALA BAGIAN',
             style: 'tableHeader'
         }, {
             text: 'YANG MEMERLUKAN',
@@ -215,15 +209,15 @@ var line = [{
         }];
 
     var tbody2 = [[{
-            text: " ",
-            style: ['size30', 'center']
-        }, "", "", "", ""]];
+        text: " ",
+        style: ['size30', 'center']
+    }, "", "", "", ""]];
 
     var table2 = [{
         table: {
             widths: ['20%', '20%', '20%', '20%', '20%'],
             headerRows: 1,
-            body: [].concat([thead2],tbody2)
+            body: [].concat([thead2], tbody2)
         }
     }];
 
@@ -231,7 +225,7 @@ var line = [{
         pageSize: 'A5',
         pageOrientation: 'portrait',
         pageMargins: 20,
-        content: [].concat(header, line, subheader, subheader2, opening, table, footer,table2),
+        content: [].concat(header, line, subheader, subheader2, opening, table, footer, table2),
         styles: {
             size06: {
                 fontSize: 6

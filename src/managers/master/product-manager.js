@@ -11,11 +11,13 @@ require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Product = DLModels.master.Product;
+var UomManager = require('./uom-manager');
 
 module.exports = class ProductManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.master.collection.Product);
+        this.uomManager = new UomManager(db,user);
     }
 
     _getQuery(paging) {
@@ -44,6 +46,7 @@ module.exports = class ProductManager extends BaseManager {
 
             query['$and'].push($or);
         }
+        
         return query;
     }
 
@@ -62,11 +65,13 @@ module.exports = class ProductManager extends BaseManager {
                     code: valid.code
                 }]
             });
-
+            
+            var getUom = valid.uom && ObjectId.isValid(valid.uom._id) ? this.uomManager.getSingleByIdOrDefault(valid.uom._id) : Promise.resolve(null);
             // 2. begin: Validation.
-            Promise.all([getProductPromise])
+            Promise.all([getProductPromise, getUom])
                 .then(results => {
                     var _module = results[0];
+                    var _uom = results[1];
 
                     if (!valid.code || valid.code == '')
                         errors["code"] = i18n.__("Product.code.isRequired:%s is required", i18n.__("Product.code._:Code")); // "Kode tidak boleh kosong.";
@@ -89,8 +94,9 @@ module.exports = class ProductManager extends BaseManager {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('Product Manager : data does not pass validation', errors));
                     }
-
-                    valid.uomId = new ObjectId(valid.uomId);
+                    
+                    valid.uom=_uom;
+                    valid.uomId = new ObjectId(valid.uom._id);
                     if (!valid.stamp)
                         valid = new Product(valid);
                     valid.stamp(this.user.username, 'manager');
@@ -100,5 +106,23 @@ module.exports = class ProductManager extends BaseManager {
                     reject(e);
                 })
         });
+    }
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.master.collection.Product}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var codeIndex = {
+            name: `ix_${map.master.collection.Product}_code`,
+            key: {
+                code: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, codeIndex]);
     }
 };

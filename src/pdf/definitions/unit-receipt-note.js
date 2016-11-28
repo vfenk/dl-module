@@ -1,57 +1,48 @@
-module.exports = function (unitReceiptNote) {
+var global = require('../../global');
+
+module.exports = function(unitReceiptNote) {
 
     var items = [].concat.apply([], unitReceiptNote.items);
 
-    var iso = "FM.FP-GB-15-005/R2";
+    var iso = "FM.PB-00-06-006";
     var number = unitReceiptNote.no;
 
-    var locale = 'id-ID';
-    var dateLocaleOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    var dateFormat = "DD-MMMM-YYYY";
+    var locale = global.config.locale;
 
     var moment = require('moment');
-    moment.locale(locale);
-    
-    
-    var numberLocaleOptions = {
-        style: 'decimal',
-        maximumFractionDigits: 4
-    };
-    
+    moment.locale(locale.name);
+
     var header = [{
-        columns: [{
-            columns: [{
-                width: '*',
-                stack: [{
-                    text: 'PT DAN LIRIS',
-                    style: ['size15', 'bold']
-                }, {
+        alignment: "center",
+        text: 'BON PENERIMAAN BARANG',
+        style: ['size10', 'bold']
+    }, {
+        columns: [
+            {
+                columns: [{
+                    width: '*',
+                    stack: [{
+                        text: 'PT DAN LIRIS',
+                        style: ['size15', 'bold']
+                    }, {
                         text: 'BANARAN SUKOHARJO',
                         style: ['size09']
                     }]
-            }]
+                }]
 
-        },
+            },
             {
                 columns: [{
                     width: '*',
                     stack: [{
                         alignment: "right",
                         text: ' ',
-                        style: ['size08', 'bold']
-                    },{
+                        style: ['size15', 'bold']
+                    }, {
                         alignment: "right",
                         text: iso,
                         style: ['size08', 'bold']
-                    }, {
-                            alignment: "right",
-                            text: 'BON PENERIMAAN BARANG',
-                            style: ['size09','bold']
-                        }]
+                    }]
                 }]
 
             }]
@@ -65,12 +56,12 @@ module.exports = function (unitReceiptNote) {
                     width: '35%',
                     stack: ['Tanggal', 'Diterima dari']
                 }, {
-                        width: '5%',
-                        stack: [':', ':']
-                    }, {
-                        width: '*',
-                        stack: [`${moment(unitReceiptNote.date).format(dateFormat)}`, unitReceiptNote.supplier.name]
-                    }],
+                    width: '5%',
+                    stack: [':', ':']
+                }, {
+                    width: '*',
+                    stack: [`${moment(unitReceiptNote.date).format(locale.date.format)}`, unitReceiptNote.supplier.name]
+                }],
                 style: ['size08']
 
             },
@@ -84,12 +75,12 @@ module.exports = function (unitReceiptNote) {
                     width: '25%',
                     stack: ['Bagian', 'No.']
                 }, {
-                        width: '5%',
-                        stack: [':', ':']
-                    }, {
-                        width: '*',
-                        stack: [unitReceiptNote.unit.subDivision, unitReceiptNote.no]
-                    }],
+                    width: '5%',
+                    stack: [':', ':']
+                }, {
+                    width: '*',
+                    stack: [unitReceiptNote.unit.name, unitReceiptNote.no]
+                }],
                 style: ['size08']
             }
         ]
@@ -97,7 +88,7 @@ module.exports = function (unitReceiptNote) {
 
     var line = [{
         canvas: [{
-    	       type: 'line',
+            type: 'line',
             x1: 0,
             y1: 5,
             x2: 378,
@@ -108,45 +99,45 @@ module.exports = function (unitReceiptNote) {
     }, '\n'];
 
     var thead = [{
-            text: 'No.',
-            style: 'tableHeader'
-        }, {
-            text: 'Nama barang',
-            style: 'tableHeader'
-        }, {
-            text: 'Jumlah',
-            style: 'tableHeader'
-        }, {
-            text: 'Satuan',
-            style: 'tableHeader'
-        }, {
-            text: 'Keterangan',
-            style: 'tableHeader'
-        }];
+        text: 'No.',
+        style: 'tableHeader'
+    }, {
+        text: 'Nama barang',
+        style: 'tableHeader'
+    }, {
+        text: 'Jumlah',
+        style: 'tableHeader'
+    }, {
+        text: 'Satuan',
+        style: 'tableHeader'
+    }, {
+        text: 'Keterangan',
+        style: 'tableHeader'
+    }];
 
-    
-    
-    
-    
+
+
+
+
     var tbody = items.map(function(item, index) {
         return [{
-                    text: (index+1).toString() || '',
-                    style: ['size07', 'center']
-                },{
-                    text: item.product.code +" - "+item.product.name,
-                    style: ['size07', 'left']
-                }, {
-                    text: parseFloat(item.deliveredQuantity).toLocaleString(locale, numberLocaleOptions),
-                    style: ['size07', 'center']
-                }, {
-                    text: item.deliveredUom.unit,
-                    style: ['size07', 'center']
-                }, {
-                    text: item.remark || '',
-                    style: ['size07', 'left']
-                }];
+            text: (index + 1).toString() || '',
+            style: ['size07', 'center']
+        }, {
+            text: item.product.code + " - " + item.product.name,
+            style: ['size07', 'left']
+        }, {
+            text: parseFloat(item.deliveredQuantity).toLocaleString(locale, locale.decimal),
+            style: ['size07', 'center']
+        }, {
+            text: item.deliveredUom.unit,
+            style: ['size07', 'center']
+        }, {
+            text: item.remark || '',
+            style: ['size07', 'left']
+        }];
     });
-    
+
     tbody = tbody.length > 0 ? tbody : [
         [{
             text: "tidak ada barang",
@@ -159,37 +150,37 @@ module.exports = function (unitReceiptNote) {
         table: {
             widths: ['5%', '40%', '20%', '10%', '25%'],
             headerRows: 1,
-            body: [].concat([thead],tbody)
+            body: [].concat([thead], tbody)
         }
     }];
 
     var footer = [
         '\n', {
             stack: [{
-                text: `Sukoharjo, ${moment(unitReceiptNote.date).format(dateFormat)}`,
+                text: `Sukoharjo, ${moment(unitReceiptNote.date).format(locale.date.format)}`,
                 alignment: "right"
             }, {
-                    columns: [{
-                            width: '35%',
-                            stack: ['Mengetahui\n\n\n\n\n', '(_______________________)'],
-                            style: 'center'
-                        }, {
-                            width: '30%',
-                            text: ''
-                        }, {
-                            width: '35%',
-                            stack: ['Yang Menerima\n\n\n\n\n', '(_______________________)'],
-                            style: 'center'
-                        },]
-                }
+                columns: [{
+                    width: '35%',
+                    stack: ['Mengetahui\n\n\n\n\n', '(_______________________)'],
+                    style: 'center'
+                }, {
+                    width: '30%',
+                    text: ''
+                }, {
+                    width: '35%',
+                    stack: ['Yang Menerima\n\n\n\n\n', '(_______________________)'],
+                    style: 'center'
+                },]
+            }
             ],
             style: ['size08']
         }
     ];
 
     var dd = {
-        pageSize: 'A5',
-        pageOrientation: 'portrait',
+        pageSize: 'A6',
+        pageOrientation: 'landscape',
         pageMargins: 20,
         content: [].concat(header, line, subHeader, table, footer),
         styles: {

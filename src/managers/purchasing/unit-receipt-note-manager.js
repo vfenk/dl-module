@@ -7,13 +7,20 @@ var map = DLModels.map;
 var i18n = require('dl-i18n');
 var UnitReceiptNote = DLModels.purchasing.UnitReceiptNote;
 var PurchaseOrderManager = require('./purchase-order-manager');
+var DeliveryOrderManager = require('./delivery-order-manager');
+var UnitManager = require('../master/unit-manager');
+var SupplierManager = require('../master/supplier-manager');
 var BaseManager = require('../base-manager');
+var generateCode = require('../../utils/code-generator');
 
 module.exports = class UnitReceiptNoteManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.purchasing.collection.UnitReceiptNote);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
+        this.deliveryOrderManager = new DeliveryOrderManager(db, user);
+        this.unitManager = new UnitManager(db, user);
+        this.supplierManager = new SupplierManager(db, user);
     }
 
     _validate(unitReceiptNote) {
@@ -27,46 +34,67 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        "no": valid.no
-                    }, {
-                        _deleted: false
-                    }]
+                    "no": valid.no
+                }, {
+                    _deleted: false
+                }]
             });
+            var getDeliveryOrder = valid.deliveryOrder && ObjectId.isValid(valid.deliveryOrder._id) ? this.deliveryOrderManager.getSingleByIdOrDefault(valid.deliveryOrder._id) : Promise.resolve(null);
+            var getUnit = valid.unit && ObjectId.isValid(valid.unit._id) ? this.unitManager.getSingleByIdOrDefault(valid.unit._id) : Promise.resolve(null);
+            var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
+            var getPurchaseOrder = [];
+            if (valid.deliveryOrder) {
+                for (var doItem of valid.deliveryOrder.items) {
+                    for (var fulfillment of doItem.fulfillments)
+                        if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                            getPurchaseOrder.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                }
+            }
+            else
+                getPurchaseOrder = Promise.resolve(null);
 
-            Promise.all([getUnitReceiptNotePromise])
+            Promise.all([getUnitReceiptNotePromise, getDeliveryOrder, getUnit, getSupplier, getPurchaseOrder])
                 .then(results => {
-                    var _module = results[0];
+                    var _unitReceiptNote = results[0];
+                    var _deliveryOrder = results[1];
+                    var _unit = results[2];
+                    var _supplier = results[3];
+                    var _purchaseOrderList = results.slice(4, results.length) || [];
                     var now = new Date();
 
-                    if (_module)
+                    if (_unitReceiptNote)
                         errors["no"] = i18n.__("UnitReceiptNote.no.isExists:%s is already exists", i18n.__("UnitReceiptNote.no._:No")); //"No. bon unit sudah terdaftar";
 
-                    if (!valid.unitId)
-                        errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
-                    else if (valid.unit) {
+                    if (valid.unit) {
                         if (!valid.unit._id)
                             errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
                     }
                     else if (!valid.unit)
                         errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
+                    else if (!_unit)
+                        errors["unit"] = i18n.__("UnitReceiptNote.unit.isRequired:%s is required", i18n.__("UnitReceiptNote.unit._:Unit")); //"Unit tidak boleh kosong";
 
-                    if (!valid.supplierId)
-                        errors["supplier"] = i18n.__("UnitReceiptNote.supplier.isRequired:%s name is required", i18n.__("UnitReceiptNote.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
-                    else if (valid.supplier) {
+                    if (valid.supplier) {
                         if (!valid.supplier._id)
                             errors["supplier"] = i18n.__("UnitReceiptNote.supplier.isRequired:%s name is required", i18n.__("UnitReceiptNote.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
                     }
                     else if (!valid.supplier)
                         errors["supplier"] = i18n.__("UnitReceiptNote.supplier.isRequired:%s name is required", i18n.__("UnitReceiptNote.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
+                    else if (!_supplier)
+                        errors["supplier"] = i18n.__("UnitReceiptNote.supplier.isRequired:%s name  is required", i18n.__("UnitReceiptNote.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
 
-                    if (!valid.deliveryOrderId)
-                        errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s is required", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No.")); //"No. surat jalan tidak boleh kosong";
-                    else if (valid.deliveryOrder) {
+
+                    if (!valid.date || valid.date == '')
+                        errors["date"] = i18n.__("UnitReceiptNote.date.isRequired:%s is required", i18n.__("UnitReceiptNote.date._:Date")); //"Tanggal tidak boleh kosong";
+
+                    if (valid.deliveryOrder) {
                         if (!valid.deliveryOrder._id)
                             errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s is required", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No")); //"No. surat jalan tidak boleh kosong";
                     }
                     else if (!valid.deliveryOrder)
                         errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s is required", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No")); //"No. surat jalan tidak boleh kosong";
+                    else if (!_deliveryOrder)
+                        errors["deliveryOrder"] = i18n.__("UnitReceiptNote.deliveryOrder.isRequired:%s is required", i18n.__("UnitReceiptNote.deliveryOrder._:Delivery Order No.")); //"No. surat jalan tidak boleh kosong";
 
                     if (valid.items) {
                         if (valid.items.length <= 0) {
@@ -99,43 +127,34 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-                    valid.unitId = new ObjectId(valid.unit._id);
-                    valid.unit._id = new ObjectId(valid.unit._id);
-                    valid.supplierId = new ObjectId(valid.supplier._id);
-                    valid.supplier._id = new ObjectId(valid.supplier._id);
-                    valid.deliveryOrderId = new ObjectId(valid.deliveryOrder._id);
-                    valid.deliveryOrder._id = new ObjectId(valid.deliveryOrder._id);
-                    valid.deliveryOrder.supplierId = new ObjectId(valid.deliveryOrder.supplier._id);
-                    valid.deliveryOrder.supplier._id = new ObjectId(valid.deliveryOrder.supplier._id);
-                    for (var doItem of valid.deliveryOrder.items) {
-                        doItem.purchaseOrderExternalId = new ObjectId(doItem.purchaseOrderExternal._id);
-                        doItem.purchaseOrderExternal._id = new ObjectId(doItem.purchaseOrderExternal._id);
-                        for (var fulfillment of doItem.fulfillments) {
-                            fulfillment.purchaseOrderId = new ObjectId(fulfillment.purchaseOrder._id);
-                            fulfillment.purchaseOrder._id = new ObjectId(fulfillment.purchaseOrder._id);
-                            fulfillment.purchaseOrder.unitId = new ObjectId(fulfillment.purchaseOrder.unit._id);
-                            fulfillment.purchaseOrder.unit._id = new ObjectId(fulfillment.purchaseOrder.unit._id);
-                            fulfillment.purchaseOrder.categoryId = new ObjectId(fulfillment.purchaseOrder.category._id);
-                            fulfillment.purchaseOrder.category._id = new ObjectId(fulfillment.purchaseOrder.category._id);
-                            fulfillment.productId = new ObjectId(fulfillment.product._id);
-                            fulfillment.product._id = new ObjectId(fulfillment.product._id);
-                        }
-                    }
+                    valid.unitId = new ObjectId(_unit._id);
+                    valid.unit = _unit;
+                    valid.supplierId = new ObjectId(_supplier._id);
+                    valid.supplier = _supplier;
+                    valid.deliveryOrderId = new ObjectId(_deliveryOrder._id);
+                    valid.deliveryOrder = _deliveryOrder;
 
                     for (var item of valid.items) {
-                        item.product._id = new ObjectId(item.product._id);
-                        item.purchaseOrderId = new ObjectId(item.purchaseOrder._id);
-                        item.purchaseOrder._id = new ObjectId(item.purchaseOrder._id);
-                        item.purchaseOrder.unitId = new ObjectId(item.purchaseOrder.unit._id);
-                        item.purchaseOrder.unit._id = new ObjectId(item.purchaseOrder.unit._id);
-                        item.purchaseOrder.categoryId = new ObjectId(item.purchaseOrder.category._id);
-                        item.purchaseOrder.category._id = new ObjectId(item.purchaseOrder.category._id);
-                        item.purchaseOrder.currency._id = new ObjectId(item.currency._id);
-                        for (var poItem of item.purchaseOrder.items) {
-                            poItem.product._id = new ObjectId(poItem.product.uom._id);
-                            poItem.product.uom._id = new ObjectId(poItem.product.uom._id);
-                            poItem.defaultUom._id = new ObjectId(poItem.product.uom._id);
+                        for (var _po of _purchaseOrderList) {
+                            var _poId = new ObjectId(item.purchaseOrder._id);
+                            if (_poId.equals(_po._id)) {
+                                item.purchaseOrder = _po;
+                                item.purchaseOrderId = _po._id;
+                                item.currency = _po.currency;
+                                item.currencyRate = _po.currencyRate;
+
+                                for (var _poItem of _po.items) {
+                                    var _productId = new ObjectId(item.product._id);
+                                    if (_productId.equals(_poItem.product._id)) {
+                                        item.product = _poItem.product;
+                                        item.deliveredUom = _poItem.dealUom;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
                         }
+
                     }
 
                     if (!valid.stamp)
@@ -147,7 +166,6 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 .catch(e => {
                     reject(e);
                 })
-
         });
     }
 
@@ -200,61 +218,126 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
 
     create(unitReceiptNote) {
         return new Promise((resolve, reject) => {
-            var tasks = [];
-            var tasksPoExternal = [];
+            var tasksUpdatePoInternal = [];
             var getPurchaseOrderById = [];
             this._validate(unitReceiptNote)
                 .then(validUnitReceiptNote => {
-                    validUnitReceiptNote.no = this.generateNo(validUnitReceiptNote.unit.code);
-                    validUnitReceiptNote.unitId = new ObjectId(validUnitReceiptNote.unitId);
-                    validUnitReceiptNote.supplierId = new ObjectId(validUnitReceiptNote.supplierId);
-                    validUnitReceiptNote.deliveryOrderId = new ObjectId(validUnitReceiptNote.deliveryOrderId);
-                    validUnitReceiptNote.date = validUnitReceiptNote._createdDate;
-                    this.collection.insert(validUnitReceiptNote)
-                        .then(id => {
-                            //update PO Internal
-                            for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
-                                for (var fulfillment of doItem.fulfillments)
-                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillment.purchaseOrder._id));
-                            }
-                            Promise.all(getPurchaseOrderById)
-                                .then(results => {
-                                    for (var result of results) {
-                                        var purchaseOrder = result;
-                                        for (var poItem of purchaseOrder.items) {
-                                            for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
-                                                if (validUnitReceiptNote.unitId.equals(purchaseOrder.unitId)) {
-                                                    if (unitReceiptNoteItem.product._id.equals(poItem.product._id)) {
-                                                        for (var fulfillment of poItem.fulfillments) {
-                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
-                                                            var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
+                    validUnitReceiptNote.no = generateCode();
 
-                                                            if (fulfillmentNo == deliveryOrderNo) {
-                                                                fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
-                                                                fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
-                                                                fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
-                                                                fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
+                    //Update PO Internal
+                    var poId = new ObjectId();
+                    for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
+                        for (var fulfillment of doItem.fulfillments)
+                            if (!poId.equals(fulfillment.purchaseOrder._id)) {
+                                poId = new ObjectId(fulfillment.purchaseOrder._id);
+                                if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                            }
+                    }
+
+                    Promise.all(getPurchaseOrderById)
+                        .then(results => {
+                            for (var purchaseOrder of results) {
+                                for (var poItem of purchaseOrder.items) {
+                                    for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
+                                        if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
+                                            if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
+                                                for (var fulfillment of poItem.fulfillments) {
+                                                    var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                    var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
+
+                                                    if (fulfillmentNo == deliveryOrderNo && !fulfillment.unitReceiptNoteNo) {
+                                                        fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
+                                                        fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
+                                                        fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
+                                                        fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
+                                                        break;
+                                                    } else if (fulfillmentNo == deliveryOrderNo && fulfillment.unitReceiptNoteNo) {
+                                                        var _fulfillment = fulfillment;
+                                                        _fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
+                                                        _fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
+                                                        _fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
+                                                        _fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
+                                                        poItem.fulfillments.push(_fulfillment);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            unitReceiptNoteItem.purchaseOrder = purchaseOrder;
+                                        }
+                                    }
+                                }
+                                tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
+                            }
+                            Promise.all(tasksUpdatePoInternal)
+                                .then(results => {
+                                    this.deliveryOrderManager.getSingleByQueryOrDefault(validUnitReceiptNote.deliveryOrder._id)
+                                        .then(_deliveryOrder => {
+                                            for (var _item of _deliveryOrder.items) {
+                                                for (var _fulfillment of _item.fulfillments) {
+                                                    for (var item of validUnitReceiptNote.items) {
+                                                        if (_fulfillment.purchaseOrder._id.toString() == item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() == item.product._id.toString()) {
+                                                            var _realizationQuantity = {
+                                                                no: validUnitReceiptNote.no,
+                                                                deliveredQuantity: item.deliveredQuantity
                                                             }
+                                                            _fulfillment.realizationQuantity.push(_realizationQuantity);
+                                                            break;
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
-                                        tasks.push(this.purchaseOrderManager.update(purchaseOrder));
-                                    }
+                                            for (var _item of _deliveryOrder.items) {
+                                                for (var _fulfillment of _item.fulfillments) {
+                                                    var _total = 0
+                                                    for (var _qty of _fulfillment.realizationQuantity) {
+                                                        _total += _qty.deliveredQuantity;
+                                                    }
+                                                    if (_total != _fulfillment.deliveredQuantity) {
+                                                        _item.isClosed = false;
+                                                        break;
+                                                    }
+                                                    else
+                                                        _item.isClosed = true;
+                                                }
+                                                for (var _fulfillment of _item.fulfillments) {
+                                                    if (_fulfillment.realizationQuantity.length > 0) {
+                                                        _deliveryOrder.isPosted = true;
+                                                        break;
+                                                    } else {
+                                                        _deliveryOrder.isPosted = false;
+                                                    }
+                                                }
 
-                                    Promise.all(tasks)
-                                        .then(results => {
-                                            resolve(id);
+                                                if (!_item.isClosed) {
+                                                    _deliveryOrder.isClosed = false;
+                                                    break;
+                                                }
+                                                else
+                                                    _deliveryOrder.isClosed = true;
+                                            }
+                                            validUnitReceiptNote.deliveryOrder = _deliveryOrder;
+                                            this.deliveryOrderManager.update(_deliveryOrder)
+                                                .then(_deliveryOrderId => {
+                                                    this.collection.insert(validUnitReceiptNote)
+                                                        .then(id => {
+                                                            resolve(id);
+                                                        })
+                                                        .catch(e => {
+                                                            reject(e);
+                                                        })
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                })
                                         })
                                         .catch(e => {
                                             reject(e);
                                         })
-
                                 })
                                 .catch(e => {
                                     reject(e);
-                                });
+                                })
                         })
                         .catch(e => {
                             reject(e);
@@ -263,6 +346,268 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 .catch(e => {
                     reject(e);
                 })
+        });
+    }
+
+    update(unitReceiptNote) {
+        var tasksUpdatePoInternal = [];
+        var getPurchaseOrderById = [];
+        return new Promise((resolve, reject) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
+                    this._validate(unitReceiptNote)
+                        .then(validUnitReceiptNote => {
+                            //Update PO Internal
+                            var poId = new ObjectId();
+                            for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
+                                for (var fulfillment of doItem.fulfillments)
+                                    if (!poId.equals(fulfillment.purchaseOrder._id)) {
+                                        poId = new ObjectId(fulfillment.purchaseOrder._id);
+                                        if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                                            getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                                    }
+                            }
+
+                            Promise.all(getPurchaseOrderById)
+                                .then(results => {
+                                    for (var purchaseOrder of results) {
+                                        for (var poItem of purchaseOrder.items) {
+                                            for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
+                                                if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
+                                                    if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
+                                                        for (var fulfillment of poItem.fulfillments) {
+                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                            var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
+
+                                                            if (fulfillmentNo == deliveryOrderNo && fulfillment.unitReceiptNoteNo == validUnitReceiptNote.no) {
+                                                                fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
+                                                                fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
+                                                                fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
+                                                                fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
+                                                            }
+                                                        }
+                                                    }
+                                                    unitReceiptNoteItem.purchaseOrder = purchaseOrder;
+                                                }
+                                            }
+                                        }
+                                        tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
+                                    }
+                                    Promise.all(tasksUpdatePoInternal)
+                                        .then(results => {
+                                            this.deliveryOrderManager.getSingleByQueryOrDefault(validUnitReceiptNote.deliveryOrder._id)
+                                                .then(_deliveryOrder => {
+                                                    for (var _item of _deliveryOrder.items) {
+                                                        for (var _fulfillment of _item.fulfillments) {
+                                                            for (var item of validUnitReceiptNote.items) {
+                                                                if (_fulfillment.purchaseOrder._id.toString() == item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() == item.product._id.toString()) {
+                                                                    for (var realizationQty of _fulfillment.realizationQuantity) {
+                                                                        if (realizationQty.no == validUnitReceiptNote.no) {
+                                                                            realizationQty.deliveredQuantity = item.deliveredQuantity;
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    for (var _item of _deliveryOrder.items) {
+                                                        for (var _fulfillment of _item.fulfillments) {
+                                                            var _total = 0
+                                                            for (var _qty of _fulfillment.realizationQuantity) {
+                                                                _total += _qty.deliveredQuantity;
+                                                            }
+                                                            if (_total != _fulfillment.deliveredQuantity) {
+                                                                _item.isClosed = false;
+                                                                break;
+                                                            }
+                                                            else
+                                                                _item.isClosed = true;
+                                                        }
+                                                        for (var _fulfillment of _item.fulfillments) {
+                                                            if (_fulfillment.realizationQuantity.length > 0) {
+                                                                _deliveryOrder.isPosted = true;
+                                                                break;
+                                                            } else {
+                                                                _deliveryOrder.isPosted = false;
+                                                            }
+                                                        }
+                                                        if (!_item.isClosed) {
+                                                            _deliveryOrder.isClosed = false;
+                                                            break;
+                                                        }
+                                                        else
+                                                            _deliveryOrder.isClosed = true;
+                                                    }
+                                                    validUnitReceiptNote.deliveryOrder = _deliveryOrder;
+                                                    this.deliveryOrderManager.update(_deliveryOrder)
+                                                        .then(_deliveryOrderId => {
+                                                            this.collection.update(validUnitReceiptNote)
+                                                                .then(id => {
+                                                                    resolve(id);
+                                                                })
+                                                                .catch(e => {
+                                                                    reject(e);
+                                                                });
+                                                        })
+                                                        .catch(e => {
+                                                            reject(e);
+                                                        })
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                })
+
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        })
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                })
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
+    delete(unitReceiptNote) {
+        var tasksUpdatePoInternal = [];
+        var getPurchaseOrderById = [];
+        return new Promise((resolve, reject) => {
+            this._createIndexes()
+                .then((createIndexResults) => {
+                    this._validate(unitReceiptNote)
+                        .then(validUnitReceiptNote => {
+                            validUnitReceiptNote._deleted = true;
+                            //Update PO Internal
+                            var poId = new ObjectId();
+                            for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
+                                for (var fulfillment of doItem.fulfillments)
+                                    if (!poId.equals(fulfillment.purchaseOrder._id)) {
+                                        poId = new ObjectId(fulfillment.purchaseOrder._id);
+                                        if (ObjectId.isValid(fulfillment.purchaseOrder._id))
+                                            getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
+                                    }
+                            }
+
+                            Promise.all(getPurchaseOrderById)
+                                .then(results => {
+                                    for (var purchaseOrder of results) {
+                                        for (var poItem of purchaseOrder.items) {
+                                            for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
+                                                if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
+                                                    if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
+                                                        for (var fulfillment of poItem.fulfillments) {
+                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                            var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
+
+                                                            if (fulfillmentNo == deliveryOrderNo && fulfillment.unitReceiptNoteNo == validUnitReceiptNote.no) {
+                                                                delete fulfillment.unitReceiptNoteNo;
+                                                                delete fulfillment.unitReceiptNoteDate;
+                                                                delete fulfillment.unitReceiptNoteDeliveredQuantity;
+                                                                delete fulfillment.unitReceiptDeliveredUom;
+                                                            }
+                                                        }
+                                                    }
+                                                    unitReceiptNoteItem.purchaseOrder = purchaseOrder;
+                                                }
+                                            }
+                                        }
+                                        tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
+                                    }
+                                    Promise.all(tasksUpdatePoInternal)
+                                        .then(results => {
+                                            this.deliveryOrderManager.getSingleByQueryOrDefault(validUnitReceiptNote.deliveryOrder._id)
+                                                .then(_deliveryOrder => {
+                                                    for (var _item of _deliveryOrder.items) {
+                                                        for (var _fulfillment of _item.fulfillments) {
+                                                            for (var item of validUnitReceiptNote.items) {
+                                                                if (_fulfillment.purchaseOrder._id.toString() == item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() == item.product._id.toString()) {
+                                                                    var _index;
+                                                                    for (var realizationQty of _fulfillment.realizationQuantity) {
+                                                                        if (realizationQty.no == validUnitReceiptNote.no) {
+                                                                            _index = _fulfillment.realizationQuantity.indexOf(realizationQty);
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                    if (_index != null) {
+                                                                        _fulfillment.realizationQuantity.splice(_index, 1);
+                                                                    }
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    for (var _item of _deliveryOrder.items) {
+                                                        for (var _fulfillment of _item.fulfillments) {
+                                                            var _total = 0
+                                                            for (var _qty of _fulfillment.realizationQuantity) {
+                                                                _total += _qty.deliveredQuantity;
+                                                            }
+                                                            if (_total != _fulfillment.deliveredQuantity) {
+                                                                _item.isClosed = false;
+                                                                break;
+                                                            }
+                                                            else
+                                                                _item.isClosed = true;
+                                                        }
+                                                        for (var _fulfillment of _item.fulfillments) {
+                                                            if (_fulfillment.realizationQuantity.length > 0) {
+                                                                _deliveryOrder.isPosted = true;
+                                                                break;
+                                                            } else {
+                                                                _deliveryOrder.isPosted = false;
+                                                            }
+                                                        }
+                                                        if (!_item.isClosed) {
+                                                            _deliveryOrder.isClosed = false;
+                                                            break;
+                                                        }
+                                                        else
+                                                            _deliveryOrder.isClosed = true;
+                                                    }
+                                                    validUnitReceiptNote.deliveryOrder = _deliveryOrder;
+                                                    this.deliveryOrderManager.update(_deliveryOrder)
+                                                        .then(_deliveryOrderId => {
+                                                            this.collection.update(validUnitReceiptNote)
+                                                                .then(id => {
+                                                                    resolve(id);
+                                                                })
+                                                                .catch(e => {
+                                                                    reject(e);
+                                                                });
+                                                        })
+                                                        .catch(e => {
+                                                            reject(e);
+                                                        })
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                })
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        })
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                })
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 
@@ -290,11 +635,12 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         });
     }
 
-    getUnitReceiptNotes(_no, _unitId, _categoryId, _supplierId, _dateFrom, _dateTo) {
+    getUnitReceiptNotes(_no, _unitId, _categoryId, _supplierId, _dateFrom, _dateTo, _createdBy) {
         return new Promise((resolve, reject) => {
             var query = Object.assign({});
 
             var deleted = { _deleted: false };
+            var createdBy = { _createdBy: _createdBy };
 
             if (_no != "undefined" && _no != "") {
                 var no = { no: _no };
@@ -327,7 +673,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 };
                 Object.assign(query, date);
             }
-            Object.assign(query, deleted);
+            Object.assign(query, deleted, createdBy);
 
             this.collection
                 .where(query)
@@ -352,4 +698,22 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         return no;
     }
 
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.purchasing.collection.UnitReceiptNote}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var noIndex = {
+            name: `ix_${map.purchasing.collection.UnitReceiptNote}_no`,
+            key: {
+                no: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, noIndex]);
+    }
 }

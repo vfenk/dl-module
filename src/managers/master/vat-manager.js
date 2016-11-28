@@ -89,4 +89,24 @@ module.exports = class VatManager extends BaseManager {
                 })
         });
     } 
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.master.collection.Vat}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var nameRateIndex = {
+            name: `ix_${map.master.collection.Vat}_name`,
+            key: {
+                name: 1,
+                rate: 1
+            },
+            unique: true
+        } 
+
+        return this.collection.createIndexes([dateIndex, nameRateIndex]);
+    }
+ 
 }
