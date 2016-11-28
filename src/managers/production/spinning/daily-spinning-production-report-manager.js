@@ -124,15 +124,16 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
     }
 
     addOutput(data) {
+        var date = new Date(data.date);
 
         return new Promise((resolve, reject) => {
-            this._getByDateAndUnit(data.date, data.unitId)
+            this._getByDateAndUnit(date, data.unitId)
                 .then(result => {
                     if (result == null) {
                         result = {};
                         result.entries = [];
 
-                        var savedDate = data.date;
+                        var savedDate = new Date(date);
                         savedDate.setHours(0, 0, 0, 0);
 
                         result.date = savedDate;
@@ -231,17 +232,7 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
             if (_unitId === '')
                 resolve(null);
 
-            var todayStartHour = new Date();
-            todayStartHour.setHours(6, 0, 0, 0);
-
-            var inputDate = _date;
-
-            if (inputDate < todayStartHour) {
-                todayStartHour.setDate(todayStartHour.getDate() - 1);
-            }
-
-            _filterDate = todayStartHour;
-
+            _filterDate = new Date(_date);
             _filterDate.setHours(0, 0, 0, 0);
 
             var query = {
@@ -258,7 +249,7 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
         });
     }
 
-    getFromDB(firstDay, lastDay, unitId) {
+    getFromDB(firstDay, lastDay, now, unitId) {
         
         var spinning = [];
         spinning['SPINNING 1'] = 55;
@@ -269,8 +260,6 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
         spindle['SPINNING 1'] = (47*432)+(8*480);
         spindle['SPINNING 2'] = (94*480)+(1*1008)+(3*1056)+(10*1008);
         spindle['SPINNING 3'] = (28*400)+(12*420)+(24*480);
-
-        var now = new Date();
 
         return new Promise((resolve, reject) => {
             this._getByRangeDate(firstDay, lastDay, unitId)
@@ -322,7 +311,7 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
                             mtdThreadCountInBale += item.threadCountInBale;
                             item.mtdThreadCountInBale = mtdThreadCountInBale;
 
-                            item.factorStandard30s = (item.averageCount - Math.floor(item.averageCount) * ((data.upperConvertionRatio.conversionRatio - data.lowerConvertionRatio.conversionRatio) + data.lowerConvertionRatio.conversionRatio));
+                            item.factorStandard30s = (item.averageCount - Math.floor(item.averageCount)) * ((data.upperConvertionRatio.conversionRatio - data.lowerConvertionRatio.conversionRatio) + data.lowerConvertionRatio.conversionRatio);
                             item.productionStandard30s = item.threadCountInBale * item.factorStandard30s;
 
                             mtdUsedMachineCount += item.usedMachineCount;
@@ -346,16 +335,16 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
         })
     }
 
-    getDailySpinningProductionReport(unitId) {
+    getDailySpinningProductionReport(firstDay, lastDay, unitId) {
 
         var now = new Date();
 
-        var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-        var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        var firstDay = new Date(firstDay);
+        var lastDay = new Date(lastDay);
 
         return new Promise((resolve, reject) => {
-            var p1 = this.getFromDB(firstDay, lastDay, unitId);
-            var p2 = this.productCollection.find({"tags" : {$regex : ".*Benang Spinning.*"}}).toArray();
+            var p1 = this.getFromDB(firstDay, lastDay, now, unitId);
+            var p2 = this.productCollection.find({"tags" : {$regex : ".*BENANG SPINNING.*"}}).toArray();
 
             Promise.all([p1, p2])
                 .then(results => {
