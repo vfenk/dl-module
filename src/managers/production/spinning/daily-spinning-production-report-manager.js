@@ -232,17 +232,6 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
             if (_unitId === '')
                 resolve(null);
 
-            // var todayStartHour = new Date();
-            // todayStartHour.setHours(6, 0, 0, 0);
-
-            // var inputDate = new Date(_date);
-
-            // if (inputDate < todayStartHour) {
-            //     todayStartHour.setDate(todayStartHour.getDate() - 1);
-            // }
-
-            // _filterDate = todayStartHour;
-
             _filterDate = new Date(_date);
             _filterDate.setHours(0, 0, 0, 0);
 
