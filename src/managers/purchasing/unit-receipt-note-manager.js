@@ -10,7 +10,7 @@ var PurchaseOrderManager = require('./purchase-order-manager');
 var DeliveryOrderManager = require('./delivery-order-manager');
 var UnitManager = require('../master/unit-manager');
 var SupplierManager = require('../master/supplier-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 
 module.exports = class UnitReceiptNoteManager extends BaseManager {
