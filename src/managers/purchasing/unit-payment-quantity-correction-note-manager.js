@@ -81,7 +81,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.lessThan:%s must not be greater than quantity on unit payment order", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
                                             else if (item.quantity == _unitReceiptNoteItem.deliveredQuantity)
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.noChanges: no changes", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
-                                            
+
                                             itemErrors.push(itemError);
                                             break;
                                         }
@@ -194,9 +194,30 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
         return new Promise((resolve, reject) => {
 
             this.getSingleById(id)
-                .then(unitReceiptNote => {
+                .then(unitPaymentQuantityCorrectionNote => {
                     var getDefinition = require('../../pdf/definitions/unit-payment-correction-note');
-                    var definition = getDefinition(unitReceiptNote);
+                    for (var _item of unitPaymentQuantityCorrectionNote.items) {
+                        for (var _poItem of _item.purchaseOrder.items) {
+                            if (_poItem.product._id.toString() === _item.product._id.toString()) {
+                                for (var _fulfillment of _poItem.fulfillments) {
+                                    var qty = 0, priceTotal = 0, pricePerUnit = 0;
+                                    if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentQuantityCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
+                                        qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
+                                        priceTotal = qty * _item.pricePerUnit * _item.currency.rate;
+                                        pricePerUnit = _item.pricePerUnit * _item.currency.rate;
+                                        _item.pricePerUnit = pricePerUnit;
+                                        _item.quantity = qty;
+                                        _item.priceTotal = priceTotal;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+
+                    var definition = getDefinition(unitPaymentQuantityCorrectionNote);
 
                     var generatePdf = require('../../pdf/pdf-generator');
                     generatePdf(definition)
@@ -302,6 +323,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                     correctionDate: validData.date,
                                                                     correctionNo: validData.no,
                                                                     correctionQuantity: _item.quantity,
+                                                                    correctionPricePerUnit : _item.pricePerUnit,
                                                                     correctionPriceTotal: _item.priceTotal,
                                                                     correctionRemark: `Koreksi ${validData.priceCorrectionType}`
                                                                 };

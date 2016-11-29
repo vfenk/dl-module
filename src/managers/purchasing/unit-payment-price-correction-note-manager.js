@@ -188,9 +188,39 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         return new Promise((resolve, reject) => {
 
             this.getSingleById(id)
-                .then(unitReceiptNote => {
+                .then(unitPaymentPriceCorrectionNote => {
                     var getDefinition = require('../../pdf/definitions/unit-payment-correction-note');
-                    var definition = getDefinition(unitReceiptNote);
+
+                    for (var _item of unitPaymentPriceCorrectionNote.items) {
+                        for (var _poItem of _item.purchaseOrder.items) {
+                            if (_poItem.product._id.toString() === _item.product._id.toString()) {
+                                for (var _fulfillment of _poItem.fulfillments) {
+                                    var pricePerUnit = 0, priceTotal = 0;
+                                    if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentPriceCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
+                                        if(unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Satuan")
+                                        {
+                                            pricePerUnit = _poItem.pricePerDealUnit - _item.pricePerUnit;
+                                            priceTotal = pricePerUnit * _item.quantity* _item.currency.rate;
+                                        }
+                                        else if(unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Total")
+                                        {
+                                            priceTotal = (_item.quantity * _poItem.pricePerDealUnit * _item.currency.rate) - (_item.priceTotal * _item.currency.rate)
+                                        }
+                                        
+                                        pricePerUnit = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
+                                        priceTotal = pricePerUnit * _item.pricePerUnit * _item.currency.rate;
+
+                                        _item.pricePerUnit = pricePerUnit;
+                                        _item.priceTotal = priceTotal;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    var definition = getDefinition(unitPaymentPriceCorrectionNote);
 
                     var generatePdf = require('../../pdf/pdf-generator');
                     generatePdf(definition)
@@ -286,6 +316,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                                     correctionDate: validData.date,
                                                                     correctionNo: validData.no,
                                                                     correctionQuantity: _item.quantity,
+                                                                    correctionPricePerUnit : _item.pricePerUnit,
                                                                     correctionPriceTotal: _item.priceTotal,
                                                                     correctionRemark: `Koreksi ${validData.priceCorrectionType}`
                                                                 };
