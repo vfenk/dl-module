@@ -115,11 +115,25 @@ module.exports = function (unitPaymentCorrection) {
             text: item.product.name,
             style: ['size07', 'left']
         }, {
-            text: parseFloat(item.pricePerUnit).toLocaleString(locale, locale.currency),
-            style: ['size07', 'right']
+            columns: [{
+                width: '5%',
+                text: currency,
+                style: ['size08']
+            }, {
+                width: '*',
+                text: parseFloat(item.pricePerUnit).toLocaleString(locale, locale.currency),
+                style: ['size07', 'right']
+            }]
         }, {
-            text: parseFloat(item.priceTotal).toLocaleString(locale, locale.currency),
-            style: ['size07', 'right']
+            columns: [{
+                width: '5%',
+                text: currency,
+                style: ['size08']
+            }, {
+                width: '*',
+                text: parseFloat(item.priceTotal).toLocaleString(locale, locale.currency),
+                style: ['size07', 'right']
+            }]
         }, {
             text: item.prNo,
             style: ['size07', 'left']
