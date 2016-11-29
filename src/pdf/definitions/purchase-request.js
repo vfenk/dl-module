@@ -21,12 +21,7 @@ module.exports = function (purchaseRequest) {
                     style: ['size15'],
                     alignment: "center"
                 }, {
-                        text: 'BANARAN, GROGOL, SUKOHARJO 57193',
-                        style: ['size09'],
-                        alignment: "center"
-                    },
-                    {
-                        text: 'No. Telp : (0271) 716888   Fax : (0271) 717818',
+                        text: 'BANARAN, GROGOL, SUKOHARJO',
                         style: ['size09'],
                         alignment: "center"
                     }]
