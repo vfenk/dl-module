@@ -1,7 +1,7 @@
 var Say = require('../../utils/say');
 var global = require('../../global');
 
-module.exports = function(unitPaymentCorrection) {
+module.exports = function (unitPaymentCorrection) {
 
     var items = unitPaymentCorrection.items.map((item) => {
         return {
@@ -37,7 +37,7 @@ module.exports = function(unitPaymentCorrection) {
             columns: [
                 {
                     width: '40%',
-                    text: 'DAN LIRIS',
+                    text: 'PT DAN LIRIS',
                     style: ['size15', 'bold', 'left']
                 }, {
                     width: '60%',
@@ -49,11 +49,7 @@ module.exports = function(unitPaymentCorrection) {
             columns: [
                 {
                     width: '60%',
-                    stack: [
-                        'INDUSTRIAL & TRADING CO.LTD. ',
-                        'Kel. Banaran Kec. Grogol Kab. Sukoharjo',
-                        'Telp. (0271) 714400'
-                    ],
+                    text: 'BANARAN, GROGOL, SUKOHARJO',
                     style: ['size08']
                 }, {
                     width: '*',
@@ -108,7 +104,7 @@ module.exports = function(unitPaymentCorrection) {
         }
     ];
 
-    var tbody = items.map(function(item, index) {
+    var tbody = items.map(function (item, index) {
         return [{
             text: (index + 1).toString() || '',
             style: ['size07', 'center']
@@ -153,7 +149,7 @@ module.exports = function(unitPaymentCorrection) {
 
     var sum = (items.length > 0 ? items : [initialValue])
         .map(item => item.priceTotal)
-        .reduce(function(prev, curr, index, arr) {
+        .reduce(function (prev, curr, index, arr) {
             return prev + curr;
         }, 0);
 
@@ -209,50 +205,82 @@ module.exports = function(unitPaymentCorrection) {
         '\n'];
 
     var terbilang = {
-            text: `Terbilang : ${Say(sum + useIncomeTax)}`,
-            style: ['size09','bold']
+        text: `Terbilang : ${Say(sum + useIncomeTax)}`,
+        style: ['size09', 'bold']
     };
 
-    var footer = ['\n', {
-        text: `Perjanjian Pembayaran : ${moment(unitPaymentCorrection.unitPaymentOrder.dueDate).format(locale.date.format)}`,
-        style: ['size08']
-    }, {
-            columns: [{
-                width: '50%',
-                columns: [{
-                    width: '10%',
-                    text: 'Nota',
-                    style: ['size08']
+    var footer = ['\n', 
+            {
+            columns: [
+                {
+                    width: '50%',
+                    columns: [{
+                        width: '35%',
+                        text: 'Perjanjian Pembayaran',
+                        style: ['size08']
+                    }, {
+                        width: '3%',
+                        text: ':',
+                        style: ['size08']
+                    }, {
+                        width: '*',
+                        text: moment(unitPaymentCorrection.unitPaymentOrder.dueDate).format(locale.date.format),
+                        style: ['size08']
+                    }]
                 }, {
-                    width: '3%',
-                    text: ':',
-                    style: ['size08']
-                }, {
-                    width: '*',
-                    text: `NO ${unitPaymentCorrection.invoiceCorrectionNo} ${moment(unitPaymentCorrection.invoiceCorrectionDate).format(locale.date.format)}`,
-                    style: ['size08']
+                    width: '50%',
+                    columns: [{
+                        width: '35%',
+                        text: '',
+                        style: ['size08']
+                    }, {
+                        width: '3%',
+                        text: '',
+                        style: ['size08']
+                    }, {
+                        width: '*',
+                        text: "",
+                        style: ['size08']
+                    }]
                 }]
             }, {
-                width: '50%',
-                columns: [{
-                    width: '15%',
-                    text: 'Brg Dtg',
-                    style: ['size08']
+            columns: [
+                {
+                    width: '50%',
+                    columns: [{
+                        width: '35%',
+                        text: 'Nota',
+                        style: ['size08']
+                    }, {
+                        width: '3%',
+                        text: ':',
+                        style: ['size08']
+                    }, {
+                        width: '*',
+                        text: `NO ${unitPaymentCorrection.invoiceCorrectionNo} ${moment(unitPaymentCorrection.invoiceCorrectionDate).format(locale.date.format)}`,
+                        style: ['size08']
+                    }]
                 }, {
-                    width: '3%',
-                    text: ':',
-                    style: ['size08']
-                }, {
-                    width: '*',
-                    text: `${moment(sjDate).format(locale.date.format)} `,
-                    style: ['size08']
+                    width: '50%',
+                    columns: [{
+                        width: '35%',
+                        text: 'Brg Dtg',
+                        style: ['size08']
+                    }, {
+                        width: '3%',
+                        text: ':',
+                        style: ['size08']
+                    }, {
+                        width: '*',
+                        text: `${moment(sjDate).format(locale.date.format)} `,
+                        style: ['size08']
+                    }]
                 }]
-            }]
-        }, {
+            }, {
             columns: [{
                 width: '50%',
                 columns: [{
-                    width: '10%',
+                    width: '35%',
                     text: 'Ket',
                     style: ['size08']
                 }, {
@@ -267,7 +295,7 @@ module.exports = function(unitPaymentCorrection) {
             }, {
                 width: '50%',
                 columns: [{
-                    width: '15%',
+                    width: '35%',
                     text: 'NT',
                     style: ['size08']
                 }, {
