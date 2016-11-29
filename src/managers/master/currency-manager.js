@@ -84,7 +84,7 @@ module.exports = class CurrencyManager extends BaseManager {
                         errors["rate"] = i18n.__("Currency.rate.isRequired:%s is required", i18n.__("Currency.rate._:Rate")); //"Rate mata uang Tidak Boleh Kosong";
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 

@@ -101,7 +101,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('unitPaymentOrder does not pass validation', errors));
                     }
                     if (!valid.useVat) {

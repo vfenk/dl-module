@@ -77,7 +77,7 @@ module.exports = class DivisionManager extends BaseManager {
                         errors["name"] = i18n.__("Division.name.isRequired:%s is required", i18n.__("Division.name._:Name")); //"Sub Divisi Tidak Boleh Kosong";
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 

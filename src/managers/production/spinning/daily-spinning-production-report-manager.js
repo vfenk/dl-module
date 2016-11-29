@@ -7,7 +7,7 @@ var DLModels = require('dl-models');
 var map = DLModels.map;
 var DailySpinningProductionReport = DLModels.production.spinning.DailySpinningProductionReport;
 var UnitManager = require('../../master/unit-manager');
-var BaseManager = require('../../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var YarnEquivalentConversionManager = require('../../master/yarn-equivalent-conversion-manager');
 var i18n = require('dl-i18n');
 
@@ -84,7 +84,7 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
