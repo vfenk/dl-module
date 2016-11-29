@@ -103,7 +103,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -124,7 +124,6 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                     item.productId = new ObjectId(_unitReceiptNoteItem.product._id);
                                     item.product = _unitReceiptNoteItem.product;
                                     item.product._id = new ObjectId(_unitReceiptNoteItem.product._id);
-                                    item.pricePerUnit = _unitReceiptNoteItem.pricePerDealUnit;
                                     item.priceTotal = item.quantity * item.pricePerUnit;
                                     item.uom = _unitReceiptNoteItem.deliveredUom;
                                     item.uomId = new ObjectId(_unitReceiptNoteItem.deliveredUom._id);
@@ -203,8 +202,8 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                     var qty = 0, priceTotal = 0, pricePerUnit = 0;
                                     if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentQuantityCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
                                         qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
-                                        priceTotal = qty * _item.pricePerUnit * _item.currency.rate;
-                                        pricePerUnit = _item.pricePerUnit * _item.currency.rate;
+                                        priceTotal = qty * _item.pricePerUnit;
+                                        pricePerUnit = _item.pricePerUnit;
                                         _item.pricePerUnit = pricePerUnit;
                                         _item.quantity = qty;
                                         _item.priceTotal = priceTotal;
@@ -281,6 +280,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                             if (unitPaymentQuantityCorrectionNoteItem.unitReceiptNoteNo == _unitReceiptNoteNo && validData.unitPaymentOrder.no == _unitPaymentOrderNo) {
 
                                                                 var _correction = {};
+                                                                var _qty = 0;
                                                                 _correction.correctionDate = validData.date;
                                                                 _correction.correctionNo = validData.no;
                                                                 _correction.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
@@ -295,8 +295,9 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                             sum += corr.correctionQuantity;
                                                                     }
                                                                     _correction.correctionQuantity = fulfillmentPoItem.unitReceiptNoteDeliveredQuantity - unitPaymentQuantityCorrectionNoteItem.quantity - sum;
+                                                                    _qty = unitPaymentQuantityCorrectionNoteItem.quantity + sum - fulfillmentPoItem.unitReceiptNoteDeliveredQuantity;
                                                                 }
-                                                                _correction.correctionPriceTotal = _correction.correctionQuantity * unitPaymentQuantityCorrectionNoteItem.pricePerUnit * unitPaymentQuantityCorrectionNoteItem.currency.rate;
+                                                                _correction.correctionPriceTotal = _qty * unitPaymentQuantityCorrectionNoteItem.pricePerUnit * unitPaymentQuantityCorrectionNoteItem.currency.rate;
                                                                 fulfillmentPoItem.correction.push(_correction);
                                                                 break;
                                                             }
@@ -323,7 +324,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                     correctionDate: validData.date,
                                                                     correctionNo: validData.no,
                                                                     correctionQuantity: _item.quantity,
-                                                                    correctionPricePerUnit : _item.pricePerUnit,
+                                                                    correctionPricePerUnit: _item.pricePerUnit,
                                                                     correctionPriceTotal: _item.priceTotal,
                                                                     correctionRemark: `Koreksi ${validData.priceCorrectionType}`
                                                                 };
@@ -386,5 +387,47 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
         }
 
         return this.collection.createIndexes([dateIndex, noIndex]);
+    }
+
+    pdfReturNote(id) {
+        return new Promise((resolve, reject) => {
+            this.getSingleById(id)
+                .then(unitPaymentQuantityCorrectionNote => {
+                    var getDefinition = require('../../pdf/definitions/unit-payment-correction-retur-note');
+                    for (var _item of unitPaymentQuantityCorrectionNote.items) {
+                        for (var _poItem of _item.purchaseOrder.items) {
+                            if (_poItem.product._id.toString() === _item.product._id.toString()) {
+                                for (var _fulfillment of _poItem.fulfillments) {
+                                    var qty = 0, priceTotal = 0, pricePerUnit = 0;
+                                    if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentQuantityCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
+                                        qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
+                                        priceTotal = qty * _item.pricePerUnit;
+                                        pricePerUnit = _item.pricePerUnit;
+                                        _item.pricePerUnit = pricePerUnit;
+                                        _item.quantity = qty;
+                                        _item.priceTotal = priceTotal;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    var definition = getDefinition(unitPaymentQuantityCorrectionNote);
+                    var generatePdf = require('../../pdf/pdf-generator');
+                    generatePdf(definition)
+                        .then(binary => {
+                            resolve(binary);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+
+        });
     }
 }
