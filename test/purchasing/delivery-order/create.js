@@ -50,7 +50,7 @@ it('#02. should success when create new data', function (done) {
 it(`#03. should success when delete data`, function (done) {
     deliveryOrderManager.delete(createdData)
         .then(id => {
-            createdId.toString().should.equal(id.toString());
+            id.toString().should.equal(id.toString());
             done();
         })
         .catch(e => {
