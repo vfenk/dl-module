@@ -7,10 +7,10 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Category = DLModels.master.Category;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
-module.exports = class CategoryManager  extends BaseManager  {
+module.exports = class CategoryManager extends BaseManager {
 
     constructor(db, user) {
         super(db, user);
@@ -37,7 +37,7 @@ module.exports = class CategoryManager  extends BaseManager  {
         }
         return query;
     }
-    
+
     _validate(category) {
         var errors = {};
         return new Promise((resolve, reject) => {
@@ -49,8 +49,8 @@ module.exports = class CategoryManager  extends BaseManager  {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        name: valid.name
-                    }]
+                    name: valid.name
+                }]
             });
 
             // 2. begin: Validation.
@@ -64,7 +64,7 @@ module.exports = class CategoryManager  extends BaseManager  {
                         errors["name"] = i18n.__("Category.name.isExists:%s is already exists", i18n.__("Category.name._:Name"));//"Nama Kategori sudah terdaftar";
                     }
 
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
                         var ValidationError = require('../../validation-error');
                         reject(new ValidationError('data does not pass validation', errors));
                     }
@@ -79,7 +79,7 @@ module.exports = class CategoryManager  extends BaseManager  {
         });
     }
 
-     _createIndexes() {
+    _createIndexes() {
         var dateIndex = {
             name: `ix_${map.master.collection.Category}__updatedDate`,
             key: {
@@ -97,5 +97,5 @@ module.exports = class CategoryManager  extends BaseManager  {
 
         return this.collection.createIndexes([dateIndex, codeIndex]);
     }
-   
+
 }

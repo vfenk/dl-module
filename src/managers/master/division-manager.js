@@ -7,7 +7,7 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Division = DLModels.master.Division;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 module.exports = class DivisionManager extends BaseManager {
@@ -90,7 +90,7 @@ module.exports = class DivisionManager extends BaseManager {
                 });
         });
     }
-    
+
     _createIndexes() {
         var dateIndex = {
             name: `ix_${map.master.collection.Unit}__updatedDate`,

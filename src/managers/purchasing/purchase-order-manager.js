@@ -9,7 +9,7 @@ var PurchaseOrder = DLModels.purchasing.PurchaseOrder;
 var PurchaseOrderItem = DLModels.purchasing.PurchaseOrderItem;
 var PurchaseRequestManager = require('./purchase-request-manager');
 var generateCode = require('../../utils/code-generator');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 module.exports = class PurchaseOrderManager extends BaseManager {

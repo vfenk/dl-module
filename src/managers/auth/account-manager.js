@@ -5,7 +5,7 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Account = DLModels.auth.Account;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var sha1 = require("sha1");
 
 module.exports = class AccountManager extends BaseManager {

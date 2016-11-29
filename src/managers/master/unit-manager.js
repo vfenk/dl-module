@@ -7,7 +7,7 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Unit = DLModels.master.Unit;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var DivisionManager = require('./division-manager');
 
@@ -63,7 +63,7 @@ module.exports = class UnitManager extends BaseManager {
                     code: valid.code
                 }]
             });
-            var getDivision = valid.divisionId && (valid.divisionId||'').toString().trim().length > 0 ? this.divisionManager.getSingleByIdOrDefault(valid.divisionId) : Promise.resolve(null);
+            var getDivision = valid.divisionId && (valid.divisionId || '').toString().trim().length > 0 ? this.divisionManager.getSingleByIdOrDefault(valid.divisionId) : Promise.resolve(null);
 
             // 2. begin: Validation.
             Promise.all([getUnitPromise, getDivision])

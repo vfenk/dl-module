@@ -2,7 +2,7 @@
 
 // external deps 
 var ObjectId = require("mongodb").ObjectId;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 
 // internal deps 
 require('mongodb-toolkit');

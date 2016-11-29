@@ -13,7 +13,7 @@ var PurchaseOrderManager = require('./purchase-order-manager');
 var CurrencyManager = require('../master/currency-manager');
 var VatManager = require('../master/vat-manager');
 var SupplierManager = require('../master/supplier-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 var i18n = require('dl-i18n');
 
