@@ -58,14 +58,14 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                     else if (!valid.unitPaymentOrder)
                         errors["unitPaymentOrder"] = i18n.__("UnitPaymentQuantityCorrectionNote.unitPaymentOrder.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.unitPaymentOrder._:Unit Payment Order"));
 
-                    if (!valid.invoiceCorrectionNo || valid.invoiceCorrectionNo == '')
-                        errors["invoiceCorrectionNo"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo._:Invoice Correction No"));
+                    // if (!valid.invoiceCorrectionNo || valid.invoiceCorrectionNo == '')
+                    //     errors["invoiceCorrectionNo"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo._:Invoice Correction No"));
 
                     if (!valid.releaseOrderNoteNo || valid.releaseOrderNoteNo == '')
                         errors["releaseOrderNoteNo"] = i18n.__("UnitPaymentQuantityCorrectionNote.releaseOrderNoteNo.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.releaseOrderNoteNo._:Release Order Note No"));
 
-                    if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
-                        errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
+                    // if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
+                    //     errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
                     if (valid.items) {
                         if (valid.items.length > 0) {

@@ -60,11 +60,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                     else if (!valid.unitPaymentOrder)
                         errors["unitPaymentOrder"] = i18n.__("UnitPaymentPriceCorrectionNote.unitPaymentOrder.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.unitPaymentOrder._:Unit Payment Order"));
 
-                    if (!valid.invoiceCorrectionNo || valid.invoiceCorrectionNo == '')
-                        errors["invoiceCorrectionNo"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionNo.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionNo._:Invoice Correction No"));
+                    // if (!valid.invoiceCorrectionNo || valid.invoiceCorrectionNo == '')
+                        // errors["invoiceCorrectionNo"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionNo.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionNo._:Invoice Correction No"));
 
-                    if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
-                        errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
+                    // if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
+                    //     errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
                     if (valid.items) {
                         if (valid.items.length > 0) {
