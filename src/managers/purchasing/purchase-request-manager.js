@@ -31,9 +31,14 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             var valid = purchaseRequest;
 
             var getPurchaseRequestPromise = this.collection.singleOrDefault({
-                _id: {
-                    '$ne': new ObjectId(valid._id)
-                }
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    },
+                    _deleted: false
+                }, {
+                    "no": valid.no
+                }]
             });
 
             var getUnit = valid.unitId && valid.unitId.toString().trim() != '' ? this.unitManager.getSingleByIdOrDefault(valid.unitId) : Promise.resolve(null);
@@ -47,12 +52,18 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
             Promise.all([getPurchaseRequestPromise, getUnit, getCategory, getBudget].concat(getProduct))
                 .then(results => {
-                    var _module = results[0];
+                    var _purchaseRequest = results[0];
                     var _unit = results[1];
                     var _category = results[2];
                     var _budget = results[3];
                     var _products = results.slice(4, results.length);
                     var now = new Date();
+
+                    if (!valid.no || valid.no == '')
+                        errors["no"] = i18n.__("PurchaseRequest.no.isRequired:%s is required", i18n.__("PurchaseRequest.no._:No"));//"Nomor PR tidak boleh kosong";
+                    else if (_purchaseRequest)
+                        errors["no"] = i18n.__("PurchaseRequest.no.isExists:%s is already exists", i18n.__("PurchaseRequest.no._:No"));//"Nomor PR sudah terdaftar";
+
 
                     if (!valid.date || valid.date == '' || valid.date == "undefined")
                         errors["date"] = i18n.__("PurchaseRequest.date.isRequired:%s is required", i18n.__("PurchaseRequest.date._:Date")); //"Tanggal PR tidak boleh kosong";
@@ -112,7 +123,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -155,8 +166,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
     _getQuery(paging) {
         var deletedFilter = {
-                _deleted: false
-            },
+            _deleted: false
+        },
             keywordFilter = {};
 
 
