@@ -1,6 +1,6 @@
 var helper = require("../helper");
 var ThreadSpecificationManager = require("../../src/managers/master/thread-specification-manager");
-var ProductManager = require("../../src/managers/master/Product-manager");
+var ProductManager = require("../../src/managers/master/product-manager");
 var UomUtil = require('../data-util/master/uom-data-util');
 var Product = require('dl-models').master.Product;
 var validator = require('dl-models').validator.master;
