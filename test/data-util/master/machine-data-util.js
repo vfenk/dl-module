@@ -1,6 +1,7 @@
 "use strict";
 var _getSert = require("./getsert");
 var unit = require("./unit-data-util");
+var generateCode = require("../../../src/utils/code-generator");
 
 class MachineDataUtil {
     getSert(input) {
@@ -17,8 +18,7 @@ class MachineDataUtil {
             .then(unit => {
 
                 var now = new Date();
-                var stamp = now / 1000 | 0;
-                var code = stamp.toString(36);
+                var code = generateCode();
 
                 var data = {
                     name: `name [${code}]`,

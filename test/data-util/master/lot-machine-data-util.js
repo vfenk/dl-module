@@ -2,6 +2,7 @@
 var _getSert = require("./getsert");
 var product = require("./product-data-util");
 var machine = require("./machine-data-util");
+var generateCode = require("../../../src/utils/code-generator");
 
 class LotMachineDataUtil {
     getSert(input) {
@@ -21,9 +22,7 @@ class LotMachineDataUtil {
                 var product = results[0];
                 var machine = results[1];
 
-                var now = new Date();
-                var stamp = now / 1000 | 0;
-                var code = stamp.toString(36);
+                var code = generateCode();
 
                 var data = {
                     productId: product._id,

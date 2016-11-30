@@ -1,5 +1,6 @@
 "use strict";
 var _getSert = require("./getsert");
+var generateCode = require("../../../src/utils/code-generator");
 
 class CurrencyDataUtil {
     getSert(input) {
@@ -15,9 +16,7 @@ class CurrencyDataUtil {
         var Model = require("dl-models").master.Currency;
         var data = new Model();
 
-        var now = new Date();
-        var stamp = now / 1000 | 0;
-        var code = stamp.toString(36);
+        var code = generateCode();
 
         data.code = code;
         data.symbol = `symbol[${code}]`;

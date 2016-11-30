@@ -1,6 +1,7 @@
 "use strict";
 var _getSert = require("./getsert");
 var uom = require("./uom-data-util");
+var generateCode = require("../../../src/utils/code-generator");
 
 class ProductDataUtil {
     getSert(input) {
@@ -15,9 +16,7 @@ class ProductDataUtil {
     getNewData() {
         return uom.getTestData()
             .then((uom) => {
-                var now = new Date();
-                var stamp = now / 1000 | 0;
-                var code = stamp.toString(36);
+                var code = generateCode();
 
                 var data = {
                     code: code,
