@@ -1,7 +1,7 @@
 var say = require('../../utils/say');
 var global = require('../../global');
 
-module.exports = function(unitPaymentOrder) {
+module.exports = function (unitPaymentOrder) {
 
     var items = unitPaymentOrder.items.map(unitPaymentOrderItem => {
         return unitPaymentOrderItem.unitReceiptNote.items.map(receiptNoteItem => {
@@ -38,7 +38,7 @@ module.exports = function(unitPaymentOrder) {
 
     var sum = (items.length > 0 ? items : [initialValue])
         .map(item => item.price * item.quantity)
-        .reduce(function(prev, curr, index, arr) {
+        .reduce(function (prev, curr, index, arr) {
             return prev + curr;
         }, 0);
 
@@ -168,7 +168,7 @@ module.exports = function(unitPaymentOrder) {
         }
     ];
 
-    var tbody = items.map(function(item, index) {
+    var tbody = items.map(function (item, index) {
         return [{
             text: (index + 1).toString() || '',
             style: ['size07', 'center']
@@ -232,36 +232,36 @@ module.exports = function(unitPaymentOrder) {
                         {
                             columns: [{
                                 width: '50%',
-                                text: `PPh ${unitPaymentOrder.vat.name} ${unitPaymentOrder.vatRate} %`
+                                text: unitPaymentOrder.useVat ? `PPh ${unitPaymentOrder.vat.name} ${unitPaymentOrder.vatRate} %` : ""
                             },
                             {
                                 width: '5%',
-                                text: ':'
+                                text: unitPaymentOrder.useVat ? ":" : ""
                             },
                             {
                                 width: '10%',
-                                text: unitPaymentOrder.useVat ? currency : '-'
+                                text: unitPaymentOrder.useVat ? currency : ""
                             },
                             {
                                 width: '*',
-                                text: unitPaymentOrder.useVat ? parseFloat(vat).toLocaleString(locale, locale.currencyNotaItern) : ''
+                                text: unitPaymentOrder.useVat ? parseFloat(vat).toLocaleString(locale, locale.currencyNotaItern) : ""
                             }]
                         }, {
                             columns: [{
                                 width: '50%',
-                                text: "Jumlah dibayar Ke Supplier"
+                                text: unitPaymentOrder.useVat ? "Jumlah dibayar Ke Supplier" : ""
                             },
                             {
                                 width: '5%',
-                                text: ':'
+                                text: unitPaymentOrder.useVat ? ":" : ""
                             },
                             {
                                 width: '10%',
-                                text:  unitPaymentOrder.useVat ? currency : '-'
+                                text: unitPaymentOrder.useVat ? currency : ""
                             },
                             {
                                 width: '*',
-                                text: unitPaymentOrder.useVat ? parseFloat((sum + incomeTax) - vat).toLocaleString(locale, locale.currencyNotaItern) : ''
+                                text: unitPaymentOrder.useVat ? parseFloat((sum + incomeTax) - vat).toLocaleString(locale, locale.currencyNotaItern) : ""
                             }]
                         }]
                 },
