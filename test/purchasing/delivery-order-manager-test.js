@@ -82,31 +82,7 @@ it(`#05. should success when get updated data with id`, function (done) {
         })
 });
 
-it(`#06. should success when posting created data`, function (done) {
-    deliveryOrderManager.post(createdData)
-        .then(id => {
-            createdId.toString().should.equal(id.toString());
-            done();
-        })
-        .catch(e => {
-            done(e);
-        });
-});
-
-it(`#07. should isPosted=true`, function (done) {
-    deliveryOrderManager.getSingleByQuery({ _id: createdId })
-        .then(data => {
-            data.isPosted.should.be.Boolean();
-            data.isPosted.should.equal(true);
-            createdData = data;
-            done();
-        })
-        .catch(e => {
-            done(e);
-        })
-});
-
-it(`#08. should success when delete data`, function (done) {
+it(`#06. should success when delete data`, function (done) {
     deliveryOrderManager.delete(createdData)
         .then(id => {
             createdId.toString().should.equal(id.toString());
@@ -117,7 +93,7 @@ it(`#08. should success when delete data`, function (done) {
         });
 });
 
-it('#09. should error when create new data with same code', function (done) {
+it('#07. should error when create new data with same code', function (done) {
     var data = Object.assign({}, createdData);
     delete data._id;
     deliveryOrderManager.create(data)
