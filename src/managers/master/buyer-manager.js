@@ -5,7 +5,7 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Buyer = DLModels.master.Buyer;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 module.exports = class BuyerManager extends BaseManager {
@@ -55,12 +55,12 @@ module.exports = class BuyerManager extends BaseManager {
                             '$ne': new ObjectId(valid._id)
                         }
                     }, {
-                            code: valid.code
-                        }]
+                        code: valid.code
+                    }]
                 },
                 {
-                    _deleted:false
-                } ]
+                    _deleted: false
+                }]
             });
             // 2. begin: Validation.
             Promise.all([getBuyerPromise])
@@ -83,8 +83,8 @@ module.exports = class BuyerManager extends BaseManager {
                         errors["country"] = i18n.__("Buyer.country.isRequired:%s is required", i18n.__("Buyer.country._:Country"));// "Silakan pilih salah satu negara";
 
                     // 2c. begin: check if data has any error, reject if it has.
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -98,7 +98,7 @@ module.exports = class BuyerManager extends BaseManager {
         });
     }
 
-     _createIndexes() {
+    _createIndexes() {
         var dateIndex = {
             name: `ix_${map.master.collection.Buyer}__updatedDate`,
             key: {

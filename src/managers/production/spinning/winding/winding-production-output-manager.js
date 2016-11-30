@@ -11,7 +11,7 @@ var MachineManager = require('../../../master/machine-manager');
 var UnitManager = require('../../../master/unit-manager');
 var ThreadSpecificationManager = require('../../../master/thread-specification-manager');
 var LotMachineManager = require('../../../master/lot-machine-manager');
-var BaseManager = require('../../../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var DailySpinningProductionReportManager = require('../daily-spinning-production-report-manager');
 
@@ -222,7 +222,7 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 }
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
-                    var ValidationError = require('../../../../validation-error');
+                    var ValidationError = require('module-toolkit').ValidationError ;
                     reject(new ValidationError('data does not pass validation', errors));
                 }
                 valid.unitId=new ObjectId(_unit._id);
