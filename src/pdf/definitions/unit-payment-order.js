@@ -42,8 +42,8 @@ module.exports = function(unitPaymentOrder) {
             return prev + curr;
         }, 0);
 
-    var incomeTax = unitPaymentOrder.incomeTaxNo != '' ? sum * 0.1 : 0;
-    var vat = unitPaymentOrder.vatNo != '' ? sum * (unitPaymentOrder.vatRate / 100) : 0;
+    var incomeTax = unitPaymentOrder.useIncomeTax ? sum * 0.1 : 0;
+    var vat = unitPaymentOrder.useVat ? sum * (unitPaymentOrder.vatRate / 100) : 0;
 
     var header = [{
         columns: [
@@ -62,7 +62,7 @@ module.exports = function(unitPaymentOrder) {
                     text: 'NOTA KREDIT',
                     style: ['size20', 'bold']
                 }, {
-                    text: unitPaymentOrder.paymentMethod === 'CASH' ? 'CASH' : 'DP',
+                    text: unitPaymentOrder.paymentMethod === 'KREDIT' ? '' : unitPaymentOrder.paymentMethod,
                     style: ['size08']
                 }]
             }, {
@@ -257,11 +257,11 @@ module.exports = function(unitPaymentOrder) {
                             },
                             {
                                 width: '10%',
-                                text: currency
+                                text:  unitPaymentOrder.useVat ? currency : '-'
                             },
                             {
                                 width: '*',
-                                text: parseFloat((sum + incomeTax) - vat).toLocaleString(locale, locale.currencyNotaItern)
+                                text: unitPaymentOrder.useVat ? parseFloat((sum + incomeTax) - vat).toLocaleString(locale, locale.currencyNotaItern) : ''
                             }]
                         }]
                 },
