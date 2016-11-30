@@ -4,9 +4,9 @@ var ObjectId = require("mongodb").ObjectId;
 require('mongodb-toolkit');
 var DLModels = require('dl-models');
 var map = DLModels.map;
-var ThreadSpecification= DLModels.master.ThreadSpecification;
+var ThreadSpecification = DLModels.master.ThreadSpecification;
 var ProductManager = require('../master/product-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 module.exports = class ThreadSpecificationManager extends BaseManager {
@@ -58,41 +58,41 @@ module.exports = class ThreadSpecificationManager extends BaseManager {
                             '$ne': new ObjectId(valid._id)
                         }
                     }, {
-                            productId: new ObjectId(valid.productId)
-                        }]
+                        productId: new ObjectId(valid.productId)
+                    }]
                 },
                 {
-                    _deleted:false
-                } ]
+                    _deleted: false
+                }]
             });
 
             var getProduct = valid.productId && ObjectId.isValid(valid.productId) ? this.productManager.getSingleByIdOrDefault(valid.productId) : Promise.resolve(null);
-            
-             Promise.all([getThreadSpecificationPromise, getProduct])
-             .then(results =>{
-                var _module = results[0];
-                var _product = results[1];
-                var now = new Date();
 
-                if (!_product)
-                    errors["product"] = i18n.__("ThreadSpecification.product.isRequired:%s is not exists", i18n.__("ThreadSpecification.product._:Product")); 
-                else if (!valid.productId)
-                    errors["product"] = i18n.__("ThreadSpecification.product.isRequired:%s is required", i18n.__("ThreadSpecification.product._:Product"));
-                else if (valid.product) {
-                    if (!valid.product._id)
+            Promise.all([getThreadSpecificationPromise, getProduct])
+                .then(results => {
+                    var _module = results[0];
+                    var _product = results[1];
+                    var now = new Date();
+
+                    if (!_product)
+                        errors["product"] = i18n.__("ThreadSpecification.product.isRequired:%s is not exists", i18n.__("ThreadSpecification.product._:Product"));
+                    else if (!valid.productId)
                         errors["product"] = i18n.__("ThreadSpecification.product.isRequired:%s is required", i18n.__("ThreadSpecification.product._:Product"));
-                }
+                    else if (valid.product) {
+                        if (!valid.product._id)
+                            errors["product"] = i18n.__("ThreadSpecification.product.isRequired:%s is required", i18n.__("ThreadSpecification.product._:Product"));
+                    }
 
-                if (Object.getOwnPropertyNames(errors).length > 0) {
-                    var ValidationError = require('../../validation-error');
-                    reject(new ValidationError('data does not pass validation', errors));
-                }
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
+                        var ValidationError = require('module-toolkit').ValidationError ;
+                        reject(new ValidationError('data does not pass validation', errors));
+                    }
 
-                valid = new ThreadSpecification(threadSpecification);
-                valid.stamp(this.user.username, 'manager');
-                resolve(valid);
-             })
-             .catch(e => {
+                    valid = new ThreadSpecification(threadSpecification);
+                    valid.stamp(this.user.username, 'manager');
+                    resolve(valid);
+                })
+                .catch(e => {
                     reject(e);
                 })
         });

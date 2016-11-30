@@ -10,7 +10,7 @@ var ProductManager = require('../../../master/product-manager');
 var MachineManager = require('../../../master/machine-manager');
 var UsterManager = require('../../../master/uster-manager');
 var UnitManager = require('../../../master/unit-manager');
-var BaseManager = require('../../../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 
@@ -142,7 +142,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
 
                     // 2c. begin: check if data has any error, reject if it has.
                      if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
                     if(!valid.thin) valid.thin = 0;

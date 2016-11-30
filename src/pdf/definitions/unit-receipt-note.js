@@ -25,7 +25,7 @@ module.exports = function(unitReceiptNote) {
                         text: 'PT DAN LIRIS',
                         style: ['size15', 'bold']
                     }, {
-                        text: 'BANARAN SUKOHARJO',
+                        text: 'BANARAN, GROGOL, SUKOHARJO',
                         style: ['size09']
                     }]
                 }]

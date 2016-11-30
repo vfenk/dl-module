@@ -1,15 +1,15 @@
 var helper = require("../../helper");
-var Budget = require("../../data-util/master/budget-data-util");
-var BudgetManager = require("../../../src/managers/master/budget-manager");
+var Buyer = require("../../data-util/master/buyer-data-util");
+var BuyerManager = require("../../../src/managers/master/buyer-manager");
 var instanceManager = null;
-var validate = require("dl-models").validator.master.budget;
+var validate = require("dl-models").validator.master.buyer;
 
 var should = require("should");
 
 before("#00. connect db", function(done) {
     helper.getDb()
         .then((db) => {
-            instanceManager = new BudgetManager(db, {
+            instanceManager = new BuyerManager(db, {
                 username: "unit-test"
             });
             done();
@@ -19,7 +19,7 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should error when create new budget with empty data", function(done) {
+it("#01. should error when create new buyer with empty data", function(done) {
     instanceManager.create({})
         .then((id) => {
             done("Should not be able to create data with empty data");
@@ -37,7 +37,7 @@ it("#01. should error when create new budget with empty data", function(done) {
 
 var createdId;
 it("#02. should success when create new data", function(done) {
-    Budget.getNewData()
+    Buyer.getNewData()
         .then((data) => instanceManager.create(data))
         .then((id) => {
             id.should.be.Object();

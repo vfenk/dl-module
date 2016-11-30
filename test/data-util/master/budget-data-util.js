@@ -2,9 +2,9 @@
 var _getSert = require("./getsert");
 
 class BudgetDataUtil {
-    getSert(budget) {
-        var BudgetManager = require("../../../src/managers/master/budget-manager");
-        return Promise.resolve(_getSert(budget, BudgetManager, (data) => {
+    getSert(input) {
+        var ManagerType = require("../../../src/managers/master/budget-manager");
+        return Promise.resolve(_getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
@@ -12,23 +12,23 @@ class BudgetDataUtil {
     }
 
     getNewData() {
-        var Budget = require('dl-models').master.Budget;
-        var budget = new Budget();
+        var Model = require('dl-models').master.Budget;
+        var data = new Model();
 
         var now = new Date();
         var stamp = now / 1000 | 0;
         var code = stamp.toString(36);
 
-        budget.code = code;
-        budget.name = `name[${code}]`;
+        data.code = code;
+        data.name = `name[${code}]`;
 
-        return Promise.resolve(budget);
+        return Promise.resolve(data);
     }
 
     getTestData() {
         var testData = {
-            code: "UT/Budget/01",
-            name: "budget 01"
+            code: "UT/BUDGET/01",
+            name: "data 01"
         };
         return Promise.resolve(this.getSert(testData));
     }

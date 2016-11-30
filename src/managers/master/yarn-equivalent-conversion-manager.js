@@ -7,7 +7,7 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var YarnEquivalentConversion = DLModels.master.YarnEquivalentConversion;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 module.exports = class YarnEquivalentConversionManager extends BaseManager {
@@ -27,7 +27,7 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-             var filterNe = {
+            var filterNe = {
                 'ne': {
                     '$regex': regex
                 }
@@ -46,7 +46,7 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
         }
         return query;
     }
-    
+
     _validate(yarnEquivalentConversion) {
         var errors = {};
         return new Promise((resolve, reject) => {
@@ -58,9 +58,9 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                        ne: valid.ne,
-                        conversionRatio: valid.conversionRatio
-                    }]
+                    ne: valid.ne,
+                    conversionRatio: valid.conversionRatio
+                }]
             });
 
             // 2. begin: Validation.
@@ -69,14 +69,14 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
                     var _yarnEquivalentConversion = results[0];
 
                     if (!valid.ne || valid.ne == '')
-                        errors["ne"] =  i18n.__("YarnEquivalentConversion.ne.isRequired:%s is required", i18n.__("YarnEquivalentConversion.ne._:Ne"));
-                    
-                   if (!valid.conversionRatio || valid.conversionRatio == 0)
-                        errors["conversionRatio"] = i18n.__("YarnEquivalentConversion.conversionRatio.isRequired:%s is required", i18n.__("YarnEquivalentConversion.conversionRatio._:ConversionRatio"));
-                    
+                        errors["ne"] = i18n.__("YarnEquivalentConversion.ne.isRequired:%s is required", i18n.__("YarnEquivalentConversion.ne._:Ne"));
 
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                    if (!valid.conversionRatio || valid.conversionRatio == 0)
+                        errors["conversionRatio"] = i18n.__("YarnEquivalentConversion.conversionRatio.isRequired:%s is required", i18n.__("YarnEquivalentConversion.conversionRatio._:ConversionRatio"));
+
+
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -88,7 +88,7 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
                     reject(e);
                 })
         });
-    } 
+    }
     _createIndexes() {
         var dateIndex = {
             name: `ix_${map.master.collection.YarnEquivalentConversion}__updatedDate`,
@@ -104,7 +104,7 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
                 conversionRatio: 1
             },
             unique: true
-        } 
+        }
 
         return this.collection.createIndexes([dateIndex, neRatioIndex]);
     }

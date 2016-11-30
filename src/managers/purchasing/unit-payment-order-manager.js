@@ -8,7 +8,7 @@ var i18n = require('dl-i18n');
 var UnitPaymentOrder = DLModels.purchasing.UnitPaymentOrder;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitReceiptNoteManager = require('./unit-receipt-note-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 
 module.exports = class UnitPaymentOrderManager extends BaseManager {
@@ -101,7 +101,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('unitPaymentOrder does not pass validation', errors));
                     }
                     if (!valid.useVat) {

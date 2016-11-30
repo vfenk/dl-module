@@ -9,7 +9,7 @@ var PurchaseOrder = DLModels.purchasing.PurchaseOrder;
 var PurchaseOrderItem = DLModels.purchasing.PurchaseOrderItem;
 var PurchaseRequestManager = require('./purchase-request-manager');
 var generateCode = require('../../utils/code-generator');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 module.exports = class PurchaseOrderManager extends BaseManager {
@@ -26,15 +26,19 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = purchaseOrder;
             valid._id = valid._id || new ObjectId();
-
             var getPurchaseOrderPromise = this.collection.firstOrDefault({
-                "$and": [{
-                    _deleted: false
-                }, {
-                    "purchaseRequestId": new ObjectId(valid.purchaseRequestId)
-                }]
-            });
+                    "$and": [{
+                        _deleted: false
+                    }, {
+                        "purchaseRequestId": new ObjectId(valid.purchaseRequestId)
+                    }, {
+                        _id: {
+                            '$ne': new ObjectId(valid._id)
+                        }
+                    }]
+                });
 
+            valid._id = valid._id || new ObjectId();
             var getPurchaseRequest = ObjectId.isValid(valid.purchaseRequestId) ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
 
             Promise.all([getPurchaseOrderPromise, getPurchaseRequest])
@@ -51,7 +55,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         if (_purchaseOrder._id.toString() != valid.sourcePurchaseOrder._id.toString() && _purchaseOrder._id.toString() != valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
                             errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
                     } else if (valid.sourcePurchaseOrder == null) {
-                        if (_purchaseOrder._id.toString() != valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
+                        if (_purchaseOrder._id.toString() === valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
                             errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
                     }
                     if (valid.items.length > 0) {
@@ -95,7 +99,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -477,7 +481,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function(err, result) {
+                    .toArray(function (err, result) {
                         assert.equal(err, null);
                         console.log(result);
                         resolve(result);
@@ -508,7 +512,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function(err, result) {
+                    .toArray(function (err, result) {
                         assert.equal(err, null);
                         console.log(result);
                         resolve(result);
@@ -552,7 +556,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function(err, result) {
+                        .toArray(function (err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -591,7 +595,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function(err, result) {
+                        .toArray(function (err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -624,7 +628,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function(err, result) {
+                        .toArray(function (err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -656,7 +660,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function(err, result) {
+                        .toArray(function (err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -702,7 +706,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function(err, result) {
+                    .toArray(function (err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
@@ -732,7 +736,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function(err, result) {
+                    .toArray(function (err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });

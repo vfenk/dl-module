@@ -13,7 +13,7 @@ var PurchaseOrderManager = require('./purchase-order-manager');
 var CurrencyManager = require('../master/currency-manager');
 var VatManager = require('../master/vat-manager');
 var SupplierManager = require('../master/supplier-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 var i18n = require('dl-i18n');
 
@@ -324,7 +324,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(purchaseOrderExternalError).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data podl does not pass validation', purchaseOrderExternalError));
                     }
 

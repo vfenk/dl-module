@@ -10,7 +10,7 @@ var PurchaseOrderManager = require('./purchase-order-manager');
 var DeliveryOrderManager = require('./delivery-order-manager');
 var UnitManager = require('../master/unit-manager');
 var SupplierManager = require('../master/supplier-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 
 module.exports = class UnitReceiptNoteManager extends BaseManager {
@@ -123,7 +123,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
