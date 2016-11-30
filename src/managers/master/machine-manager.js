@@ -6,7 +6,7 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Machine = DLModels.master.Machine;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var CodeGenerator = require('../../utils/code-generator');
 var UnitManager = require('./unit-manager');
@@ -41,7 +41,7 @@ module.exports = class MachineManager extends BaseManager {
             };
         }
 
-        query = {'$and' : [deletedFilter, paging.filter, keywordFilter]};
+        query = { '$and': [deletedFilter, paging.filter, keywordFilter] };
         return query;
     }
 
@@ -52,13 +52,13 @@ module.exports = class MachineManager extends BaseManager {
             // 1. begin: Declare promises.
             var getMachinePromise = this.collection.singleOrDefault({
                 "$and": [{
-                        _id: {
-                            '$ne': new ObjectId(valid._id)
-                        }
-                    }, {
-                        name: valid.name
-                    }, {
-                        _deleted:false
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                    name: valid.name
+                }, {
+                    _deleted: false
                 }]
             });
             var getUnit = valid.unit && valid.unit._id ? this.unitManager.getSingleByIdOrDefault(valid.unit._id) : Promise.resolve(null);
@@ -67,29 +67,29 @@ module.exports = class MachineManager extends BaseManager {
                 .then(results => {
                     var _machine = results[0];
                     var _unit = results[1];
-                    if(!valid.code)
+                    if (!valid.code)
                         valid.code = CodeGenerator();
-                    
+
                     if (!valid.name || valid.name == '')
                         errors["name"] = i18n.__("Machine.name.isExists:%s is required", i18n.__("Machine.name._:Name")); //"Nama harus diisi";
                     else if (_machine) {
                         errors["name"] = i18n.__("Machine.name.isExists:%s is already exists", i18n.__("Machine.name._:Name")); //"Nama sudah ada";
                     }
-                    if(!_unit)
+                    if (!_unit)
                         errors["unit"] = i18n.__("Machine.unit.isExists:%s is not exists", i18n.__("Machine.unit._:Unit")); //"Unit tidak ada";
 
                     // 2c. begin: check if data has any error, reject if it has.
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
-                    if(_unit){
+                    if (_unit) {
                         valid.unit = _unit;
                         valid.unitId = new ObjectId(_unit._id);
                     }
 
-                    if(!valid.stamp)
+                    if (!valid.stamp)
                         valid = new Machine(valid);
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);
@@ -99,7 +99,7 @@ module.exports = class MachineManager extends BaseManager {
                 })
         });
     }
-     _createIndexes() {
+    _createIndexes() {
         var dateIndex = {
             name: `ix_${map.master.collection.Machine}__updatedDate`,
             key: {
