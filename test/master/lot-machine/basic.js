@@ -1,15 +1,15 @@
 var helper = require("../../helper");
-var Buyer = require("../../data-util/master/buyer-data-util");
-var BuyerManager = require("../../../src/managers/master/buyer-manager");
+var LotMachine = require("../../data-util/master/lot-machine-data-util");
+var LotMachineManager = require("../../../src/managers/master/lot-machine-manager");
 var instanceManager = null;
-var validate = require("dl-models").validator.master.buyer;
+var validate = require("dl-models").validator.master.lotMachine;
 
 var should = require("should");
 
 before("#00. connect db", function(done) {
     helper.getDb()
         .then((db) => {
-            instanceManager = new BuyerManager(db, {
+            instanceManager = new LotMachineManager(db, {
                 username: "unit-test"
             });
             done();
@@ -19,17 +19,16 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should error when create new buyer with empty data", function(done) {
+it("#01. should error when create new lot-machine with empty data", function(done) {
     instanceManager.create({})
         .then((id) => {
             done("Should not be able to create data with empty data");
         })
         .catch((e) => {
             try {
-                e.errors.should.have.property("code");
-                e.errors.should.have.property("name");
-                e.errors.should.have.property("tempo");
-                e.errors.should.have.property("country");
+                e.errors.should.have.property("product");
+                e.errors.should.have.property("machine");
+                e.errors.should.have.property("lot");
                 done();
             }
             catch (ex) {
@@ -40,8 +39,10 @@ it("#01. should error when create new buyer with empty data", function(done) {
 
 var createdId;
 it("#02. should success when create new data", function(done) {
-    Buyer.getNewData()
-        .then((data) => instanceManager.create(data))
+    LotMachine.getNewData()
+        .then((data) => {
+            return instanceManager.create(data);
+        })
         .then((id) => {
             id.should.be.Object();
             createdId = id;
@@ -66,17 +67,18 @@ it(`#03. should success when get created data with id`, function(done) {
         });
 });
 
-it("#04. should error when create new data with same code", function(done) {
+it("#04. should error when create new data with same product and machine", function(done) {
     var data = Object.assign({}, createdData);
     delete data._id;
 
     instanceManager.create(data)
         .then((id) => {
-            done("Should not be able to create data with same code");
+            done("Should not be able to create data with same product and machine");
         })
         .catch((e) => {
             try {
-                e.errors.should.have.property("code");
+                e.errors.should.have.property("product");
+                e.errors.should.have.property("machine");
                 done();
             }
             catch (ex) {
@@ -87,7 +89,7 @@ it("#04. should error when create new data with same code", function(done) {
 
 it(`#05. should success when update created data`, function(done) {
 
-    createdData.name += "[updated]";
+    createdData.lot += "[updated]";
     instanceManager.update(createdData)
         .then((id) => {
             createdId.toString().should.equal(id.toString());
@@ -102,7 +104,7 @@ it(`#06. should success when get updated data with id`, function(done) {
     instanceManager.getSingleById(createdId)
         .then((data) => {
             validate(data);
-            data.name.should.equal(createdData.name);
+            data.lot.should.equal(createdData.lot);
             done();
         })
         .catch((e) => {
@@ -110,22 +112,26 @@ it(`#06. should success when get updated data with id`, function(done) {
         });
 });
 
-it("#07. should error when update new data with same code", function(done) {
+
+it("#07. should error when update new data with same product and machine", function(done) {
     var newDataId;
-    Buyer.getNewData()
+    LotMachine.getNewData()
         .then((data) => instanceManager.create(data))
         .then((newId) => instanceManager.getSingleById(newId))
         .then((newData) => {
             newDataId = newData._id;
-            newData.code = createdData.code;
+            newData.productId = createdData.productId;
+            newData.machineId = createdData.machineId;
+            newData.lot = createdData.lot;
             return instanceManager.update(newData);
         })
         .then((id) => {
-            done("Should not be able to create data with same code");
+            done("Should not be able to create data with same product and machine");
         })
         .catch((e) => {
             try {
-                e.errors.should.have.property("code");
+                e.errors.should.have.property("product");
+                e.errors.should.have.property("machine");
                 instanceManager.destroy(newDataId)
                     .then(() => done());
             }

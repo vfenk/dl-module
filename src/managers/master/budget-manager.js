@@ -49,13 +49,10 @@ module.exports = class BudgetManager extends BaseManager {
             var valid = budget;
             // 1. begin: Declare promises.
             var getbudgetPromise = this.collection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                    code: valid.code
-                }]
+                _id: {
+                    '$ne': new ObjectId(valid._id)
+                },
+                code: valid.code
             });
 
             // 2. begin: Validation.

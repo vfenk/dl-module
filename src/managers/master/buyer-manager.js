@@ -46,17 +46,10 @@ module.exports = class BuyerManager extends BaseManager {
             var valid = buyer;
             // 1. begin: Declare promises.
             var getBuyerPromise = this.collection.singleOrDefault({
-                "$and": [{
-                    "$and": [{
-                        _id: {
-                            '$ne': new ObjectId(valid._id)
-                        }
-                    }, {
-                        code: valid.code
-                    }]
-                }, {
-                    _deleted: false
-                }]
+                _id: {
+                    '$ne': new ObjectId(valid._id)
+                },
+                code: valid.code
             });
             // 2. begin: Validation.
             Promise.all([getBuyerPromise])

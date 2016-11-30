@@ -1,39 +1,48 @@
-'use strict';
-var _getSert = require('./getsert');
-var division = require('./division-data-util');
+"use strict";
+var _getSert = require("./getsert");
+var division = require("./division-data-util");
 
 class UnitDataUtil {
-    getSert(unit) {
-        var UnitManager = require('../../../src/managers/master/unit-manager');
-        return Promise.resolve(_getSert(unit, UnitManager, data => {
+    getSert(input) {
+        var ManagerType = require("../../../src/managers/master/unit-manager");
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
-    }
-    getTestData() {
-        return new Promise((resolve, reject) => {
-            division.getTestData()
-                .then(div => {
-                    var testData = {
-                        code: 'UT/UNIT/01',
-                        divisionId: div._id,
-                        division: div,
-                        name: 'Test Unit',
-                        description: ''
-                    };
-                    this.getSert(testData)
-                        .then(data => {
-                            resolve(data);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                });
         });
+    }
+
+    getNewData() {
+        return division.getTestData()
+            .then(div => {
+
+                var now = new Date();
+                var stamp = now / 1000 | 0;
+                var code = stamp.toString(36);
+
+                var data = {
+                    code: code,
+                    divisionId: div._id,
+                    division: div,
+                    name: `name[${code}]`,
+                    description: ""
+                };
+                return Promise.resolve(data);
+            });
+    }
+
+    getTestData() {
+        return division.getTestData()
+            .then(div => {
+                var data = {
+                    code: "UT/UNIT/01",
+                    divisionId: div._id,
+                    division: div,
+                    name: "Test Unit",
+                    description: ""
+                };
+                return this.getSert(data);
+            });
     }
 }
 module.exports = new UnitDataUtil();

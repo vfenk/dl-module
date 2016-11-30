@@ -4,11 +4,11 @@ var _getSert = require("./getsert");
 class CategoryDataUtil {
     getSert(input) {
         var ManagerType = require("../../../src/managers/master/category-manager");
-        return Promise.resolve(_getSert(input, ManagerType, (data) => {
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
+        });
     }
 
     getNewData() {
@@ -20,8 +20,8 @@ class CategoryDataUtil {
         var code = stamp.toString(36);
 
         data.code = code;
-        data.name = `name[${code}]`; 
-        data.codeRequirement = `codeRequirement[${code}]`; 
+        data.name = `name[${code}]`;
+        data.codeRequirement = `codeRequirement[${code}]`;
 
         return Promise.resolve(data);
     }
@@ -30,9 +30,9 @@ class CategoryDataUtil {
         var data = {
             code: "UT/CATEGORY/01",
             name: "Category 01",
-            codeRequirement: "" 
+            codeRequirement: ""
         };
-        return Promise.resolve(this.getSert(data));
+        return this.getSert(data);
     }
 }
 module.exports = new CategoryDataUtil();

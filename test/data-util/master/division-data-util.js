@@ -4,11 +4,11 @@ var _getSert = require("./getsert");
 class DivisionDataUtil {
     getSert(input) {
         var ManagerType = require("../../../src/managers/master/division-manager");
-        return Promise.resolve(_getSert(input, ManagerType, (data) => {
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
+        });
     }
 
     getNewData() {
@@ -31,7 +31,7 @@ class DivisionDataUtil {
             name: 'Div Unit Test',
             description: ''
         };
-        return Promise.resolve(this.getSert(data));
+        return this.getSert(data);
     }
 }
 module.exports = new DivisionDataUtil();

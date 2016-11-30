@@ -4,11 +4,11 @@ var _getSert = require("./getsert");
 class BuyerDataUtil {
     getSert(input) {
         var ManagerType = require("../../../src/managers/master/buyer-manager");
-        return Promise.resolve(_getSert(input, ManagerType, (data) => {
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
+        });
     }
 
     getNewData() {
@@ -38,7 +38,7 @@ class BuyerDataUtil {
             contact: "Mr. John Doe.",
             tempo: "30"
         };
-        return Promise.resolve(this.getSert(data));
+        return this.getSert(data);
     }
 }
 module.exports = new BuyerDataUtil();

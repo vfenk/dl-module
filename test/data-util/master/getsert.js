@@ -17,7 +17,7 @@ module.exports = function(data, Manager, filterCallback) {
             }
             else {
                 return manager.create(data)
-                    .then(manager.getSingleById);
+                    .then((id) => manager.getSingleById(id));
             }
         });
 };

@@ -57,13 +57,10 @@ module.exports = class ProductManager extends BaseManager {
 
             // 1. begin: Declare promises.
             var getProductPromise = this.collection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                    code: valid.code
-                }]
+                _id: {
+                    '$ne': new ObjectId(valid._id)
+                },
+                code: valid.code
             });
 
             var getUom = valid.uom && ObjectId.isValid(valid.uom._id) ? this.uomManager.getSingleByIdOrDefault(valid.uom._id) : Promise.resolve(null);
@@ -91,7 +88,7 @@ module.exports = class ProductManager extends BaseManager {
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('Product Manager : data does not pass validation', errors));
                     }
 
@@ -104,7 +101,7 @@ module.exports = class ProductManager extends BaseManager {
                 })
                 .catch(e => {
                     reject(e);
-                })
+                });
         });
     }
     _createIndexes() {
@@ -113,7 +110,7 @@ module.exports = class ProductManager extends BaseManager {
             key: {
                 _updatedDate: -1
             }
-        }
+        };
 
         var codeIndex = {
             name: `ix_${map.master.collection.Product}_code`,
@@ -121,7 +118,7 @@ module.exports = class ProductManager extends BaseManager {
                 code: 1
             },
             unique: true
-        }
+        };
 
         return this.collection.createIndexes([dateIndex, codeIndex]);
     }

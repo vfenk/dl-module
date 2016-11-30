@@ -4,11 +4,11 @@ var _getSert = require("./getsert");
 class BudgetDataUtil {
     getSert(input) {
         var ManagerType = require("../../../src/managers/master/budget-manager");
-        return Promise.resolve(_getSert(input, ManagerType, (data) => {
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
+        });
     }
 
     getNewData() {
@@ -30,7 +30,7 @@ class BudgetDataUtil {
             code: "UT/BUDGET/01",
             name: "data 01"
         };
-        return Promise.resolve(this.getSert(data));
+        return this.getSert(data);
     }
 }
 module.exports = new BudgetDataUtil();

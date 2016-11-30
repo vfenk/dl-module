@@ -11,13 +11,17 @@ describe('#dl-module', function(done) {
     // Auth
     // test('@auth/account-manager', './auth/account-manager-test');
     // test('@auth/role-manager', './auth/role-manager-test');
-    
+
     // // Master
     test('@master/budget', './master/budget');
     test('@master/buyer', './master/buyer');
     test('@master/category', './master/category');
     test('@master/currency', './master/currency');
     test('@master/division', './master/division');
+    test('@master/lot-machine', './master/lot-machine');
+    test('@master/machine', './master/machine');
+    test('@master/product', './master/product');
+    test('@master/unit', './master/unit');
     // test('@master/uom-manager', './master/uom-manager-test');
     // test('@master/supplier-manager', './master/supplier-manager-test');
     // test('@master/buyer-manager', './master/buyer-manager-test');
@@ -32,7 +36,7 @@ describe('#dl-module', function(done) {
     // test('@master/lot-machine-manager', './master/lot-machine-manager-test');
     // test('@master/yarn-equivalent-conversion-manager', './master/yarn-equivalent-conversion-manager-test');
     // test('@master/thread-specification-manager', './master/thread-specification-manager-test');
-    
+
     // //Purchasing 
     // test('@purchasing/purchase-request-manager', './purchasing/purchase-request-manager-test');
     // test('@purchasing/purchase-order-manager', './purchasing/purchase-order-manager-test');
@@ -52,9 +56,9 @@ describe('#dl-module', function(done) {
     // test('@purchasing/unit-payment-order/create', './purchasing/unit-payment-order/create');
     // test('@purchasing/unit-payment-price-correction-note/create', './purchasing/unit-payment-price-correction-note/create');
     // test('@purchasing/unit-payment-quantity-correction-note/create', './purchasing/unit-payment-quantity-correction-note/create');
-    
+
     // //Production
-    
+
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 

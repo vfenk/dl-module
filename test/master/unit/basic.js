@@ -1,15 +1,15 @@
 var helper = require("../../helper");
-var Buyer = require("../../data-util/master/buyer-data-util");
-var BuyerManager = require("../../../src/managers/master/buyer-manager");
+var Unit = require("../../data-util/master/unit-data-util");
+var UnitManager = require("../../../src/managers/master/unit-manager");
 var instanceManager = null;
-var validate = require("dl-models").validator.master.buyer;
+var validate = require("dl-models").validator.master.unit;
 
 var should = require("should");
 
 before("#00. connect db", function(done) {
     helper.getDb()
         .then((db) => {
-            instanceManager = new BuyerManager(db, {
+            instanceManager = new UnitManager(db, {
                 username: "unit-test"
             });
             done();
@@ -19,7 +19,7 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should error when create new buyer with empty data", function(done) {
+it("#01. should error when create new unit with empty data", function(done) {
     instanceManager.create({})
         .then((id) => {
             done("Should not be able to create data with empty data");
@@ -28,8 +28,7 @@ it("#01. should error when create new buyer with empty data", function(done) {
             try {
                 e.errors.should.have.property("code");
                 e.errors.should.have.property("name");
-                e.errors.should.have.property("tempo");
-                e.errors.should.have.property("country");
+                e.errors.should.have.property("division");
                 done();
             }
             catch (ex) {
@@ -40,7 +39,7 @@ it("#01. should error when create new buyer with empty data", function(done) {
 
 var createdId;
 it("#02. should success when create new data", function(done) {
-    Buyer.getNewData()
+    Unit.getNewData()
         .then((data) => instanceManager.create(data))
         .then((id) => {
             id.should.be.Object();
@@ -112,7 +111,7 @@ it(`#06. should success when get updated data with id`, function(done) {
 
 it("#07. should error when update new data with same code", function(done) {
     var newDataId;
-    Buyer.getNewData()
+    Unit.getNewData()
         .then((data) => instanceManager.create(data))
         .then((newId) => instanceManager.getSingleById(newId))
         .then((newData) => {

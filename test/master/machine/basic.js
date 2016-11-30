@@ -1,16 +1,16 @@
 var helper = require("../../helper");
-var Buyer = require("../../data-util/master/buyer-data-util");
-var BuyerManager = require("../../../src/managers/master/buyer-manager");
+var Machine = require("../../data-util/master/machine-data-util");
+var MachineManager = require("../../../src/managers/master/machine-manager");
 var instanceManager = null;
-var validate = require("dl-models").validator.master.buyer;
+var validate = require("dl-models").validator.master.machine;
 
 var should = require("should");
 
 before("#00. connect db", function(done) {
     helper.getDb()
         .then((db) => {
-            instanceManager = new BuyerManager(db, {
-                username: "unit-test"
+            instanceManager = new MachineManager(db, {
+                username: "machine-test"
             });
             done();
         })
@@ -19,17 +19,15 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should error when create new buyer with empty data", function(done) {
+it("#01. should error when create new machine with empty data", function(done) {
     instanceManager.create({})
         .then((id) => {
             done("Should not be able to create data with empty data");
         })
         .catch((e) => {
             try {
-                e.errors.should.have.property("code");
                 e.errors.should.have.property("name");
-                e.errors.should.have.property("tempo");
-                e.errors.should.have.property("country");
+                e.errors.should.have.property("unit");
                 done();
             }
             catch (ex) {
@@ -40,7 +38,7 @@ it("#01. should error when create new buyer with empty data", function(done) {
 
 var createdId;
 it("#02. should success when create new data", function(done) {
-    Buyer.getNewData()
+    Machine.getNewData()
         .then((data) => instanceManager.create(data))
         .then((id) => {
             id.should.be.Object();
@@ -66,18 +64,24 @@ it(`#03. should success when get created data with id`, function(done) {
         });
 });
 
-it("#04. should error when create new data with same code", function(done) {
-    var data = Object.assign({}, createdData);
-    delete data._id;
-
-    instanceManager.create(data)
+it("#04. should error when update new data with same code", function(done) {
+    var newDataId;
+    Machine.getNewData()
+        .then((data) => instanceManager.create(data))
+        .then((newId) => instanceManager.getSingleById(newId))
+        .then((newData) => {
+            newDataId = newData._id;
+            newData.code = createdData.code;
+            return instanceManager.update(newData);
+        })
         .then((id) => {
             done("Should not be able to create data with same code");
         })
         .catch((e) => {
             try {
                 e.errors.should.have.property("code");
-                done();
+                instanceManager.destroy(newDataId)
+                    .then(() => done());
             }
             catch (ex) {
                 done(e);
@@ -110,32 +114,7 @@ it(`#06. should success when get updated data with id`, function(done) {
         });
 });
 
-it("#07. should error when update new data with same code", function(done) {
-    var newDataId;
-    Buyer.getNewData()
-        .then((data) => instanceManager.create(data))
-        .then((newId) => instanceManager.getSingleById(newId))
-        .then((newData) => {
-            newDataId = newData._id;
-            newData.code = createdData.code;
-            return instanceManager.update(newData);
-        })
-        .then((id) => {
-            done("Should not be able to create data with same code");
-        })
-        .catch((e) => {
-            try {
-                e.errors.should.have.property("code");
-                instanceManager.destroy(newDataId)
-                    .then(() => done());
-            }
-            catch (ex) {
-                done(e);
-            }
-        });
-});
-
-it("#08. should success when read data", function(done) {
+it("#07. should success when read data", function(done) {
     instanceManager.read({
             filter: {
                 _id: createdId
@@ -153,7 +132,7 @@ it("#08. should success when read data", function(done) {
         });
 });
 
-it(`#09. should success when delete data`, function(done) {
+it(`#08. should success when delete data`, function(done) {
     instanceManager.delete(createdData)
         .then((id) => {
             id.toString().should.equal(createdId.toString());
@@ -165,7 +144,7 @@ it(`#09. should success when delete data`, function(done) {
 });
 
 
-it(`#10. should _deleted=true`, function(done) {
+it(`#09. should _deleted=true`, function(done) {
     instanceManager.getSingleByQuery({
             _id: createdId
         })
@@ -180,7 +159,7 @@ it(`#10. should _deleted=true`, function(done) {
         });
 });
 
-it("#11. should success when destroy data with id", function(done) {
+it("#10. should success when destroy data with id", function(done) {
     instanceManager.destroy(createdId)
         .then((result) => {
             result.should.be.Boolean();
@@ -192,7 +171,7 @@ it("#11. should success when destroy data with id", function(done) {
         });
 });
 
-it(`#12. should null when get destroyed data`, function(done) {
+it(`#11. should null when get destroyed data`, function(done) {
     instanceManager.getSingleByIdOrDefault(createdId)
         .then((data) => {
             should.equal(data, null);

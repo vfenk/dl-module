@@ -4,11 +4,11 @@ var _getSert = require("./getsert");
 class CurrencyDataUtil {
     getSert(input) {
         var ManagerType = require("../../../src/managers/master/currency-manager");
-        return Promise.resolve(_getSert(input, ManagerType, (data) => {
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
+        });
     }
 
     getNewData() {
@@ -33,7 +33,7 @@ class CurrencyDataUtil {
             rate: 1,
             description: "Unit test currency"
         };
-        return Promise.resolve(this.getSert(data));
+        return this.getSert(data);
     }
 }
 

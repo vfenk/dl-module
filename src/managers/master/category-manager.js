@@ -49,13 +49,10 @@ module.exports = class CategoryManager extends BaseManager {
             var valid = category;
             // 1. begin: Declare promises.
             var getcategoryPromise = this.collection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        "$ne": new ObjectId(valid._id)
-                    }
-                }, {
-                    code: valid.code
-                }]
+                _id: {
+                    '$ne': new ObjectId(valid._id)
+                },
+                code: valid.code
             });
 
             // 2. begin: Validation.
