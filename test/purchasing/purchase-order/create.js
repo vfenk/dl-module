@@ -103,7 +103,7 @@ it('#04. purchase-order items should the same as purchase-request items', functi
         });
         prItem.should.not.equal(null, "an item in purchase-order not found in purchase-request");
         poItem.defaultQuantity.should.equal(prItem.quantity, "purchase-order-item.defaultQuantity does not equal purchase-request-item.quantity");
-        poItem.defaultUom._id.toString().should.equal(prItem.uom._id.toString(), "purchase-order-item.defaultUom does not equal purchase-request-item.uom");
+        poItem.defaultUom._id.toString().should.equal(prItem.product.uom._id.toString(), "purchase-order-item.defaultUom does not equal purchase-request-item.uom");
     }
     done();
 });
