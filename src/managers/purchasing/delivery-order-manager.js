@@ -2,7 +2,7 @@
 
 // external deps 
 var ObjectId = require("mongodb").ObjectId;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 
 // internal deps 
 require('mongodb-toolkit');
@@ -164,7 +164,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 

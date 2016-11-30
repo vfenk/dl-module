@@ -21,12 +21,7 @@ module.exports = function (purchaseRequest) {
                     style: ['size15'],
                     alignment: "center"
                 }, {
-                        text: 'BANARAN, GROGOL, SUKOHARJO 57193',
-                        style: ['size09'],
-                        alignment: "center"
-                    },
-                    {
-                        text: 'No. Telp : (0271) 716888   Fax : (0271) 717818',
+                        text: 'BANARAN, GROGOL, SUKOHARJO',
                         style: ['size09'],
                         alignment: "center"
                     }]
@@ -136,7 +131,7 @@ module.exports = function (purchaseRequest) {
                 style: ['size07', 'left']
             }, {
                 text: item.product.name,
-                style: ['size07', 'center']
+                style: ['size07', 'left']
             }, {
                 text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.product.uom.unit,
                 style: ['size07', 'center']
@@ -175,7 +170,7 @@ module.exports = function (purchaseRequest) {
                 columns: [{
                     width: '60%',
                     columns: [{
-                        width: '50%',
+                        width: '30%',
                         stack: ['Kategori', 'Diminta Datang', 'Keterangan']
                     }, {
                             width: '3%',

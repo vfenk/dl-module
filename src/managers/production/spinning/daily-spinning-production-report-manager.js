@@ -7,7 +7,7 @@ var DLModels = require('dl-models');
 var map = DLModels.map;
 var DailySpinningProductionReport = DLModels.production.spinning.DailySpinningProductionReport;
 var UnitManager = require('../../master/unit-manager');
-var BaseManager = require('../../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var YarnEquivalentConversionManager = require('../../master/yarn-equivalent-conversion-manager');
 var i18n = require('dl-i18n');
 
@@ -84,7 +84,7 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -231,17 +231,6 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
                 resolve(null);
             if (_unitId === '')
                 resolve(null);
-
-            // var todayStartHour = new Date();
-            // todayStartHour.setHours(6, 0, 0, 0);
-
-            // var inputDate = new Date(_date);
-
-            // if (inputDate < todayStartHour) {
-            //     todayStartHour.setDate(todayStartHour.getDate() - 1);
-            // }
-
-            // _filterDate = todayStartHour;
 
             _filterDate = new Date(_date);
             _filterDate.setHours(0, 0, 0, 0);

@@ -8,7 +8,7 @@ var i18n = require('dl-i18n');
 var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitPaymentCorrectionNote = DLModels.purchasing.UnitPaymentCorrectionNote;
 var UnitPaymentOrderManager = require('./unit-payment-order-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 
 module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager {
@@ -60,11 +60,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                     else if (!valid.unitPaymentOrder)
                         errors["unitPaymentOrder"] = i18n.__("UnitPaymentPriceCorrectionNote.unitPaymentOrder.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.unitPaymentOrder._:Unit Payment Order"));
 
-                    if (!valid.invoiceCorrectionNo || valid.invoiceCorrectionNo == '')
-                        errors["invoiceCorrectionNo"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionNo.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionNo._:Invoice Correction No"));
+                    // if (!valid.invoiceCorrectionNo || valid.invoiceCorrectionNo == '')
+                    // errors["invoiceCorrectionNo"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionNo.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionNo._:Invoice Correction No"));
 
-                    if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
-                        errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
+                    // if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
+                    //     errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
                     if (valid.items) {
                         if (valid.items.length > 0) {
@@ -97,7 +97,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -188,9 +188,34 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         return new Promise((resolve, reject) => {
 
             this.getSingleById(id)
-                .then(unitReceiptNote => {
+                .then(unitPaymentPriceCorrectionNote => {
                     var getDefinition = require('../../pdf/definitions/unit-payment-correction-note');
-                    var definition = getDefinition(unitReceiptNote);
+
+                    for (var _item of unitPaymentPriceCorrectionNote.items) {
+                        for (var _poItem of _item.purchaseOrder.items) {
+                            if (_poItem.product._id.toString() === _item.product._id.toString()) {
+                                for (var _fulfillment of _poItem.fulfillments) {
+                                    var pricePerUnit = 0, priceTotal = 0;
+                                    if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentPriceCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
+                                        if (unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Satuan") {
+                                            pricePerUnit = _poItem.pricePerDealUnit - _item.pricePerUnit;
+                                            priceTotal = pricePerUnit * _item.quantity;
+                                        }
+                                        else if (unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Total") {
+                                            priceTotal = (_item.quantity * _poItem.pricePerDealUnit) - (_item.priceTotal)
+                                        }
+
+                                        _item.pricePerUnit = pricePerUnit;
+                                        _item.priceTotal = priceTotal;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    var definition = getDefinition(unitPaymentPriceCorrectionNote);
 
                     var generatePdf = require('../../pdf/pdf-generator');
                     generatePdf(definition)
@@ -228,7 +253,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                             var tasks = [];
                             var getPurchaseOrderById = [];
                             validData.no = generateCode();
-                            if(validData.unitPaymentOrder.useIncomeTax)
+                            if (validData.unitPaymentOrder.useIncomeTax)
                                 validData.returNoteNo = generateCode();
                             //Update PO Internal
                             var poId = new ObjectId();
@@ -258,7 +283,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                                 _correction.correctionDate = validData.date;
                                                                 _correction.correctionNo = validData.no;
                                                                 _correction.correctionQuantity = unitPaymentPriceCorrectionNoteItem.quantity;
-                                                                _correction.correctionPriceTotal = (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate);
+                                                                _correction.correctionPriceTotal = (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate);
                                                                 _correction.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
                                                                 fulfillmentPoItem.correction.push(_correction);
                                                                 break;
@@ -286,6 +311,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                                     correctionDate: validData.date,
                                                                     correctionNo: validData.no,
                                                                     correctionQuantity: _item.quantity,
+                                                                    correctionPricePerUnit: _item.pricePerUnit,
                                                                     correctionPriceTotal: _item.priceTotal,
                                                                     correctionRemark: `Koreksi ${validData.priceCorrectionType}`
                                                                 };
@@ -353,10 +379,34 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
     pdfReturNote(id) {
         return new Promise((resolve, reject) => {
             this.getSingleById(id)
-                .then(unitReceiptNote => {
+                .then(unitPaymentPriceCorrectionNote => {
                     var getDefinition = require('../../pdf/definitions/unit-payment-correction-retur-note');
-                    var definition = getDefinition(unitReceiptNote);
 
+                    for (var _item of unitPaymentPriceCorrectionNote.items) {
+                        for (var _poItem of _item.purchaseOrder.items) {
+                            if (_poItem.product._id.toString() === _item.product._id.toString()) {
+                                for (var _fulfillment of _poItem.fulfillments) {
+                                    var pricePerUnit = 0, priceTotal = 0;
+                                    if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentPriceCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
+                                        if (unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Satuan") {
+                                            pricePerUnit = _poItem.pricePerDealUnit - _item.pricePerUnit;
+                                            priceTotal = pricePerUnit * _item.quantity;
+                                        }
+                                        else if (unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Total") {
+                                            priceTotal = (_item.quantity * _poItem.pricePerDealUnit) - (_item.priceTotal)
+                                        }
+
+                                        _item.pricePerUnit = pricePerUnit;
+                                        _item.priceTotal = priceTotal;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    var definition = getDefinition(unitPaymentPriceCorrectionNote);
                     var generatePdf = require('../../pdf/pdf-generator');
                     generatePdf(definition)
                         .then(binary => {

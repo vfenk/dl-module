@@ -6,7 +6,7 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Supplier = DLModels.master.Supplier;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 module.exports = class SupplierManager extends BaseManager {
@@ -56,12 +56,12 @@ module.exports = class SupplierManager extends BaseManager {
                             '$ne': new ObjectId(valid._id)
                         }
                     }, {
-                            code: valid.code
-                        }]
+                        code: valid.code
+                    }]
                 },
                 {
-                    _deleted:false
-                } ]
+                    _deleted: false
+                }]
             });
             // 2. begin: Validation.
             Promise.all([getSupplierPromise])
@@ -76,13 +76,13 @@ module.exports = class SupplierManager extends BaseManager {
 
                     if (!valid.name || valid.name == '')
                         errors["name"] = i18n.__("Supplier.name.isExists:%s is required", i18n.__("Supplier.name._:Name")); //"Nama harus diisi";
-                    
-                    if(!valid.import)
-                        valid.import=false;
+
+                    if (!valid.import)
+                        valid.import = false;
 
                     // 2c. begin: check if data has any error, reject if it has.
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -95,7 +95,7 @@ module.exports = class SupplierManager extends BaseManager {
                 })
         });
     }
-     _createIndexes() {
+    _createIndexes() {
         var dateIndex = {
             name: `ix_${map.master.collection.Supplier}__updatedDate`,
             key: {

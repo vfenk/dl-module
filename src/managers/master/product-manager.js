@@ -3,7 +3,7 @@
 // external deps 
 var ObjectId = require("mongodb").ObjectId;
 var UomManager = require('./uom-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 // internal deps
@@ -17,7 +17,7 @@ module.exports = class ProductManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.master.collection.Product);
-        this.uomManager = new UomManager(db,user);
+        this.uomManager = new UomManager(db, user);
     }
 
     _getQuery(paging) {
@@ -46,7 +46,7 @@ module.exports = class ProductManager extends BaseManager {
 
             query['$and'].push($or);
         }
-        
+
         return query;
     }
 
@@ -65,7 +65,7 @@ module.exports = class ProductManager extends BaseManager {
                     code: valid.code
                 }]
             });
-            
+
             var getUom = valid.uom && ObjectId.isValid(valid.uom._id) ? this.uomManager.getSingleByIdOrDefault(valid.uom._id) : Promise.resolve(null);
             // 2. begin: Validation.
             Promise.all([getProductPromise, getUom])
@@ -80,7 +80,7 @@ module.exports = class ProductManager extends BaseManager {
                     }
 
                     if (!valid.name || valid.name == '')
-                        errors["name"] =  i18n.__("Product.name.isRequired:%s is required", i18n.__("Product.name._:Name")); // "Nama tidak boleh kosong.";
+                        errors["name"] = i18n.__("Product.name.isRequired:%s is required", i18n.__("Product.name._:Name")); // "Nama tidak boleh kosong.";
 
                     if (valid.uom) {
                         if (!valid.uom.unit || valid.uom.unit == '')
@@ -91,11 +91,11 @@ module.exports = class ProductManager extends BaseManager {
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('Product Manager : data does not pass validation', errors));
                     }
-                    
-                    valid.uom=_uom;
+
+                    valid.uom = _uom;
                     valid.uomId = new ObjectId(valid.uom._id);
                     if (!valid.stamp)
                         valid = new Product(valid);
