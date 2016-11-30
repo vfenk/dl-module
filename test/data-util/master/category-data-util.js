@@ -1,23 +1,38 @@
-'use strict';
-var _getSert = require('./getsert');
+"use strict";
+var _getSert = require("./getsert");
 
 class CategoryDataUtil {
-    getSert(category) {
-        var CategoryManager = require('../../../src/managers/master/category-manager');
-        return Promise.resolve(_getSert(category, CategoryManager, data => {
+    getSert(input) {
+        var ManagerType = require("../../../src/managers/master/category-manager");
+        return Promise.resolve(_getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
         }));
     }
+
+    getNewData() {
+        var Model = require("dl-models").master.Category;
+        var data = new Model();
+
+        var now = new Date();
+        var stamp = now / 1000 | 0;
+        var code = stamp.toString(36);
+
+        data.code = code;
+        data.name = `name[${code}]`; 
+        data.codeRequirement = `codeRequirement[${code}]`; 
+
+        return Promise.resolve(data);
+    }
+
     getTestData() {
-        var testData = {
-            code: 'UT/CATEGORY/01',
-            name: 'Category 01',
-            codeRequirement: '' 
+        var data = {
+            code: "UT/CATEGORY/01",
+            name: "Category 01",
+            codeRequirement: "" 
         };
-        return Promise.resolve(this.getSert(testData));
+        return Promise.resolve(this.getSert(data));
     }
 }
 module.exports = new CategoryDataUtil();
-

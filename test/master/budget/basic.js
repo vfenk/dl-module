@@ -26,6 +26,7 @@ it("#01. should error when create new budget with empty data", function(done) {
         })
         .catch((e) => {
             try {
+                e.errors.should.have.property("code");
                 e.errors.should.have.property("name");
                 done();
             }

@@ -1,15 +1,15 @@
 var helper = require("../../helper");
-var Buyer = require("../../data-util/master/buyer-data-util");
-var BuyerManager = require("../../../src/managers/master/buyer-manager");
+var Category = require("../../data-util/master/category-data-util");
+var CategoryManager = require("../../../src/managers/master/category-manager");
 var instanceManager = null;
-var validate = require("dl-models").validator.master.buyer;
+var validate = require("dl-models").validator.master.category;
 
 var should = require("should");
 
 before("#00. connect db", function(done) {
     helper.getDb()
         .then((db) => {
-            instanceManager = new BuyerManager(db, {
+            instanceManager = new CategoryManager(db, {
                 username: "unit-test"
             });
             done();
@@ -19,7 +19,7 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should error when create new buyer with empty data", function(done) {
+it("#01. should error when create new category with empty data", function(done) {
     instanceManager.create({})
         .then((id) => {
             done("Should not be able to create data with empty data");
@@ -28,8 +28,6 @@ it("#01. should error when create new buyer with empty data", function(done) {
             try {
                 e.errors.should.have.property("code");
                 e.errors.should.have.property("name");
-                e.errors.should.have.property("tempo");
-                e.errors.should.have.property("country");
                 done();
             }
             catch (ex) {
@@ -40,7 +38,7 @@ it("#01. should error when create new buyer with empty data", function(done) {
 
 var createdId;
 it("#02. should success when create new data", function(done) {
-    Buyer.getNewData()
+    Category.getNewData()
         .then((data) => instanceManager.create(data))
         .then((id) => {
             id.should.be.Object();

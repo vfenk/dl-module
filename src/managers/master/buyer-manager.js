@@ -15,31 +15,28 @@ module.exports = class BuyerManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deleted = {
-            _deleted: false
-        };
-        var query = paging.keyword ? {
-            '$and': [deleted]
-        } : deleted;
+        var _default = {
+                _deleted: false
+            },
+            pagingFilter = paging.filter || {},
+            keywordFilter = {},
+            query = {};
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterCode = {
+            var codeFilter = {
                 'code': {
                     '$regex': regex
                 }
             };
-            var filterName = {
+            var nameFilter = {
                 'name': {
                     '$regex': regex
                 }
             };
-            var $or = {
-                '$or': [filterCode, filterName]
-            };
-
-            query['$and'].push($or);
+            keywordFilter['$or'] = [codeFilter, nameFilter];
         }
+        query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
     }
 
@@ -57,8 +54,7 @@ module.exports = class BuyerManager extends BaseManager {
                     }, {
                         code: valid.code
                     }]
-                },
-                {
+                }, {
                     _deleted: false
                 }]
             });
@@ -76,15 +72,15 @@ module.exports = class BuyerManager extends BaseManager {
                     if (!valid.name || valid.name == '')
                         errors["name"] = i18n.__("Buyer.name.isRequired:%s is required", i18n.__("Buyer.name._:Name")); //"Nama Harus diisi";
 
-                    if (Number.isInteger(parseInt(valid.tempo)) === false)
-                        errors["tempo"] = i18n.__("Buyer.tempo.isNumeric:%s must be numeric", i18n.__("Buyer.tempo._:Tempo"));//"Tempo harus berupa angka";
+                    if (Number.isInteger(parseInt(valid.tempo, 10)) === false)
+                        errors["tempo"] = i18n.__("Buyer.tempo.isNumeric:%s must be numeric", i18n.__("Buyer.tempo._:Tempo")); //"Tempo harus berupa angka";
 
                     if (!valid.country || valid.country == '')
-                        errors["country"] = i18n.__("Buyer.country.isRequired:%s is required", i18n.__("Buyer.country._:Country"));// "Silakan pilih salah satu negara";
+                        errors["country"] = i18n.__("Buyer.country.isRequired:%s is required", i18n.__("Buyer.country._:Country")); // "Silakan pilih salah satu negara";
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 

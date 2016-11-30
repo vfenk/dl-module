@@ -26,11 +26,11 @@ class BudgetDataUtil {
     }
 
     getTestData() {
-        var testData = {
+        var data = {
             code: "UT/BUDGET/01",
             name: "data 01"
         };
-        return Promise.resolve(this.getSert(testData));
+        return Promise.resolve(this.getSert(data));
     }
 }
 module.exports = new BudgetDataUtil();

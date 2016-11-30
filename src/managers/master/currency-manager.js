@@ -18,36 +18,28 @@ module.exports = class CurrencyManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deleted = {
-            _deleted: false
-        };
-        var query = paging.keyword ? {
-            '$and': [deleted]
-        } : deleted;
+        var _default = {
+                _deleted: false
+            },
+            pagingFilter = paging.filter || {},
+            keywordFilter = {},
+            query = {};
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterCode = {
+            var codeFilter = {
                 'code': {
                     '$regex': regex
                 }
             };
-            // var filterSymbol = {
-            //     'symbol': {
-            //         '$regex': regex
-            //     }
-            // };
-            // var filterDescription = {
-            //     'description': {
-            //         '$regex': regex
-            //     }
-            // };
-            // var $or = {
-            //     '$or': [filterCode, filterSymbol, filterDescription]
-            // };
-
-            query['$and'].push(filterCode);
+            var symbolFilter = {
+                'symbol': {
+                    '$regex': regex
+                }
+            };
+            keywordFilter['$or'] = [codeFilter, symbolFilter];
         }
+        query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
     }
 
@@ -84,7 +76,7 @@ module.exports = class CurrencyManager extends BaseManager {
                         errors["rate"] = i18n.__("Currency.rate.isRequired:%s is required", i18n.__("Currency.rate._:Rate")); //"Rate mata uang Tidak Boleh Kosong";
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 

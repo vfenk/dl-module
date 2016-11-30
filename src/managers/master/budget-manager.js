@@ -27,12 +27,17 @@ module.exports = class BudgetManager extends BaseManager {
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterName = {
+            var codeFilter = {
+                'code': {
+                    '$regex': regex
+                }
+            };
+            var nameFilter = {
                 'name': {
                     '$regex': regex
                 }
             };
-            keywordFilter['$or'] = [filterName];
+            keywordFilter['$or'] = [codeFilter, nameFilter];
         }
         query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
