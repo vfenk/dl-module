@@ -17,6 +17,7 @@ describe('#dl-module', function(done) {
     test('@master/buyer', './master/buyer');
     test('@master/category', './master/category');
     test('@master/currency', './master/currency');
+    test('@master/division', './master/division');
     // test('@master/uom-manager', './master/uom-manager-test');
     // test('@master/supplier-manager', './master/supplier-manager-test');
     // test('@master/buyer-manager', './master/buyer-manager-test');
