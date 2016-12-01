@@ -60,12 +60,12 @@ module.exports = class BuyerManager extends BaseManager {
                 else if (_module) {
                     errors["code"] = i18n.__("Buyer.code.isExists:%s is already exists", i18n.__("Buyer.code._:Code")); //"Kode sudah ada";
                 }
-
-                if (!valid.name || valid.name == "")
+                if (!valid.name || valid.name == '')
                     errors["name"] = i18n.__("Buyer.name.isRequired:%s is required", i18n.__("Buyer.name._:Name")); //"Nama Harus diisi";
+                    
+                if (valid.tempo < 0)
+                    errors["tempo"] = i18n.__("Buyer.tempo.isNumeric:%s must be 0 or more", i18n.__("Buyer.tempo._:Tempo")); //"Tempo harus lebih atau sama dengan 0";
 
-                if (Number.isInteger(parseInt(valid.tempo, 10)) === false)
-                    errors["tempo"] = i18n.__("Buyer.tempo.isNumeric:%s must be numeric", i18n.__("Buyer.tempo._:Tempo")); //"Tempo harus berupa angka";
 
                 if (!valid.country || valid.country == "")
                     errors["country"] = i18n.__("Buyer.country.isRequired:%s is required", i18n.__("Buyer.country._:Country")); // "Silakan pilih salah satu negara";
@@ -75,8 +75,10 @@ module.exports = class BuyerManager extends BaseManager {
                     var ValidationError = require("module-toolkit").ValidationError;
                     return Promise.reject(new ValidationError("data does not pass validation", errors));
                 }
+                if(!valid.tempo || valid.tempo == '')
+                    valid.tempo = 0;
 
-                valid = new Buyer(buyer);
+                valid = new Buyer(valid);
                 valid.stamp(this.user.username, "manager");
                 return Promise.resolve(valid);
             });
