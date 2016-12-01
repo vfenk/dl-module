@@ -21,14 +21,7 @@ describe('#dl-module', function(done) {
     test('@master/lot-machine', './master/lot-machine');
     test('@master/machine', './master/machine');
     test('@master/product', './master/product');
-    test('@master/supplier', './master/supplier');
-    test('@master/thread-specification', './master/thread-specification');
-    test('@master/uom', './master/uom');
     test('@master/unit', './master/unit');
-    test('@master/uster', './master/uster');
-    test('@master/vat', './master/vat');
-    test('@master/yarn-equivalent-coversion', './master/yarn-equivalent-coversion');
-
     // test('@master/uom-manager', './master/uom-manager-test');
     // test('@master/supplier-manager', './master/supplier-manager-test');
     // test('@master/buyer-manager', './master/buyer-manager-test');

@@ -28,7 +28,6 @@ it("#01. should error when create new buyer with empty data", function(done) {
             try {
                 e.errors.should.have.property("code");
                 e.errors.should.have.property("name");
-                e.errors.should.have.property("tempo");
                 e.errors.should.have.property("country");
                 done();
             }
