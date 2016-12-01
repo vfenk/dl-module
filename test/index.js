@@ -13,38 +13,25 @@ describe('#dl-module', function(done) {
     // test('@auth/role-manager', './auth/role-manager-test');
 
     // // Master
-    test('@master/budget', './master/budget');
-    test('@master/buyer', './master/buyer');
-    test('@master/category', './master/category');
-    test('@master/currency', './master/currency');
-    test('@master/division', './master/division');
-    test('@master/lot-machine', './master/lot-machine');
-    test('@master/machine', './master/machine');
-    test('@master/product', './master/product');
-    test('@master/supplier', './master/supplier');
-    test('@master/thread-specification', './master/thread-specification');
-    test('@master/uom', './master/uom');
-    test('@master/unit', './master/unit');
-    test('@master/uster', './master/uster');
-    test('@master/vat', './master/vat');
-    test('@master/yarn-equivalent-coversion', './master/yarn-equivalent-coversion');
-
-    // test('@master/uom-manager', './master/uom-manager-test');
-    // test('@master/supplier-manager', './master/supplier-manager-test');
-    // test('@master/buyer-manager', './master/buyer-manager-test');
-    // test('@master/product-manager', './master/product-manager-test');
-    // test('@master/division-manager', './master/division-manager-test');
-    // test('@master/unit-manager', './master/unit-manager-test');
-    // test('@master/category-manager', './master/category-manager-test');
-    // test('@master/currency-manager', './master/currency-manager-test');
-    // test('@master/vat-manager', './master/vat-manager-test');
-    // test('@master/budget-manager', './master/budget-manager-test');
-    // test('@master/machine-manager', './master/machine-manager-test');
-    // test('@master/lot-machine-manager', './master/lot-machine-manager-test');
-    // test('@master/yarn-equivalent-conversion-manager', './master/yarn-equivalent-conversion-manager-test');
-    // test('@master/thread-specification-manager', './master/thread-specification-manager-test');
+    // test('@master/budget', './master/budget');
+    // test('@master/buyer', './master/buyer');
+    // test('@master/category', './master/category');
+    // test('@master/currency', './master/currency');
+    // test('@master/division', './master/division');
+    // test('@master/lot-machine', './master/lot-machine');
+    // test('@master/machine', './master/machine');
+    // test('@master/product', './master/product');
+    // test('@master/supplier', './master/supplier');
+    // test('@master/thread-specification', './master/thread-specification');
+    // test('@master/uom', './master/uom');
+    // test('@master/unit', './master/unit');
+    // test('@master/uster', './master/uster');
+    // test('@master/vat', './master/vat');
+    // test('@master/yarn-equivalent-coversion', './master/yarn-equivalent-coversion');
+ 
 
     // //Purchasing 
+    test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
     // test('@purchasing/purchase-request-manager', './purchasing/purchase-request-manager-test');
     // test('@purchasing/purchase-order-manager', './purchasing/purchase-order-manager-test');
     // test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
