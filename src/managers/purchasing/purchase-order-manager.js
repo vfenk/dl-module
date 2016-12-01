@@ -781,7 +781,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         .toArray(function (err, result) {
                             assert.equal(err, null);
                             resolve(result);
-                            console.log(result);
                         });
                 }
                 
@@ -812,7 +811,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         .toArray(function (err, result) {
                             assert.equal(err, null);
                             resolve(result);
-                            console.log(result);
                         });
             }
         });
