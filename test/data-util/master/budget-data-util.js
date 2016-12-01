@@ -1,22 +1,35 @@
-'use strict';
-var _getSert = require('./getsert');
+"use strict";
+var _getSert = require("./getsert");
+var generateCode = require("../../../src/utils/code-generator");
 
 class BudgetDataUtil {
-    getSert(budget) {
-        var BudgetManager = require('../../../src/managers/master/budget-manager');
-        return Promise.resolve(_getSert(budget, BudgetManager, data => {
+    getSert(input) {
+        var ManagerType = require("../../../src/managers/master/budget-manager");
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
+        });
     }
+
+    getNewData() {
+        var Model = require('dl-models').master.Budget;
+        var data = new Model();
+
+        var code = generateCode();
+
+        data.code = code;
+        data.name = `name[${code}]`;
+
+        return Promise.resolve(data);
+    }
+
     getTestData() {
-        var testData = { 
-            code: 'UT/Budget/01',
-            name: 'budget 01' 
+        var data = {
+            code: "UT/BUDGET/01",
+            name: "data 01"
         };
-        return Promise.resolve(this.getSert(testData));
+        return this.getSert(data);
     }
 }
 module.exports = new BudgetDataUtil();
-

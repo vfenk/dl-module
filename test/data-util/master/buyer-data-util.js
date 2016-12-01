@@ -1,25 +1,43 @@
-'use strict';
-var _getSert = require('./getsert');
+"use strict";
+var _getSert = require("./getsert");
+var generateCode = require("../../../src/utils/code-generator");
 
 class BuyerDataUtil {
-    getSert(unit) {
-        var BuyerManager = require('../../../src/managers/master/buyer-manager');
-        return Promise.resolve(_getSert(unit, BuyerManager, data => {
+    getSert(input) {
+        var ManagerType = require("../../../src/managers/master/buyer-manager");
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
+        });
     }
+
+    getNewData() {
+        var Model = require("dl-models").master.Buyer;
+        var data = new Model();
+
+        var code = generateCode();
+
+        data.code = code;
+        data.name = `name[${code}]`;
+        data.address = `address[${code}]`;
+        data.country = `country[${code}]`;
+        data.contact = `contact[${code}]`;
+        data.tempo = "30";
+
+        return Promise.resolve(data);
+    }
+
     getTestData() {
-        var testData = {
-            code: 'UT/BUY/01',
-            name: 'Buyer 01',
-            address: '152 La Sierra Street Land O Lakes, FL 34639',
-            country: 'US',
-            contact: 'Mr. John Doe.',
-            tempo: ''
+        var data = {
+            code: "UT/BUY/01",
+            name: "Buyer 01",
+            address: "152 La Sierra Street Land O Lakes, FL 34639",
+            country: "US",
+            contact: "Mr. John Doe.",
+            tempo: "30"
         };
-        return Promise.resolve(this.getSert(testData));
+        return this.getSert(data);
     }
 }
 module.exports = new BuyerDataUtil();

@@ -8,6 +8,8 @@ module.exports = {
         budget: require('./data-util/master/budget-data-util'),
         supplier: require('./data-util/master/supplier-data-util'),
         unit: require('./data-util/master/unit-data-util'),
+        machine: require('./data-util/master/machine-data-util'),
+        lotMachine: require('./data-util/master/lot-machine-data-util'),
         category: require('./data-util/master/category-data-util')
     },
     transaction: {

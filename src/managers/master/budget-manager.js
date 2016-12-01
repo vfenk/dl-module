@@ -10,7 +10,7 @@ var Budget = DLModels.master.Budget;
 var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
-module.exports = class BudgetManager  extends BaseManager  {
+module.exports = class BudgetManager extends BaseManager {
 
     constructor(db, user) {
         super(db, user);
@@ -18,39 +18,41 @@ module.exports = class BudgetManager  extends BaseManager  {
     }
 
     _getQuery(paging) {
-        var deleted = {
-            _deleted: false
-        };
-        var query = paging.keyword ? {
-            '$and': [deleted]
-        } : deleted;
+        var _default = {
+                _deleted: false
+            },
+            pagingFilter = paging.filter || {},
+            keywordFilter = {},
+            query = {};
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterName = {
+            var codeFilter = {
+                'code': {
+                    '$regex': regex
+                }
+            };
+            var nameFilter = {
                 'name': {
                     '$regex': regex
                 }
             };
-
-            query['$and'].push(filterName);
+            keywordFilter['$or'] = [codeFilter, nameFilter];
         }
+        query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
     }
-    
+
     _validate(budget) {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = budget;
             // 1. begin: Declare promises.
             var getbudgetPromise = this.collection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                        name: valid.name
-                    }]
+                _id: {
+                    '$ne': new ObjectId(valid._id)
+                },
+                code: valid.code
             });
 
             // 2. begin: Validation.
@@ -58,14 +60,17 @@ module.exports = class BudgetManager  extends BaseManager  {
                 .then(results => {
                     var _budget = results[0];
 
-                    if (!valid.name || valid.name == '')
-                        errors["name"] = i18n.__("Budget.name.isRequired:%s is required", i18n.__("Budget.name._:Name"));//"Nama Budget Tidak Boleh Kosong";
+                    if (!valid.code || valid.code == '')
+                        errors["code"] = i18n.__("Budget.code.isRequired:%s is required", i18n.__("Budget.code._:Code")); //"Nama Budget Tidak Boleh Kosong";
                     else if (_budget) {
-                        errors["name"] = i18n.__("Budget.name.isExists:%s is already exists", i18n.__("Budget.name._:Name"));//"Nama Budget sudah terdaftar";
+                        errors["code"] = i18n.__("Budget.code.isExists:%s is already exists", i18n.__("Budget.code._:Code")); //"Nama Budget sudah terdaftar";
                     }
 
-                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                    if (!valid.name || valid.name == '')
+                        errors["name"] = i18n.__("Budget.name.isRequired:%s is required", i18n.__("Budget.name._:Name")); //"Nama Harus diisi";
+
+                    if (Object.getOwnPropertyNames(errors).length > 0) {
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -97,5 +102,5 @@ module.exports = class BudgetManager  extends BaseManager  {
 
         return this.collection.createIndexes([dateIndex, codeIndex]);
     }
-   
+
 }
