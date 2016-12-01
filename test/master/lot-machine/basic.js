@@ -126,7 +126,7 @@ it("#07. should error when update new data with same product and machine", funct
             return instanceManager.update(newData);
         })
         .then((id) => {
-            done("Should not be able to create data with same product and machine");
+            done("Should not be able to update data with same product and machine");
         })
         .catch((e) => {
             try {
