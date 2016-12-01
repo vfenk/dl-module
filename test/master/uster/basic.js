@@ -1,15 +1,15 @@
 var helper = require("../../helper");
-var ThreadSpecification = require("../../data-util/master/thread-specification-data-util");
-var ThreadSpecificationManager = require("../../../src/managers/master/thread-specification-manager");
+var Uster = require("../../data-util/master/uster-data-util");
+var UsterManager = require("../../../src/managers/master/uster-manager");
 var instanceManager = null;
-var validate = require("dl-models").validator.master.threadSpecification;
+var validate = require("dl-models").validator.master.uster;
 
 var should = require("should");
 
 before("#00. connect db", function(done) {
     helper.getDb()
         .then((db) => {
-            instanceManager = new ThreadSpecificationManager(db, {
+            instanceManager = new UsterManager(db, {
                 username: "unit-test"
             });
             done();
@@ -19,7 +19,7 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should error when create new thread-specification with empty data", function(done) {
+it("#01. should error when create new uster with empty data", function(done) {
     instanceManager.create({})
         .then((id) => {
             done("Should not be able to create data with empty data");
@@ -27,6 +27,7 @@ it("#01. should error when create new thread-specification with empty data", fun
         .catch((e) => {
             try {
                 e.errors.should.have.property("product"); 
+                e.errors.should.have.property("classifications"); 
                 done();
             }
             catch (ex) {
@@ -35,9 +36,34 @@ it("#01. should error when create new thread-specification with empty data", fun
         });
 });
 
+it("#01A. should error when create new uster with empty classifications data", function(done) {
+    instanceManager.create({classifications:[{},{},{},{},{}]})
+        .then((id) => {
+            done("Should not be able to create data with empty data");
+        })
+        .catch((e) => {
+            try {
+                e.errors.should.have.property("product"); 
+                e.errors.should.have.property("classifications"); 
+                e.errors.classifications.should.instanceof(Array); 
+                e.errors.classifications.length.should.equal(5); 
+                for(var errorClassification of e.errors.classifications)
+                {
+                    errorClassification.should.have.property("grade");
+                    errorClassification.grade.should.instanceof(String);
+                }
+                done();
+            }
+            catch (ex) {
+                done(e);
+            }
+        });
+});
+
+
 var createdId;
 it("#02. should success when create new data", function(done) {
-    ThreadSpecification.getNewData()
+    Uster.getNewData()
         .then((data) => instanceManager.create(data))
         .then((id) => {
             id.should.be.Object();
@@ -84,7 +110,7 @@ it("#04. should error when create new data with same product", function(done) {
 
 it(`#05. should success when update created data`, function(done) {
 
-    createdData.rpm += 29;
+    createdData.code += "[updated]";
     instanceManager.update(createdData)
         .then((id) => {
             createdId.toString().should.equal(id.toString());
@@ -99,7 +125,7 @@ it(`#06. should success when get updated data with id`, function(done) {
     instanceManager.getSingleById(createdId)
         .then((data) => {
             validate(data);
-            data.rpm.should.equal(createdData.rpm);
+            data.code.should.equal(createdData.code);
             done();
         })
         .catch((e) => {
@@ -109,7 +135,7 @@ it(`#06. should success when get updated data with id`, function(done) {
 
 it("#07. should error when update new data with same product", function(done) {
     var newDataId;
-    ThreadSpecification.getNewData()
+    Uster.getNewData()
         .then((data) => instanceManager.create(data))
         .then((newId) => instanceManager.getSingleById(newId))
         .then((newData) => {

@@ -7,7 +7,7 @@ class ThreadSpecificationDataUtil {
         var ManagerType = require("../../../src/managers/master/thread-specification-manager");
         return _getSert(input, ManagerType, (data) => {
             return {
-                code: data.code
+                productId: data.productId
             };
         });
     }

@@ -7,7 +7,7 @@ class UomDataUtil {
         var ManagerType = require("../../../src/managers/master/uom-manager");
         return _getSert(input, ManagerType, (data) => {
             return {
-                code: data.code
+                unit: data.unit
             };
         });
     }
