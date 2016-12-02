@@ -119,7 +119,7 @@ it("#07. should error when update new data with same code", function(done) {
             return instanceManager.update(newData);
         })
         .then((id) => {
-            done("Should not be able to create data with same code");
+            done("Should not be able to update data with same code");
         })
         .catch((e) => {
             try {

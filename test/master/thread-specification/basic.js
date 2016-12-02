@@ -1,15 +1,15 @@
 var helper = require("../../helper");
-var LotMachine = require("../../data-util/master/lot-machine-data-util");
-var LotMachineManager = require("../../../src/managers/master/lot-machine-manager");
+var ThreadSpecification = require("../../data-util/master/thread-specification-data-util");
+var ThreadSpecificationManager = require("../../../src/managers/master/thread-specification-manager");
 var instanceManager = null;
-var validate = require("dl-models").validator.master.lotMachine;
+var validate = require("dl-models").validator.master.threadSpecification;
 
 var should = require("should");
 
 before("#00. connect db", function(done) {
     helper.getDb()
         .then((db) => {
-            instanceManager = new LotMachineManager(db, {
+            instanceManager = new ThreadSpecificationManager(db, {
                 username: "unit-test"
             });
             done();
@@ -19,16 +19,14 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should error when create new lot-machine with empty data", function(done) {
+it("#01. should error when create new thread-specification with empty data", function(done) {
     instanceManager.create({})
         .then((id) => {
             done("Should not be able to create data with empty data");
         })
         .catch((e) => {
             try {
-                e.errors.should.have.property("product");
-                e.errors.should.have.property("machine");
-                e.errors.should.have.property("lot");
+                e.errors.should.have.property("product"); 
                 done();
             }
             catch (ex) {
@@ -39,10 +37,8 @@ it("#01. should error when create new lot-machine with empty data", function(don
 
 var createdId;
 it("#02. should success when create new data", function(done) {
-    LotMachine.getNewData()
-        .then((data) => {
-            return instanceManager.create(data);
-        })
+    ThreadSpecification.getNewData()
+        .then((data) => instanceManager.create(data))
         .then((id) => {
             id.should.be.Object();
             createdId = id;
@@ -67,18 +63,17 @@ it(`#03. should success when get created data with id`, function(done) {
         });
 });
 
-it("#04. should error when create new data with same product and machine", function(done) {
-    var data = Object.assign({}, createdData);
+it("#04. should error when create new data with same product", function(done) {
+    var data = Object.assign({}, createdData); 
     delete data._id;
 
     instanceManager.create(data)
         .then((id) => {
-            done("Should not be able to create data with same product and machine");
+            done("Should not be able to create data with same product");
         })
         .catch((e) => {
             try {
                 e.errors.should.have.property("product");
-                e.errors.should.have.property("machine");
                 done();
             }
             catch (ex) {
@@ -89,7 +84,7 @@ it("#04. should error when create new data with same product and machine", funct
 
 it(`#05. should success when update created data`, function(done) {
 
-    createdData.lot += "[updated]";
+    createdData.rpm += 29;
     instanceManager.update(createdData)
         .then((id) => {
             createdId.toString().should.equal(id.toString());
@@ -104,7 +99,7 @@ it(`#06. should success when get updated data with id`, function(done) {
     instanceManager.getSingleById(createdId)
         .then((data) => {
             validate(data);
-            data.lot.should.equal(createdData.lot);
+            data.rpm.should.equal(createdData.rpm);
             done();
         })
         .catch((e) => {
@@ -112,26 +107,22 @@ it(`#06. should success when get updated data with id`, function(done) {
         });
 });
 
-
-it("#07. should error when update new data with same product and machine", function(done) {
+it("#07. should error when update new data with same product", function(done) {
     var newDataId;
-    LotMachine.getNewData()
+    ThreadSpecification.getNewData()
         .then((data) => instanceManager.create(data))
         .then((newId) => instanceManager.getSingleById(newId))
         .then((newData) => {
             newDataId = newData._id;
             newData.productId = createdData.productId;
-            newData.machineId = createdData.machineId;
-            newData.lot = createdData.lot;
             return instanceManager.update(newData);
         })
         .then((id) => {
-            done("Should not be able to update data with same product and machine");
+            done("Should not be able to update data with same product");
         })
         .catch((e) => {
             try {
                 e.errors.should.have.property("product");
-                e.errors.should.have.property("machine");
                 instanceManager.destroy(newDataId)
                     .then(() => done());
             }

@@ -1,15 +1,15 @@
 var helper = require("../../helper");
-var LotMachine = require("../../data-util/master/lot-machine-data-util");
-var LotMachineManager = require("../../../src/managers/master/lot-machine-manager");
+var PurchaseRequest = require("../../data-util/purchasing/purchase-request-data-util");
+var PurchaseRequestManager = require("../../../src/managers/purchasing/purchase-request-manager");
 var instanceManager = null;
-var validate = require("dl-models").validator.master.lotMachine;
+var validate = require("dl-models").validator.purchasing.purchaseRequest;
 
 var should = require("should");
 
 before("#00. connect db", function(done) {
     helper.getDb()
         .then((db) => {
-            instanceManager = new LotMachineManager(db, {
+            instanceManager = new PurchaseRequestManager(db, {
                 username: "unit-test"
             });
             done();
@@ -19,16 +19,18 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should error when create new lot-machine with empty data", function(done) {
+it("#01. should error when create new purchase-request with empty data", function(done) {
     instanceManager.create({})
         .then((id) => {
             done("Should not be able to create data with empty data");
         })
         .catch((e) => {
             try {
-                e.errors.should.have.property("product");
-                e.errors.should.have.property("machine");
-                e.errors.should.have.property("lot");
+                e.errors.should.have.property('date');
+                e.errors.should.have.property('unit');
+                e.errors.should.have.property('category');
+                e.errors.should.have.property('budget');
+                e.errors.should.have.property('items');
                 done();
             }
             catch (ex) {
@@ -39,10 +41,8 @@ it("#01. should error when create new lot-machine with empty data", function(don
 
 var createdId;
 it("#02. should success when create new data", function(done) {
-    LotMachine.getNewData()
-        .then((data) => {
-            return instanceManager.create(data);
-        })
+    PurchaseRequest.getNewData()
+        .then((data) => instanceManager.create(data))
         .then((id) => {
             id.should.be.Object();
             createdId = id;
@@ -66,30 +66,11 @@ it(`#03. should success when get created data with id`, function(done) {
             done(e);
         });
 });
+ 
 
-it("#04. should error when create new data with same product and machine", function(done) {
-    var data = Object.assign({}, createdData);
-    delete data._id;
+it(`#04. should success when update created data`, function(done) {
 
-    instanceManager.create(data)
-        .then((id) => {
-            done("Should not be able to create data with same product and machine");
-        })
-        .catch((e) => {
-            try {
-                e.errors.should.have.property("product");
-                e.errors.should.have.property("machine");
-                done();
-            }
-            catch (ex) {
-                done(e);
-            }
-        });
-});
-
-it(`#05. should success when update created data`, function(done) {
-
-    createdData.lot += "[updated]";
+    createdData.remark += "[updated]";
     instanceManager.update(createdData)
         .then((id) => {
             createdId.toString().should.equal(id.toString());
@@ -100,11 +81,11 @@ it(`#05. should success when update created data`, function(done) {
         });
 });
 
-it(`#06. should success when get updated data with id`, function(done) {
+it(`#05. should success when get updated data with id`, function(done) {
     instanceManager.getSingleById(createdId)
         .then((data) => {
             validate(data);
-            data.lot.should.equal(createdData.lot);
+            data.remark.should.equal(createdData.remark);
             done();
         })
         .catch((e) => {
@@ -112,26 +93,22 @@ it(`#06. should success when get updated data with id`, function(done) {
         });
 });
 
-
-it("#07. should error when update new data with same product and machine", function(done) {
+it("#06. should error when update new data with same no", function(done) {
     var newDataId;
-    LotMachine.getNewData()
+    PurchaseRequest.getNewData()
         .then((data) => instanceManager.create(data))
         .then((newId) => instanceManager.getSingleById(newId))
         .then((newData) => {
             newDataId = newData._id;
-            newData.productId = createdData.productId;
-            newData.machineId = createdData.machineId;
-            newData.lot = createdData.lot;
+            newData.no = createdData.no;
             return instanceManager.update(newData);
         })
         .then((id) => {
-            done("Should not be able to update data with same product and machine");
+            done("Should not be able to update data with same no");
         })
         .catch((e) => {
             try {
-                e.errors.should.have.property("product");
-                e.errors.should.have.property("machine");
+                e.errors.should.have.property("no");
                 instanceManager.destroy(newDataId)
                     .then(() => done());
             }
@@ -141,7 +118,7 @@ it("#07. should error when update new data with same product and machine", funct
         });
 });
 
-it("#08. should success when read data", function(done) {
+it("#07. should success when read data", function(done) {
     instanceManager.read({
             filter: {
                 _id: createdId
@@ -159,7 +136,7 @@ it("#08. should success when read data", function(done) {
         });
 });
 
-it(`#09. should success when delete data`, function(done) {
+it(`#08. should success when delete data`, function(done) {
     instanceManager.delete(createdData)
         .then((id) => {
             id.toString().should.equal(createdId.toString());
@@ -171,7 +148,7 @@ it(`#09. should success when delete data`, function(done) {
 });
 
 
-it(`#10. should _deleted=true`, function(done) {
+it(`#09. should _deleted=true`, function(done) {
     instanceManager.getSingleByQuery({
             _id: createdId
         })
@@ -186,7 +163,7 @@ it(`#10. should _deleted=true`, function(done) {
         });
 });
 
-it("#11. should success when destroy data with id", function(done) {
+it("#10. should success when destroy data with id", function(done) {
     instanceManager.destroy(createdId)
         .then((result) => {
             result.should.be.Boolean();
@@ -198,7 +175,7 @@ it("#11. should success when destroy data with id", function(done) {
         });
 });
 
-it(`#12. should null when get destroyed data`, function(done) {
+it(`#11. should null when get destroyed data`, function(done) {
     instanceManager.getSingleByIdOrDefault(createdId)
         .then((data) => {
             should.equal(data, null);
