@@ -8,7 +8,7 @@ var i18n = require('dl-i18n');
 var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitPaymentCorrectionNote = DLModels.purchasing.UnitPaymentCorrectionNote;
 var UnitPaymentOrderManager = require('./unit-payment-order-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 
 module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseManager {
@@ -58,14 +58,14 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                     else if (!valid.unitPaymentOrder)
                         errors["unitPaymentOrder"] = i18n.__("UnitPaymentQuantityCorrectionNote.unitPaymentOrder.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.unitPaymentOrder._:Unit Payment Order"));
 
-                    if (!valid.invoiceCorrectionNo || valid.invoiceCorrectionNo == '')
-                        errors["invoiceCorrectionNo"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo._:Invoice Correction No"));
+                    // if (!valid.invoiceCorrectionNo || valid.invoiceCorrectionNo == '')
+                    //     errors["invoiceCorrectionNo"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionNo._:Invoice Correction No"));
 
                     if (!valid.releaseOrderNoteNo || valid.releaseOrderNoteNo == '')
                         errors["releaseOrderNoteNo"] = i18n.__("UnitPaymentQuantityCorrectionNote.releaseOrderNoteNo.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.releaseOrderNoteNo._:Release Order Note No"));
 
-                    if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
-                        errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
+                    // if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
+                    //     errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
                     if (valid.items) {
                         if (valid.items.length > 0) {
@@ -81,7 +81,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.lessThan:%s must not be greater than quantity on unit payment order", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
                                             else if (item.quantity == _unitReceiptNoteItem.deliveredQuantity)
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.noChanges: no changes", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
-                                            
+
                                             itemErrors.push(itemError);
                                             break;
                                         }
@@ -103,7 +103,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -124,7 +124,6 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                     item.productId = new ObjectId(_unitReceiptNoteItem.product._id);
                                     item.product = _unitReceiptNoteItem.product;
                                     item.product._id = new ObjectId(_unitReceiptNoteItem.product._id);
-                                    item.pricePerUnit = _unitReceiptNoteItem.pricePerDealUnit;
                                     item.priceTotal = item.quantity * item.pricePerUnit;
                                     item.uom = _unitReceiptNoteItem.deliveredUom;
                                     item.uomId = new ObjectId(_unitReceiptNoteItem.deliveredUom._id);
@@ -194,9 +193,30 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
         return new Promise((resolve, reject) => {
 
             this.getSingleById(id)
-                .then(unitReceiptNote => {
+                .then(unitPaymentQuantityCorrectionNote => {
                     var getDefinition = require('../../pdf/definitions/unit-payment-correction-note');
-                    var definition = getDefinition(unitReceiptNote);
+                    for (var _item of unitPaymentQuantityCorrectionNote.items) {
+                        for (var _poItem of _item.purchaseOrder.items) {
+                            if (_poItem.product._id.toString() === _item.product._id.toString()) {
+                                for (var _fulfillment of _poItem.fulfillments) {
+                                    var qty = 0, priceTotal = 0, pricePerUnit = 0;
+                                    if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentQuantityCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
+                                        qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
+                                        priceTotal = qty * _item.pricePerUnit;
+                                        pricePerUnit = _item.pricePerUnit;
+                                        _item.pricePerUnit = pricePerUnit;
+                                        _item.quantity = qty;
+                                        _item.priceTotal = priceTotal;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+
+                    var definition = getDefinition(unitPaymentQuantityCorrectionNote);
 
                     var generatePdf = require('../../pdf/pdf-generator');
                     generatePdf(definition)
@@ -260,6 +280,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                             if (unitPaymentQuantityCorrectionNoteItem.unitReceiptNoteNo == _unitReceiptNoteNo && validData.unitPaymentOrder.no == _unitPaymentOrderNo) {
 
                                                                 var _correction = {};
+                                                                var _qty = 0;
                                                                 _correction.correctionDate = validData.date;
                                                                 _correction.correctionNo = validData.no;
                                                                 _correction.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
@@ -274,8 +295,9 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                             sum += corr.correctionQuantity;
                                                                     }
                                                                     _correction.correctionQuantity = fulfillmentPoItem.unitReceiptNoteDeliveredQuantity - unitPaymentQuantityCorrectionNoteItem.quantity - sum;
+                                                                    _qty = unitPaymentQuantityCorrectionNoteItem.quantity + sum - fulfillmentPoItem.unitReceiptNoteDeliveredQuantity;
                                                                 }
-                                                                _correction.correctionPriceTotal = _correction.correctionQuantity * unitPaymentQuantityCorrectionNoteItem.pricePerUnit * unitPaymentQuantityCorrectionNoteItem.currency.rate;
+                                                                _correction.correctionPriceTotal = _qty * unitPaymentQuantityCorrectionNoteItem.pricePerUnit * unitPaymentQuantityCorrectionNoteItem.currency.rate;
                                                                 fulfillmentPoItem.correction.push(_correction);
                                                                 break;
                                                             }
@@ -302,6 +324,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                     correctionDate: validData.date,
                                                                     correctionNo: validData.no,
                                                                     correctionQuantity: _item.quantity,
+                                                                    correctionPricePerUnit: _item.pricePerUnit,
                                                                     correctionPriceTotal: _item.priceTotal,
                                                                     correctionRemark: `Koreksi ${validData.priceCorrectionType}`
                                                                 };
@@ -364,5 +387,47 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
         }
 
         return this.collection.createIndexes([dateIndex, noIndex]);
+    }
+
+    pdfReturNote(id) {
+        return new Promise((resolve, reject) => {
+            this.getSingleById(id)
+                .then(unitPaymentQuantityCorrectionNote => {
+                    var getDefinition = require('../../pdf/definitions/unit-payment-correction-retur-note');
+                    for (var _item of unitPaymentQuantityCorrectionNote.items) {
+                        for (var _poItem of _item.purchaseOrder.items) {
+                            if (_poItem.product._id.toString() === _item.product._id.toString()) {
+                                for (var _fulfillment of _poItem.fulfillments) {
+                                    var qty = 0, priceTotal = 0, pricePerUnit = 0;
+                                    if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentQuantityCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
+                                        qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
+                                        priceTotal = qty * _item.pricePerUnit;
+                                        pricePerUnit = _item.pricePerUnit;
+                                        _item.pricePerUnit = pricePerUnit;
+                                        _item.quantity = qty;
+                                        _item.priceTotal = priceTotal;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    var definition = getDefinition(unitPaymentQuantityCorrectionNote);
+                    var generatePdf = require('../../pdf/pdf-generator');
+                    generatePdf(definition)
+                        .then(binary => {
+                            resolve(binary);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+
+        });
     }
 }
