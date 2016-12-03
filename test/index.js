@@ -28,10 +28,10 @@ describe('#dl-module', function(done) {
     test('@MASTER/USTER', './master/uster');
     test('@MASTER/VAT', './master/vat');
     test('@MASTER/YARN-EQUIVALENT-CONVERSION', './master/yarn-equivalent-coversion');
- 
+    test('@MASTER/LAMP-STANDARD', './master/lamp-standard');
 
     // //Purchasing 
-    test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
+     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
     // test('@purchasing/purchase-request-manager', './purchasing/purchase-request-manager-test');
     // test('@purchasing/purchase-order-manager', './purchasing/purchase-order-manager-test');
     // test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
