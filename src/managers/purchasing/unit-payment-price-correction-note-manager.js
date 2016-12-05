@@ -233,17 +233,6 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         });
     }
 
-    generateNo(unit, category) {
-        var now = new Date();
-        var stamp = now / 1000 | 0;
-        var code = stamp.toString();
-        var locale = 'id-ID';
-        var moment = require('moment');
-        moment.locale(locale);
-        var no = `NDO${unit.toUpperCase()}${category.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
-        return no;
-    }
-
     create(unitPaymentPriceCorrectionNote) {
         return new Promise((resolve, reject) => {
             this._createIndexes()
@@ -276,7 +265,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                             var _unitPaymentOrderNo = fulfillmentPoItem.interNoteNo || '';
                                                             var _unitReceiptNoteNo = fulfillmentPoItem.unitReceiptNoteNo || '';
 
-                                                            if (unitPaymentPriceCorrectionNoteItem.unitReceiptNoteNo == _unitReceiptNoteNo && validData.unitPaymentOrder.no == _unitPaymentOrderNo) {
+                                                            if (unitPaymentPriceCorrectionNoteItem.unitReceiptNoteNo === _unitReceiptNoteNo && validData.unitPaymentOrder.no === _unitPaymentOrderNo) {
                                                                 if (!fulfillmentPoItem.correction)
                                                                     fulfillmentPoItem.correction = [];
                                                                 var _correction = {};
@@ -306,7 +295,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                 for (var _unitReceiptNote of _unitPaymentOrder.items) {
                                                     if (_item.unitReceiptNoteNo == _unitReceiptNote.unitReceiptNote.no) {
                                                         for (var _unitReceiptNoteItem of _unitReceiptNote.unitReceiptNote.items) {
-                                                            if (_item.purchaseOrderId.toString() == _unitReceiptNoteItem.purchaseOrderId.toString() && _item.product._id.toString() == _unitReceiptNoteItem.product._id.toString()) {
+                                                            if (_item.purchaseOrderId.toString() === _unitReceiptNoteItem.purchaseOrderId.toString() && _item.product._id.toString() === _unitReceiptNoteItem.product._id.toString()) {
                                                                 var _correction = {
                                                                     correctionDate: validData.date,
                                                                     correctionNo: validData.no,
