@@ -64,32 +64,7 @@ it(`#03. should success when get created data with id`, function(done) {
         });
 });
 
-it("#04. should error when update new data with same code", function(done) {
-    var newDataId;
-    Machine.getNewData()
-        .then((data) => instanceManager.create(data))
-        .then((newId) => instanceManager.getSingleById(newId))
-        .then((newData) => {
-            newDataId = newData._id;
-            newData.code = createdData.code;
-            return instanceManager.update(newData);
-        })
-        .then((id) => {
-            done("Should not be able to create data with same code");
-        })
-        .catch((e) => {
-            try {
-                e.errors.should.have.property("code");
-                instanceManager.destroy(newDataId)
-                    .then(() => done());
-            }
-            catch (ex) {
-                done(e);
-            }
-        });
-});
-
-it(`#05. should success when update created data`, function(done) {
+it(`#04. should success when update created data`, function(done) {
 
     createdData.name += "[updated]";
     instanceManager.update(createdData)
@@ -102,7 +77,7 @@ it(`#05. should success when update created data`, function(done) {
         });
 });
 
-it(`#06. should success when get updated data with id`, function(done) {
+it(`#05. should success when get updated data with id`, function(done) {
     instanceManager.getSingleById(createdId)
         .then((data) => {
             validate(data);
@@ -111,6 +86,31 @@ it(`#06. should success when get updated data with id`, function(done) {
         })
         .catch((e) => {
             done(e);
+        });
+});
+
+it("#06. should error when update new data with same code", function(done) {
+    var newDataId;
+    Machine.getNewData()
+        .then((data) => instanceManager.create(data))
+        .then((newId) => instanceManager.getSingleById(newId))
+        .then((newData) => {
+            newDataId = newData._id;
+            newData.code = createdData.code;
+            return instanceManager.update(newData);
+        })
+        .then((id) => {
+            done("Should not be able to update data with same code");
+        })
+        .catch((e) => {
+            try {
+                e.errors.should.have.property("code");
+                instanceManager.destroy(newDataId)
+                    .then(() => done());
+            }
+            catch (ex) {
+                done(e);
+            }
         });
 });
 
