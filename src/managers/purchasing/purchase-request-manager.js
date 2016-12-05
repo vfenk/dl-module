@@ -59,45 +59,56 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     var _products = results.slice(4, results.length);
                     var now = new Date();
 
-                    if (!valid.no || valid.no == '')
+                    if (!valid.no || valid.no === "") {
                         errors["no"] = i18n.__("PurchaseRequest.no.isRequired:%s is required", i18n.__("PurchaseRequest.no._:No"));//"Nomor PR tidak boleh kosong";
-                    else if (_purchaseRequest)
+                    } else if (_purchaseRequest) {
                         errors["no"] = i18n.__("PurchaseRequest.no.isExists:%s is already exists", i18n.__("PurchaseRequest.no._:No"));//"Nomor PR sudah terdaftar";
+                    }
 
-
-                    if (!valid.date || valid.date == '' || valid.date == "undefined")
+                    if (!valid.date || valid.date === "" || valid.date === "undefined") {
                         errors["date"] = i18n.__("PurchaseRequest.date.isRequired:%s is required", i18n.__("PurchaseRequest.date._:Date")); //"Tanggal PR tidak boleh kosong";
+                    }
 
-                    if (!_unit)
+                    if (!_unit) {
                         errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is not exists", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
-                    else if (!valid.unitId)
+                    }
+                    else if (!valid.unitId) {
                         errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is required", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
+                    }
                     else if (valid.unit) {
-                        if (!valid.unit._id)
+                        if (!valid.unit._id) {
                             errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is required", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
+                        }
                     }
-                    else if (!valid.unit)
+                    else if (!valid.unit) {
                         errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is required", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
-
-
-                    if (!_category)
-                        errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is not exists", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
-                    else if (!valid.categoryId)
-                        errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is required", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
-                    else if (valid.category) {
-                        if (!valid.category._id)
-                            errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is required", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
                     }
-                    else if (!valid.category)
-                        errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is required", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
 
-                    if (!_budget)
+
+                    if (!_category) {
+                        errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is not exists", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong"
+                    }
+                    else if (!valid.categoryId) {
+                        errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is required", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
+                    }
+                    else if (valid.category) {
+                        if (!valid.category._id) {
+                            errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is required", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
+                        }
+                    }
+                    else if (!valid.category) {
+                        errors["category"] = i18n.__("PurchaseRequest.category.isRequired:%s is required", i18n.__("PurchaseRequest.category._:Category")); //"Category tidak boleh kosong";
+                    }
+
+                    if (!_budget) {
                         errors["budget"] = i18n.__("PurchaseRequest.budget.name.isRequired:%s is not exists", i18n.__("PurchaseRequest.budget.name._:Budget")); //"Budget tidak boleh kosong";
-                    else if (!valid.budget._id)
+                    }
+                    else if (!valid.budget._id) {
                         errors["budget"] = i18n.__("PurchaseRequest.budget.name.isRequired:%s is required", i18n.__("PurchaseRequest.budget.name._:Budget")); //"Budget tidak boleh kosong";
+                    }
 
                     if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == '' || valid.expectedDeliveryDate == 'undefined')
-                        valid.expectedDeliveryDate = "";
+                    { valid.expectedDeliveryDate = ""; }
 
                     if (valid.items && valid.items.length <= 0) {
                         errors["items"] = i18n.__("PurchaseRequest.items.isRequired:%s is required", i18n.__("PurchaseRequest.items._:Item")); //"Harus ada minimal 1 barang";
@@ -106,10 +117,12 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                         var itemErrors = [];
                         for (var item of valid.items) {
                             var itemError = {};
-                            if (!item.product || !item.product._id)
+                            if (!item.product || !item.product._id) {
                                 itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isRequired:%s is required", i18n.__("PurchaseRequest.items.product.name._:Name")); //"Nama barang tidak boleh kosong";
-                            if (item.quantity <= 0)
+                            }
+                            if (item.quantity <= 0) {
                                 itemError["quantity"] = i18n.__("PurchaseRequest.items.quantity.isRequired:%s is required", i18n.__("PurchaseRequest.items.quantity._:Quantity")); //Jumlah barang tidak boleh kosong";
+                            }
                             itemErrors.push(itemError);
                         }
                         for (var itemError of itemErrors) {
@@ -118,7 +131,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                                 break;
                             }
                             if (errors.items)
-                                break;
+                            { break; }
                         }
                     }
 
@@ -165,13 +178,12 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deletedFilter = {
+        var _default = {
             _deleted: false
         },
-            keywordFilter = {};
-
-
-        var query = {};
+            pagingFilter = paging.filter || {},
+            keywordFilter = {},
+            query = {};
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
@@ -204,36 +216,35 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             };
         }
         query = {
-            '$and': [deletedFilter, paging.filter, keywordFilter]
+            '$and': [_default, paging.filter, keywordFilter]
         }
         return query;
     }
 
-    create(purchaseRequest) {
+    _beforeInsert(purchaseRequest) {
         return new Promise((resolve, reject) => {
-            var dateFormat = "MMYY";
-            var locale = 'id-ID';
-            var moment = require('moment');
-            moment.locale(locale);
-            this._validate(purchaseRequest)
-                .then(validPurchaseRequest => {
-                    validPurchaseRequest.no = generateCode();
-                    if (validPurchaseRequest.expectedDeliveryDate == "undefined") {
-                        validPurchaseRequest.expectedDeliveryDate = "";
-                    }
-                    this.collection.insert(validPurchaseRequest)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                })
+            purchaseRequest.no = generateCode();
+            resolve(purchaseRequest);
+        })
+    }
 
-        });
+    _createIndexes() {
+        var dateIndex = {
+            name: `ix_${map.purchasing.collection.PurchaseRequest}__updatedDate`,
+            key: {
+                _updatedDate: -1
+            }
+        }
+
+        var noIndex = {
+            name: `ix_${map.purchasing.collection.PurchaseRequest}_no`,
+            key: {
+                no: 1
+            },
+            unique: true
+        }
+
+        return this.collection.createIndexes([dateIndex, noIndex]);
     }
 
     post(listPurchaseRequest) {
@@ -378,24 +389,5 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     reject(e);
                 });
         });
-    }
-
-    _createIndexes() {
-        var dateIndex = {
-            name: `ix_${map.purchasing.collection.PurchaseRequest}__updatedDate`,
-            key: {
-                _updatedDate: -1
-            }
-        }
-
-        var noIndex = {
-            name: `ix_${map.purchasing.collection.PurchaseRequest}_no`,
-            key: {
-                no: 1
-            },
-            unique: true
-        }
-
-        return this.collection.createIndexes([dateIndex, noIndex]);
     }
 }
