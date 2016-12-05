@@ -9,7 +9,7 @@ require("should");
 
 before('#00. connect db', function (done) {
     helper.getDb()
-        .then(db => {
+        .then((db) => {
             unitPaymentOrderManager = new UnitPaymentOrderManager(db, {
                 username: 'unit-test'
             });
@@ -23,7 +23,7 @@ before('#00. connect db', function (done) {
 var createdId;
 it('#01. should success when create new data', function (done) {
     unitPaymentOrder.getNew()
-        .then(data => {
+        .then((data) => {
             data._id.should.be.Object();
             createdId = data._id;
             done();
@@ -34,7 +34,7 @@ it('#01. should success when create new data', function (done) {
 });
 it(`#02. should success when get created data with id`, function (done) {
     unitPaymentOrderManager.pdf(createdId.toString())
-        .then(data => {
+        .then((data) => {
             done();
         })
         .catch(e => {
@@ -45,7 +45,7 @@ it(`#02. should success when get created data with id`, function (done) {
 var createdData;
 it(`#03. should success when get created data with id`, function (done) {
     unitPaymentOrderManager.getSingleByQuery({ _id: createdId })
-        .then(data => {
+        .then((data) => {
             data.should.instanceof(Object);
             createdData = data;
             done();
@@ -58,7 +58,7 @@ it(`#03. should success when get created data with id`, function (done) {
 it(`#04. should success when update created data`, function (done) {
     createdData.remark += '[updated]';
     unitPaymentOrderManager.update(createdData)
-        .then(id => {
+        .then((id) => {
             createdId.toString().should.equal(id.toString());
             done();
         })
@@ -69,7 +69,7 @@ it(`#04. should success when update created data`, function (done) {
 
 it(`#05. should success when get updated data with id`, function (done) {
     unitPaymentOrderManager.getSingleByQuery({ _id: createdId })
-        .then(data => {
+        .then((data) => {
             data.no.should.equal(createdData.no);
             createdData = data;
             done();
@@ -81,7 +81,7 @@ it(`#05. should success when get updated data with id`, function (done) {
 
 it(`#06. should success when delete data`, function (done) {
     unitPaymentOrderManager.delete(createdData)
-        .then(id => {
+        .then((id) => {
             id.toString().should.equal(id.toString());
             done();
         })
@@ -92,7 +92,7 @@ it(`#06. should success when delete data`, function (done) {
 
 it('#07. should error when create new blank data', function (done) {
     unitPaymentOrderManager.create({})
-        .then(id => {
+        .then((id) => {
             id.should.be.Object();
             done();
         })

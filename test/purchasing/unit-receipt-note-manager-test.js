@@ -8,7 +8,7 @@ require("should");
 
 before('#00. connect db', function (done) {
     helper.getDb()
-        .then(db => {
+        .then((db) => {
             unitReceiptNoteManager = new UnitReceiptNoteManager(db, {
                 username: 'unit-test'
             });
@@ -22,7 +22,7 @@ before('#00. connect db', function (done) {
 var createdId;
 it('#01. should success when create new data', function (done) {
     unitReceiptNote.getNew()
-        .then(data => {
+        .then((data) => {
             data._id.should.be.Object();
             createdId = data._id;
             done();
@@ -35,7 +35,7 @@ it('#01. should success when create new data', function (done) {
 var createdData;
 it(`#02. should success when get created data with id`, function (done) {
     unitReceiptNoteManager.getSingleByQuery({ _id: createdId })
-        .then(data => {
+        .then((data) => {
             validatorPurchasing.unitReceiptNote(data);
             data.should.instanceof(Object);
             createdData = data;
@@ -49,7 +49,7 @@ it(`#02. should success when get created data with id`, function (done) {
 it(`#03. should success when update created data`, function (done) {
     createdData.remark += '[updated]';
     unitReceiptNoteManager.update(createdData)
-        .then(id => {
+        .then((id) => {
             createdId.toString().should.equal(id.toString());
             done();
         })
@@ -60,7 +60,7 @@ it(`#03. should success when update created data`, function (done) {
 
 it(`#04. should success when get updated data with id`, function (done) {
     unitReceiptNoteManager.getSingleByQuery({ _id: createdId })
-        .then(data => {
+        .then((data) => {
             data.no.should.equal(createdData.no);
             createdData = data;
             done();
@@ -72,7 +72,7 @@ it(`#04. should success when get updated data with id`, function (done) {
 
 it(`#05. should success when delete data`, function (done) {
     unitReceiptNoteManager.delete(createdData)
-        .then(id => {
+        .then((id) => {
             createdId.toString().should.equal(id.toString());
             done();
         })
@@ -85,7 +85,7 @@ it('#06. should error when create new data with same code', function (done) {
     var data = Object.assign({}, createdData);
     delete data._id;
     unitReceiptNoteManager.create(data)
-        .then(id => {
+        .then((id) => {
             id.should.be.Object();
             done();
         })
@@ -100,7 +100,7 @@ it('#06. should error when create new data with same code', function (done) {
 });
 it('#07. should error when create new blank data', function (done) {
     unitReceiptNoteManager.create({})
-        .then(id => {
+        .then((id) => {
             id.should.be.Object();
             done();
         })
