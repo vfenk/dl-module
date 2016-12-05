@@ -1,5 +1,4 @@
-"use strict";
-"use esversion: 6";
+'use strict';
 
 var should = require('should');
 var helper = require("../helper"); 
