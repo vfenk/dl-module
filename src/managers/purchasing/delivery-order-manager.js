@@ -94,19 +94,19 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     var _supplier = results[1];
                     var _poExternals = results.slice(2, results.length) || [];
 
-                    if (!valid.no || valid.no == '')
+                    if (!valid.no || valid.no === "")
                         errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan tidak boleh kosong";
                     else if (_module)
                         errors["no"] = i18n.__("DeliveryOrder.no.isExists:%s is already exists", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan sudah terdaftar";
 
-                    if (!valid.date || valid.date == '')
+                    if (!valid.date || valid.date === "")
                         errors["date"] = i18n.__("DeliveryOrder.date.isRequired:%s is required", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh kosong";
                     else if (valid.date > now)
                         errors["date"] = i18n.__("DeliveryOrder.date.isGreater:%s is greater than today", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
-                    if (!valid.supplierDoDate || valid.supplierDoDate == '')
+                    if (!valid.supplierDoDate || valid.supplierDoDate === "")
                         errors["supplierDoDate"] = i18n.__("DeliveryOrder.supplierDoDate.isRequired:%s is required", i18n.__("DeliveryOrder.supplierDoDate._:SupplierDoDate"));//"Tanggal surat jalan supplier tidak boleh kosong";
 
-                    if (!valid.supplierId || valid.supplierId.toString() == '')
+                    if (!valid.supplierId || valid.supplierId.toString() === "")
                         errors["supplier"] = i18n.__("DeliveryOrder.supplier.name.isRequired:%s is required", i18n.__("DeliveryOrder.supplier.name._:NameSupplier")); //"Nama supplier tidak boleh kosong";    
                     else if (!_supplier)
                         errors["supplier"] = i18n.__("DeliveryOrder.supplier.name.isRequired:%s is required", i18n.__("DeliveryOrder.supplier.name._:NameSupplier")); //"Nama supplier tidak boleh kosong";
@@ -139,7 +139,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                             for (var doFulfillment of doItem.fulfillments || []) {
                                 var fulfillmentError = {};
-                                if (!doFulfillment.deliveredQuantity || doFulfillment.deliveredQuantity == 0) {
+                                if (!doFulfillment.deliveredQuantity || doFulfillment.deliveredQuantity === 0) {
                                     purchaseOrderExternalItemHasErrors = true;
                                     fulfillmentError["deliveredQuantity"] = i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity.isRequired:%s is required or not 0", i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity._:DeliveredQuantity")); //"Jumlah barang diterima tidak boleh kosong";
                                 }
@@ -173,15 +173,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                     for (var item of valid.items) {
                         for (var poExternal of _poExternals) {
-                            if (item.purchaseOrderExternal._id.toString() == poExternal._id.toString()) {
+                            if (item.purchaseOrderExternal._id.toString() === poExternal._id.toString()) {
                                 item.purchaseOrderExternal = poExternal;
                                 item.purchaseOrderExternalId = new ObjectId(poExternal._id);
 
                                 for (var fulfillment of item.fulfillments) {
                                     for (var poInternal of poExternal.items) {
-                                        if (fulfillment.purchaseOrder._id.toString() == poInternal._id.toString()) {
+                                        if (fulfillment.purchaseOrder._id.toString() === poInternal._id.toString()) {
                                             for (var poItem of poInternal.items) {
-                                                if (fulfillment.product._id.toString() == poItem.product._id.toString()) {
+                                                if (fulfillment.product._id.toString() === poItem.product._id.toString()) {
                                                     fulfillment.product = poItem.product;
                                                     fulfillment.productId = new ObjectId(poItem.product._id);
                                                     fulfillment.purchaseOrder = poInternal;
@@ -292,7 +292,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
                                                         for (var result of results) {
                                                             for (var poExternalItem of purchaseOrderExternal.items) {
-                                                                if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() == result._id.toString())
+                                                                if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() === result._id.toString())
                                                                     poExternalItem = result;
                                                                 break;
                                                             }
@@ -443,7 +443,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
                                                         for (var result of results) {
                                                             for (var poExternalItem of purchaseOrderExternal.items) {
-                                                                if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() == result._id.toString())
+                                                                if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() === result._id.toString())
                                                                     poExternalItem = result;
                                                                 break;
                                                             }
@@ -544,7 +544,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                     if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
                                                         var _index;
                                                         for (var poItemFulfillment of poItem.fulfillments) {
-                                                            if (poItemFulfillment.deliveryOderNo == validDeliveryOrder.no) {
+                                                            if (poItemFulfillment.deliveryOderNo === validDeliveryOrder.no) {
                                                                 _index = poItem.fulfillments.indexOf(poItemFulfillment);
                                                                 break;
                                                             }
@@ -558,7 +558,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                             totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
                                                         }
                                                         poItem.realizationQuantity = totalRealize;
-                                                        if (poItem.realizationQuantity == poItem.dealQuantity)
+                                                        if (poItem.realizationQuantity === poItem.dealQuantity)
                                                             poItem.isClosed = true;
                                                         else
                                                             poItem.isClosed = false;
@@ -568,7 +568,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                 }
                                             }
                                             for (var poItem of purchaseOrder.items) {
-                                                if (poItem.isClosed == false) {
+                                                if (poItem.isClosed === false) {
                                                     purchaseOrder.isClosed = false;
                                                     break;
                                                 }
@@ -595,7 +595,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
                                                         for (var result of results) {
                                                             for (var poExternalItem of purchaseOrderExternal.items) {
-                                                                if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() == result._id.toString())
+                                                                if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() === result._id.toString())
                                                                     poExternalItem = result;
                                                                 break;
                                                             }
@@ -671,15 +671,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var deleted = { _deleted: false };
             var _createdBy = { _createdBy: createdBy };
 
-            if (no != "undefined" && no != "") {
+            if (no !== "undefined" && no !== "") {
                 var _no = { no: no };
                 Object.assign(query, _no);
             }
-            if (supplierId != "undefined" && supplierId != "") {
+            if (supplierId !== "undefined" && supplierId !== "") {
                 var _supplierId = { supplierId: new ObjectId(supplierId) };
                 Object.assign(query, _supplierId);
             }
-            if (dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
+            if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
                 var supplierDoDate = {
                     supplierDoDate:
                     {
