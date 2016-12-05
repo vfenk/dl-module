@@ -356,7 +356,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                                     var fulfillmentNo = fulfillment.unitReceiptNoteNo || '';
                                                                     var unitReceiptNoteNo = unitPaymentOrderItem.unitReceiptNote.no || '';
                                                                     var interNoteNo = fulfillment.interNoteNo || '';
-                                                                    if (interNoteNo == validUnitPaymentOrder.no && fulfillmentNo == unitReceiptNoteNo) {
+                                                                    if (interNoteNo === validUnitPaymentOrder.no && fulfillmentNo === unitReceiptNoteNo) {
                                                                         fulfillment.invoiceDate = '';
                                                                         fulfillment.invoiceNo = '';
                                                                         fulfillment.interNoteDate = '';
@@ -446,17 +446,6 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         }
 
         return this.collection.createIndexes([dateIndex, noIndex]);
-    }
-
-    generateNo(unit, category) {
-        var now = new Date();
-        var stamp = now / 1000 | 0;
-        var code = stamp.toString();
-        var locale = 'id-ID';
-        var moment = require('moment');
-        moment.locale(locale);
-        var no = `SPB${unit.toUpperCase()}${category.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
-        return no;
     }
 
 }
