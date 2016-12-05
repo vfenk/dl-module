@@ -83,22 +83,78 @@ before('#00. connect db', function(done) {
 it('#01. should success when create 20 PO External data', function (done) {
     var data = []; 
     for (var i = 0; i < 20; i++) { 
-        var poe = purchaseOrderExternalDataUtil.getPosted();  
+        var poe = purchaseOrderExternalDataUtil.getPosted();
         data.push(poe); 
     } 
     Promise.all(data) 
         .then((result) => { 
-            resolve(result);
             done(); 
         }).catch(e => {
             done(e);
         });
 });
 
-it('#02. should success when get data report', function (done) {
+it('#02. should success when get data report PO Per Unit Per Category', function (done) {
     purchaseOrderManager.getDataPOUnitCategory()
     .then(po => {
-        po.should.instanceof(Object);
+        po.should.instanceof(Array);
+        done();
+    }).catch(e => {
+            done(e);
+        });
+
+});
+
+it('#03. should success when get data report PO Per Unit', function (done) {
+    purchaseOrderManager.getDataPOUnit()
+    .then(po => {
+        po.should.instanceof(Array);
+        done();
+    }).catch(e => {
+            done(e);
+        });
+
+});
+
+it('#04. should success when get data report Per Category', function (done) {
+    purchaseOrderManager.getDataPOCategory()
+    .then(po => {
+        po.should.instanceof(Array);
+        done();
+    }).catch(e => {
+            done(e);
+        });
+
+});
+var startDate=new Date();
+var endDate=new Date();
+it('#05. should success when get data report PO Per Unit Per Category with date', function (done) {
+    
+    purchaseOrderManager.getDataPOUnitCategory(startDate,endDate)
+    .then(po => {
+        po.should.instanceof(Array);
+        done();
+    }).catch(e => {
+            done(e);
+        });
+
+});
+
+it('#06. should success when get data report PO Per Unit with date', function (done) {
+    purchaseOrderManager.getDataPOUnit(startDate,endDate)
+    .then(po => {
+        po.should.instanceof(Array);
+        done();
+    }).catch(e => {
+            done(e);
+        });
+
+});
+
+it('#07. should success when get data report Per Category with date', function (done) {
+    purchaseOrderManager.getDataPOCategory(startDate,endDate)
+    .then(po => {
+        po.should.instanceof(Array);
         done();
     }).catch(e => {
             done(e);
