@@ -4,7 +4,7 @@ var generateCode = require("../../../src/utils/code-generator");
 
 class VatDataUtil {
     getSert(input) {
-        var ManagerType = require("../../../src/managers/master/budget-manager");
+        var ManagerType = require("../../../src/managers/master/vat-manager");
         return _getSert(input, ManagerType, (data) => {
             return {
                 name: data.name,
