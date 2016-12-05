@@ -254,7 +254,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             purchaseOrderExternalError["paymentDueDays"] = i18n.__("PurchaseOrderExternal.paymentDueDays.isRequired:%s is required", i18n.__("PurchaseOrderExternal.paymentDueDays._:Payment Due Days")); //"Tempo Pembayaran tidak boleh kosong";
                         }
                     }
-                    if ((valid.freightCostBy || '').toString() == '') {
+                    if ((valid.freightCostBy || "").toString() === "") {
                         purchaseOrderExternalError["freightCostBy"] = i18n.__("PurchaseOrderExternal.freightCostBy.isRequired:%s is required", i18n.__("PurchaseOrderExternal.freightCostBy._:FreightCostBy")); //"Tempo Pembayaran tidak boleh kosong";
                     }
 
@@ -291,7 +291,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                             poItemHasError = true;
                                             poItemError["dealUom"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:Deal Quantity")); //"Jumlah kesepakatan tidak boleh kosong";
                                         }
-                                        if (!poItem.priceBeforeTax || poItem.priceBeforeTax == 0) {
+                                        if (!poItem.priceBeforeTax || poItem.priceBeforeTax === 0) {
                                             poItemHasError = true;
                                             poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
                                         }
@@ -343,12 +343,12 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
                     for (var _item of valid.items) {
                         for (var _purchaseOrder of _poInternals) {
-                            if (_purchaseOrder._id.toString() == _item._id.toString()) {
+                            if (_purchaseOrder._id.toString() === _item._id.toString()) {
                                 var _po = new PurchaseOrder();
                                 _po = _purchaseOrder;
                                 for (var _poItem of _item.items) {
                                     for (var _purchaseOrderItem of _po.items) {
-                                        if (_purchaseOrderItem.product._id.toString() == _poItem.product._id.toString()) {
+                                        if (_purchaseOrderItem.product._id.toString() === _poItem.product._id.toString()) {
                                             _purchaseOrderItem.product = _poItem.product;
                                             _purchaseOrderItem.dealQuantity = _poItem.dealQuantity;
                                             _purchaseOrderItem.dealUom = _poItem.dealUom;
@@ -470,38 +470,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         });
     }
 
-    generatePOno() {
-        var now = new Date();
-        var stamp = now / 1000 | 0;
-        var code = stamp.toString();
-        var year = now.getFullYear();
-        var month = this._getRomanNumeral(now.getMonth());
-        var initial = 'AS';
-        var div = "UMUM";
-        var unit = '';
-        switch (div.toUpperCase().trim()) {
-            case "UMUM":
-                unit = 'PBL.A';
-                break;
-            case 'UTILITY':
-                unit = 'PBL.C';
-                break;
-            case "FINISHING&PRINTING":
-                unit = 'PBL.D';
-                break;
-            case 'WEAVING':
-                unit = 'PBL.E';
-                break;
-            case "SPINNING":
-                unit = 'PBL.F';
-                break;
-            default:
-                unit = "PBL.X";
-        }
-        var no = `${code}/DL-${unit}/PO-${initial}/${month}/${year}`;
-        return no;
-    }
-
     pdf(id) {
         return new Promise((resolve, reject) => {
 
@@ -545,8 +513,4 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
 
-    _getRomanNumeral(_number) {
-        var listRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXXII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX", "XXXI"];
-        return listRoman[_number];
-    }
 };
