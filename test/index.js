@@ -12,6 +12,7 @@ describe('#dl-module', function(done) {
     // test('@auth/account-manager', './auth/account-manager-test');
     // test('@auth/role-manager', './auth/role-manager-test');
 
+    // test('@MASTER/BUDGET', './etl/fact-purchase-duration');
     // // Master
     test('@MASTER/BUDGET', './master/budget');
     test('@MASTER/BUYER', './master/buyer');
