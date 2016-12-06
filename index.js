@@ -49,7 +49,7 @@ module.exports = {
                 account: require("./test/data-util/auth/account-data-util"),
                 role: require("./test/data-util/auth/role-data-util")
             },
-            master: {,
+            master: {
                 accountBank: require("./test/data-util/master/account-bank-data-util"),
                 budget: require("./test/data-util/master/budget-data-util"),
                 buyer: require("./test/data-util/master/buyer-data-util"),
