@@ -61,7 +61,7 @@ module.exports = class UnitManager extends BaseManager {
                 },
                 code: valid.code
             });
-            var getDivision = valid.divisionId && (valid.divisionId || '').toString().trim().length > 0 ? this.divisionManager.getSingleByIdOrDefault(valid.divisionId) : Promise.resolve(null);
+            var getDivision = ObjectId.isValid(valid.divisionId) ? this.divisionManager.getSingleByIdOrDefault(new ObjectId(valid.divisionId)) : Promise.resolve(null);
 
             // 2. begin: Validation.
             Promise.all([getUnitPromise, getDivision])
