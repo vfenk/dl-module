@@ -62,7 +62,7 @@ module.exports = class LotMachineManager extends BaseManager {
         });
 
         var getProduct = ObjectId.isValid(valid.productId) ? this.productManager.getSingleByIdOrDefault(new ObjectId(valid.productId)) : Promise.resolve(null);
-        var getMachine = ObjectId.isValid(valid.machineId) ? this.machineManager.getSingleByIdOrDefault(new Object(valid.machineId)) : Promise.resolve(null);
+        var getMachine = ObjectId.isValid(valid.machineId) ? this.machineManager.getSingleByIdOrDefault(new ObjectId(valid.machineId)) : Promise.resolve(null);
 
         return Promise.all([getLotMachinePromise, getProduct, getMachine])
             .then(results => {

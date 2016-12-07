@@ -28,8 +28,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
     _getQuery(paging) {
         var deletedFilter = {
-                _deleted: false
-            },
+            _deleted: false
+        },
             keywordFilter = {};
 
 
@@ -101,7 +101,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
                 if (_purchaseRequest)
                     errors["no"] = i18n.__("PurchaseRequest.no.isExists:%s is exists", i18n.__("PurchaseRequest.product._:No"));
-                    
+
                 if (!valid.date || valid.date == "" || valid.date == "undefined")
                     errors["date"] = i18n.__("PurchaseRequest.date.isRequired:%s is required", i18n.__("PurchaseRequest.date._:Date")); //"Tanggal PR tidak boleh kosong";
 
@@ -319,7 +319,6 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 query = {
                     "no": PRNo
                 };
-                console.log(query);
             }
             else if (dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
                 query = {
@@ -335,9 +334,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 isPosted: true
             });
             this.collection.find(query).sort(sorting).toArray()
-                .then(purchaseRequest => {
-                    resolve(purchaseRequest);
-                    console.log(purchaseRequest);
+                .then((purchaseRequests) => {
+                    resolve(purchaseRequests);
                 })
                 .catch(e => {
                     reject(e);
