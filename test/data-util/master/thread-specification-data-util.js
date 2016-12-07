@@ -1,5 +1,5 @@
 "use strict";
-var _getSert = require("./getsert");
+var _getSert = require("../getsert");
 var product = require("./product-data-util");
 
 class ThreadSpecificationDataUtil {

@@ -12,7 +12,8 @@ describe('#dl-module', function(done) {
     test('@auth/account-manager', './auth/account-manager-test');
     test('@auth/role-manager', './auth/role-manager-test');
 
-    // Master
+    // test('@MASTER/BUDGET', './etl/fact-purchase-duration');
+    // // Master
     test('@MASTER/BUDGET', './master/budget');
     test('@MASTER/BUYER', './master/buyer');
     test('@MASTER/CATEGORY', './master/category');
@@ -29,6 +30,8 @@ describe('#dl-module', function(done) {
     test('@MASTER/VAT', './master/vat');
     test('@MASTER/YARN-EQUIVALENT-CONVERSION', './master/yarn-equivalent-coversion');
     test('@MASTER/LAMP-STANDARD', './master/lamp-standard');
+    test('@MASTER/ACCOUNT-BANK', './master/account-bank');
+
     // //Purchasing 
      test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
     // test('@purchasing/purchase-request-manager', './purchasing/purchase-request-manager-test');

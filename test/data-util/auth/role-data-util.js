@@ -2,9 +2,9 @@
 var _getSert = require("../getsert");
 var generateCode = require("../../../src/utils/code-generator");
 
-class LampStandardDataUtil {
+class RoleDataUtil {
     getSert(input) {
-        var ManagerType = require("../../../src/managers/master/lamp-standard-manager");
+        var ManagerType = require("../../../src/managers/auth/role-manager");
         return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
@@ -13,23 +13,24 @@ class LampStandardDataUtil {
     }
 
     getNewData() {
-        var Model = require('dl-models').master.LampStandard;
+        var Model = require("dl-models").auth.Role;
         var data = new Model();
 
         var code = generateCode();
-
-        data.name = `name[${code}]`;
-        data.description = `description[${code}]`;
+        data.code = code;
+        data.name = `Role[${code}]`;
+        data.description = ` data for unit testing.`;
 
         return Promise.resolve(data);
     }
 
     getTestData() {
         var data = {
-            name: 'Lamp Standard Unit Test',
-            description: 'Lamp'
+            code: "UT-ADM",
+            name: "Admin-UT",
+            description: "Unit test administrator"
         };
         return this.getSert(data);
     }
 }
-module.exports = new LampStandardDataUtil();
+module.exports = new RoleDataUtil();
