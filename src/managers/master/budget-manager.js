@@ -47,7 +47,7 @@ module.exports = class BudgetManager extends BaseManager {
         var errors = {};
         var valid = budget;
         // 1. begin: Declare promises.
-        var getbudgetPromise = this.collection.singleOrDefault({
+        var getbudgetPromise = this.collection.firstOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },
