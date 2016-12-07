@@ -47,7 +47,7 @@ module.exports = class CategoryManager extends BaseManager {
         var errors = {};
         var valid = category;
         // 1. begin: Declare promises.
-        var getcategoryPromise = this.collection.singleOrDefault({
+        var getcategoryPromise = this.collection.firstOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },
