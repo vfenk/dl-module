@@ -256,6 +256,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                     this.purchaseRequestManager.getSingleById(validData.purchaseRequest._id)
                                         .then(PR => {
                                             PR.isUsed = false;
+                                            var poIndex = PR.purchaseOrderIds.indexOf(validData._id);
+                                            PT.purchaseOrderIds.splice(poIndex, 1);
                                             this.purchaseRequestManager.update(PR)
                                                 .then(results => {
                                                     resolve(id);
@@ -486,7 +488,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     )
                     .toArray(function(err, result) {
                         assert.equal(err, null);
-                        console.log(result);
                         resolve(result);
                     });
 
@@ -517,7 +518,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     )
                     .toArray(function(err, result) {
                         assert.equal(err, null);
-                        console.log(result);
                         resolve(result);
                     });
 
