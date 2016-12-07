@@ -42,7 +42,7 @@ describe('#dl-module', function(done) {
     // test('@purchasing/unit-payment-price-correction-note', './purchasing/unit-payment-price-correction-note-manager-test');
     // test('@purchasing/unit-payment-order', './purchasing/unit-payment-order-test');
 
-    // test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');
+     test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');
 
     // test('@purchasing/purchase-request/create', './purchasing/purchase-request/create');
     // test('@purchasing/purchase-request/post', './purchasing/purchase-request/post');
