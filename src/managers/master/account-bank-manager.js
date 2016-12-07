@@ -55,7 +55,7 @@ module.exports = class AccountBankManager extends BaseManager {
         var errors = {};
         var valid = accountBank;
         // 1. begin: Declare promises.
-        var getAccountBankPromise = this.collection.singleOrDefault({
+        var getAccountBankPromise = this.collection.firstOrDefault({
             _id: {
                 "$ne": new ObjectId(valid._id)
             },
