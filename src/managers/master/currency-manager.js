@@ -47,7 +47,7 @@ module.exports = class CurrencyManager extends BaseManager {
         var errors = {};
         var valid = currency;
         // 1. begin: Declare promises.
-        var getcurrencyPromise = this.collection.singleOrDefault({
+        var getcurrencyPromise = this.collection.firstOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },
