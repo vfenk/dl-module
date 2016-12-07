@@ -44,7 +44,7 @@ module.exports = class BuyerManager extends BaseManager {
         var errors = {};
         var valid = buyer;
         // 1. begin: Declare promises.
-        var getBuyerPromise = this.collection.singleOrDefault({
+        var getBuyerPromise = this.collection.firstOrDefault({
             _id: {
                 "$ne": new ObjectId(valid._id)
             },
