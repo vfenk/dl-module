@@ -48,7 +48,7 @@ module.exports = class DailySpinningProductionReportManager extends BaseManager 
         return new Promise((resolve, reject) => {
             var valid = dailySpinningProductionReport;
             // 1. begin: Declare promises.
-            var getDailySpinningProductionReportPromise = this.collection.singleOrDefault({
+            var getDailySpinningProductionReportPromise = this.collection.firstOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)

@@ -51,7 +51,7 @@ module.exports = class YarnEquivalentConversionManager extends BaseManager {
         var errors = {};
         var valid = yarnEquivalentConversion;
         // 1. begin: Declare promises.
-        var getYarnEquivalentConversionPromise = this.collection.singleOrDefault({
+        var getYarnEquivalentConversionPromise = this.collection.firstOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },

@@ -28,7 +28,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = unitReceiptNote;
 
-            var getUnitReceiptNotePromise = this.collection.singleOrDefault({
+            var getUnitReceiptNotePromise = this.collection.firstOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)

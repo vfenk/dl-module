@@ -24,7 +24,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
         return new Promise((resolve, reject) => {
             var valid = unitPaymentQuantityCorrectionNote;
 
-            var getUnitPaymentQuantityCorrectionNote = this.collection.singleOrDefault({
+            var getUnitPaymentQuantityCorrectionNote = this.collection.firstOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)

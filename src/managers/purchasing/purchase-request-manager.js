@@ -75,7 +75,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
         var errors = {};
         var valid = purchaseRequest;
 
-        var getPurchaseRequestPromise = this.collection.singleOrDefault({
+        var getPurchaseRequestPromise = this.collection.firstOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },

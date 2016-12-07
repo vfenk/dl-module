@@ -55,7 +55,7 @@ module.exports = class UsterManager extends BaseManager {
         var errors = {};
         var valid = uster;
         // 1. begin: Declare promises.
-        var getUster = this.collection.singleOrDefault({
+        var getUster = this.collection.firstOrDefault({
             _id: {
                 "$ne": new ObjectId(valid._id)
             },

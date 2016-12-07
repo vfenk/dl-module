@@ -42,7 +42,7 @@ module.exports = class UomManager extends BaseManager {
         var errors = {};
         var valid = uom;
         // 1. begin: Declare promises.
-        var getUomPromise = (valid.unit || "").trim().length > 0 ? this.collection.singleOrDefault({
+        var getUomPromise = (valid.unit || "").trim().length > 0 ? this.collection.firstOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },

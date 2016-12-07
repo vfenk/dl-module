@@ -182,7 +182,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = purchaseOrderGroup;
 
-            var getPurchaseOrderPromise = this.collection.singleOrDefault({
+            var getPurchaseOrderPromise = this.collection.firstOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)

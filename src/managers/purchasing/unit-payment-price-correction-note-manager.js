@@ -24,7 +24,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         return new Promise((resolve, reject) => {
             var valid = unitPaymentPriceCorrectionNote;
 
-            var getUnitPaymentPriceCorrectionNote = this.collection.singleOrDefault({
+            var getUnitPaymentPriceCorrectionNote = this.collection.firstOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
