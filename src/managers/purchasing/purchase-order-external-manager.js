@@ -10,12 +10,15 @@ var map = DLModels.map;
 var PurchaseOrderExternal = DLModels.purchasing.PurchaseOrderExternal;
 var PurchaseOrder = DLModels.purchasing.PurchaseOrder;
 var PurchaseOrderManager = require('./purchase-order-manager');
+var PurchaseRequestManager = require('./purchase-request-manager');
 var CurrencyManager = require('../master/currency-manager');
 var VatManager = require('../master/vat-manager');
 var SupplierManager = require('../master/supplier-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 var i18n = require('dl-i18n');
+var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
+var prStatusEnum = DLModels.purchasing.enum.PurchaseRequestStatus;
 
 module.exports = class PurchaseOrderExternalManager extends BaseManager {
     constructor(db, user) {
@@ -23,6 +26,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         this.collection = this.db.use(map.purchasing.collection.PurchaseOrderExternal);
         this.year = (new Date()).getFullYear().toString().substring(2, 4);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
+        this.purchaseRequestManager = new PurchaseRequestManager(db, user);
         this.currencyManager = new CurrencyManager(db, user);
         this.vatManager = new VatManager(db, user);
         this.supplierManager = new SupplierManager(db, user);
@@ -513,4 +517,121 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
 
+    _getRomanNumeral(_number) {
+        var listRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXXII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX", "XXXI"];
+        return listRoman[_number];
+    }
+
+    unpost(poExternalId) {
+        return this.getSingleByIdOrDefault(poExternalId)
+            .then((poExternal) => {
+
+                var getPos = poExternal.items.map((po) => this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
+
+                return Promise.all(getPos)
+                    .then((pos) => {
+
+                        var updatedPos = pos.map(po => {
+
+                            po.purchaseOrderExternalId = {};
+                            po.purchaseOrderExternal = {};
+                            po.supplierId = {};
+                            po.supplier = {};
+                            po.freightCostBy = '';
+                            po.currency = {};
+                            po.currencyRate = 1;
+                            po.paymentMethod = '';
+                            po.paymentDueDays = 0;
+                            po.vat = {};
+                            po.useVat = false;
+                            po.vatRate = 0;
+                            po.useIncomeTax = false;
+                            po.isPosted = false;
+                            po.status = poStatusEnum.PROCESSING;
+
+                            for (var poItem of po.items) {
+                                poItem.dealQuantity = 0;
+                                poItem.dealUom = {};
+                                poItem.priceBeforeTax = 0;
+                                poItem.pricePerDealUnit = 0;
+                                poItem.conversion = 1;
+                                poItem.currency = {};
+                                poItem.currencyRate = 1;
+                            }
+
+                            return this.purchaseOrderManager.update(po)
+                                .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
+                        })
+
+                        return Promise.all(updatedPos);
+                    })
+                    .then((updatedPos) => {
+
+                        poExternal.items = poExternal.items.map((po) => {
+
+                            po.isPosted = false;
+                            po.status = poStatusEnum.PROCESSING;
+
+                            return po;
+                        })
+
+                        poExternal.isPosted = false;
+                        poExternal.status = poStatusEnum.CREATED;
+
+                        return this.update(poExternal)
+                            .then((poExId) => {
+
+                                return Promise.resolve(this.getSingleByIdOrDefault(poExId));
+                            })
+                    })
+            })
+    }
+
+    cancel(poExternalId) {
+        return this.getSingleByIdOrDefault(poExternalId)
+            .then((poExternal) => {
+
+                var getPos = poExternal.items.map((po) => this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
+
+                return Promise.all(getPos)
+                    .then((pos) => {
+
+                        var voidedPos = pos.map((po) => {
+
+                            po.status = poStatusEnum.VOID;
+
+                            return this.purchaseOrderManager.update(po)
+                                .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
+                        })
+
+                        return Promise.all(voidedPos);
+                    })
+                    .then((voidedPos) => {
+
+                        poExternal.status = poStatusEnum.VOID;
+
+                        return this.update(poExternal)
+                            .then((poExId) => {
+
+                                return Promise.resolve(this.getSingleByIdOrDefault(poExId));
+                            })
+                    })
+            })
+    }
+
+    close(poExternalId) {
+
+        return this.getSingleByIdOrDefault(poExternalId)
+            .then((poExternal) => {
+
+                poExternal.isClosed = true;
+
+                return this.update(poExternal)
+                    .then((poExId) => {
+
+                        return Promise.resolve(this.getSingleByIdOrDefault(poExId));
+                    })
+
+            })
+    }
 };
