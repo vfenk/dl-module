@@ -257,7 +257,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         .then(PR => {
                                             PR.isUsed = false;
                                             var poIndex = PR.purchaseOrderIds.indexOf(validData._id);
-                                            PT.purchaseOrderIds.splice(poIndex, 1);
+                                            PR.purchaseOrderIds.splice(poIndex, 1);
                                             this.purchaseRequestManager.update(PR)
                                                 .then(results => {
                                                     resolve(id);
