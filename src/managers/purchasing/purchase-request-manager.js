@@ -266,73 +266,34 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 "date": -1,
                 "no": 1
             };
-            var query = {};
-            if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && budgetId != "undefined" && budgetId != "" && PRNo != "undefined" && PRNo != "" && dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
-                query = {
-                    unitId: new ObjectId(unitId),
-                    categoryId: new ObjectId(categoryId),
-                    "no": PRNo,
-                    "budget._id": new ObjectId(budgetId),
+            var query = Object.assign({});
+
+            if (unitId != "undefined" && unitId != "") {
+                Object.assign(query, { unitId: new ObjectId(unitId) });
+            }
+            if (categoryId != "undefined" && categoryId != "") {
+                Object.assign(query, { categoryId: new ObjectId(categoryId) });
+            }
+            if (budgetId != "undefined" && budgetId != "") {
+                Object.assign(query, { budgetId: new ObjectId(budgetId) });
+            }
+            if (PRNo != "undefined" && PRNo != "") {
+                Object.assign(query, { "no": PRNo });
+            }
+            if (dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
+                Object.assign(query, {
                     date: {
                         $gte: dateFrom,
                         $lte: dateTo
                     }
-                };
-            }
-            else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && budgetId != "undefined" && budgetId != "" && PRNo != "undefined" && PRNo != "") {
-                query = {
-                    unitId: new ObjectId(unitId),
-                    categoryId: new ObjectId(categoryId),
-                    "no": PRNo,
-                    "budget._id": new ObjectId(budgetId)
-                };
-            }
-            else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && budgetId != "undefined" && budgetId != "") {
-                query = {
-                    unitId: new ObjectId(unitId),
-                    categoryId: new ObjectId(categoryId),
-                    "budget._id": new ObjectId(budgetId)
-                };
-            }
-            else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "") {
-                query = {
-                    unitId: new ObjectId(unitId),
-                    categoryId: new ObjectId(categoryId)
-                };
-            }
-            else if (unitId != "undefined" && unitId != "") {
-                query = {
-                    unitId: new ObjectId(unitId)
-                };
-            }
-            else if (categoryId != "undefined" && categoryId != "") {
-                query = {
-                    categoryId: new ObjectId(categoryId)
-                };
-            }
-            else if (budgetId != "undefined" && budgetId != "") {
-                query = {
-                    "budget._id": budgetId
-                };
-            }
-            else if (PRNo != "undefined" && PRNo != "") {
-                query = {
-                    "no": PRNo
-                };
-            }
-            else if (dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
-                query = {
-                    date: {
-                        $gte: dateFrom,
-                        $lte: dateTo
-                    }
-                };
+                });
             }
             query = Object.assign(query, {
                 _createdBy: this.user.username,
                 _deleted: false,
                 isPosted: true
             });
+            
             this.collection.find(query).sort(sorting).toArray()
                 .then((purchaseRequests) => {
                     resolve(purchaseRequests);
