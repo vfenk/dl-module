@@ -46,6 +46,7 @@ it('#01. should success when create new posted purchase-order-external with purc
             done();
         })
         .catch(e => {
+            console.log(e.errors);
             done(e);
         });
 });
@@ -58,6 +59,7 @@ it('#02. should isPosted = true', function (done) {
             done();
         })
         .catch(e => {
+            console.log(e.errors);
             done(e);
         })
 });
@@ -70,6 +72,7 @@ it('#03. should success when canceling purchase-order-external', function (done)
             done();
         })
         .catch(e => {
+            console.log(e.errors);
             done(e);
         });
 
@@ -88,6 +91,7 @@ it('#04. all purchase-order status should be = VOID in purchase-order-external',
             done();
         })
         .catch(e => {
+            console.log(e.errors);
             done(e);
         });
 });

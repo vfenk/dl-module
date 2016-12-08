@@ -14,6 +14,8 @@ describe('#dl-module', function(done) {
 
     // test('@MASTER/BUDGET', './etl/fact-purchase-duration');
     // // Master
+
+
     test('@MASTER/BUDGET', './master/budget');
     test('@MASTER/BUYER', './master/buyer');
     test('@MASTER/CATEGORY', './master/category');
@@ -42,18 +44,22 @@ describe('#dl-module', function(done) {
     test('@purchasing/purchase-order-external/cancel', './purchasing/purchase-order-external/cancel');
     test('@purchasing/purchase-order-external/close', './purchasing/purchase-order-external/close');
 
-    test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
+    // ok
+    // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
+    
     // test('@purchasing/unit-receipt-note', './purchasing/unit-receipt-note-manager-test');
     // test('@purchasing/unit-payment-price-correction-note', './purchasing/unit-payment-price-correction-note-manager-test');
     // test('@purchasing/unit-payment-order', './purchasing/unit-payment-order-test');
-
     // test('@purchasing/purchase-request/create', './purchasing/purchase-request/create');
     // test('@purchasing/purchase-request/post', './purchasing/purchase-request/post');
     // test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
     // test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
     // test('@purchasing/purchase-order-external/create', './purchasing/purchase-order-external/create');
-    test('@purchasing/delivery-order/create', './purchasing/delivery-order/create');
-    test('@purchasing/unit-receipt-note/create', './purchasing/unit-receipt-note/create');
+    
+    // ok
+    // test('@purchasing/delivery-order/create', './purchasing/delivery-order/create');
+    // test('@purchasing/unit-receipt-note/create', './purchasing/unit-receipt-note/create');
+    
     // test('@purchasing/unit-payment-order/create', './purchasing/unit-payment-order/create');
     // test('@purchasing/unit-payment-price-correction-note/create', './purchasing/unit-payment-price-correction-note/create');
     // test('@purchasing/unit-payment-quantity-correction-note/create', './purchasing/unit-payment-quantity-correction-note/create');
