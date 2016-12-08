@@ -1,6 +1,7 @@
 "use strict";
-var _getSert = require("./getsert");
+var _getSert = require("../getsert");
 var unit = require("./unit-data-util");
+var ObjectId   = require("mongodb").ObjectId;
 var generateCode = require("../../../src/utils/code-generator");
 
 class MachineDataUtil {
@@ -8,7 +9,7 @@ class MachineDataUtil {
         var ManagerType = require("../../../src/managers/master/machine-manager");
         return _getSert(input, ManagerType, (data) => {
             return {
-                code: data.code
+                _id: data._id
             };
         });
     }
@@ -37,11 +38,14 @@ class MachineDataUtil {
         return unit.getTestData()
             .then(unit => {
                 var data = {
-                    code: "UT/UNIT/01",
+                    _id:new ObjectId("584797d3bd4e12234869bccb"), 
+                    name: "Test Machine",
                     unitId: unit._id,
                     unit: unit,
-                    name: "Test Machine",
-                    description: ""
+                    process: "Process untuk unit test",
+                    manufacture: "Manufacture untuk unit test",
+                    year:1900,
+                    condition: ""
                 };
                 return this.getSert(data);
             });

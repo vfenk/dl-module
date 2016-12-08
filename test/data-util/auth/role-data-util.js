@@ -2,33 +2,35 @@
 var _getSert = require("../getsert");
 var generateCode = require("../../../src/utils/code-generator");
 
-class UomDataUtil {
+class RoleDataUtil {
     getSert(input) {
-        var ManagerType = require("../../../src/managers/master/uom-manager");
+        var ManagerType = require("../../../src/managers/auth/role-manager");
         return _getSert(input, ManagerType, (data) => {
             return {
-                unit: data.unit
+                code: data.code
             };
         });
     }
 
     getNewData() {
-        var Model = require("dl-models").master.Uom;
+        var Model = require("dl-models").auth.Role;
         var data = new Model();
 
         var code = generateCode();
-
-        data.unit = code;
+        data.code = code;
+        data.name = `Role[${code}]`;
+        data.description = ` data for unit testing.`;
 
         return Promise.resolve(data);
     }
 
     getTestData() {
         var data = {
-            unit: "PCS"
+            code: "UT-ADM",
+            name: "Admin-UT",
+            description: "Unit test administrator"
         };
         return this.getSert(data);
     }
 }
-
-module.exports = new UomDataUtil();
+module.exports = new RoleDataUtil();

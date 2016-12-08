@@ -2,33 +2,34 @@
 var _getSert = require("../getsert");
 var generateCode = require("../../../src/utils/code-generator");
 
-class UomDataUtil {
+class LampStandardDataUtil {
     getSert(input) {
-        var ManagerType = require("../../../src/managers/master/uom-manager");
+        var ManagerType = require("../../../src/managers/master/lamp-standard-manager");
         return _getSert(input, ManagerType, (data) => {
             return {
-                unit: data.unit
+                code: data.code
             };
         });
     }
 
     getNewData() {
-        var Model = require("dl-models").master.Uom;
+        var Model = require('dl-models').master.LampStandard;
         var data = new Model();
 
         var code = generateCode();
 
-        data.unit = code;
+        data.name = `name[${code}]`;
+        data.description = `description[${code}]`;
 
         return Promise.resolve(data);
     }
 
     getTestData() {
         var data = {
-            unit: "PCS"
+            name: 'Lamp Standard Unit Test',
+            description: 'Lamp'
         };
         return this.getSert(data);
     }
 }
-
-module.exports = new UomDataUtil();
+module.exports = new LampStandardDataUtil();

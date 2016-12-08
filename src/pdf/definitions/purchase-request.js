@@ -156,7 +156,7 @@ module.exports = function (purchaseRequest) {
 
     var table = [{
         table: {
-            widths: ['5%', '20%', '40%', '10%', '25%'],
+            widths: ['5%', '13%', '40%', '17%', '25%'],
             headerRows: 1,
             body: [].concat([thead], tbody, tfoot)
         }

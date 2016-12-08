@@ -9,7 +9,7 @@ var purchaseOrderExternal = require('../data').transaction.purchaseOrderExternal
 
 before('#00. connect db', function (done) {
     helper.getDb()
-        .then(db => {
+        .then((db) => {
             purchaseOrderExternalManager = new PurchaseOrderExternalManager(db, {
                 username: 'unit-test'
             });  
@@ -24,7 +24,7 @@ before('#00. connect db', function (done) {
 var purchaseOrderExternalId;
 it('#01. should success when create new data', function (done) { 
     purchaseOrderExternal.getNew()
-        .then(data => {
+        .then((data) => {
             data._id.should.be.Object();
             purchaseOrderExternalId = data._id;
             done();
@@ -37,7 +37,7 @@ it('#01. should success when create new data', function (done) {
 var purchaseOrderExternal;
 it(`#02. should success when get created data with id`, function (done) {
     purchaseOrderExternalManager.pdf(purchaseOrderExternalId.toString())
-        .then(data => { 
+        .then((data) => { 
             data.should.instanceof(Object);
             purchaseOrderExternal = data;
             done();
@@ -49,7 +49,7 @@ it(`#02. should success when get created data with id`, function (done) {
 
 it('#03. should success when read data', function (done) {
     purchaseOrderExternalManager.read()
-        .then(documents => {
+        .then((documents) => {
             documents.data.should.be.instanceof(Array);
             done();
         })
@@ -61,7 +61,7 @@ it('#03. should success when read data', function (done) {
 var purchaseOrderExternal;
 it(`#04. should success when get created data with id`, function (done) {
     purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
-        .then(data => {
+        .then((data) => {
             validatorPurchasing.purchaseOrderExternal(data);
             data.should.instanceof(Object);
             purchaseOrderExternal = data;
@@ -75,7 +75,7 @@ it(`#04. should success when get created data with id`, function (done) {
 it(`#05. should success when update data`, function (done) {
     purchaseOrderExternal.remark += '[updated]'; 
     purchaseOrderExternalManager.update(purchaseOrderExternal)
-        .then(id => {
+        .then((id) => {
             purchaseOrderExternalId.toString().should.equal(id.toString());
             done();
         })
@@ -86,7 +86,7 @@ it(`#05. should success when update data`, function (done) {
 
 it(`#06. should success when get updated data with id`, function (done) {
     purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
-        .then(data => {
+        .then((data) => {
             data.no.should.equal(purchaseOrderExternal.no); 
             done();
         })
@@ -99,7 +99,7 @@ it(`#07. should success when post`, function (done) {
     var listPurchaseOrderExternal = [];
     listPurchaseOrderExternal.push(purchaseOrderExternal);
     purchaseOrderExternalManager.post(listPurchaseOrderExternal)
-        .then(data => {
+        .then((data) => {
             done();
         })
         .catch(e => {
@@ -109,7 +109,7 @@ it(`#07. should success when post`, function (done) {
 
 it(`#08. should isPosted=true`, function (done) {
     purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
-        .then(data => {
+        .then((data) => {
             data.isPosted.should.be.Boolean();
             data.isPosted.should.equal(true);
             done();
@@ -121,7 +121,7 @@ it(`#08. should isPosted=true`, function (done) {
 
 it(`#09. should success when delete data`, function (done) {
     purchaseOrderExternalManager.delete(purchaseOrderExternal)
-        .then(id => {
+        .then((id) => {
             purchaseOrderExternalId.toString().should.equal(id.toString());
             done();
         })
@@ -132,7 +132,7 @@ it(`#09. should success when delete data`, function (done) {
 
 it(`#10. should _deleted=true`, function (done) {
     purchaseOrderExternalManager.getSingleByQuery({ _id: purchaseOrderExternalId })
-        .then(data => {
+        .then((data) => {
             data._deleted.should.be.Boolean();
             data._deleted.should.equal(true);
             done();

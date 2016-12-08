@@ -74,12 +74,12 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                 var itemError = {};
                                 for (var _unitPaymentOrderItem of valid.unitPaymentOrder.items) {
                                     for (var _unitReceiptNoteItem of _unitPaymentOrderItem.unitReceiptNote.items) {
-                                        if (_unitReceiptNoteItem.purchaseOrderId.toString() == item.purchaseOrderId.toString() && _unitReceiptNoteItem.product._id.toString() == item.productId.toString()) {
+                                        if (_unitReceiptNoteItem.purchaseOrderId.toString() === item.purchaseOrderId.toString() && _unitReceiptNoteItem.product._id.toString() === item.productId.toString()) {
                                             if (item.quantity <= 0)
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
                                             else if (item.quantity > _unitReceiptNoteItem.deliveredQuantity)
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.lessThan:%s must not be greater than quantity on unit payment order", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
-                                            else if (item.quantity == _unitReceiptNoteItem.deliveredQuantity)
+                                            else if (item.quantity === _unitReceiptNoteItem.deliveredQuantity)
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.noChanges: no changes", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
 
                                             itemErrors.push(itemError);
@@ -234,17 +234,6 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
         });
     }
 
-    generateNo(unit, category) {
-        var now = new Date();
-        var stamp = now / 1000 | 0;
-        var code = stamp.toString();
-        var locale = 'id-ID';
-        var moment = require('moment');
-        moment.locale(locale);
-        var no = `NDO${unit.toUpperCase()}${category.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
-        return no;
-    }
-
     create(unitPaymentQuantityCorrectionNote) {
         return new Promise((resolve, reject) => {
             this._createIndexes()
@@ -277,7 +266,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                             var _unitPaymentOrderNo = fulfillmentPoItem.interNoteNo || '';
                                                             var _unitReceiptNoteNo = fulfillmentPoItem.unitReceiptNoteNo || '';
 
-                                                            if (unitPaymentQuantityCorrectionNoteItem.unitReceiptNoteNo == _unitReceiptNoteNo && validData.unitPaymentOrder.no == _unitPaymentOrderNo) {
+                                                            if (unitPaymentQuantityCorrectionNoteItem.unitReceiptNoteNo === _unitReceiptNoteNo && validData.unitPaymentOrder.no === _unitPaymentOrderNo) {
 
                                                                 var _correction = {};
                                                                 var _qty = 0;
@@ -317,9 +306,9 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                             var _unitPaymentOrder = validData.unitPaymentOrder;
                                             for (var _item of validData.items) {
                                                 for (var _unitReceiptNote of _unitPaymentOrder.items) {
-                                                    if (_item.unitReceiptNoteNo == _unitReceiptNote.unitReceiptNote.no) {
+                                                    if (_item.unitReceiptNoteNo === _unitReceiptNote.unitReceiptNote.no) {
                                                         for (var _unitReceiptNoteItem of _unitReceiptNote.unitReceiptNote.items) {
-                                                            if (_item.purchaseOrderId.toString() == _unitReceiptNoteItem.purchaseOrderId.toString() && _item.product._id.toString() == _unitReceiptNoteItem.product._id.toString()) {
+                                                            if (_item.purchaseOrderId.toString() === _unitReceiptNoteItem.purchaseOrderId.toString() && _item.product._id.toString() === _unitReceiptNoteItem.product._id.toString()) {
                                                                 var _correction = {
                                                                     correctionDate: validData.date,
                                                                     correctionNo: validData.no,

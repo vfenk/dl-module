@@ -19,25 +19,54 @@ module.exports = {
             MachineManager: require('./src/managers/master/machine-manager'),
             LotMachineManager: require('./src/managers/master/lot-machine-manager'),
             YarnEquivalentConversion: require('./src/managers/master/yarn-equivalent-conversion-manager'),
-            UsterManager: require('./src/managers/master/uster-manager')
+            UsterManager: require('./src/managers/master/uster-manager'),
+            LampStandardManager: require('./src/managers/master/lamp-standard-manager'),
+            AccountBankManager: require('./src/managers/master/account-bank-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
             PurchaseOrderExternalManager: require('./src/managers/purchasing/purchase-order-external-manager'),
             DeliveryOrderManager: require('./src/managers/purchasing/delivery-order-manager'),
-            UnitReceiptNoteManager: require('./src/managers/purchasing/unit-receipt-note-manager'), 
+            UnitReceiptNoteManager: require('./src/managers/purchasing/unit-receipt-note-manager'),
             PurchaseRequestManager: require('./src/managers/purchasing/purchase-request-manager'),
             UnitPaymentPriceCorrectionNoteManager: require('./src/managers/purchasing/unit-payment-price-correction-note-manager'),
             UnitPaymentOrderManager: require('./src/managers/purchasing/unit-payment-order-manager'),
             UnitPaymentQuantityCorrectionNoteManager: require('./src/managers/purchasing/unit-payment-quantity-correction-note-manager')
         },
-        production : {
-            spinning : {
-                winding : {
-                    WindingQualitySampling : require('./src/managers/production/spinning/winding/winding-quality-sampling-manager'),
-                    WindingProductionOutput : require('./src/managers/production/spinning/winding/winding-production-output-manager')
+        production: {
+            spinning: {
+                winding: {
+                    WindingQualitySampling: require('./src/managers/production/spinning/winding/winding-quality-sampling-manager'),
+                    WindingProductionOutput: require('./src/managers/production/spinning/winding/winding-production-output-manager')
                 },
-                DailySpinningProductionReportManager : require('./src/managers/production/spinning/daily-spinning-production-report-manager')
+                DailySpinningProductionReportManager: require('./src/managers/production/spinning/daily-spinning-production-report-manager')
+            }
+        }
+    },
+    test: {
+        data: {
+            auth: {
+                account: require("./test/data-util/auth/account-data-util"),
+                role: require("./test/data-util/auth/role-data-util")
+            },
+            master: {
+                accountBank: require("./test/data-util/master/account-bank-data-util"),
+                budget: require("./test/data-util/master/budget-data-util"),
+                buyer: require("./test/data-util/master/buyer-data-util"),
+                category: require("./test/data-util/master/category-data-util"),
+                currency: require("./test/data-util/master/currency-data-util"),
+                division: require("./test/data-util/master/division-data-util"),
+                lampStandard: require("./test/data-util/master/lamp-standard-data-util"),
+                lotMachine: require("./test/data-util/master/lot-machine-data-util"),
+                machine: require("./test/data-util/master/machine-data-util"),
+                product: require("./test/data-util/master/product-data-util"),
+                supplier: require("./test/data-util/master/supplier-data-util"),
+                threadSpecification: require("./test/data-util/master/thread-specification-data-util"),
+                unit: require("./test/data-util/master/unit-data-util"),
+                uom: require("./test/data-util/master/uom-data-util"),
+                uster: require("./test/data-util/master/uster-data-util"),
+                vat: require("./test/data-util/master/vat-data-util"),
+                yarnEquivalentConversion: require("./test/data-util/master/yarn-equivalent-conversion-data-util")
             }
         }
     }

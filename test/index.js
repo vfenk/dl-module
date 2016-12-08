@@ -12,6 +12,7 @@ describe('#dl-module', function(done) {
     // test('@auth/account-manager', './auth/account-manager-test');
     // test('@auth/role-manager', './auth/role-manager-test');
 
+    // test('@MASTER/BUDGET', './etl/fact-purchase-duration');
     // // Master
     test('@MASTER/BUDGET', './master/budget');
     test('@MASTER/BUYER', './master/buyer');
@@ -28,10 +29,11 @@ describe('#dl-module', function(done) {
     test('@MASTER/USTER', './master/uster');
     test('@MASTER/VAT', './master/vat');
     test('@MASTER/YARN-EQUIVALENT-CONVERSION', './master/yarn-equivalent-coversion');
- 
+    test('@MASTER/LAMP-STANDARD', './master/lamp-standard');
+    test('@MASTER/ACCOUNT-BANK', './master/account-bank');
 
     // //Purchasing 
-    test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
+     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
     // test('@purchasing/purchase-request-manager', './purchasing/purchase-request-manager-test');
     // test('@purchasing/purchase-order-manager', './purchasing/purchase-order-manager-test');
     // test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
