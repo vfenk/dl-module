@@ -22,8 +22,8 @@ class PurchaseOrderExternalDataUtil {
         return new Promise((resolve, reject) => {
             helper
                 .getManager(PoExternalManager)
-                .then(manager => {
-                    var getPurchaseOrders = purchaseOrders ? purchaseOrders : get2NewPos;
+                .then(manager => { 
+                    var getPurchaseOrders = purchaseOrders ? purchaseOrders : get2NewPos(); 
                     Promise.all([supplier.getTestData(), currency.getTestData(), vat.getTestData(), getPurchaseOrders])
                         .then(results => {
                             var supplier = results[0];
@@ -61,7 +61,7 @@ class PurchaseOrderExternalDataUtil {
                                 isPosted: false,
                                 isClosed: false,
                                 remark: '',
-                                items: [po01, po02]
+                                items: pos
                             };
                             manager.create(data)
                                 .then(id => {
