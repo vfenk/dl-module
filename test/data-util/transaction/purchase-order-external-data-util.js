@@ -7,29 +7,37 @@ var currency = require('../master/currency-data-util');
 var vat = require('../master/vat-data-util');
 var po = require('./purchase-order-data-util');
 
+var get2NewPos = function() {
+    return po.getNew()
+        .then((po1) => {
+            return po.getNew()
+                .then((po2) => {
+                    return Promise.resolve([po1, po2]);
+                });
+        });
+};
+
 class PurchaseOrderExternalDataUtil {
     getNew(purchaseOrders) {
         return new Promise((resolve, reject) => {
             helper
                 .getManager(PoExternalManager)
                 .then(manager => {
-                    var getPurchaseOrders = purchaseOrders ? purchaseOrders.map(purchaseOrder => Promise.resolve(purchaseOrder)) : [po.getNew(), po.getNew()];
-                    Promise.all([supplier.getTestData(), currency.getTestData(), vat.getTestData()].concat(getPurchaseOrders))
+                    var getPurchaseOrders = purchaseOrders ? purchaseOrders : get2NewPos;
+                    Promise.all([supplier.getTestData(), currency.getTestData(), vat.getTestData(), getPurchaseOrders])
                         .then(results => {
                             var supplier = results[0];
                             var currency = results[1];
                             var vat = results[2];
-                            var po01 = results[3];
-                            var po02 = results[4];
+                            var pos = results[3];
 
-                            for (var po of[po01, po02]) {
+                            for (var po of pos) {
                                 for (var poItem of po.items) {
                                     poItem.currency = currency;
                                     poItem.currencyRate = currency.rate;
                                     poItem.dealQuantity = poItem.defaultQuantity;
                                     poItem.dealUom = poItem.defaultUom;
                                     poItem.pricePerDealUnit = poItem.product.price * 1.05;
-                                    poItem.priceBeforeTax = poItem.pricePerDealUnit;
                                 }
                             }
 
