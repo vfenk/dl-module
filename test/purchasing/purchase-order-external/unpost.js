@@ -38,7 +38,7 @@ it('#01. should success when create new posted purchase-order-external with purc
             done();
         })
         .catch(e => {
-            console.log(e.errors);
+            console.log("create" + e.errors);
             done(e);
         });
 });
@@ -51,7 +51,7 @@ it('#02. should isPosted = true', function (done) {
             done();
         })
         .catch(e => {
-            console.log(e.errors);
+            console.log("create" + e.errors);
             done(e);
         })
 });
@@ -65,7 +65,7 @@ it('#03. should success when unposting purchase-order-external', function (done)
             done();
         })
         .catch(e => {
-            console.log(e.errors);
+            console.log("create" + e.errors);
             done(e);
         });
 
@@ -86,7 +86,7 @@ it('#04. all purchase-orders isPosted should be = false and status should be PRO
             done();
         })
         .catch(e => {
-            console.log(e.errors);
+            console.log("create" + e.errors);
             done(e);
         });
 });
