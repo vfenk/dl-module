@@ -82,14 +82,14 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             no: valid.no
         });
 
-        var getUnit = valid.unitId && valid.unitId.toString().trim() != "" ? this.unitManager.getSingleByIdOrDefault(valid.unitId) : Promise.resolve(null);
-        var getCategory = valid.categoryId && valid.categoryId.toString().trim() != "" ? this.categoryManager.getSingleByIdOrDefault(valid.categoryId) : Promise.resolve(null);
-        var getBudget = valid.budgetId && valid.budgetId.toString().trim() != "" ? this.budgetManager.getSingleByIdOrDefault(valid.budgetId) : Promise.resolve(null);
+        var getUnit = valid.unitId && valid.unitId.toString().trim() !== "" ? this.unitManager.getSingleByIdOrDefault(valid.unitId) : Promise.resolve(null);
+        var getCategory = valid.categoryId && valid.categoryId.toString().trim() !== "" ? this.categoryManager.getSingleByIdOrDefault(valid.categoryId) : Promise.resolve(null);
+        var getBudget = valid.budgetId && valid.budgetId.toString().trim() !== "" ? this.budgetManager.getSingleByIdOrDefault(valid.budgetId) : Promise.resolve(null);
         var getProduct = [];
 
         valid.items = valid.items instanceof Array ? valid.items : [];
         for (var _item of valid.items)
-            getProduct.push(_item.productId && _item.productId.toString().trim() != "" ? this.productManager.getSingleByIdOrDefault(_item.productId) : Promise.resolve(null));
+            getProduct.push(_item.productId && _item.productId.toString().trim() !== "" ? this.productManager.getSingleByIdOrDefault(_item.productId) : Promise.resolve(null));
 
         return Promise.all([getPurchaseRequestPromise, getUnit, getCategory, getBudget].concat(getProduct))
             .then(results => {
@@ -120,7 +120,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 else if (!valid.budget._id)
                     errors["budget"] = i18n.__("PurchaseRequest.budget.name.isRequired:%s is required", i18n.__("PurchaseRequest.budget.name._:Budget")); //"Budget tidak boleh kosong";
 
-                if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate == "" || valid.expectedDeliveryDate == "undefined")
+                if (!valid.expectedDeliveryDate || valid.expectedDeliveryDate === "" || valid.expectedDeliveryDate === "undefined")
                     valid.expectedDeliveryDate = "";
 
                 if (valid.items && valid.items.length <= 0) {
@@ -158,7 +158,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
                 for (var prItem of valid.items) {
                     for (var _product of _products) {
-                        if (prItem.product._id.toString() == _product._id.toString()) {
+                        if (prItem.product._id.toString() === _product._id.toString()) {
                             prItem.product = _product;
                             prItem.uom = _product.uom;
                             break;
@@ -183,7 +183,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             this._validate(purchaseRequest)
                 .then(validPurchaseRequest => {
                     validPurchaseRequest.no = generateCode();
-                    if (validPurchaseRequest.expectedDeliveryDate == "undefined") {
+                    if (validPurchaseRequest.expectedDeliveryDate === "undefined") {
                         validPurchaseRequest.expectedDeliveryDate = "";
                     }
                     this.collection.insert(validPurchaseRequest)
@@ -266,73 +266,34 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 "date": -1,
                 "no": 1
             };
-            var query = {};
-            if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && budgetId != "undefined" && budgetId != "" && PRNo != "undefined" && PRNo != "" && dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
-                query = {
-                    unitId: new ObjectId(unitId),
-                    categoryId: new ObjectId(categoryId),
-                    "no": PRNo,
-                    "budget._id": new ObjectId(budgetId),
+            var query = Object.assign({});
+
+            if (unitId !== "undefined" && unitId !== "") {
+                Object.assign(query, { unitId: new ObjectId(unitId) });
+            }
+            if (categoryId !== "undefined" && categoryId !== "") {
+                Object.assign(query, { categoryId: new ObjectId(categoryId) });
+            }
+            if (budgetId !== "undefined" && budgetId !== "") {
+                Object.assign(query, { budgetId: new ObjectId(budgetId) });
+            }
+            if (PRNo !== "undefined" && PRNo !== "") {
+                Object.assign(query, { "no": PRNo });
+            }
+            if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
+                Object.assign(query, {
                     date: {
                         $gte: dateFrom,
                         $lte: dateTo
                     }
-                };
-            }
-            else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && budgetId != "undefined" && budgetId != "" && PRNo != "undefined" && PRNo != "") {
-                query = {
-                    unitId: new ObjectId(unitId),
-                    categoryId: new ObjectId(categoryId),
-                    "no": PRNo,
-                    "budget._id": new ObjectId(budgetId)
-                };
-            }
-            else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "" && budgetId != "undefined" && budgetId != "") {
-                query = {
-                    unitId: new ObjectId(unitId),
-                    categoryId: new ObjectId(categoryId),
-                    "budget._id": new ObjectId(budgetId)
-                };
-            }
-            else if (unitId != "undefined" && unitId != "" && categoryId != "undefined" && categoryId != "") {
-                query = {
-                    unitId: new ObjectId(unitId),
-                    categoryId: new ObjectId(categoryId)
-                };
-            }
-            else if (unitId != "undefined" && unitId != "") {
-                query = {
-                    unitId: new ObjectId(unitId)
-                };
-            }
-            else if (categoryId != "undefined" && categoryId != "") {
-                query = {
-                    categoryId: new ObjectId(categoryId)
-                };
-            }
-            else if (budgetId != "undefined" && budgetId != "") {
-                query = {
-                    "budget._id": budgetId
-                };
-            }
-            else if (PRNo != "undefined" && PRNo != "") {
-                query = {
-                    "no": PRNo
-                };
-            }
-            else if (dateFrom != "undefined" && dateFrom != "" && dateFrom != "null" && dateTo != "undefined" && dateTo != "" && dateTo != "null") {
-                query = {
-                    date: {
-                        $gte: dateFrom,
-                        $lte: dateTo
-                    }
-                };
+                });
             }
             query = Object.assign(query, {
                 _createdBy: this.user.username,
                 _deleted: false,
                 isPosted: true
             });
+
             this.collection.find(query).sort(sorting).toArray()
                 .then((purchaseRequests) => {
                     resolve(purchaseRequests);
