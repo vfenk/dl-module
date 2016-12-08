@@ -5,7 +5,7 @@ require("mongodb-toolkit");
 var DLModels = require("dl-models");
 var map = DLModels.map;
 var PurchaseRequest = DLModels.purchasing.PurchaseRequest;
-var generateCode = require("../../utils/code-generator");
+var CodeGenerator = require("../../utils/code-generator");
 var BaseManager = require("module-toolkit").BaseManager;
 var i18n = require("dl-i18n");
 var UnitManager = require("../master/unit-manager");
@@ -174,31 +174,9 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             });
     }
 
-    create(purchaseRequest) {
-        return new Promise((resolve, reject) => {
-            var dateFormat = "MMYY";
-            var locale = "id-ID";
-            var moment = require("moment");
-            moment.locale(locale);
-            this._validate(purchaseRequest)
-                .then(validPurchaseRequest => {
-                    validPurchaseRequest.no = generateCode();
-                    if (validPurchaseRequest.expectedDeliveryDate === "undefined") {
-                        validPurchaseRequest.expectedDeliveryDate = "";
-                    }
-                    this.collection.insert(validPurchaseRequest)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                });
-
-        });
+    _beforeInsert(purchaseRequest) {
+        purchaseRequest.no = CodeGenerator();
+        return Promise.resolve(purchaseRequest);
     }
 
     post(listPurchaseRequest) {
