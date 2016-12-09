@@ -12,6 +12,7 @@ var UnitManager = require("../master/unit-manager");
 var BudgetManager = require("../master/budget-manager");
 var CategoryManager = require("../master/category-manager");
 var ProductManager = require("../master/product-manager");
+var prStatusEnum = DLModels.purchasing.enum.PurchaseRequestStatus;
 
 module.exports = class PurchaseRequestManager extends BaseManager {
     constructor(db, user) {
@@ -183,6 +184,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             this._validate(purchaseRequest)
                 .then(validPurchaseRequest => {
                     validPurchaseRequest.no = generateCode();
+                    validPurchaseRequest.status = prStatusEnum.CREATED;
+
                     if (validPurchaseRequest.expectedDeliveryDate === "undefined") {
                         validPurchaseRequest.expectedDeliveryDate = "";
                     }
@@ -214,6 +217,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                         for (var _pr of validPurchaseRequest) {
                             if (_pr._id.equals(pr._id)) {
                                 _pr.isPosted = true;
+                                _pr.status = prStatusEnum.POSTED;
                                 tasks.push(this.update(_pr));
                                 break;
                             }
