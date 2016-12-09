@@ -78,12 +78,16 @@ module.exports = class ProductManager extends BaseManager {
                 if (!valid.name || valid.name == '')
                     errors["name"] = i18n.__("Product.name.isRequired:%s is required", i18n.__("Product.name._:Name")); // "Nama tidak boleh kosong.";
 
+                if (!valid.uom) {
+                    errors["uom"] = i18n.__("Product.uom.isRequired:%s is required", i18n.__("Product.uom._:Uom")); //"Satuan tidak boleh kosong";
+                }
                 if (valid.uom) {
                     if (!valid.uom.unit || valid.uom.unit == '')
                         errors["uom"] = i18n.__("Product.uom.isRequired:%s is required", i18n.__("Product.uom._:Uom")); //"Satuan tidak boleh kosong";
                 }
-                else
-                    errors["uom"] = i18n.__("Product.uom.isRequired:%s is required", i18n.__("Product.uom._:Uom")); //"Satuan tidak boleh kosong";
+                else if (_uom){
+                    errors["uom"] = i18n.__("Product.uom.noExists:%s is not exists", i18n.__("Product.uom._:Uom")); //"Satuan tidak boleh kosong";
+                }
 
                 // 2c. begin: check if data has any error, reject if it has.
                 if (Object.getOwnPropertyNames(errors).length > 0) {
