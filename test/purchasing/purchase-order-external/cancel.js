@@ -64,10 +64,13 @@ it('#02. should isPosted = true', function (done) {
 
 it('#03. should success when canceling purchase-order-external', function (done) {
     purchaseOrderExternalManager.cancel(purchaseOrderExternal._id)
-        .then(poe => {
-            purchaseOrderExternal = poe;
-            JSON.stringify(purchaseOrderExternal.status).should.equal(JSON.stringify(poStatusEnum.VOID));
-            done();
+        .then((poExId) => {
+            purchaseOrderExternalManager.getSingleById(poExId)
+                .then((poe) => {
+                    purchaseOrderExternal = poe;
+                    JSON.stringify(purchaseOrderExternal.status).should.equal(JSON.stringify(poStatusEnum.VOID));
+                    done();
+                })
         })
         .catch(e => {
             done(e);
@@ -79,9 +82,8 @@ it('#04. all purchase-order status should be = VOID in purchase-order-external',
     Promise.all(purchaseOrderExternal.items.map(purchaseOrder => {
         return purchaseOrderManager.getSingleById(purchaseOrder._id);
     }))
-        .then(results => {
+        .then((results) => {
             purchaseOrders = results;
-            
             for (var purchaseOrder of purchaseOrders) {
                 JSON.stringify(purchaseOrder.status).should.equal(JSON.stringify(poStatusEnum.VOID));
             }
