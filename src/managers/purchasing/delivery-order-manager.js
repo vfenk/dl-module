@@ -143,10 +143,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                     purchaseOrderExternalItemHasErrors = true;
                                     fulfillmentError["deliveredQuantity"] = i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity.isRequired:%s is required or not 0", i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity._:DeliveredQuantity")); //"Jumlah barang diterima tidak boleh kosong";
                                 }
-                                else if (doFulfillment.deliveredQuantity > doFulfillment.purchaseOrderQuantity) {
-                                    purchaseOrderExternalItemHasErrors = true;
-                                    fulfillmentError["deliveredQuantity"] = i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity.isGreater:%s is greater than purchaseOrderQuantity", i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity._:DeliveredQuantity")); //"Jumlah barang diterima tidak boleh lebih besar dari jumlah barang di po eksternal";
-                                }
+                                // else if (doFulfillment.deliveredQuantity > doFulfillment.purchaseOrderQuantity) {
+                                //     purchaseOrderExternalItemHasErrors = true;
+                                //     fulfillmentError["deliveredQuantity"] = i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity.isGreater:%s is greater than purchaseOrderQuantity", i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity._:DeliveredQuantity")); //"Jumlah barang diterima tidak boleh lebih besar dari jumlah barang di po eksternal";
+                                // }
                                 purchaseOrderExternalItemErrors.push(fulfillmentError);
                             }
                             if (purchaseOrderExternalItemHasErrors) {

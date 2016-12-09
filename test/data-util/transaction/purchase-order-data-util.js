@@ -21,13 +21,13 @@ class PurchaseOrderDataUtil {
             helper
                 .getManager(PurchaseOrderManager)
                 .then(manager => {
-                    Promise.all([getPr, unit.getTestData(), category.getTestData(), vat.getTestData(), product.getTestData()])
+                    Promise.all([getPr]) //, unit.getTestData(), category.getTestData(), vat.getTestData(), product.getTestData()])
                         .then(results => {
                             var purchaseRequest = results[0];
-                            var unit = results[1];
-                            var category = results[2];
-                            var vat = results[3];
-                            var product = results[4];
+                            // var unit = results[1];
+                            // var category = results[2];
+                            // var vat = results[3];
+                            // var product = results[4];
 
                             var poItems = purchaseRequest.items.map(prItem => {
                                 return {
@@ -63,12 +63,12 @@ class PurchaseOrderDataUtil {
                                 sourcePurchaseOrder: null,
                                 supplierId: {},
                                 supplier: new Supplier(),
-                                unitId: unit._id,
-                                unit: unit,
-                                categoryId: category._id,
-                                category: category,
+                                unitId: purchaseRequest.unit._id,
+                                unit: purchaseRequest.unit,
+                                categoryId: purchaseRequest.category._id,
+                                category: purchaseRequest.category,
 
-                                vat: vat,
+                                vat: purchaseRequest.vat,
                                 useVat: false,
                                 vatRate: 0,
                                 useIncomeTax: false,
