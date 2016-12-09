@@ -231,7 +231,15 @@ module.exports = class FactPurchaseDurationEtlManager {
                     unitReceiptNoteDays: uroDays,
                     unitReceiptNoteDate: unitReceiptNote ? unitReceiptNote.date : null,
                     unitPaymentOrderDays: upoDays,
-                    unitPaymentOrderDate: unitPaymentOrder ? unitPaymentOrder.date : null
+                    unitPaymentOrderDate: unitPaymentOrder ? unitPaymentOrder.date : null,
+                    purchaseOrderDaysRange: this.getRangeWeek(poDays),
+                    purchaseOrderExternalDaysRange: this.getRangeMonth(poExtDays),
+                    deliveryOrderDaysRange: this.getRangeWeek(doDays),
+                    unitReceiptNoteDaysRange: this.getRangeWeek(uroDays),
+                    unitPaymentOrderDaysRange: this.getRangeMonth(upoDays),
+                    divisionName: purchaseRequest._id,
+                    supplierCode: purchaseOrderExternal._id,
+                    purchasingStaffCode: purchaseOrder._id
                 };
             });
             return [].concat.apply([], results);
@@ -239,7 +247,41 @@ module.exports = class FactPurchaseDurationEtlManager {
         return Promise.resolve([].concat.apply([], result));
     }
 
-    load(data) {
+    getRangeMonth(days) {
+        if (days == null) {
+            return null;
+        } else if (days == 0) {
+            return "0 hari";
+        } else if (days <= 30) {
+            return "1-30 hari";
+        } else if (days <= 60) {
+            return "31-60 hari";
+        } else if (days <= 90) {
+            return "61-90 hari";
+        } else {
+            return ">90 hari";
+        }
+    }
 
+    getRangeWeek(days) {
+        if (days == null) {
+            return null;
+        } else if (days == 0) {
+            return "0 hari";
+        } else if (days <= 7) {
+            return "1-7 hari";
+        } else if (days <= 14) {
+            return "8-14 hari";
+        } else if (days <= 21) {
+            return "15-21 hari";
+        } else if (days <= 30) {
+            return "22-30 hari";
+        } else {
+            return ">30 hari";
+        }
+    }
+
+    load(data) {
+        
     }
 }
