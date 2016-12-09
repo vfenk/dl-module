@@ -42,7 +42,7 @@ module.exports = class VatManager extends BaseManager {
         var errors = {};
         var valid = vat;
         // 1. begin: Declare promises.
-        var getVatPromise = this.collection.firstOrDefault({
+        var getVatPromise = this.collection.singleOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },

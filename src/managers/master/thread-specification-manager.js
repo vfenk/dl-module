@@ -47,7 +47,7 @@ module.exports = class ThreadSpecificationManager extends BaseManager {
         var errors = {};
         var valid = threadSpecification;
         // 1. begin: Declare promises.
-        var getThreadSpecificationPromise = this.collection.firstOrDefault({
+        var getThreadSpecificationPromise = this.collection.singleOrDefault({
             _id: {
                 "$ne": new ObjectId(valid._id)
             },

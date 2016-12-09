@@ -74,7 +74,7 @@ module.exports = class LampStandardManager extends BaseManager {
         var errors = {};
         var valid = lampStandard;
         // 1. begin: Declare promises.
-        var getLampStandardPromise = this.collection.firstOrDefault({
+        var getLampStandardPromise = this.collection.singleOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },

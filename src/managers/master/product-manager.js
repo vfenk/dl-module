@@ -55,7 +55,7 @@ module.exports = class ProductManager extends BaseManager {
         var valid = product;
 
         // 1. begin: Declare promises.
-        var getProductPromise = this.collection.firstOrDefault({
+        var getProductPromise = this.collection.singleOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },

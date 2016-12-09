@@ -45,7 +45,7 @@ module.exports = class SupplierManager extends BaseManager {
         var errors = {};
         var valid = supplier;
         // 1. begin: Declare promises.
-        var getSupplierPromise = this.collection.firstOrDefault({
+        var getSupplierPromise = this.collection.singleOrDefault({
             _id: {
                 "$ne": new ObjectId(valid._id)
             },

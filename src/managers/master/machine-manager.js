@@ -63,7 +63,7 @@ module.exports = class MachineManager extends BaseManager {
         var errors = {};
         var valid = machine;
         // 1. begin: Declare promises.
-        var getMachinePromise = this.collection.firstOrDefault({
+        var getMachinePromise = this.collection.singleOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },

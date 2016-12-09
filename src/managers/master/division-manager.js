@@ -47,7 +47,7 @@ module.exports = class DivisionManager extends BaseManager {
         var errors = {};
         var valid = unit;
         // 1. begin: Declare promises.
-        var getunitPromise = this.collection.firstOrDefault({
+        var getunitPromise = this.collection.singleOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },

@@ -53,7 +53,7 @@ module.exports = class LotMachineManager extends BaseManager {
         var errors = {};
         var valid = lotMachine;
         // 1. begin: Declare promises.
-        var getLotMachinePromise = this.collection.firstOrDefault({
+        var getLotMachinePromise = this.collection.singleOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },

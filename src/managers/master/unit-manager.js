@@ -55,7 +55,7 @@ module.exports = class UnitManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = unit;
             // 1. begin: Declare promises.
-            var getUnitPromise = this.collection.firstOrDefault({
+            var getUnitPromise = this.collection.singleOrDefault({
                 _id: {
                     '$ne': new ObjectId(valid._id)
                 },
