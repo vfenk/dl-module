@@ -525,113 +525,181 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     unpost(poExternalId) {
         return this.getSingleByIdOrDefault(poExternalId)
             .then((poExternal) => {
+                return this.validateCancelAndUnpost(poExternal)
+                    .then((valid) => {
+                        var getPos = valid.items.map((po) => this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
 
-                var getPos = poExternal.items.map((po) => this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
+                        return Promise.all(getPos)
+                            .then((pos) => {
 
-                return Promise.all(getPos)
-                    .then((pos) => {
+                                var updatedPos = pos.map(po => {
 
-                        var updatedPos = pos.map(po => {
+                                    po.purchaseOrderExternalId = {};
+                                    po.purchaseOrderExternal = {};
+                                    po.supplierId = {};
+                                    po.supplier = {};
+                                    po.freightCostBy = '';
+                                    po.currency = {};
+                                    po.currencyRate = 1;
+                                    po.paymentMethod = '';
+                                    po.paymentDueDays = 0;
+                                    po.vat = {};
+                                    po.useVat = false;
+                                    po.vatRate = 0;
+                                    po.useIncomeTax = false;
+                                    po.isPosted = false;
+                                    po.status = poStatusEnum.PROCESSING;
 
-                            po.purchaseOrderExternalId = {};
-                            po.purchaseOrderExternal = {};
-                            po.supplierId = {};
-                            po.supplier = {};
-                            po.freightCostBy = '';
-                            po.currency = {};
-                            po.currencyRate = 1;
-                            po.paymentMethod = '';
-                            po.paymentDueDays = 0;
-                            po.vat = {};
-                            po.useVat = false;
-                            po.vatRate = 0;
-                            po.useIncomeTax = false;
-                            po.isPosted = false;
-                            po.status = poStatusEnum.PROCESSING;
+                                    for (var poItem of po.items) {
+                                        poItem.dealQuantity = 0;
+                                        poItem.dealUom = {};
+                                        poItem.priceBeforeTax = 0;
+                                        poItem.pricePerDealUnit = 0;
+                                        poItem.conversion = 1;
+                                        poItem.currency = {};
+                                        poItem.currencyRate = 1;
+                                    }
 
-                            for (var poItem of po.items) {
-                                poItem.dealQuantity = 0;
-                                poItem.dealUom = {};
-                                poItem.priceBeforeTax = 0;
-                                poItem.pricePerDealUnit = 0;
-                                poItem.conversion = 1;
-                                poItem.currency = {};
-                                poItem.currencyRate = 1;
-                            }
+                                    return this.purchaseOrderManager.update(po)
+                                        .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
+                                })
 
-                            return this.purchaseOrderManager.update(po)
-                                .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
-                        })
-
-                        return Promise.all(updatedPos);
-                    })
-                    .then((updatedPos) => {
-
-                        poExternal.items = poExternal.items.map((po) => {
-
-                            po.isPosted = false;
-                            po.status = poStatusEnum.PROCESSING;
-
-                            return po;
-                        })
-
-                        poExternal.isPosted = false;
-                        poExternal.status = poStatusEnum.CREATED;
-
-                        return this.update(poExternal)
-                            .then((poExId) => {
-
-                                return Promise.resolve(this.getSingleByIdOrDefault(poExId));
+                                return Promise.all(updatedPos);
                             })
-                    })
-            })
+                            .then((updatedPos) => {
+
+                                valid.items = valid.items.map((po) => {
+
+                                    po.isPosted = false;
+                                    po.status = poStatusEnum.PROCESSING;
+
+                                    return po;
+                                })
+
+                                valid.isPosted = false;
+                                valid.status = poStatusEnum.CREATED;
+
+                                return this.update(valid)
+                                    .then((poExId) => {
+
+                                        return Promise.resolve(poExId);
+                                    });
+                            });
+                    });
+            });
+    }
+
+    validateCancelAndUnpost(purchaseOrderExternal) {
+        var purchaseOrderExternalError = {};
+        var valid = purchaseOrderExternal;
+
+        return this.getSingleByIdOrDefault(valid._id)
+            .then((poe) => {
+                if (!poe.isPosted)
+                    purchaseOrderExternalError["no"] = i18n.__("PurchaseOrderExternal.isPosted:%s is not yet being posted", i18n.__("PurchaseOrderExternal.isPosted._:Posted"));
+
+                if (valid.items && valid.items.length > 0) {
+                    for (var purchaseOrder of valid.items) {
+                        var poItemError = {};
+                        var purchaseOrderItemErrors = [];
+                        var poItemHasError = false;
+                        for (var poItem of purchaseOrder.items) {
+                            if (poItem.fulfillments && poItem.fulfillments.length > 0) {
+                                poItemHasError = true;
+                                poItemError["no"] = i18n.__("PurchaseOrderExternal.items.items.no:%s is already have delivery order", i18n.__("PurchaseOrderExternal.items,items.no._:No"));
+
+                                purchaseOrderItemErrors.push(poItemError);
+                            }
+                        }
+
+                        if (poItemHasError)
+                            purchaseOrderExternalError["items"] = purchaseOrderItemErrors;
+                    }
+                }
+
+                if (Object.getOwnPropertyNames(purchaseOrderExternalError).length > 0) {
+                    var ValidationError = require('module-toolkit').ValidationError;
+                    return Promise.reject(new ValidationError('data podl does not pass validation', purchaseOrderExternalError));
+                }
+
+                if (!valid.stamp)
+                { valid = new PurchaseOrderExternal(valid); }
+                valid.stamp(this.user.username, 'manager');
+                return Promise.resolve(valid);
+            });
     }
 
     cancel(poExternalId) {
         return this.getSingleByIdOrDefault(poExternalId)
             .then((poExternal) => {
+                return this.validateCancelAndUnpost(poExternal)
+                    .then((valid) => {
+                        var getPos = valid.items.map((po) => this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
 
-                var getPos = poExternal.items.map((po) => this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
+                        return Promise.all(getPos)
+                            .then((pos) => {
 
-                return Promise.all(getPos)
-                    .then((pos) => {
+                                var voidedPos = pos.map((po) => {
 
-                        var voidedPos = pos.map((po) => {
+                                    po.status = poStatusEnum.VOID;
 
-                            po.status = poStatusEnum.VOID;
+                                    return this.purchaseOrderManager.update(po)
+                                        .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
+                                })
 
-                            return this.purchaseOrderManager.update(po)
-                                .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
-                        })
-
-                        return Promise.all(voidedPos);
-                    })
-                    .then((voidedPos) => {
-
-                        poExternal.status = poStatusEnum.VOID;
-
-                        return this.update(poExternal)
-                            .then((poExId) => {
-
-                                return Promise.resolve(this.getSingleByIdOrDefault(poExId));
+                                return Promise.all(voidedPos);
                             })
-                    })
-            })
+                            .then((voidedPos) => {
+
+                                valid.status = poStatusEnum.VOID;
+
+                                return this.update(valid)
+                                    .then((poExId) => {
+
+                                        return Promise.resolve(poExId);
+                                    });
+                            });
+                    });
+
+            });
     }
 
     close(poExternalId) {
 
         return this.getSingleByIdOrDefault(poExternalId)
             .then((poExternal) => {
+                return this.validateClose(poExternal)
+                    .then((valid) => {
 
-                poExternal.isClosed = true;
+                        valid.isClosed = true;
 
-                return this.update(poExternal)
-                    .then((poExId) => {
+                        return this.update(valid)
+                            .then((poExId) => {
 
-                        return Promise.resolve(this.getSingleByIdOrDefault(poExId));
-                    })
+                                return Promise.resolve(poExId);
+                            });
+                    });
+            });
+    }
 
-            })
+    validateClose(purchaseOrderExternal) {
+        var purchaseOrderExternalError = {};
+        var valid = purchaseOrderExternal;
+
+        return this.getSingleByIdOrDefault(valid._id)
+            .then((poe) => {
+                if (!poe.isPosted)
+                    purchaseOrderExternalError["no"] = i18n.__("PurchaseOrderExternal.isPosted:%s is not yet being posted", i18n.__("PurchaseOrderExternal.isPosted._:Posted"));
+
+                if (Object.getOwnPropertyNames(purchaseOrderExternalError).length > 0) {
+                    var ValidationError = require('module-toolkit').ValidationError;
+                    return Promise.reject(new ValidationError('data podl does not pass validation', purchaseOrderExternalError));
+                }
+
+                if (!valid.stamp)
+                { valid = new PurchaseOrderExternal(valid); }
+                valid.stamp(this.user.username, 'manager');
+                return Promise.resolve(valid);
+            });
     }
 };

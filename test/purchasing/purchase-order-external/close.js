@@ -54,10 +54,13 @@ it('#02. should isPosted = true', function (done) {
 
 it('#03. should success when closing purchase-order-external', function (done) {
     purchaseOrderExternalManager.close(purchaseOrderExternal._id)
-        .then(poe => {
-            purchaseOrderExternal = poe;
-            purchaseOrderExternal.isClosed.should.equal(true);
-            done();
+        .then(poExId => {
+            purchaseOrderExternalManager.getSingleById(poExId)
+                .then((poe) => {
+                    purchaseOrderExternal = poe;
+                    purchaseOrderExternal.isClosed.should.equal(true);
+                    done();
+                })
         })
         .catch(e => {
             done(e);

@@ -38,7 +38,7 @@ class PurchaseOrderExternalDataUtil {
                                     poItem.dealQuantity = poItem.defaultQuantity;
                                     poItem.dealUom = poItem.defaultUom;
                                     poItem.pricePerDealUnit = poItem.product.price * 1.05;
-                                    poItem.priceBeforeTax= poItem.pricePerDealUnit;
+                                    poItem.priceBeforeTax = poItem.pricePerDealUnit;
                                 }
                             }
 

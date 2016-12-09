@@ -56,11 +56,14 @@ it('#02. should isPosted = true', function (done) {
 
 it('#03. should success when unposting purchase-order-external', function (done) {
     purchaseOrderExternalManager.unpost(purchaseOrderExternal._id)
-        .then(poe => {
-            purchaseOrderExternal = poe;
-            purchaseOrderExternal.isPosted.should.equal(false);
-            JSON.stringify(purchaseOrderExternal.status).should.equal(JSON.stringify(poStatusEnum.CREATED));
-            done();
+        .then((poExId) => {
+            purchaseOrderExternalManager.getSingleById(poExId)
+                .then((poe) => {
+                    purchaseOrderExternal = poe;
+                    purchaseOrderExternal.isPosted.should.equal(false);
+                    JSON.stringify(purchaseOrderExternal.status).should.equal(JSON.stringify(poStatusEnum.CREATED));
+                    done();
+                })
         })
         .catch(e => {
             done(e);
