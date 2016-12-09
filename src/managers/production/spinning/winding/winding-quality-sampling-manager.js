@@ -79,7 +79,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
             var dateNow = new Date();
             var dateProcess = new Date(valid.date);
             
-            var getWindingQuality = this.collection.firstOrDefault({
+            var getWindingQuality = this.collection.singleOrDefault({
                 "$and" : [{
                         _id : {
                             "$ne" : new ObjectId(valid._id)

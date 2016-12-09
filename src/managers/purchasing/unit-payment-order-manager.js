@@ -29,7 +29,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     getUnitReceiptNote.push(ObjectId.isValid(item.unitReceiptNoteId) ? this.unitReceiptNote.getSingleByIdOrDefault(item.unitReceiptNoteId) : Promise.resolve(null));
                 }
             }
-            var getUnitPaymentOrderPromise = this.collection.firstOrDefault({
+            var getUnitPaymentOrderPromise = this.collection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)

@@ -76,7 +76,7 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
             var valid = windingProductionOutput;
             var processDate= new Date(valid.date);
             // 1. begin: Declare promises.
-            var getWindingProductionOutputPromise = this.collection.firstOrDefault({
+            var getWindingProductionOutputPromise = this.collection.singleOrDefault({
                     "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)

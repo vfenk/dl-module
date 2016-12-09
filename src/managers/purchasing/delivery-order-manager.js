@@ -72,7 +72,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var valid = deliveryOrder;
             var now = new Date();
 
-            var getDeliveryderPromise = this.collection.firstOrDefault({
+            var getDeliveryderPromise = this.collection.singleOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
