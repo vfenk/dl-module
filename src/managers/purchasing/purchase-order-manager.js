@@ -11,6 +11,7 @@ var PurchaseRequestManager = require('./purchase-request-manager');
 var generateCode = require('../../utils/code-generator');
 var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
+var prStatusEnum = DLModels.purchasing.enum.PurchaseRequestStatus;
 
 module.exports = class PurchaseOrderManager extends BaseManager {
     constructor(db, user) {
@@ -219,6 +220,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         .then(id => {
                                             PR.isUsed = true;
                                             PR.purchaseOrderIds = PR.purchaseOrderIds || [];
+                                            PR.status = prStatusEnum.PROCESSING;
                                             PR.purchaseOrderIds.push(id);
 
                                             this.purchaseRequestManager.update(PR)
@@ -433,7 +435,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
@@ -463,7 +465,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
@@ -506,7 +508,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -545,7 +547,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -578,7 +580,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -610,7 +612,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             }
                         }]
                     )
-                        .toArray(function (err, result) {
+                        .toArray(function(err, result) {
                             assert.equal(err, null);
                             resolve(result);
                         });
@@ -656,7 +658,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
@@ -686,7 +688,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         }
                     }]
                 )
-                    .toArray(function (err, result) {
+                    .toArray(function(err, result) {
                         assert.equal(err, null);
                         resolve(result);
                     });
