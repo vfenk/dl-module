@@ -71,16 +71,16 @@ module.exports = class LotMachineManager extends BaseManager {
                 var _machine = results[2];
 
                 if (_lotMachine) {
-                    errors["product"] = i18n.__("LotMachine.product.isExists:%s is exists", i18n.__("LotMachine.product._:Product"));
-                    errors["machine"] = i18n.__("LotMachine.machine.isExists:%s is exists", i18n.__("LotMachine.machine._:Machine"));
+                    errors["productId"] = i18n.__("LotMachine.product.isExists:%s is exists", i18n.__("LotMachine.product._:Product"));
+                    errors["machineId"] = i18n.__("LotMachine.machine.isExists:%s is exists", i18n.__("LotMachine.machine._:Machine"));
                 }
 
                 if (!_product) {
-                    errors["product"] = i18n.__("LotMachine.product.isRequired:%s is not exists", i18n.__("LotMachine.product._:Product"));
+                    errors["productId"] = i18n.__("LotMachine.product.isRequired:%s is not exists", i18n.__("LotMachine.product._:Product"));
                 }
 
                 if (!_machine)
-                    errors["machine"] = i18n.__("LotMachine.machine.isRequired:%s is not exists", i18n.__("LotMachine.machine._:Machine"));
+                    errors["machineId"] = i18n.__("LotMachine.machine.isRequired:%s is not exists", i18n.__("LotMachine.machine._:Machine"));
 
                 if (!valid.lot || valid.lot == '')
                     errors["lot"] = i18n.__("LotMachine.lot.isRequired:%s is required", i18n.__("LotMachine.lot._:Lot")); //"Lot Harus diisi";

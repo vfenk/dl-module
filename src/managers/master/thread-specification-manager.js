@@ -62,11 +62,11 @@ module.exports = class ThreadSpecificationManager extends BaseManager {
                 var _product = results[1];
 
                 if (_threadSpecification)
-                    errors["product"] = i18n.__("ThreadSpecification.product.isExists:%s is exists", i18n.__("ThreadSpecification.product._:Product"));
+                    errors["productId"] = i18n.__("ThreadSpecification.product.isExists:%s is exists", i18n.__("ThreadSpecification.product._:Product"));
                 else if (!_product)
-                    errors["product"] = i18n.__("ThreadSpecification.product.isNotExists:%s is not exists", i18n.__("ThreadSpecification.product._:Product"));
+                    errors["productId"] = i18n.__("ThreadSpecification.product.isNotExists:%s is not exists", i18n.__("ThreadSpecification.product._:Product"));
                 else if (!valid.productId)
-                    errors["product"] = i18n.__("ThreadSpecification.product.isRequired:%s is required", i18n.__("ThreadSpecification.product._:Product"));
+                    errors["productId"] = i18n.__("ThreadSpecification.product.isRequired:%s is required", i18n.__("ThreadSpecification.product._:Product"));
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require("module-toolkit").ValidationError;

@@ -69,21 +69,22 @@ module.exports = class AccountBankManager extends BaseManager {
 
                 if (!valid.bankName || valid.bankName == '')
                     errors["bankName"] = i18n.__("AccountBank.bankName.isRequired:%s is required", i18n.__("AccountBank.bankName._:BankName")); //"Nama Bank Harus diisi";
-                    
+
                 if (!valid.accountName || valid.accountName == '')
                     errors["accountName"] = i18n.__("AccountBank.accountName.isRequired:%s is required", i18n.__("AccountBank.accountName._:AccountName")); //"Nama Nasabah Bank harus diisi";
 
                 if (!valid.accountNumber || valid.accountNumber == '')
                     errors["accountNumber"] = i18n.__("AccountBank.accountNumber.isRequired:%s is required", i18n.__("AccountBank.accountNumber._:AccountNumber")); //"nomor Rekening harus diisi";
-                else if(_accBank)
-                    errors["accountNumber"] = i18n.__("AccountBank.accountNumber.isReadyExist:%s with same Bank is ready exist", i18n.__("AccountBank.accountNumber._:AccountNumber")); //"Nomor rekening dengan Bank dan Mata uang yang sama tidak boleh";
-
+                else if (_accBank) {
+                    errors["bankName"] = i18n.__("AccountBank.bankName.isExist:%s is already exist", i18n.__("AccountBank.bankName._:BankName")); //"Nama Bank Harus diisi";
+                    errors["accountNumber"] = i18n.__("AccountBank.accountNumber.isExist:%s with same Bank is already exist", i18n.__("AccountBank.accountNumber._:AccountNumber")); //"Nomor rekening dengan Bank dan Mata uang yang sama tidak boleh";
+                }
                 // 2c. begin: check if data has any error, reject if it has.
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require("module-toolkit").ValidationError;
                     return Promise.reject(new ValidationError("data does not pass validation", errors));
                 }
-                if(!valid.code)
+                if (!valid.code)
                     valid.code = CodeGenerator();
 
                 valid = new AccountBank(valid);
