@@ -34,6 +34,9 @@ before('#00. connect db', function(done) {
             purchaseOrderManager = new PurchaseOrderManager(db, {
                 username: 'dev'
             });
+            purchaseOrderExternalManager = new PurchaseOrderExternalManager(db, {
+                username: 'dev'
+            });
 
     done();
                        
@@ -81,24 +84,21 @@ before('#00. connect db', function(done) {
 
 it('#01. should success when create 20 PO External data', function (done) {
    
-    function getNewPo() {
-        return Promise.resolve(purchaseOrderExternalDataUtil.getPosted());
-    }
-
-    var anchor = (arr) => {
-    return getNewPo().then((po) => {
-        arr.push(po);
-        return Promise.resolve(arr);
-    })
-    }
-
-    var results = anchor([]);
-
-    for (var i = 0; i < 20; i++)
-    results = results.then(anchor);
-
-    // results.then(console.log)
-    done();
+    var data = []; 
+    for (var i = 0; i < 20; i++) { 
+        purchaseOrderExternalDataUtil.getPosted().then(
+            poe=>{
+                data.push(poe); 
+            }
+        )
+        
+    } 
+    Promise.all(data) 
+        .then((result) => { 
+            done(); 
+        }).catch(e => {
+            done(e);
+        });
     
  });
 
