@@ -43,7 +43,6 @@ before('#00. connect db', function(done) {
         });
 });
 
- 
 
 // var kodeUnik;
 // var PO;
@@ -81,23 +80,33 @@ before('#00. connect db', function(done) {
 //    });
 
 it('#01. should success when create 20 PO External data', function (done) {
-    var data = []; 
-    for (var i = 0; i < 20; i++) { 
-        var poe = purchaseOrderExternalDataUtil.getPosted();
-        data.push(poe); 
-    } 
-    Promise.all(data) 
-        .then((result) => { 
-            done(); 
-        }).catch(e => {
-            done(e);
-        });
-});
+   
+    function getNewPo() {
+        return Promise.resolve(purchaseOrderExternalDataUtil.getPosted());
+    }
+
+    var anchor = (arr) => {
+    return getNewPo().then((po) => {
+        arr.push(po);
+        return Promise.resolve(arr);
+    })
+    }
+
+    var results = anchor([]);
+
+    for (var i = 0; i < 20; i++)
+    results = results.then(anchor);
+
+    // results.then(console.log)
+    done();
+    
+ });
 
 it('#02. should success when get data report PO Per Unit Per Category', function (done) {
     purchaseOrderManager.getDataPOUnitCategory()
     .then(po => {
         po.should.instanceof(Array);
+        po.length.should
         done();
     }).catch(e => {
             done(e);
