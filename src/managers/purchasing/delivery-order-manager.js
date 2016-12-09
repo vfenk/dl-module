@@ -11,8 +11,10 @@ var map = DLModels.map;
 var DeliveryOrder = DLModels.purchasing.DeliveryOrder;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var PurchaseOrderExternalManager = require('./purchase-order-external-manager');
+var PurchaseRequestManager = require('./purchase-request-manager');
 var i18n = require('dl-i18n');
 var SupplierManager = require('../master/supplier-manager');
+var prStatusEnum = DLModels.purchasing.enum.PurchaseRequestStatus;
 
 module.exports = class DeliveryOrderManager extends BaseManager {
     constructor(db, user) {
@@ -20,6 +22,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         this.collection = this.db.use(map.purchasing.collection.DeliveryOrder);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
         this.purchaseOrderExternalManager = new PurchaseOrderExternalManager(db, user);
+        this.purchaseRequestManager = new PurchaseRequestManager(db, user);
         this.supplierManager = new SupplierManager(db, user);
     }
 
@@ -164,7 +167,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
@@ -213,7 +216,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var tasks = [];
             var tasksPoExternal = [];
+            var tasksPR = [];
             var getPurchaseOrderById = [];
+            var getPRById = [];
 
             var now = new Date();
             var stamp = now / 1000 | 0;
@@ -230,14 +235,16 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
                                     if (!poId.equals(fulfillmentItem.purchaseOrder._id)) {
                                         poId = new ObjectId(fulfillmentItem.purchaseOrder._id);
-                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id))
+                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id)) {
                                             getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
+                                            getPRById.push(this.purchaseRequestManager.getSingleById(fulfillmentItem.purchaseOrder.purchaseRequest._id));
+                                        }
                                     }
                                 }
                             }
-                            Promise.all(getPurchaseOrderById)
-                                .then(results => {
-                                    for (var purchaseOrder of results) {
+                            Promise.all([getPurchaseOrderById, getPRById])
+                                .then((results) => {
+                                    for (var purchaseOrder of results[0]) {
                                         for (var poItem of purchaseOrder.items) {
                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                                                 for (var fulfillment of validDeliveryOrderItem.fulfillments) {
@@ -273,9 +280,22 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                             else
                                                 purchaseOrder.isClosed = true;
                                         }
+
+                                        for (var _pr of results[1]) {
+                                            if (_pr._id.toString() === purchaseOrder._id.toString()) {
+                                                if (purchaseOrder.isClosed) {
+                                                    _pr.status = prStatusEnum.COMPLETE;
+                                                }
+                                                else {
+                                                    _pr.status = prStatusEnum.ARRIVING;
+                                                }
+                                                tasksPR.push(this.purchaseRequestManager.update(_pr));
+                                                break;
+                                            }
+                                        }
                                         tasks.push(this.purchaseOrderManager.update(purchaseOrder));
                                     }
-                                    Promise.all(tasks)
+                                    Promise.all([tasks, tasksPR])
                                         .then(results => {
                                             //UPDATE PO EXTERNAL
                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
@@ -367,7 +387,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var tasks = [];
             var tasksPoExternal = [];
+            var tasksPR = [];
             var getPurchaseOrderById = [];
+            var getPRById = [];
+
             this._createIndexes()
                 .then((createIndexResults) => {
                     this._validate(deliveryOrder)
@@ -378,14 +401,16 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
                                     if (!poId.equals(fulfillmentItem.purchaseOrder._id)) {
                                         poId = new ObjectId(fulfillmentItem.purchaseOrder._id);
-                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id))
+                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id)) {
                                             getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
+                                            getPRById.push(this.purchaseRequestManager.getSingleById(fulfillmentItem.purchaseOrder.purchaseRequest._id));
+                                        }
                                     }
                                 }
                             }
-                            Promise.all(getPurchaseOrderById)
+                            Promise.all([getPurchaseOrderById, getPRById])
                                 .then(results => {
-                                    for (var purchaseOrder of results) {
+                                    for (var purchaseOrder of results[0]) {
                                         for (var poItem of purchaseOrder.items) {
                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                                                 for (var fulfillment of validDeliveryOrderItem.fulfillments) {
@@ -423,10 +448,22 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                 else
                                                     purchaseOrder.isClosed = true;
                                             }
+                                            for (var _pr of results[1]) {
+                                                if (_pr._id.toString() === purchaseOrder._id.toString()) {
+                                                    if (purchaseOrder.isClosed) {
+                                                        _pr.status = prStatusEnum.COMPLETE;
+                                                    }
+                                                    else {
+                                                        _pr.status = prStatusEnum.ARRIVING;
+                                                    }
+                                                    tasksPR.push(this.purchaseRequestManager.update(_pr));
+                                                    break;
+                                                }
+                                            }
                                             tasks.push(this.purchaseOrderManager.update(purchaseOrder));
                                         }
                                     }
-                                    Promise.all(tasks)
+                                    Promise.all([tasks, tasksPR])
                                         .then(results => {
                                             //UPDATE PO EXTERNAL
                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
@@ -457,7 +494,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
                                                         tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
                                                     }
-                                                    
+
                                                     Promise.all(tasksPoExternal)
                                                         .then(results => {
                                                             var getPoExternalByID = [];
@@ -517,7 +554,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var tasks = [];
             var tasksPoExternal = [];
+            var tasksPR = [];
             var getPurchaseOrderById = [];
+            var getPRById = [];
             this._createIndexes()
                 .then((createIndexResults) => {
                     this._validate(deliveryOrder)
@@ -530,14 +569,16 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
                                     if (!poId.equals(fulfillmentItem.purchaseOrder._id)) {
                                         poId = new ObjectId(fulfillmentItem.purchaseOrder._id);
-                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id))
+                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id)) {
                                             getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
+                                            getPRById.push(this.purchaseRequestManager.getSingleById(fulfillmentItem.purchaseOrder.purchaseRequest._id));
+                                        }
                                     }
                                 }
                             }
-                            Promise.all(getPurchaseOrderById)
+                            Promise.all([getPurchaseOrderById, getPRById])
                                 .then(results => {
-                                    for (var purchaseOrder of results) {
+                                    for (var purchaseOrder of results[0]) {
                                         for (var poItem of purchaseOrder.items) {
                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                                                 for (var fulfillment of validDeliveryOrderItem.fulfillments) {
@@ -575,10 +616,22 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                 else
                                                     purchaseOrder.isClosed = true;
                                             }
+                                            for (var _pr of results[1]) {
+                                                if (_pr._id.toString() === purchaseOrder._id.toString()) {
+                                                    if (purchaseOrder.isClosed) {
+                                                        _pr.status = prStatusEnum.COMPLETE;
+                                                    }
+                                                    else {
+                                                        _pr.status = prStatusEnum.ARRIVING;
+                                                    }
+                                                    tasksPR.push(this.purchaseRequestManager.update(_pr));
+                                                    break;
+                                                }
+                                            }
                                             tasks.push(this.purchaseOrderManager.update(purchaseOrder));
                                         }
                                     }
-                                    Promise.all(tasks)
+                                    Promise.all([tasks, tasksPR])
                                         .then(results => {
                                             //UPDATE PO EXTERNAL
                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
@@ -609,7 +662,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
                                                         tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
                                                     }
-                                                    
+
                                                     Promise.all(tasksPoExternal)
                                                         .then(results => {
                                                             var getPoExternalByID = [];
