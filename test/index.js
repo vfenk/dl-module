@@ -9,8 +9,8 @@ describe('#dl-module', function(done) {
     this.timeout(2 * 60000);
 
     // Auth
-    test('@auth/account-manager', './auth/account-manager-test');
-    test('@auth/role-manager', './auth/role-manager-test');
+    // test('@auth/account-manager', './auth/account-manager-test');
+    // test('@auth/role-manager', './auth/role-manager-test');
 
     // test('@MASTER/BUDGET', './etl/fact-purchase-duration');
     // // Master
