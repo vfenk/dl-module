@@ -1,6 +1,7 @@
 "use strict";
 var _getSert = require("../getsert");
 var uom = require("./uom-data-util");
+var currency = require("./currency-data-util");
 var generateCode = require("../../../src/utils/code-generator");
 
 class ProductDataUtil {
@@ -14,8 +15,12 @@ class ProductDataUtil {
     }
 
     getNewData() {
-        return uom.getTestData()
-            .then((uom) => {
+
+        return Promise.all([uom.getTestData(), currency.getTestData()])
+            .then((results) => {
+                var uom = results[0];
+                var currency = results[1];
+
                 var code = generateCode();
 
                 var data = {
@@ -24,6 +29,8 @@ class ProductDataUtil {
                     price: 1250,
                     uomId: uom._id,
                     uom: uom,
+                    currencyId: currency._id,
+                    currency: currency,
                     description: `description for ${code}`,
                     tags: `tags for ${code}`,
                     properties: []
@@ -40,35 +47,29 @@ class ProductDataUtil {
     }
 
     getTestData() {
-        return uom.getTestData()
-            .then((uom) => {
-                var data = {
-                    code: "P01-UT",
-                    name: "Product 01",
-                    price: 1250,
-                    uomId: uom._id,
-                    uom: uom,
-                    description: "Product untuk unit test",
-                    tags: "#unit-test, #product",
-                    properties: []
-                };
+        return this.getNewData()
+            .then((data) => {
+                data.code = "PRD-UT-01";
+                data.name = "Product Unit Test 01";
+                data.price = 1250;
+
+                data.description = "Product untuk unit test";
+                data.tags = "#unit-test, #product";
+
                 return this.getSert(data);
             });
     }
 
     getTestData2() {
-        return uom.getTestData()
-            .then((uom) => {
-                var data = {
-                    code: "P02-UT",
-                    name: "Product 02",
-                    price: 8500,
-                    description: "Product untuk unit test",
-                    uomId: uom._id,
-                    uom: uom,
-                    tags: "#unit-test, #product",
-                    properties: []
-                };
+        return this.getNewData()
+            .then((data) => {
+                data.code = "PRD-UT-02";
+                data.name = "Product Unit Test 02";
+                data.price = 4250;
+
+                data.description = "Product untuk unit test";
+                data.tags = "#unit-test, #product";
+
                 return this.getSert(data);
             });
     }

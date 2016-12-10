@@ -1,13 +1,13 @@
 require("should");
 var helper = require("../../helper");
 
-var purchaseOrderDataUtil = require('../../data').transaction.purchaseOrder;
+var purchaseOrderDataUtil = require("../../data-util/purchasing/purchase-order-data-util");
 var validatePR = require("dl-models").validator.purchasing.purchaseOrder;
 var PurchaseOrderManager = require("../../../src/managers/purchasing/purchase-order-manager");
 var purchaseOrderManager = null;
 var purchaseOrders;
 
-var purchaseOrderExternalDataUtil = require('../../data').transaction.purchaseOrderExternal;
+var purchaseOrderExternalDataUtil = require("../../data-util/purchasing/purchase-order-external-data-util");
 var validatePO = require("dl-models").validator.purchasing.purchaseOrderExternal;
 var PurchaseOrderExternalManager = require("../../../src/managers/purchasing/purchase-order-external-manager");
 var purchaseOrderExternalManager = null;
@@ -23,7 +23,7 @@ before('#00. connect db', function(done) {
                 username: 'dev'
             });
 
-            Promise.all([purchaseOrderDataUtil.getNew(), purchaseOrderDataUtil.getNew()])
+            Promise.all([purchaseOrderDataUtil.getNewTestData(), purchaseOrderDataUtil.getNewTestData()])
                 .then(results => {
                     purchaseOrders = results;
                     done();

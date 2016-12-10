@@ -7,7 +7,7 @@ class LampStandardDataUtil {
         var ManagerType = require("../../../src/managers/master/lamp-standard-manager");
         return _getSert(input, ManagerType, (data) => {
             return {
-                code: data.code
+                name: data.name
             };
         });
     }

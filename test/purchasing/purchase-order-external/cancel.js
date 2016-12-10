@@ -1,7 +1,7 @@
 require("should");
 var helper = require("../../helper");
 
-var purchaseOrderDataUtil = require('../../data').transaction.purchaseOrder;
+var purchaseOrderDataUtil = require("../../data-util/purchasing/purchase-order-data-util");
 var validatePR = require("dl-models").validator.purchasing.purchaseOrder;
 var PurchaseOrderManager = require("../../../src/managers/purchasing/purchase-order-manager");
 var purchaseOrderManager = null;
@@ -11,7 +11,7 @@ var PurchaseRequestManager = require("../../../src/managers/purchasing/purchase-
 var purchaseRequestManager = null;
 var purchaseRequests;
 
-var purchaseOrderExternalDataUtil = require('../../data').transaction.purchaseOrderExternal;
+var purchaseOrderExternalDataUtil = require("../../data-util/purchasing/purchase-order-external-data-util");
 var validatePO = require("dl-models").validator.purchasing.purchaseOrderExternal;
 var PurchaseOrderExternalManager = require("../../../src/managers/purchasing/purchase-order-external-manager");
 var purchaseOrderExternalManager = null;

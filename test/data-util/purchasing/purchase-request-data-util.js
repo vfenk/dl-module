@@ -61,7 +61,7 @@ class PurchaseRequestDataUtil {
     }
 
     getPostedData() {
-        return this.getNew()
+        return this.getNewTestData()
             .then((pr) => {
                 return helper
                     .getManager(PurchaseRequestManager)
