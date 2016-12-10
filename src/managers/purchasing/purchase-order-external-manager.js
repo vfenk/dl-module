@@ -185,18 +185,18 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         var purchaseOrderExternalError = {};
         var valid = purchaseOrderGroup;
 
-            var getPurchaseOrderPromise = this.collection.firstOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                    "refNo": valid.refNo
-                }]
-            });
-            var getCurrency = valid.currency && ObjectId.isValid(valid.currency._id) ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
-            var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
-            var getVat = valid.vat && ObjectId.isValid(valid.vat._id) ? this.vatManager.getSingleByIdOrDefault(valid.vat._id) : Promise.resolve(null);
+             var getOtherPurchaseOrder = this.collection.singleOrDefault({
+            "$and": [{
+                _id: {
+                    '$ne': new ObjectId(valid._id)
+                }
+            }, {
+                "refNo": valid.refNo
+            }]
+        });
+        var getCurrency = valid.currency && ObjectId.isValid(valid.currency._id) ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
+        var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
+        var getVat = valid.vat && ObjectId.isValid(valid.vat._id) ? this.vatManager.getSingleByIdOrDefault(valid.vat._id) : Promise.resolve(null);
 
 
         var getPOInternal = [];
