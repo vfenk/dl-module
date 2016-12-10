@@ -185,7 +185,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         var purchaseOrderExternalError = {};
         var valid = purchaseOrderGroup;
 
-             var getOtherPurchaseOrder = this.collection.singleOrDefault({
+        var getOtherPurchaseOrder = this.collection.singleOrDefault({
             "$and": [{
                 _id: {
                     '$ne': new ObjectId(valid._id)
