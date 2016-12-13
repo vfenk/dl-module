@@ -461,15 +461,27 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     }
                                 }
                             }
-                            Promise.all([tasksUpdatePoInternal,getPRById])
+                            Promise.all(tasksUpdatePoInternal)
                                 .then((_results) => {
-                                    for(var _pr of _results[1]){
-                                        _pr.status = prStatusEnum.ORDERED;
-                                        tasksUpdatePR.push(this.purchaseRequestManager.update(_pr));
-                                    }
-                                    Promise.all([tasksUpdatePR,tasksUpdatePoEksternal])
-                                        .then((_listIdPoEksternal) => {
-                                            resolve(_listIdPoEksternal[1]);
+                                    Promise.all(getPRById)
+                                        .then((_prs) => {
+                                            for(var _pr of _prs){
+                                                _pr.status = prStatusEnum.ORDERED;
+                                                tasksUpdatePR.push(this.purchaseRequestManager.update(_pr));
+                                            }
+                                            Promise.all(tasksUpdatePR)
+                                                .then((_updatedId) => {
+                                                    Promise.all(tasksUpdatePoEksternal)
+                                                        .then((_listIdPoEksternal) => {
+                                                            resolve(_listIdPoEksternal);
+                                                        })
+                                                        .catch(e => {
+                                                            reject(e);
+                                                        })
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                })
                                         })
                                         .catch(e => {
                                             reject(e);
