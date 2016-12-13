@@ -152,7 +152,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                             for (var poInternal of results) {
                                                 poInternal.isPosted = false;
                                                 tasks.push(this.purchaseOrderManager.update(poInternal));
-
                                             }
                                             Promise.all(tasks)
                                                 .then(results => {
@@ -394,6 +393,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     post(listPurchaseOrderExternal) {
         var tasksUpdatePoInternal = [];
         var tasksUpdatePoEksternal = [];
+        var tasksUpdatePR=[];
+        var getPRById=[];
         var getPOItemById = [];
         var getPOExternalById = [];
         return new Promise((resolve, reject) => {
@@ -418,6 +419,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         for (var _poExternalItem of _purchaseOrderExternal.items) {
                                             for (var _purchaseOrder of _purchaseOrderList) {
                                                 if (_purchaseOrder._id.equals(_poExternalItem._id)) {
+                                                    getPRById.push(this.purchaseRequestManager.getSingleByIdOrDefault(_purchaseOrder.purchaseRequest._id));
                                                     _purchaseOrder.purchaseOrderExternalId = new ObjectId(_purchaseOrderExternal._id);
                                                     _purchaseOrder.purchaseOrderExternal = _purchaseOrderExternal;
                                                     _purchaseOrder.purchaseOrderExternal._id = new ObjectId(_purchaseOrderExternal._id);
@@ -460,10 +462,26 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 }
                             }
                             Promise.all(tasksUpdatePoInternal)
-                                .then(_listIdPoInternal => {
-                                    Promise.all(tasksUpdatePoEksternal)
-                                        .then(_listIdPoEksternal => {
-                                            resolve(_listIdPoEksternal);
+                                .then((_results) => {
+                                    Promise.all(getPRById)
+                                        .then((_prs) => {
+                                            for(var _pr of _prs){
+                                                _pr.status = prStatusEnum.ORDERED;
+                                                tasksUpdatePR.push(this.purchaseRequestManager.update(_pr));
+                                            }
+                                            Promise.all(tasksUpdatePR)
+                                                .then((_updatedId) => {
+                                                    Promise.all(tasksUpdatePoEksternal)
+                                                        .then((_listIdPoEksternal) => {
+                                                            resolve(_listIdPoEksternal);
+                                                        })
+                                                        .catch(e => {
+                                                            reject(e);
+                                                        })
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                })
                                         })
                                         .catch(e => {
                                             reject(e);

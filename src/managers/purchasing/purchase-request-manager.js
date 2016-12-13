@@ -12,6 +12,7 @@ var UnitManager = require("../master/unit-manager");
 var BudgetManager = require("../master/budget-manager");
 var CategoryManager = require("../master/category-manager");
 var ProductManager = require("../master/product-manager");
+var prStatusEnum = DLModels.purchasing.enum.PurchaseRequestStatus;
 
 module.exports = class PurchaseRequestManager extends BaseManager {
     constructor(db, user) {
@@ -29,8 +30,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     _getQuery(paging) {
 
         var _default = {
-                _deleted: false
-            },
+            _deleted: false
+        },
             pagingFilter = paging.filter || {},
             keywordFilter = {},
             query = {};
@@ -168,9 +169,10 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 return Promise.resolve(valid);
             });
     }
-    
+
     _beforeInsert(purchaseRequest) {
         purchaseRequest.no = generateCode();
+        purchaseRequest.status = prStatusEnum.CREATED;
         return Promise.resolve(purchaseRequest);
     }
 
@@ -187,6 +189,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                         for (var _pr of validPurchaseRequest) {
                             if (_pr._id.equals(pr._id)) {
                                 _pr.isPosted = true;
+                                _pr.status = prStatusEnum.POSTED;
                                 tasks.push(this.update(_pr));
                                 break;
                             }
