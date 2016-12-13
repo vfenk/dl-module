@@ -493,7 +493,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 }, {
                                     "_deleted": false
                                 }]
-                            },
+                            }
                         }, {
                             $unwind: "$items"
                         }, {

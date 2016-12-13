@@ -10,7 +10,7 @@ module.exports = function (unitPaymentCorrection) {
             product: item.product,
             pricePerUnit: item.pricePerUnit,
             priceTotal: item.priceTotal,
-            prNo: item.purchaseOrder.purchaseRequest.no,
+            prNo: item.purchaseOrder.purchaseRequest.no
         };
     });
 
@@ -29,7 +29,7 @@ module.exports = function (unitPaymentCorrection) {
 
     var numberLocaleOptions = {
         style: 'decimal',
-        maximumFractionDigits: 4,
+        maximumFractionDigits: 4
 
     };
     var header = [
