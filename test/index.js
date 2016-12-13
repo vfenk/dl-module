@@ -14,8 +14,6 @@ describe('#dl-module', function(done) {
 
     // test('@ETL/FACT-PURCHASE-DURATION', './etl/fact-purchase-duration');
     // // Master
-
-
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
     test('@MASTER/BUDGET', './master/budget');
     test('@MASTER/BUYER', './master/buyer');
@@ -39,6 +37,9 @@ describe('#dl-module', function(done) {
     test('@PURCHASING/PURCHASE ORDER', './purchasing/purchase-order');
     test('@PURCHASING/PURCHASE ORDER EXTERNAL', './purchasing/purchase-order-external'); 
     
+
+    
+     test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');
 
     // ok
     // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
