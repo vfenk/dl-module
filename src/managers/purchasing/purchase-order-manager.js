@@ -33,11 +33,13 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             no: valid.no || ""
         });
         var getPurchaseRequest = ObjectId.isValid(valid.purchaseRequestId) ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
+        var getSourcePurchaseOrder = ObjectId.isValid(valid.sourcePurchaseOrderId) ? this.getSingleByIdOrDefault(valid.sourcePurchaseOrderId) : Promise.resolve(null);
 
-        return Promise.all([getPurchaseOrder, getPurchaseRequest])
+        return Promise.all([getPurchaseOrder, getPurchaseRequest, getSourcePurchaseOrder])
             .then(results => {
                 var _purchaseOrder = results[0];
                 var _purchaseRequest = results[1];
+                var _sourcePurchaseOrder = results[2];
 
                 if (_purchaseOrder) {
                     errors["no"] = i18n.__("PurchaseOrder.no.isExist:%s is exist", i18n.__("PurchaseOrder.no._:No")); //"purchaseRequest tidak boleh kosong";
@@ -91,7 +93,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         if (!item.defaultQuantity || item.defaultQuantity === 0)
                             itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isRequired:%s is required", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh kosong";
 
-                        if (valid.sourcePurchaseOrder) {
+                        if (_sourcePurchaseOrder) {
                             for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
                                 sourcePoItem.product._id = new ObjectId(sourcePoItem.product._id);
                                 item.product._id = new ObjectId(item.product._id);
