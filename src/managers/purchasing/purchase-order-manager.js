@@ -24,123 +24,135 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     _validate(purchaseOrder) {
         var errors = {};
-        return new Promise((resolve, reject) => {
-            var valid = purchaseOrder;
-            valid._id = valid._id || new ObjectId();
-            var getPurchaseOrderPromise = this.collection.firstOrDefault({
-                "$and": [{
-                    _deleted: false
-                }, {
-                    "purchaseRequestId": new ObjectId(valid.purchaseRequestId)
-                }, {
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
+        var valid = purchaseOrder;
+        // valid._id = ObjectId.isValid(valid._id) ? new ObjectId(valid._id) : new ObjectId();
+        var getPurchaseOrder = this.collection.singleOrDefault({
+            _id: {
+                '$ne': new ObjectId(valid._id)
+            },
+            no: valid.no || ""
+        });
+        var getPurchaseRequest = ObjectId.isValid(valid.purchaseRequestId) ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
+
+        return Promise.all([getPurchaseOrder, getPurchaseRequest])
+            .then(results => {
+                var _purchaseOrder = results[0];
+                var _purchaseRequest = results[1];
+
+                if (_purchaseOrder) {
+                    errors["no"] = i18n.__("PurchaseOrder.no.isExist:%s is exist", i18n.__("PurchaseOrder.no._:No")); //"purchaseRequest tidak boleh kosong";
+                }
+
+                if (!_purchaseRequest) {
+                    errors["purchaseRequestId"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";
+                }
+                else if (!_purchaseRequest.isPosted) {
+                    errors["purchaseRequestId"] = i18n.__("PurchaseOrder.purchaseRequest.isNotPosted:%s is need to be posted", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest harus sudah dipost";
+                }
+                else if (_purchaseRequest.isUsed) {
+                    var searchId = valid.sourcePurchaseOrderId || valid._id || "";
+                    var poId = (_purchaseRequest.purchaseOrderIds || []).find((id) => {
+                        return id.toString() === searchId.toString();
+                    });
+                    if (!poId) {
+                        errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
                     }
-                }]
-            });
+                }
+                // /*
+                //     single
+                // */
+                // else if (!_sourcePurchaseOrder) {
+                //     if (_purchaseRequest.isUsed) {
+                //         var poId = (_purchaseRequest.purchaseOrderIds || []).find((id) => {});
 
-            valid._id = valid._id || new ObjectId();
-            var getPurchaseRequest = ObjectId.isValid(valid.purchaseRequestId) ? this.purchaseRequestManager.getSingleByIdOrDefault(valid.purchaseRequestId) : Promise.resolve(null);
+                //     }
+                // }
+                // // if (_purchaseOrder._id.toString() === valid._id.toString() && _purchaseRequest.isUsed)
+                // //     errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
 
-            Promise.all([getPurchaseOrderPromise, getPurchaseRequest])
-                .then(results => {
-                    var _purchaseOrder = results[0] || {
-                        _id: new ObjectId()
-                    };
-                    var _purchaseRequest = results[1];
-                    var now = new Date();
+                // /*
+                //     split
+                // */
+                // else if (_sourcePurchaseOrder) {
+                //     if (_purchaseOrder._id.toString() != valid.sourcePurchaseOrder._id.toString() &&
+                //         _purchaseOrder._id.toString() != valid._id.toString() &&
+                //         _purchaseRequest.isUsed)
+                //         errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
+                // }
 
-                    if (!_purchaseRequest)
-                        errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isRequired:%s is required", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh kosong";
-                    else if (_purchaseRequest && !_purchaseRequest.isPosted)
-                        errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isPosted:%s is need to be posted", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest harus sudah dipost";
-                    else if (valid.sourcePurchaseOrder !== null) {
-                        if (_purchaseOrder._id.toString() != valid.sourcePurchaseOrder._id.toString() && _purchaseOrder._id.toString() != valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
-                            errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
-                    }
-                    else if (valid.sourcePurchaseOrder === null) {
-                        if (_purchaseOrder._id.toString() === valid._id.toString() && _purchaseRequest && _purchaseRequest.isPosted && _purchaseRequest.isUsed)
-                            errors["purchaseRequest"] = i18n.__("PurchaseOrder.purchaseRequest.isUsed:%s is already used", i18n.__("PurchaseOrder.purchaseRequest._:Purchase Request")); //"purchaseRequest tidak boleh sudah dipakai";
-                    }
-                    if (valid.items.length > 0) {
-                        var itemErrors = [];
-                        for (var item of valid.items) {
-                            var itemError = {};
+                valid.items = valid.items || [];
+                if (valid.items.length > 0) {
+                    var itemErrors = [];
+                    for (var item of valid.items) {
+                        var itemError = {};
 
-                            if (!item.product || !item.product._id)
-                                itemError["product"] = i18n.__("PurchaseOrder.items.product.name.isRequired:%s is required", i18n.__("PurchaseOrder.items.product.name._:Name")); //"Nama barang tidak boleh kosong";
-                            if (!item.defaultQuantity || item.defaultQuantity === 0)
-                                itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isRequired:%s is required", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh kosong";
+                        if (!item.product || !item.product._id)
+                            itemError["product"] = i18n.__("PurchaseOrder.items.product.name.isRequired:%s is required", i18n.__("PurchaseOrder.items.product.name._:Name")); //"Nama barang tidak boleh kosong";
+                        if (!item.defaultQuantity || item.defaultQuantity === 0)
+                            itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isRequired:%s is required", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh kosong";
 
-                            if (valid.sourcePurchaseOrder !== null) {
-                                for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
-                                    sourcePoItem.product._id = new ObjectId(sourcePoItem.product._id);
-                                    item.product._id = new ObjectId(item.product._id);
-                                    if (item.product._id && item.defaultQuantity) {
-                                        if (item.product._id.equals(sourcePoItem.product._id)) {
-                                            if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
-                                                itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isGreater:%s is greater than the first PO", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh lebih besar dari PO asal";
-                                                break;
-                                            }
+                        if (valid.sourcePurchaseOrder !== null) {
+                            for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
+                                sourcePoItem.product._id = new ObjectId(sourcePoItem.product._id);
+                                item.product._id = new ObjectId(item.product._id);
+                                if (item.product._id && item.defaultQuantity) {
+                                    if (item.product._id.equals(sourcePoItem.product._id)) {
+                                        if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
+                                            itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isGreater:%s is greater than the first PO", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh lebih besar dari PO asal";
+                                            break;
                                         }
                                     }
                                 }
                             }
-                            itemErrors.push(itemError);
                         }
-                        for (var itemError of itemErrors) {
-                            for (var prop in itemError) {
-                                errors.items = itemErrors;
+                        itemErrors.push(itemError);
+                    }
+                    for (var itemError of itemErrors) {
+                        if (Object.getOwnPropertyNames(itemError).length > 0) {
+                            errors.items = itemErrors;
+                            break;
+                        }
+                    }
+                }
+                else {
+                    errors["items"] = i18n.__("PurchaseOrder.items.isRequired:%s is required", i18n.__("PurchaseOrder.items._:Items")); //"Harus ada minimal 1 barang";
+                }
+
+                if (Object.getOwnPropertyNames(errors).length > 0) {
+                    var ValidationError = require('module-toolkit').ValidationError;
+                    return Promise.reject(new ValidationError('data does not pass validation', errors));
+                }
+
+                if (_purchaseRequest) {
+                    valid.purchaseRequest = _purchaseRequest;
+                    valid.purchaseRequestId = new ObjectId(_purchaseRequest._id);
+                    valid.refNo = _purchaseRequest.no;
+                    valid.unit = _purchaseRequest.unit;
+                    valid.unitId = new ObjectId(_purchaseRequest.unit._id);
+                    valid.unit._id = new ObjectId(_purchaseRequest.unit._id);
+                    valid.category = _purchaseRequest.category;
+                    valid.categoryId = new ObjectId(_purchaseRequest.category._id);
+                    valid.category._id = new ObjectId(_purchaseRequest.category._id);
+                    valid.date = _purchaseRequest.date;
+                    valid.expectedDeliveryDate = _purchaseRequest.expectedDeliveryDate;
+                    for (var poItem of valid.items) {
+                        for (var _prItem of _purchaseRequest.items)
+                            if (_prItem.product._id.toString() === poItem.product._id.toString()) {
+                                poItem.product = _prItem.product;
+                                poItem.defaultUom = _prItem.product.uom;
                                 break;
                             }
-                            if (errors.items)
-                                break;
-                        }
-
                     }
-                    else {
-                        errors["items"] = i18n.__("PurchaseOrder.items.isRequired:%s is required", i18n.__("PurchaseOrder.items._:Items")); //"Harus ada minimal 1 barang";
-                    }
+                    // valid.items = items;
+                }
 
-                    if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError;
-                        reject(new ValidationError('data does not pass validation', errors));
-                    }
+                if (!valid.stamp) {
+                    valid = new PurchaseOrder(valid);
+                }
 
-                    if (_purchaseRequest) {
-                        valid.purchaseRequest = _purchaseRequest;
-                        valid.purchaseRequestId = new ObjectId(_purchaseRequest._id);
-                        valid.refNo = _purchaseRequest.no;
-                        valid.unit = _purchaseRequest.unit;
-                        valid.unitId = new ObjectId(_purchaseRequest.unit._id);
-                        valid.unit._id = new ObjectId(_purchaseRequest.unit._id);
-                        valid.category = _purchaseRequest.category;
-                        valid.categoryId = new ObjectId(_purchaseRequest.category._id);
-                        valid.category._id = new ObjectId(_purchaseRequest.category._id);
-                        valid.date = _purchaseRequest.date;
-                        valid.expectedDeliveryDate = _purchaseRequest.expectedDeliveryDate;
-                        for (var poItem of valid.items) {
-                            for (var _prItem of _purchaseRequest.items)
-                                if (_prItem.product._id.toString() === poItem.product._id.toString()) {
-                                    poItem.product = _prItem.product;
-                                    poItem.defaultUom = _prItem.product.uom;
-                                    break;
-                                }
-                        }
-                        // valid.items = items;
-                    }
-
-                    if (!valid.stamp)
-                        valid = new PurchaseOrder(valid);
-
-                    valid.stamp(this.user.username, 'manager');
-                    resolve(valid);
-                })
-                .catch(e => {
-                    reject(e);
-                })
-
-        });
+                valid.stamp(this.user.username, 'manager');
+                return Promise.resolve(valid);
+            });
     }
 
     _getQuery(paging) {
@@ -204,47 +216,69 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return query;
     }
 
-    create(purchaseOrder) {
-        return new Promise((resolve, reject) => {
-            this._createIndexes()
-                .then((createIndexResults) => {
-                    purchaseOrder.no = generateCode();
-                    this._validate(purchaseOrder)
-                        .then(validPurchaseOrder => {
-                            this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
-                                .then(PR => {
-                                    validPurchaseOrder.purchaseRequestId = PR._id;
-                                    validPurchaseOrder.purchaseRequest = PR;
-
-                                    this.collection.insert(validPurchaseOrder)
-                                        .then(id => {
-                                            PR.isUsed = true;
-                                            PR.purchaseOrderIds = PR.purchaseOrderIds || [];
-                                            PR.status = prStatusEnum.PROCESSING;
-                                            PR.purchaseOrderIds.push(id);
-
-                                            this.purchaseRequestManager.update(PR)
-                                                .then(results => {
-                                                    resolve(id);
-                                                })
-                                                .catch(e => {
-                                                    reject(e);
-                                                });
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        });
-                                })
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
+    _beforeInsert(purchaseOrder) {
+        purchaseOrder.no = generateCode();
+        return Promise.resolve(purchaseOrder);
     }
+
+    _afterInsert(id) {
+        var poId = id;
+        return this.getSingleById(poId)
+            .then((purchaseOrder) => {
+                return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId);
+            })
+            .then((purchaseRequest) => {
+                purchaseRequest.isUsed = true;
+                purchaseRequest.purchaseOrderIds = purchaseRequest.purchaseOrderIds || [];
+                purchaseRequest.status = prStatusEnum.PROCESSING;
+                purchaseRequest.purchaseOrderIds.push(poId);
+                return this.purchaseRequestManager.update(purchaseRequest);
+            })
+            .then(() => {
+                return Promise.resolve(poId);
+            });
+    }
+
+    // create(purchaseOrder) {
+    //     return new Promise((resolve, reject) => {
+    //         this._createIndexes()
+    //             .then((createIndexResults) => {
+    //                 purchaseOrder.no = generateCode();
+    //                 this._validate(purchaseOrder)
+    //                     .then(validPurchaseOrder => {
+    //                         this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
+    //                             .then(PR => {
+    //                                 validPurchaseOrder.purchaseRequestId = PR._id;
+    //                                 validPurchaseOrder.purchaseRequest = PR;
+
+    //                                 this.collection.insert(validPurchaseOrder)
+    //                                     .then(id => {
+    //                                         PR.isUsed = true;
+    //                                         PR.purchaseOrderIds = PR.purchaseOrderIds || [];
+    //                                         PR.purchaseOrderIds.push(id);
+
+    //                                         this.purchaseRequestManager.update(PR)
+    //                                             .then(results => {
+    //                                                 resolve(id);
+    //                                             })
+    //                                             .catch(e => {
+    //                                                 reject(e);
+    //                                             });
+    //                                     })
+    //                                     .catch(e => {
+    //                                         reject(e);
+    //                                     });
+    //                             })
+    //                     })
+    //                     .catch(e => {
+    //                         reject(e);
+    //                     });
+    //             })
+    //             .catch(e => {
+    //                 reject(e);
+    //             });
+    //     });
+    // }
 
     delete(purchaseOrder) {
         return new Promise((resolve, reject) => {
@@ -363,19 +397,29 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             var query = Object.assign({});
 
             if (unitId !== "undefined" && unitId !== "") {
-                Object.assign(query, { unitId: new ObjectId(unitId) });
+                Object.assign(query, {
+                    unitId: new ObjectId(unitId)
+                });
             }
             if (categoryId !== "undefined" && categoryId !== "") {
-                Object.assign(query, { categoryId: new ObjectId(categoryId) });
+                Object.assign(query, {
+                    categoryId: new ObjectId(categoryId)
+                });
             }
             if (PODLNo !== "undefined" && PODLNo !== "") {
-                Object.assign(query, { "purchaseOrderExternal": PODLNo });
+                Object.assign(query, {
+                    "purchaseOrderExternal": PODLNo
+                });
             }
             if (PRNo !== "undefined" && PRNo !== "") {
-                Object.assign(query, { "purchaseRequest.no": PRNo });
+                Object.assign(query, {
+                    "purchaseRequest.no": PRNo
+                });
             }
             if (supplierId !== "undefined" && supplierId !== "") {
-                Object.assign(query, { supplierId: new ObjectId(supplierId) });
+                Object.assign(query, {
+                    supplierId: new ObjectId(supplierId)
+                });
             }
             if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
                 Object.assign(query, {

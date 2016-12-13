@@ -28,17 +28,16 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deletedFilter = {
+
+        var _default = {
             _deleted: false
         },
-            keywordFilter = {};
-
-
-        var query = {};
+            pagingFilter = paging.filter || {},
+            keywordFilter = {},
+            query = {};
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-
             var filterNo = {
                 "no": {
                     "$regex": regex
@@ -61,14 +60,9 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     "$regex": regex
                 }
             };
-
-            keywordFilter = {
-                "$or": [filterNo, filterUnitDivisionName, filterUnitName, filterCategory]
-            };
+            keywordFilter['$or'] = [filterNo, filterUnitDivisionName, filterUnitName, filterCategory];
         }
-        query = {
-            "$and": [deletedFilter, paging.filter, keywordFilter]
-        };
+        query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
     }
 
@@ -83,16 +77,16 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             no: valid.no
         });
 
-        var getUnit = valid.unitId && valid.unitId.toString().trim() !== "" ? this.unitManager.getSingleByIdOrDefault(valid.unitId) : Promise.resolve(null);
-        var getCategory = valid.categoryId && valid.categoryId.toString().trim() !== "" ? this.categoryManager.getSingleByIdOrDefault(valid.categoryId) : Promise.resolve(null);
-        var getBudget = valid.budgetId && valid.budgetId.toString().trim() !== "" ? this.budgetManager.getSingleByIdOrDefault(valid.budgetId) : Promise.resolve(null);
-        var getProduct = [];
+        var getUnit = ObjectId.isValid(valid.unitId) ? this.unitManager.getSingleByIdOrDefault(new ObjectId(valid.unitId)) : Promise.resolve(null);
+        var getCategory = ObjectId.isValid(valid.categoryId) ? this.categoryManager.getSingleByIdOrDefault(new ObjectId(valid.categoryId)) : Promise.resolve(null);
+        var getBudget = ObjectId.isValid(valid.budgetId) ? this.budgetManager.getSingleByIdOrDefault(new ObjectId(valid.budgetId)) : Promise.resolve(null);
 
         valid.items = valid.items instanceof Array ? valid.items : [];
-        for (var _item of valid.items)
-            getProduct.push(_item.productId && _item.productId.toString().trim() !== "" ? this.productManager.getSingleByIdOrDefault(_item.productId) : Promise.resolve(null));
+        var getProducts = valid.items.map((item) => {
+            return ObjectId.isValid(item.productId) ? this.productManager.getSingleByIdOrDefault(new ObjectId(item.productId)) : Promise.resolve(null);
+        });
 
-        return Promise.all([getPurchaseRequestPromise, getUnit, getCategory, getBudget].concat(getProduct))
+        return Promise.all([getPurchaseRequestPromise, getUnit, getCategory, getBudget].concat(getProducts))
             .then(results => {
                 var _purchaseRequest = results[0];
                 var _unit = results[1];
@@ -160,6 +154,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 for (var prItem of valid.items) {
                     for (var _product of _products) {
                         if (prItem.product._id.toString() === _product._id.toString()) {
+                            prItem.productId = _product._id;
                             prItem.product = _product;
                             prItem.uom = _product.uom;
                             break;
@@ -175,33 +170,10 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             });
     }
 
-    create(purchaseRequest) {
-        return new Promise((resolve, reject) => {
-            var dateFormat = "MMYY";
-            var locale = "id-ID";
-            var moment = require("moment");
-            moment.locale(locale);
-            this._validate(purchaseRequest)
-                .then(validPurchaseRequest => {
-                    validPurchaseRequest.no = generateCode();
-                    validPurchaseRequest.status = prStatusEnum.CREATED;
-
-                    if (validPurchaseRequest.expectedDeliveryDate === "undefined") {
-                        validPurchaseRequest.expectedDeliveryDate = "";
-                    }
-                    this.collection.insert(validPurchaseRequest)
-                        .then(id => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                });
-
-        });
+    _beforeInsert(purchaseRequest) {
+        purchaseRequest.no = generateCode();
+        purchaseRequest.status = prStatusEnum.CREATED;
+        return Promise.resolve(purchaseRequest);
     }
 
     post(listPurchaseRequest) {
@@ -273,16 +245,24 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             var query = Object.assign({});
 
             if (unitId !== "undefined" && unitId !== "") {
-                Object.assign(query, { unitId: new ObjectId(unitId) });
+                Object.assign(query, {
+                    unitId: new ObjectId(unitId)
+                });
             }
             if (categoryId !== "undefined" && categoryId !== "") {
-                Object.assign(query, { categoryId: new ObjectId(categoryId) });
+                Object.assign(query, {
+                    categoryId: new ObjectId(categoryId)
+                });
             }
             if (budgetId !== "undefined" && budgetId !== "") {
-                Object.assign(query, { budgetId: new ObjectId(budgetId) });
+                Object.assign(query, {
+                    budgetId: new ObjectId(budgetId)
+                });
             }
             if (PRNo !== "undefined" && PRNo !== "") {
-                Object.assign(query, { "no": PRNo });
+                Object.assign(query, {
+                    "no": PRNo
+                });
             }
             if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
                 Object.assign(query, {
