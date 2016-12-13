@@ -71,9 +71,9 @@ module.exports = class UsterManager extends BaseManager {
                 var _product = result[1];
 
                 if (_uster)
-                    errors["product"] = i18n.__("Uster.product.isExists:%s is exists in other uster", i18n.__("Uster.product._:Product")); //"Benang sudah tidak ada di master produk";
+                    errors["productId"] = i18n.__("Uster.product.isExists:%s is exists in other uster", i18n.__("Uster.product._:Product")); //"Benang sudah tidak ada di master produk";
                 else if (!_product)
-                    errors["product"] = i18n.__("Uster.product.isNotExists:%s is not exists", i18n.__("Uster.product._:Product")); //"Benang sudah tidak ada di master produk";
+                    errors["productId"] = i18n.__("Uster.product.isNotExists:%s is not exists", i18n.__("Uster.product._:Product")); //"Benang sudah tidak ada di master produk";
 
                 valid.classifications = valid.classifications || [];
                 if (valid.classifications.length > 0) {
