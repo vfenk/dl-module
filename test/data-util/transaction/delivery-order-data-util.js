@@ -3,7 +3,7 @@ var helper = require('../../helper');
 var DeliveryOrderManager = require('../../../src/managers/purchasing/delivery-order-manager');
 var codeGenerator = require('../../../src/utils/code-generator');
 var supplier = require('../master/supplier-data-util');
-var poExternal = require('./purchase-order-external-data-util');
+var poExternal = require('../purchasing/purchase-order-external-data-util');
 
 class DeliveryOrderDataUtil {
     getNew() {

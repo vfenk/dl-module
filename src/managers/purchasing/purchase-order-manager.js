@@ -489,13 +489,12 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 this.collection.aggregate(
                     [{
                         $match: {
-
                             $and: [{
                                 "purchaseOrderExternal.isPosted": true
                             }, {
                                 "_deleted": false
                             }]
-                        },
+                        }
                     }, {
                         $unwind: "$items"
                     }, {
@@ -737,6 +736,77 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         resolve(result);
                     });
 
+            }
+        });
+    }
+
+    getDataPOUnitCategory(startdate, enddate) {
+        return new Promise((resolve, reject) => {
+            if (startdate != undefined && enddate != undefined && startdate != "" && enddate != "") {
+                this.collection.aggregate(
+                    [{
+                        $match: {
+                            $and: [{
+                                $and: [{
+                                    "date": {
+                                        $gte: startdate,
+                                        $lte: enddate
+                                    }
+                                }, {
+                                    "_deleted": false
+                                }]
+                            }, {
+                                "isPosted": true
+                            }]
+                        }
+
+                    }, {
+                        $unwind: "$items"
+                    }, {
+                        $group: {
+                            _id: { division: "$unit.division.name", unit: "$unit.name", category: "$category.name" },
+                            "pricetotal": {
+                                $sum: {
+                                    $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
+                                }
+                            }
+                        }
+                    }]
+                ).sort({ "_id": 1 })
+                    .toArray(function(err, result) {
+                        assert.equal(err, null);
+                        resolve(result);
+                    });
+            }
+
+            else {
+                this.collection.aggregate(
+                    [{
+                        $match: {
+                            $and: [{
+                                "isPosted": true
+                            }, {
+                                "_deleted": false
+                            }]
+
+                        }
+                    }, {
+                        $unwind: "$items"
+                    }, {
+                        $group: {
+                            _id: { division: "$unit.division.name", unit: "$unit.name", category: "$category.name" },
+                            "pricetotal": {
+                                $sum: {
+                                    $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
+                                }
+                            }
+                        }
+                    }]
+                ).sort({ "_id": 1 })
+                    .toArray(function(err, result) {
+                        assert.equal(err, null);
+                        resolve(result);
+                    });
             }
         });
     }

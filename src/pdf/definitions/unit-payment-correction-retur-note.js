@@ -24,7 +24,7 @@ module.exports = function (unitPaymentCorrection) {
 
     var numberLocaleOptions = {
         style: 'decimal',
-        maximumFractionDigits: 4,
+        maximumFractionDigits: 4
 
     };
     var header = [
