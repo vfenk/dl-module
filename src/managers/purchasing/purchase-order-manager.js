@@ -91,7 +91,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         if (!item.defaultQuantity || item.defaultQuantity === 0)
                             itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isRequired:%s is required", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh kosong";
 
-                        if (valid.sourcePurchaseOrder !== null) {
+                        if (valid.sourcePurchaseOrder) {
                             for (var sourcePoItem of valid.sourcePurchaseOrder.items) {
                                 sourcePoItem.product._id = new ObjectId(sourcePoItem.product._id);
                                 item.product._id = new ObjectId(item.product._id);
