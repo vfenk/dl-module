@@ -114,7 +114,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             errors.items = itemErrors;
                             break;
                         }
-                    }
+                    } 
                 }
                 else {
                     errors["items"] = i18n.__("PurchaseOrder.items.isRequired:%s is required", i18n.__("PurchaseOrder.items._:Items")); //"Harus ada minimal 1 barang";
