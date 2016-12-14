@@ -108,6 +108,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 .then(results => {
                                     for (var poInternal of results) {
                                         poInternal.isPosted = true;
+                                        poInternal.status = poStatusEnum.PROCESSING;
                                         tasks.push(this.purchaseOrderManager.update(poInternal));
                                     }
                                     Promise.all(tasks)
@@ -151,6 +152,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         .then(results => {
                                             for (var poInternal of results) {
                                                 poInternal.isPosted = false;
+                                                poInternal.status = poStatusEnum.CREATED;
                                                 tasks.push(this.purchaseOrderManager.update(poInternal));
                                             }
                                             Promise.all(tasks)
@@ -190,7 +192,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     '$ne': new ObjectId(valid._id)
                 }
             }, {
-                "refNo": valid.refNo
+                "no": valid.no
             }]
         });
         var getCurrency = valid.currency && ObjectId.isValid(valid.currency._id) ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
@@ -436,6 +438,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                                     _purchaseOrder.vatRate = _purchaseOrderExternal.vatRate;
                                                     _purchaseOrder.useIncomeTax = _purchaseOrderExternal.useIncomeTax;
                                                     _purchaseOrder.isPosted = true;
+                                                    _purchaseOrder.status = poStatusEnum.ORDERED;
 
                                                     for (var poItem of _purchaseOrder.items) {
                                                         for (var itemExternal of _poExternalItem.items) {
@@ -542,11 +545,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         }
 
         return this.collection.createIndexes([dateIndex, noIndex]);
-    }
-
-    _getRomanNumeral(_number) {
-        var listRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXXII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX", "XXXI"];
-        return listRoman[_number];
     }
 
     unpost(poExternalId) {

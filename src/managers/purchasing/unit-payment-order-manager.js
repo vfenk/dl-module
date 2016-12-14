@@ -10,6 +10,7 @@ var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitReceiptNoteManager = require('./unit-receipt-note-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
+var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
 
 module.exports = class UnitPaymentOrderManager extends BaseManager {
     constructor(db, user) {
@@ -299,12 +300,37 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                     fulfillment.pphValue = validUnitPaymentOrder.vatRate * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit;
                                                     fulfillment.pphDate = validUnitPaymentOrder.vatDate;
                                                 }
+                                                break;
                                             }
                                         }
+                                        purchaseOrder.status = poStatusEnum.PAYMENT;
                                         break;
                                     }
 
                                 }
+                            }
+                        }
+                        var isFull = true;
+                        for (var poItem of purchaseOrder.items) {
+                            for(var fulfillment of poItem.fulfillments)
+                                {
+                                    if(!fulfillment.interNoteNo || fulfillment.interNoteNo === '')
+                                    {
+                                        isFull=false;
+                                        break;
+                                    }
+                                }
+                                if(!isFull){
+                                    break;
+                                }
+                        }
+
+                        if(isFull)
+                        {
+                            purchaseOrder.status = poStatusEnum.COMPLETE;
+                        }else{
+                            if(purchaseOrder.isClosed){
+                                purchaseOrder.status = poStatusEnum.PREMATURE;
                             }
                         }
                         tasks.push(this.purchaseOrderManager.update(purchaseOrder));

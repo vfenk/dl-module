@@ -12,6 +12,7 @@ var UnitManager = require('../master/unit-manager');
 var SupplierManager = require('../master/supplier-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
+var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
 
 module.exports = class UnitReceiptNoteManager extends BaseManager {
     constructor(db, user) {
@@ -263,6 +264,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                     }
                                                 }
                                             }
+                                            purchaseOrder.status = poStatusEnum.RECEIVING;
                                             unitReceiptNoteItem.purchaseOrder = purchaseOrder;
                                         }
                                     }
@@ -516,6 +518,11 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                                 delete fulfillment.unitReceiptDeliveredUom;
                                                             }
                                                         }
+                                                    }
+                                                    if(purchaseOrder.isClosed){
+                                                        purchaseOrder.status = poStatusEnum.ARRIVED;
+                                                    }else{
+                                                        purchaseOrder.status = poStatusEnum.ARRIVING;
                                                     }
                                                     unitReceiptNoteItem.purchaseOrder = purchaseOrder;
                                                 }
