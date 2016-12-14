@@ -12,6 +12,7 @@ var generateCode = require('../../utils/code-generator');
 var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var prStatusEnum = DLModels.purchasing.enum.PurchaseRequestStatus;
+var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
 
 module.exports = class PurchaseOrderManager extends BaseManager {
     constructor(db, user) {
@@ -220,6 +221,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
     _beforeInsert(purchaseOrder) {
         purchaseOrder.no = generateCode();
+        purchaseOrder.status = poStatusEnum.CREATED;
         return Promise.resolve(purchaseOrder);
     }
 
