@@ -286,8 +286,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         }
                                                     }
                                                 }
-                                                for (var poItem of purchaseOrder.items) {
-                                                    if (poItem.isClosed == false) {
+                                                for (var _poItem of purchaseOrder.items) {
+                                                    if (_poItem.isClosed === false) {
                                                         purchaseOrder.isClosed = false;
                                                         purchaseOrder.status = poStatusEnum.ARRIVING;
                                                         break;
@@ -334,7 +334,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                         break;
                                                                     }
                                                                 }
-                                                                if (result.isClosed == false) {
+                                                                if (result.isClosed === false) {
                                                                     purchaseOrderExternal.isClosed = false;
                                                                 }
                                                                 else
@@ -440,7 +440,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                             if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
 
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    if (poItemFulfillment.deliveryOderNo == validDeliveryOrder.no) {
+                                                                    if (poItemFulfillment.deliveryOderNo === validDeliveryOrder.no) {
                                                                         poItemFulfillment.deliveryOderNo = validDeliveryOrder.no;
                                                                         poItemFulfillment.deliveryOderDeliveredQuantity = fulfillment.deliveredQuantity;
                                                                         poItemFulfillment.deliveryOderDate = validDeliveryOrder.date;
@@ -454,7 +454,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                     totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
                                                                 }
                                                                 poItem.realizationQuantity = totalRealize;
-                                                                if (poItem.realizationQuantity == poItem.dealQuantity)
+                                                                if (poItem.realizationQuantity === poItem.dealQuantity)
                                                                     poItem.isClosed = true;
                                                                 else
                                                                     poItem.isClosed = false;
@@ -464,7 +464,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         }
                                                     }
                                                     for (var poItem of purchaseOrder.items) {
-                                                        if (poItem.isClosed == false) {
+                                                        if (poItem.isClosed === false) {
                                                             purchaseOrder.isClosed = false;
                                                             break;
                                                         }
@@ -508,7 +508,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                         break;
                                                                     }
                                                                 }
-                                                                if (result.isClosed == false) {
+                                                                if (result.isClosed === false) {
                                                                     purchaseOrderExternal.isClosed = false;
                                                                 }
                                                                 else
@@ -683,7 +683,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                         break;
                                                                     }
                                                                 }
-                                                                if (result.isClosed == false) {
+                                                                if (result.isClosed === false) {
                                                                     purchaseOrderExternal.isClosed = false;
                                                                 }
                                                                 else
