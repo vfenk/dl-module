@@ -4,7 +4,7 @@ var options = {
     util: require("../../data-util/purchasing/purchase-order-external-data-util"),
     validator: require("dl-models").validator.purchasing.purchaseOrderExternal,
     createDuplicate: false,
-    keys: ["refNo"]
+    keys: ["no"]
 };
 
 var basicTest = require("../../basic-test-factory");
