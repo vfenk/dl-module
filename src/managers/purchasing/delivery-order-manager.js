@@ -271,9 +271,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                 { poItem.isClosed = false; }
                                                                 fulfillment.purchaseOrder = purchaseOrder;
 
-                                                                for (var _pr of _purchaseRequests) {
-                                                                    if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
-                                                                        for (var _prItem of _pr.items) {
+                                                                for (var _purchaseRequest of _purchaseRequests) {
+                                                                    if (_purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
+                                                                        for (var _prItem of _purchaseRequest.items) {
                                                                             if (_prItem.product._id.equals(fulfillment.product._id)) {
                                                                                 _prItem.deliveryOrderNos.push(validDeliveryOrder.no);
                                                                                 break;
