@@ -217,7 +217,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 var _poInternals = results.slice(4, results.length);
 
                 if (_otherPurchaseOrder) {
-                    purchaseOrderExternalError["refNo"] = i18n.__("PurchaseOrderExternal.refNo.isExist:%s is exist", i18n.__("PurchaseOrderExternal.refNo._:Reference No"));
+                    purchaseOrderExternalError["no"] = i18n.__("PurchaseOrderExternal.no.isExist:%s is exist", i18n.__("PurchaseOrderExternal.no._:No"));
                 }
 
                 if (!valid.supplierId || valid.supplierId.toString() === "") {
