@@ -237,8 +237,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     }
 
                     Promise.all(getPurchaseOrderById)
-                        .then(results => {
-                            for (var purchaseOrder of results) {
+                        .then(purchaseOrders => {
+                            for (var purchaseOrder of purchaseOrders) {
                                 for (var poItem of purchaseOrder.items) {
                                     for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
                                         if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
@@ -264,10 +264,25 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                     }
                                                 }
                                             }
-                                            purchaseOrder.status = poStatusEnum.RECEIVING;
                                             unitReceiptNoteItem.purchaseOrder = purchaseOrder;
                                         }
                                     }
+                                }
+                                var _isClosed = true;
+                                for(var poItem of purchaseOrder.items)
+                                {
+                                    var sum = poItem.fulfillments.reduce(function (a,b) { return a + b.unitReceiptNoteDeliveredQuantity; }, 0);
+                                    if(sum !== poItem.realizationQuantity)
+                                    {
+                                        _isClosed = false;
+                                        break;
+                                    }
+                                }
+                                if(_isClosed)
+                                {
+                                    purchaseOrder.status = poStatusEnum.RECEIVED;
+                                }else{
+                                    purchaseOrder.status = poStatusEnum.RECEIVING;
                                 }
                                 tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
                             }
@@ -392,6 +407,22 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                     unitReceiptNoteItem.purchaseOrder = purchaseOrder;
                                                 }
                                             }
+                                        }
+                                        var _isClosed = true;
+                                        for(var poItem of purchaseOrder.items)
+                                        {
+                                            var sum = poItem.fulfillments.reduce(function (a,b) { return a + b.unitReceiptNoteDeliveredQuantity; }, 0);
+                                            if(sum !== poItem.realizationQuantity)
+                                            {
+                                                _isClosed = false;
+                                                break;
+                                            }
+                                        }
+                                        if(_isClosed)
+                                        {
+                                            purchaseOrder.status = poStatusEnum.RECEIVED;
+                                        }else{
+                                            purchaseOrder.status = poStatusEnum.RECEIVING;
                                         }
                                         tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
                                     }

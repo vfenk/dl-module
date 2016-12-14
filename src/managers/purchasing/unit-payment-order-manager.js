@@ -329,7 +329,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         {
                             purchaseOrder.status = poStatusEnum.COMPLETE;
                         }else{
-                            if(purchaseOrder.isClosed){
+                            if(purchaseOrder.isClosed && purchaseOrder.status.name === 'PAYMENT'){
                                 purchaseOrder.status = poStatusEnum.PREMATURE;
                             }
                         }

@@ -265,12 +265,23 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                     totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
                                                                 }
                                                                 poItem.realizationQuantity = totalRealize;
-                                                                if (poItem.realizationQuantity == poItem.dealQuantity)
-                                                                    poItem.isClosed = true;
+                                                                if (poItem.realizationQuantity === poItem.dealQuantity)
+                                                                { poItem.isClosed = true; }
                                                                 else
-                                                                    poItem.isClosed = false;
+                                                                { poItem.isClosed = false; }
                                                                 fulfillment.purchaseOrder = purchaseOrder;
-                                                                break;
+
+                                                                for (var _pr of _purchaseRequests) {
+                                                                    if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
+                                                                        for (var _prItem of _pr.items) {
+                                                                            if (_prItem.product._id.equals(fulfillment.product._id)) {
+                                                                                _prItem.deliveryOrderNos.push(validDeliveryOrder.no);
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                        break;
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -283,10 +294,11 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                     }
                                                     else
                                                         purchaseOrder.isClosed = true;
-                                                        purchaseOrder.status = poStatusEnum.ARRIVED;
+                                                    purchaseOrder.status = poStatusEnum.ARRIVED;
                                                 }
 
                                                 for (var _pr of _purchaseRequests) {
+
                                                     if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
                                                         if (purchaseOrder.isClosed) {
                                                             _pr.status = prStatusEnum.COMPLETE;
@@ -464,7 +476,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                             if (purchaseOrder.isClosed) {
                                                                 _pr.status = prStatusEnum.COMPLETE;
                                                             }
-                                                            else {
+                                                            else if (_pr.status.name !== "COMPLETE") {
                                                                 _pr.status = prStatusEnum.ARRIVING;
                                                             }
                                                             tasksPR.push(this.purchaseRequestManager.update(_pr));
