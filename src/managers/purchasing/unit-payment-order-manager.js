@@ -135,9 +135,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
                     for (var item of valid.items) {
                         for (var _urn of getURN) {
-                            if (new ObjectId(item.unitReceiptNoteId).equals(new ObjectId(_urn._id))) {
+                            if (item.unitReceiptNoteId.toString() === _urn._id.toString()) {
                                 item.unitReceiptNoteId = new ObjectId(_urn._id);
-                                item.unitReceiptNote._id = new ObjectId(_urn._id);
+                                item.unitReceiptNote = _urn;
                                 break;
                             }
                         }
