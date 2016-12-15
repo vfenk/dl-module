@@ -9,7 +9,8 @@ var WindingQualitySampling = DLModels.production.spinning.winding.WindingQuality
 var ProductManager = require('../../../master/product-manager');
 var MachineManager = require('../../../master/machine-manager');
 var UsterManager = require('../../../master/uster-manager');
-var BaseManager = require('../../../base-manager');
+var UnitManager = require('../../../master/unit-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
 
@@ -20,6 +21,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
         this.productManager = new ProductManager(db, user);
         this.machineManager = new MachineManager(db, user);
         this.usterManager = new UsterManager(db, user);
+        this.unitManager = new UnitManager(db, user);
     }
 
     _getQuery(paging) {
@@ -31,8 +33,13 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
 
-            var filterSpinning = {
-                'spinning': {
+            var filterSpinningCode = {
+                'spinning.code': {
+                    '$regex': regex
+                }
+            };
+            var filterSpinningName = {
+                'spinning.name': {
                     '$regex': regex
                 }
             };
@@ -47,18 +54,18 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                 }
             };
             var filterThreadCode = {
-                "thread.code": {
+                "uster.product.code": {
                     '$regex': regex
                 }
             };
             var filterThreadName = {
-                "thread.name": {
+                "uster.product.name": {
                     '$regex': regex
                 }
             };
 
             keywordFilter = {
-                '$or': [filterSpinning, filterMachineCode, filterMachineName, filterThreadCode, filterThreadName]
+                '$or': [filterSpinningCode, filterSpinningName, filterMachineCode, filterMachineName, filterThreadCode, filterThreadName]
             };
         }
         query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
@@ -82,26 +89,30 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                     },{
                         date : dateProcess
                     },{
-                        usterId : valid.usterId && ObjectId.isValid(valid.uster._id) ? (new ObjectId(valid.uster._id)) : ''
+                        usterId : valid.uster && ObjectId.isValid(valid.uster._id) ? (new ObjectId(valid.uster._id)) : ''
                     },{
                         machineId : valid.machine && ObjectId.isValid(valid.machine._id) ? (new ObjectId(valid.machine._id)) : ''
                     },{
-                        spinning : valid.spinning
+                        unitId : valid.spinning && ObjectId.isValid(valid.spinning._id) ? (new ObjectId(valid.spinning._id)) : ''
                 }]
             });
             var getMachine = valid.machine && ObjectId.isValid(valid.machine._id) ? this.machineManager.getSingleByIdOrDefault(valid.machine._id) : Promise.resolve(null);
-            var getUster = valid.uster && ObjectId.isValid(valid.uster._id) ? this.usterManager.getSingleByIdOrDefault(valid.uster._id) : Promise.resolve(null);            
+            var getUster = valid.uster && ObjectId.isValid(valid.uster._id) ? this.usterManager.getSingleByIdOrDefault(valid.uster._id) : Promise.resolve(null);
+            var getUnit = valid.spinning && ObjectId.isValid(valid.spinning._id) ? this.unitManager.getSingleByIdOrDefault(valid.spinning._id) : Promise.resolve(null);
 
             // 2. begin: Validation.
-            Promise.all([getWindingQuality, getMachine, getUster])
+            Promise.all([getWindingQuality, getMachine, getUster, getUnit])
                 .then(result =>{
                     var _windingQuality = result[0];
                     var _machine = result[1];
                     var _uster = result[2];
+                    var _unit = result[3];
                     if (!valid.spinning || valid.spinning == '')
                         errors["spinning"] = i18n.__("WindingQualitySampling.spinning.isRequired:%s is required", i18n.__("WindingQualitySampling.spinning._:Spinning")); //"Spinning harus diisi ";
+                    else if(!_unit)
+                        errors["spinning"] = i18n.__("WindingQualitySampling.spinning.isNotExist:%s is not exists", i18n.__("WindingQualitySampling.spinning._:Spinning")); //"Spinning harus diisi ";
                     else if(_windingQuality)
-                        errors["spinning"] = i18n.__(`WindingQualitySampling.spinning.isRequired:%s with same Product, Machine and Date is already exists`, i18n.__("WindingQualitySampling.spinning._:Spinning")); //"Spinning dengan produk, mesin dan tanggal yang sama tidak boleh";
+                        errors["spinning"] = i18n.__(`WindingQualitySampling.spinning.isAlreadyExists:%s with same Product, Machine and Date is already exists`, i18n.__("WindingQualitySampling.spinning._:Spinning")); //"Spinning dengan produk, mesin dan tanggal yang sama tidak boleh";
 
                     if (!valid.date || valid.date == '')
                         errors["date"] = i18n.__("WindingQualitySampling.date.isRequired:%s is required", i18n.__("WindingQualitySampling.date._:Date")); //"Tanggal tidak boleh kosong";
@@ -116,10 +127,12 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                     if (!valid.uster)
                         errors["uster"] = i18n.__("WindingQualitySampling.uster.isRequired:%s is required", i18n.__("WindingQualitySampling.uster._:Uster")); //"Nama Benang tidak boleh kosong";
                     if(!_uster)
-                        errors["uster"] = i18n.__("WindingQualitySampling.uster.isRequired:%s has no uster classification", i18n.__("WindingQualitySampling.uster._:Uster")); //"Benang tidak memiliki klassifikasi Uster";
+                        errors["uster"] = i18n.__("WindingQualitySampling.uster.hasNoUster:%s has no uster classification", i18n.__("WindingQualitySampling.uster._:Uster")); //"Benang tidak memiliki klassifikasi Uster";
 
                     if (!valid.U || valid.U == 0)
                         errors["U"] = i18n.__("WindingQualitySampling.U.isRequired:%s is required", i18n.__("WindingQualitySampling.U._:U")); //"U tidak boleh kosong";
+                    else if(valid.U > 100)
+                        errors["U"] = i18n.__("WindingQualitySampling.U.shouldNot:%s should not be more than 100", i18n.__("WindingQualitySampling.U._:U")); //"U tidak boleh kosong";
 
                     if (!valid.sys || valid.sys == 0)
                         errors["sys"] = i18n.__("WindingQualitySampling.sys.isRequired:%s is required", i18n.__("WindingQualitySampling.sys._:Sys")); //"Sys tidak boleh kosong";
@@ -129,7 +142,7 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
 
                     // 2c. begin: check if data has any error, reject if it has.
                      if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
                     if(!valid.thin) valid.thin = 0;
@@ -139,6 +152,8 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
                     valid.machineId = new ObjectId(_machine._id);
                     valid.uster = _uster;
                     valid.usterId = new ObjectId(_uster._id);
+                    valid.spinning = _unit;
+                    valid.unitId = new ObjectId(_unit._id);
                     valid.ipi = valid.thin + valid.thick + valid.neps;
                     var tampClassification1 = {"ipi" : 0, "grade" : ''};
                     var tampClassification2 = {"ipi" : 0, "grade" : ''};
@@ -179,58 +194,50 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
         });
     }
 
-    getWindingQualitySamplingReportByDate(startDate, endDate){
+    getWindingQualitySamplingReportByDate(startDate, endDate, spinning, machine, uster, grade){
         return new Promise((resolve, reject) => {
+            var query = Object.assign({});
+            var deleted = { _deleted: false };
+            Object.assign(query, deleted);
+            if(spinning){
+                var _spinning = {unitId : new ObjectId(spinning)}
+                Object.assign(query, _spinning);
+            }
+            if(machine){
+                var _machine = {machineId : new ObjectId(machine)}
+                Object.assign(query, _machine);
+            }
+            if(uster){
+                var _uster = {usterId : new ObjectId(uster)}
+                Object.assign(query, _uster);
+            }
+            if(grade){
+                var _grade = {grade : grade}
+                Object.assign(query, _grade);
+            }
             var now = new Date();
-            var query = {};
             if(startDate && !endDate){
-                query = {
-                    "$and" : [{
-                        "date" : {
-                            "$gte" : new Date(startDate)
-                        }
-                     },{
-                        _deleted : false
-                     }]
-                };
+                var queryDate = { date : { $gte : new Date(startDate) } };
+                Object.assign(query, queryDate);
             }else if(!startDate && endDate){
-                query = {
-                    "$and" : [{
-                        "date" : {
-                            "$lte" : new Date(endDate)
-                        }
-                    },{
-                        _deleted : false
-                    }]
-                };
+                var queryDate = { date : { $lte : new Date(endDate) } };
+                Object.assign(query, queryDate);
             }else if(startDate && endDate){
-                query = {
-                    "$and" : [{
-                        "date":{
-                            "$gte" : new Date(startDate)
+                var queryDate = { 
+                    date:{
+                        $gte : new Date(startDate),
+                        $lte : new Date(endDate)
                         }
-                    },{
-                        "date" : {
-                            "$lte" : new Date(endDate)
-                        }
-                    },{
-                         _deleted : false
-                    }]
-                };
+                    };
+                Object.assign(query, queryDate);
             }else if(!startDate && !endDate){
-                query = {
-                    "$and" : [{
-                        "date":{
-                            "$gte" : new Date(1900, 1, 1)
+                var queryDate = {
+                        date:{
+                            $gte : new Date(1900, 1, 1),
+                            $lte : now
                         }
-                    },{
-                        "date" : {
-                            "$lte" : now
-                        }
-                    },{
-                         _deleted : false
-                    }]
-                };
+                    };
+                Object.assign(query, queryDate);
             }
             var order = {
                 "date" : -1
@@ -259,9 +266,9 @@ module.exports = class WindingQualitySamplingManager extends BaseManager {
         }
 
         var codeIndex = {
-            name: `ix_${map.production.spinning.winding.collection.WindingQualitySampling}_spinning_date_machineId_usterId`,
+            name: `ix_${map.production.spinning.winding.collection.WindingQualitySampling}_unitId_date_machineId_usterId`,
             key: {
-                spinning: 1,
+                unitId: 1,
                 date: 1,
                 machineId: 1,
                 usterId: 1

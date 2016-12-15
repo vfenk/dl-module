@@ -21,12 +21,7 @@ module.exports = function (purchaseRequest) {
                     style: ['size15'],
                     alignment: "center"
                 }, {
-                        text: 'BANARAN, GROGOL, SUKOHARJO 57193',
-                        style: ['size09'],
-                        alignment: "center"
-                    },
-                    {
-                        text: 'No. Telp : (0271) 716888   Fax : (0271) 717818',
+                        text: 'BANARAN, GROGOL, SUKOHARJO',
                         style: ['size09'],
                         alignment: "center"
                     }]
@@ -73,13 +68,13 @@ module.exports = function (purchaseRequest) {
                 width: '40%',
                 columns: [{
                     width: '35%',
-                    stack: ['BAGIAN', 'Nomor']
+                    stack: ['Bagian', 'Budget' , 'Nomor']
                 }, {
                         width: '5%',
-                        stack: [':', ':']
+                        stack: [':', ':', ':']
                     }, {
                         width: '*',
-                        stack: [purchaseRequest.unit.name, purchaseRequest.no]
+                        stack: [purchaseRequest.unit.name, purchaseRequest.budget.name, purchaseRequest.no]
                     }],
                 style: ['size08']
 
@@ -93,7 +88,7 @@ module.exports = function (purchaseRequest) {
                 columns: [{
                     width: '*',
                     stack: [`Sukoharjo, ${moment(purchaseRequest.date).format(locale.date.format)} `],
-                    alignment: "right",
+                    alignment: "right"
                 }],
                 style: ['size08']
             }
@@ -103,7 +98,7 @@ module.exports = function (purchaseRequest) {
     var opening = {
         text: [
             '\n', {
-                text: 'MOHON DIBELIKAN/DIUSAHAKAN BARANG TERSEBUT DIBAWAH INI : '
+                text: 'Mohon dibelikan/diusahakan barang tersebut dibawah ini : '
             },
             '\n\n'
         ],
@@ -136,9 +131,9 @@ module.exports = function (purchaseRequest) {
                 style: ['size07', 'left']
             }, {
                 text: item.product.name,
-                style: ['size07', 'center']
+                style: ['size07', 'left']
             }, {
-                text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.uom.unit,
+                text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.product.uom.unit,
                 style: ['size07', 'center']
             }, {
                 text: '',
@@ -161,7 +156,7 @@ module.exports = function (purchaseRequest) {
 
     var table = [{
         table: {
-            widths: ['5%', '20%', '40%', '10%', '25%'],
+            widths: ['5%', '13%', '40%', '17%', '25%'],
             headerRows: 1,
             body: [].concat([thead], tbody, tfoot)
         }
@@ -175,15 +170,15 @@ module.exports = function (purchaseRequest) {
                 columns: [{
                     width: '60%',
                     columns: [{
-                        width: '50%',
-                        stack: ['KATEGORI', 'DIMINTA DATANG', 'KETERANGAN']
+                        width: '30%',
+                        stack: ['Kategori', 'Diminta Datang', 'Keterangan']
                     }, {
                             width: '3%',
                             stack: [':', ':', ':']
                         }, {
                             width: '*',
                             stack: [purchaseRequest.category.name, `${getDateexpected}`, purchaseRequest.remark]
-                        },]
+                        }]
                 }]
             }
             ],

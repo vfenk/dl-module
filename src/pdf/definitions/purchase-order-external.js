@@ -277,7 +277,7 @@ module.exports = function (pox) {
                     }, {
                         width: '*',
                         stack: [`Ditanggung ${pox.freightCostBy}`, `${pox.paymentMethod}, ${pox.paymentDueDays} hari setelah terima barang`]
-                    },]
+                    }]
                 }, {
                     width: '20%',
                     text: ''
@@ -316,7 +316,7 @@ module.exports = function (pox) {
                         style: ['bold']
                     }],
                     style: 'center'
-                },]
+                }]
             }
             ],
             style: ['size08']

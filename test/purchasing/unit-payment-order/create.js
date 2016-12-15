@@ -9,7 +9,7 @@ require("should");
 
 before('#00. connect db', function (done) {
     helper.getDb()
-        .then(db => {
+        .then((db) => {
             unitPaymentOrderManager = new UnitPaymentOrderManager(db, {
                 username: 'unit-test'
             });
@@ -23,7 +23,7 @@ before('#00. connect db', function (done) {
 var createdId;
 it('#01. should success when create new data', function (done) {
     unitPaymentOrder.getNew()
-        .then(data => {
+        .then((data) => {
             data._id.should.be.Object();
             createdId = data._id;
             done();
@@ -35,7 +35,7 @@ it('#01. should success when create new data', function (done) {
 
 it('#02. should error when create new blank data', function (done) {
     unitPaymentOrderManager.create({})
-        .then(id => {
+        .then((id) => {
             id.should.be.Object();
             done();
         })

@@ -1,70 +1,71 @@
-'use strict';
-var _getSert = require('./getsert');
-var classification = require('dl-models').master.UsterClassification;
-var Product = require('./product-data-util'); 
+"use strict";
+var _getSert = require("../getsert");
+var product = require("./product-data-util");
+
+var gradeA = {
+    thin: 5,
+    thick: 10,
+    neps: 15,
+    grade: "A"
+};
+var gradeB = {
+    thin: 10,
+    thick: 20,
+    neps: 30,
+    grade: "B"
+};
+var gradeC = {
+    thin: 15,
+    thick: 30,
+    neps: 45,
+    grade: "C"
+};
+var gradeD = {
+    thin: 20,
+    thick: 40,
+    neps: 60,
+    grade: "D"
+};
+var gradeE = {
+    thin: 25,
+    thick: 50,
+    neps: 75,
+    grade: "E"
+};
 
 class UsterDataUtil {
-    getSert(uster) {
-        var UsterManager = require('../../../src/managers/master/uster-manager');
-        return Promise.resolve(_getSert(uster, UsterManager, data => {
+    getSert(input) {
+        var ManagerType = require("../../../src/managers/master/uster-manager");
+        return _getSert(input, ManagerType, (data) => {
             return {
-                code: data.code
+                productId: data.productId
             };
-        }));
-    }
-    getTestData() {
-        return new Promise((resolve, reject) => {
-            Product.getTestData()
-                    .then(product => {
-                        var Excellent  = new classification();
-                        Excellent.thin = 5;
-                        Excellent.thick = 10;
-                        Excellent.neps = 15;
-                        Excellent.grade = "Excellent";
-                        var Good  = new classification();
-                        Good.thin = 10;
-                        Good.thick = 20;
-                        Good.neps = 30;
-                        Good.grade = "Good";
-                        var Medium  = new classification();
-                        Medium.thin = 15;
-                        Medium.thick = 30;
-                        Medium.neps = 45;
-                        Medium.grade = "Medium";
-                        var Low  = new classification();
-                        Low.thin = 20;
-                        Low.thick = 40;
-                        Low.neps = 60;
-                        Low.grade = "Low";
-                        var Bad  = new classification();
-                        Bad.thin = 25;
-                        Bad.thick = 50;
-                        Bad.neps = 75;
-                        Bad.grade = "Bad";
-                        var testData = {
-                            code: 'PC 30',
-                            productId: product._id,
-                            product: product,
-                            classifications: []
-                        };
-                        testData.classifications.push(Excellent);
-                        testData.classifications.push(Good);
-                        testData.classifications.push(Medium);
-                        testData.classifications.push(Low);
-                        testData.classifications.push(Bad);
-
-                    this.getSert(testData)
-                        .then(data => {
-                            resolve(data);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                });
         });
+    }
+
+    getNewData() {
+        return product.getRandomTestData()
+            .then(product => { 
+                var data = {
+                    productId: product._id,
+                    product: product,
+                    classifications: [gradeA, gradeB, gradeC, gradeD, gradeE]
+                };
+                return Promise.resolve(data);
+            });
+    }
+
+    getTestData() {
+        return product.getTestData()
+            .then(div => {
+                var data = {
+                    productId: div._id,
+                    product: div,
+                    classifications: [gradeA, gradeB, gradeC, gradeD, gradeE]
+                };
+
+                return this.getSert(data);
+            });
     }
 }
 module.exports = new UsterDataUtil();

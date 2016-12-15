@@ -8,7 +8,9 @@ var i18n = require('dl-i18n');
 var UnitPaymentOrder = DLModels.purchasing.UnitPaymentOrder;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitReceiptNoteManager = require('./unit-receipt-note-manager');
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
+var generateCode = require('../../utils/code-generator');
+var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
 
 module.exports = class UnitPaymentOrderManager extends BaseManager {
     constructor(db, user) {
@@ -100,7 +102,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError ;
                         reject(new ValidationError('unitPaymentOrder does not pass validation', errors));
                     }
                     if (!valid.useVat) {
@@ -202,7 +204,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                 .then((createIndexResults) => {
                     this._validate(unitPaymentOrder)
                         .then(validUnitPaymentOrder => {
-                            validUnitPaymentOrder.no = this.generateNo(validUnitPaymentOrder.division.code, validUnitPaymentOrder.category.code);
+                            validUnitPaymentOrder.no = generateCode();
                             this.collection.insert(validUnitPaymentOrder)
                                 .then(id => {
                                     this.updatePO(validUnitPaymentOrder)
@@ -298,12 +300,37 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                     fulfillment.pphValue = validUnitPaymentOrder.vatRate * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit;
                                                     fulfillment.pphDate = validUnitPaymentOrder.vatDate;
                                                 }
+                                                break;
                                             }
                                         }
+                                        purchaseOrder.status = poStatusEnum.PAYMENT;
                                         break;
                                     }
 
                                 }
+                            }
+                        }
+                        var isFull = true;
+                        for (var poItem of purchaseOrder.items) {
+                            for(var fulfillment of poItem.fulfillments)
+                                {
+                                    if(!fulfillment.interNoteNo || fulfillment.interNoteNo === '')
+                                    {
+                                        isFull=false;
+                                        break;
+                                    }
+                                }
+                                if(!isFull){
+                                    break;
+                                }
+                        }
+
+                        if(isFull)
+                        {
+                            purchaseOrder.status = poStatusEnum.COMPLETE;
+                        }else{
+                            if(purchaseOrder.isClosed && purchaseOrder.status.name === 'PAYMENT'){
+                                purchaseOrder.status = poStatusEnum.PREMATURE;
                             }
                         }
                         tasks.push(this.purchaseOrderManager.update(purchaseOrder));
@@ -355,7 +382,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                                     var fulfillmentNo = fulfillment.unitReceiptNoteNo || '';
                                                                     var unitReceiptNoteNo = unitPaymentOrderItem.unitReceiptNote.no || '';
                                                                     var interNoteNo = fulfillment.interNoteNo || '';
-                                                                    if (interNoteNo == validUnitPaymentOrder.no && fulfillmentNo == unitReceiptNoteNo) {
+                                                                    if (interNoteNo === validUnitPaymentOrder.no && fulfillmentNo === unitReceiptNoteNo) {
                                                                         fulfillment.invoiceDate = '';
                                                                         fulfillment.invoiceNo = '';
                                                                         fulfillment.interNoteDate = '';
@@ -445,17 +472,6 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         }
 
         return this.collection.createIndexes([dateIndex, noIndex]);
-    }
-
-    generateNo(unit, category) {
-        var now = new Date();
-        var stamp = now / 1000 | 0;
-        var code = stamp.toString();
-        var locale = 'id-ID';
-        var moment = require('moment');
-        moment.locale(locale);
-        var no = `SPB${unit.toUpperCase()}${category.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
-        return no;
     }
 
 }

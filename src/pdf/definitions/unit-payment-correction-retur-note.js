@@ -24,7 +24,7 @@ module.exports = function (unitPaymentCorrection) {
 
     var numberLocaleOptions = {
         style: 'decimal',
-        maximumFractionDigits: 4,
+        maximumFractionDigits: 4
 
     };
     var header = [
@@ -35,7 +35,7 @@ module.exports = function (unitPaymentCorrection) {
         {
             stack: [
                 `Nomor : ${unitPaymentCorrection.unitPaymentOrder.no}`,
-                `(Atas Faktur Pajak Nomor : ${unitPaymentCorrection.unitPaymentOrder.vatNo} Tanggal : ${moment(unitPaymentCorrection.unitPaymentOrder.vatDate).format(locale.date.format)})`
+                `(Atas Faktur Pajak Nomor : ${unitPaymentCorrection.unitPaymentOrder.incomeTaxNo} Tanggal : ${moment(unitPaymentCorrection.unitPaymentOrder.incomeTaxDate).format(locale.date.format)})`
             ],
             style: ['size09', 'center']
 
@@ -260,17 +260,6 @@ module.exports = function (unitPaymentCorrection) {
                 text: parseFloat(vatTax).toLocaleString(locale, locale.currency),
                 style: ['right']
             }],
-            style: ['size07']
-        }],
-        [{
-            text: 'PPnBM yang diminta kembali',
-            style: ['size07', 'left'],
-            colSpan: 4
-        }, null, null, null, {
-
-            text: '-',
-            style: ['center']
-            ,
             style: ['size07']
         }],
         [{

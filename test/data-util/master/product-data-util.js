@@ -1,72 +1,77 @@
-'use strict';
-var _getSert = require('./getsert');
-var uom = require('./uom-data-util'); 
+"use strict";
+var _getSert = require("../getsert");
+var uom = require("./uom-data-util");
+var currency = require("./currency-data-util");
+var generateCode = require("../../../src/utils/code-generator");
 
 class ProductDataUtil {
-    getSert(product) {
-        var ProductManager = require('../../../src/managers/master/product-manager');
-        return Promise.resolve(_getSert(product, ProductManager, data => {
+    getSert(input) {
+        var ManagerType = require("../../../src/managers/master/product-manager");
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
+        });
+    }
+
+    getNewData() {
+
+        return Promise.all([uom.getTestData(), currency.getTestData()])
+            .then((results) => {
+                var uom = results[0];
+                var currency = results[1];
+
+                var code = generateCode();
+
+                var data = {
+                    code: code,
+                    name: `name[${code}]`,
+                    price: 1250,
+                    uomId: uom._id,
+                    uom: uom,
+                    currencyId: currency._id,
+                    currency: currency,
+                    description: `description for ${code}`,
+                    tags: `tags for ${code}`,
+                    properties: []
+                };
+                return Promise.resolve(data);
+            });
+    }
+
+    getRandomTestData() {
+        return this.getNewData()
+            .then((data) => {
+                return this.getSert(data);
+            });
     }
 
     getTestData() {
-        return new Promise((resolve, reject) => {
-            uom.getTestData()
-                .then(uom => {
-                    var testData = {
-                        code: 'P01-UT',
-                        name: 'Product 01',
-                        price: 1250,
-                        description: 'Product untuk unit test',
-                        uomId: uom._id,
-                        uom: uom,
-                        tags: '#unit-test, #product'
-                    };
+        return this.getNewData()
+            .then((data) => {
+                data.code = "PRD-UT-01";
+                data.name = "Product Unit Test 01";
+                data.price = 1250;
 
-                    this.getSert(testData)
-                        .then(data => {
-                            resolve(data);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
+                data.description = "Product untuk unit test";
+                data.tags = "#unit-test, #product";
+
+                return this.getSert(data);
+            });
     }
 
     getTestData2() {
-        return new Promise((resolve, reject) => {
-            uom.getTestData()
-                .then(uom => {
-                    var testData = {
-                        code: 'P02-UT',
-                        name: 'Product 02',
-                        price: 8500,
-                        description: 'Product untuk unit test',
-                        uomId: uom._id,
-                        uom: uom,
-                        tags: '#unit-test, #product'
-                    };
+        return this.getNewData()
+            .then((data) => {
+                data.code = "PRD-UT-02";
+                data.name = "Product Unit Test 02";
+                data.price = 4250;
 
-                    this.getSert(testData)
-                        .then(data => {
-                            resolve(data);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
+                data.description = "Product untuk unit test";
+                data.tags = "#unit-test, #product";
+
+                return this.getSert(data);
+            });
     }
 }
-
 module.exports = new ProductDataUtil();
