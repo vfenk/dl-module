@@ -83,8 +83,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     },
                     _deleted: false
                 }, {
-                    "no": valid.no
-                }]
+                        "no": valid.no
+                    }]
             });
             var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
             var getPoExternal = [];
@@ -298,7 +298,6 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                 }
 
                                                 for (var _pr of _purchaseRequests) {
-
                                                     if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
                                                         if (purchaseOrder.isClosed) {
                                                             _pr.status = prStatusEnum.COMPLETE;
@@ -634,25 +633,46 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                 else
                                                                     poItem.isClosed = false;
                                                                 fulfillment.purchaseOrder = purchaseOrder;
-                                                                break;
+
+                                                                for (var _purchaseRequest of _purchaseRequests) {
+                                                                    if (_purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
+                                                                        for (var _prItem of _purchaseRequest.items) {
+                                                                            if (_prItem.product._id.equals(fulfillment.product._id)) {
+                                                                                var _index = _prItem.deliveryOrderNos.indexOf(validDeliveryOrder.no);
+                                                                                _prItem.deliveryOrderNos.splice(_index, 1);
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                        break;
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
                                                     for (var poItem of purchaseOrder.items) {
-                                                        if (poItem.isClosed === false) {
-                                                            purchaseOrder.isClosed = false;
-                                                            break;
+                                                        if (poItem.fulfillments.length > 0) {
+                                                            purchaseOrder.status = poStatusEnum.ARRIVING;
                                                         }
-                                                        else
-                                                            purchaseOrder.isClosed = true;
+                                                        else {
+                                                            purchaseOrder.status = poStatusEnum.ORDERED;
+                                                        }
+                                                        break;
                                                     }
+
                                                     for (var _pr of _purchaseRequests) {
                                                         if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
                                                             if (purchaseOrder.isClosed) {
                                                                 _pr.status = prStatusEnum.COMPLETE;
                                                             }
                                                             else {
-                                                                _pr.status = prStatusEnum.ARRIVING;
+                                                                for (var _prItem of _pr.items) {
+                                                                    if (_prItem.deliveryOrderNos.length > 0) {
+                                                                        _pr.status = prStatusEnum.ARRIVING;
+                                                                    } else {
+                                                                        _pr.status = prStatusEnum.ORDERED;
+                                                                    }
+                                                                    break;
+                                                                }
                                                             }
                                                             tasksPR.push(this.purchaseRequestManager.update(_pr));
                                                             break;
