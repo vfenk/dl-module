@@ -326,6 +326,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             this.getSingleById(purchaseOrder.sourcePurchaseOrderId)
                 .then(_purchaseOrder => {
                     delete purchaseOrder._id;
+                    delete purchaseOrder.no;
                     purchaseOrder.sourcePurchaseOrder = _purchaseOrder;
                     purchaseOrder.sourcePurchaseOrderId = _purchaseOrder._id;
                     this._validate(purchaseOrder)
