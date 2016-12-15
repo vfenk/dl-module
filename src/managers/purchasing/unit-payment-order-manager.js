@@ -473,5 +473,4 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
-
 }
