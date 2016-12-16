@@ -229,7 +229,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 .then((createIndexResults) => {
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
-                            validDeliveryOrder.refNo = `${generateCode()}-${validDeliveryOrder.no}`;
+                            validDeliveryOrder.refNo = generateCode();
                             validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
                             //UPDATE PO INTERNAL
                             var poId = new ObjectId();

@@ -35,7 +35,7 @@ class DeliveryOrderDataUtil {
 
                         var data = {
                             no: `UT/DO/${codeGenerator()}`,
-                            refNo: `${codeGenerator()}UT/DO/${codeGenerator()}`,
+                            refNo: `REF/NO/UT/DO/${codeGenerator()}`,
                             date: new Date(),
                             supplierDoDate: new Date(),
                             supplierId: dataSupplier._id,
