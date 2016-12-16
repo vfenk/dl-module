@@ -94,4 +94,21 @@ it('#04. all purchase-order status should be = VOID in purchase-order-external',
         });
 });
 
+// it('#05. all purchase-request status should be = VOID in purchase-order-external', function (done) {
+//     Promise.all(purchaseOrderExternal.items.map(purchaseOrder => {
+//         return purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequest._id);
+//     }))
+//         .then((results) => {
+//             purchaseRequests = results;
+//             for (var purchaseRequest of purchaseRequests) {
+//                 JSON.stringify(purchaseRequest.status).should.equal(JSON.stringify(prStatusEnum.VOID));
+//             }
+//             done();
+//         })
+//         .catch(e => {
+//             done(e);
+//         });
+// });
+
+
 

@@ -559,7 +559,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         return Promise.all(getPos)
                             .then((pos) => {
 
-                                var updatedPos = pos.map(po => {
+                                var updatePos = pos.map(po => {
 
                                     po.purchaseOrderExternalId = {};
                                     po.purchaseOrderExternal = {};
@@ -591,14 +591,37 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
                                 })
 
-                                return Promise.all(updatedPos);
+                                return Promise.all(updatePos);
                             })
                             .then((updatedPos) => {
+
+                                var getPrs = updatedPos.map((po) => {
+                                    return this.purchaseRequestManager.getSingleByIdOrDefault(po.purchaseRequest._id);
+                                })
+
+                                return Promise.all(getPrs);
+
+                            })
+                            .then((prs) => {
+
+                                var updatePrs = prs.map((pr) => {
+
+                                    pr.status = prStatusEnum.PROCESSING;
+
+                                    return this.purchaseRequestManager.update(pr)
+                                        .then((id) => this.purchaseRequestManager.getSingleByIdOrDefault(id));
+                                })
+                                
+                                return Promise.all(updatePrs);
+                            })
+                            .then((updatedPrs) => {
 
                                 valid.items = valid.items.map((po) => {
 
                                     po.isPosted = false;
                                     po.status = poStatusEnum.PROCESSING;
+
+                                    po.purchaseRequest.status = prStatusEnum.PROCESSING;
 
                                     return po;
                                 })
@@ -667,7 +690,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         return Promise.all(getPos)
                             .then((pos) => {
 
-                                var voidedPos = pos.map((po) => {
+                                var voidPos = pos.map((po) => {
 
                                     po.status = poStatusEnum.VOID;
 
@@ -675,11 +698,42 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
                                 })
 
-                                return Promise.all(voidedPos);
+                                return Promise.all(voidPos);
                             })
-                            .then((voidedPos) => {
+                            // .then((voidedPos) => {
+
+                            //     var getPrs = voidedPos.map((po) => {
+                            //         return this.purchaseRequestManager.getSingleByIdOrDefault(po.purchaseRequest._id);
+                            //     })
+
+                            //     return Promise.all(getPrs);
+
+                            // })
+                            // .then((prs) => {
+
+                            //     var voidPrs = prs.map((pr) => {
+
+                            //         pr.status = prStatusEnum.VOID;
+
+                            //         return this.purchaseRequest.update(pr)
+                            //             .then((id) => this.purchaseRequestManager.getSingleByIdOrDefault(id));
+                            //     })
+
+                            //     return Promise.all(voidPrs);
+                            // })
+                            .then((voidedPrs) => {
 
                                 valid.status = poStatusEnum.VOID;
+
+                                valid.items = valid.items.map((po) => {
+
+                                    po.isPosted = false;
+                                    po.status = poStatusEnum.VOID;
+
+                                    // po.purchaseRequest.status = prStatusEnum.VOID;
+
+                                    return po;
+                                })
 
                                 return this.update(valid)
                                     .then((poExId) => {
