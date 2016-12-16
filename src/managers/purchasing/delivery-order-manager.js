@@ -16,6 +16,7 @@ var i18n = require('dl-i18n');
 var SupplierManager = require('../master/supplier-manager');
 var prStatusEnum = DLModels.purchasing.enum.PurchaseRequestStatus;
 var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
+var generateCode = require('../../utils/code-generator');
 
 module.exports = class DeliveryOrderManager extends BaseManager {
     constructor(db, user) {
@@ -228,7 +229,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 .then((createIndexResults) => {
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
-                            validDeliveryOrder.refNo = `${code}-${validDeliveryOrder.no}`;
+                            validDeliveryOrder.refNo = `${generateCode()}-${validDeliveryOrder.no}`;
                             validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
                             //UPDATE PO INTERNAL
                             var poId = new ObjectId();
