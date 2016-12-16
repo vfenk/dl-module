@@ -134,6 +134,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     valid.supplier = _supplier;
                     valid.deliveryOrderId = new ObjectId(_deliveryOrder._id);
                     valid.deliveryOrder = _deliveryOrder;
+                    valid.date = new Date(valid.date);
 
                     for (var item of valid.items) {
                         for (var _po of _purchaseOrderList) {

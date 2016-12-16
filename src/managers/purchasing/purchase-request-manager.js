@@ -151,6 +151,9 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 valid.budgetId = _budget._id;
                 valid.budget = _budget;
 
+                valid.date = new Date(valid.date);
+                valid.expectedDeliveryDate = new Date(valid.expectedDeliveryDate);
+
                 for (var prItem of valid.items) {
                     for (var _product of _products) {
                         if (prItem.product._id.toString() === _product._id.toString()) {
@@ -236,13 +239,21 @@ module.exports = class PurchaseRequestManager extends BaseManager {
         });
     }
 
-    getDataPRMonitoring(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo) {
+    getDataPRMonitoring(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo, state) {
         return new Promise((resolve, reject) => {
             var sorting = {
                 "date": -1,
                 "no": 1
             };
             var query = Object.assign({});
+
+            if (state !== -1) {
+                Object.assign(query, {
+                    status: {
+                        value: state
+                    }
+                });
+            }
 
             if (unitId !== "undefined" && unitId !== "") {
                 Object.assign(query, {

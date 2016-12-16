@@ -16,7 +16,7 @@ module.exports = function (unitPaymentCorrection) {
 
     items = [].concat.apply([], items);
 
-    var currency = unitPaymentCorrection.items.find(r => true).currency.symbol;
+    var currency = unitPaymentCorrection.items.find(r => true).currency.code;
     var urDates = unitPaymentCorrection.unitPaymentOrder.items.map(unitPaymentOrderItem => {
         return new Date(unitPaymentOrderItem.unitReceiptNote.date)
     })
@@ -48,37 +48,56 @@ module.exports = function (unitPaymentCorrection) {
         }, {
             columns: [
                 {
-                    width: '60%',
+                    width: '70%',
                     text: 'BANARAN, GROGOL, SUKOHARJO',
                     style: ['size08']
                 }, {
-                    width: '*',
+                    width: '30%',
                     stack: [
                         `SUKOHARJO, ${moment(unitPaymentCorrection.unitPaymentOrder.date).format(locale.date.format)}`,
                         `(${unitPaymentCorrection.unitPaymentOrder.supplier.code}) ${unitPaymentCorrection.unitPaymentOrder.supplier.name}`,
                         `${unitPaymentCorrection.unitPaymentOrder.supplier.address}`],
-                    alignment: 'right',
+                    alignment: 'left',
                     style: ['size08']
 
                 }]
         }, '\n', {
             columns: [
                 {
-                    width: '50%',
-                    text: `Retur/Potongan ${unitPaymentCorrection.unitPaymentOrder.category.name}`,
-                    style: ['size09']
-                }, {
-                    width: '30%',
-                    text: ''
+                    stack: [{
+                        columns: [{
+                            width: '35%',
+                            text: "Retur/Potongan"
+                        }, {
+                                width: '5%',
+                                text: ":"
+                            }, {
+                                width: '*',
+                                text: unitPaymentCorrection.unitPaymentOrder.category.name
+                            }],
+                        style: ['size08']
+                    }, {
+                            columns: [{
+                                width: '35%',
+                                text: "Untuk"
+                            }, {
+                                    width: '5%',
+                                    text: ":"
+                                }, {
+                                    width: '*',
+                                    text: unitPaymentCorrection.unitPaymentOrder.division.name
+                                }],
+                            style: ['size08']
+                        }
+                    ]
                 }, {
                     width: '20%',
-                    text: `NO. ${unitPaymentCorrection.no}`,
-                    style: ['size09', 'bold']
+                    text: ''
+                }, {
+                    width: '30%',
+                    text: `Nomor ${unitPaymentCorrection.no}`,
+                    style: ['size09', 'left', 'bold']
                 }]
-        }, {
-            width: '*',
-            text: `Untuk : ${unitPaymentCorrection.unitPaymentOrder.division.name}`,
-            style: ['size09']
         }, '\n'
     ];
 
@@ -87,16 +106,16 @@ module.exports = function (unitPaymentCorrection) {
             text: 'No.',
             style: 'tableHeader'
         }, {
-            text: 'Banyak',
-            style: 'tableHeader'
-        }, {
-            text: 'Keterangan',
-            style: 'tableHeader'
-        }, {
-            text: 'Harga',
+            text: 'Nama Barang',
             style: 'tableHeader'
         }, {
             text: 'Jumlah',
+            style: 'tableHeader'
+        }, {
+            text: 'Harga Satuan',
+            style: 'tableHeader'
+        }, {
+            text: 'Harga Total',
             style: 'tableHeader'
         }, {
             text: 'Nomor Order',
@@ -109,35 +128,35 @@ module.exports = function (unitPaymentCorrection) {
             text: (index + 1).toString() || '',
             style: ['size07', 'center']
         }, {
-            text: `${item.quantity} ${item.uom.unit}`,
-            style: ['size07', 'right']
-        }, {
-            text: item.product.name,
-            style: ['size07', 'left']
-        }, {
-            columns: [{
-                width: '5%',
-                text: currency,
-                style: ['size08']
+                text: item.product.name,
+                style: ['size07', 'left']
             }, {
-                width: '*',
-                text: parseFloat(item.pricePerUnit).toLocaleString(locale, locale.currency),
+                text: `${item.quantity} ${item.uom.unit}`,
                 style: ['size07', 'right']
-            }]
-        }, {
-            columns: [{
-                width: '5%',
-                text: currency,
-                style: ['size08']
             }, {
-                width: '*',
-                text: parseFloat(item.priceTotal).toLocaleString(locale, locale.currency),
-                style: ['size07', 'right']
-            }]
-        }, {
-            text: item.prNo,
-            style: ['size07', 'left']
-        }];
+                columns: [{
+                    width: '5%',
+                    text: currency,
+                    style: ['size08']
+                }, {
+                        width: '*',
+                        text: parseFloat(item.pricePerUnit).toLocaleString(locale, locale.currency),
+                        style: ['size07', 'right']
+                    }]
+            }, {
+                columns: [{
+                    width: '5%',
+                    text: currency,
+                    style: ['size08']
+                }, {
+                        width: '*',
+                        text: parseFloat(item.priceTotal).toLocaleString(locale, locale.currency),
+                        style: ['size07', 'right']
+                    }]
+            }, {
+                text: item.prNo,
+                style: ['size07', 'left']
+            }];
     });
 
     tbody = tbody.length > 0 ? tbody : [
@@ -150,7 +169,7 @@ module.exports = function (unitPaymentCorrection) {
 
     var table = [{
         table: {
-            widths: ['5%', '15%', '35%', '15%', '15%', '15%'],
+            widths: ['5%', '35%', '15%', '15%', '15%', '15%'],
             headerRows: 1,
             body: [].concat([thead], tbody)
         }
@@ -176,14 +195,14 @@ module.exports = function (unitPaymentCorrection) {
                 text: 'Jumlah',
                 style: ['size08']
             }, {
-                width: '5%',
-                text: currency,
-                style: ['size08']
-            }, {
-                width: '65%',
-                text: parseFloat(sum).toLocaleString(locale, locale.currency),
-                style: ['size08', 'right']
-            }],
+                    width: '5%',
+                    text: currency,
+                    style: ['size08']
+                }, {
+                    width: '65%',
+                    text: parseFloat(sum).toLocaleString(locale, locale.currency),
+                    style: ['size08', 'right']
+                }],
             margin: [350, 0, 0, 0]
         }, {
             columns: [{
@@ -191,14 +210,14 @@ module.exports = function (unitPaymentCorrection) {
                 text: 'PPN',
                 style: ['size08']
             }, {
-                width: '5%',
-                text: currency,
-                style: ['size08']
-            }, {
-                width: '65%',
-                text: parseFloat(useIncomeTax).toLocaleString(locale, locale.currency),
-                style: ['size08', 'right']
-            }],
+                    width: '5%',
+                    text: currency,
+                    style: ['size08']
+                }, {
+                    width: '65%',
+                    text: parseFloat(useIncomeTax).toLocaleString(locale, locale.currency),
+                    style: ['size08', 'right']
+                }],
             margin: [350, 0, 0, 0]
         }, {
             columns: [{
@@ -206,14 +225,14 @@ module.exports = function (unitPaymentCorrection) {
                 text: 'Total',
                 style: ['size08']
             }, {
-                width: '5%',
-                text: currency,
-                style: ['size08']
-            }, {
-                width: '65%',
-                text: parseFloat(sum + useIncomeTax).toLocaleString(locale, locale.currency),
-                style: ['size08', 'right', 'bold']
-            }],
+                    width: '5%',
+                    text: currency,
+                    style: ['size08']
+                }, {
+                    width: '65%',
+                    text: parseFloat(sum + useIncomeTax).toLocaleString(locale, locale.currency),
+                    style: ['size08', 'right', 'bold']
+                }],
             margin: [350, 0, 0, 0]
         },
         '\n'];
@@ -223,8 +242,8 @@ module.exports = function (unitPaymentCorrection) {
         style: ['size09', 'bold']
     };
 
-    var footer = ['\n', 
-            {
+    var footer = ['\n',
+        {
             columns: [
                 {
                     width: '50%',
@@ -233,14 +252,14 @@ module.exports = function (unitPaymentCorrection) {
                         text: 'Perjanjian Pembayaran',
                         style: ['size08']
                     }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size08']
-                    }, {
-                        width: '*',
-                        text: moment(unitPaymentCorrection.unitPaymentOrder.dueDate).format(locale.date.format),
-                        style: ['size08']
-                    }]
+                            width: '3%',
+                            text: ':',
+                            style: ['size08']
+                        }, {
+                            width: '*',
+                            text: moment(unitPaymentCorrection.unitPaymentOrder.dueDate).format(locale.date.format),
+                            style: ['size08']
+                        }]
                 }, {
                     width: '50%',
                     columns: [{
@@ -248,16 +267,16 @@ module.exports = function (unitPaymentCorrection) {
                         text: '',
                         style: ['size08']
                     }, {
-                        width: '3%',
-                        text: '',
-                        style: ['size08']
-                    }, {
-                        width: '*',
-                        text: "",
-                        style: ['size08']
-                    }]
+                            width: '3%',
+                            text: '',
+                            style: ['size08']
+                        }, {
+                            width: '*',
+                            text: "",
+                            style: ['size08']
+                        }]
                 }]
-            }, {
+        }, {
             columns: [
                 {
                     width: '50%',
@@ -266,62 +285,62 @@ module.exports = function (unitPaymentCorrection) {
                         text: 'Nota',
                         style: ['size08']
                     }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size08']
-                    }, {
-                        width: '*',
-                        text: `NO ${unitPaymentCorrection.invoiceCorrectionNo} ${moment(unitPaymentCorrection.invoiceCorrectionDate).format(locale.date.format)}`,
-                        style: ['size08']
-                    }]
+                            width: '3%',
+                            text: ':',
+                            style: ['size08']
+                        }, {
+                            width: '*',
+                            text: `Nomor ${unitPaymentCorrection.invoiceCorrectionNo} ${moment(unitPaymentCorrection.invoiceCorrectionDate).format(locale.date.format)}`,
+                            style: ['size08']
+                        }]
                 }, {
                     width: '50%',
                     columns: [{
                         width: '35%',
-                        text: 'Brg Dtg',
+                        text: 'Barang Datang',
                         style: ['size08']
                     }, {
+                            width: '3%',
+                            text: ':',
+                            style: ['size08']
+                        }, {
+                            width: '*',
+                            text: `${moment(sjDate).format(locale.date.format)} `,
+                            style: ['size08']
+                        }]
+                }]
+        }, {
+            columns: [{
+                width: '50%',
+                columns: [{
+                    width: '35%',
+                    text: 'Keterangan',
+                    style: ['size08']
+                }, {
                         width: '3%',
                         text: ':',
                         style: ['size08']
                     }, {
                         width: '*',
-                        text: `${moment(sjDate).format(locale.date.format)} `,
+                        text: unitPaymentCorrection.remark,
                         style: ['size08']
                     }]
-                }]
             }, {
-            columns: [{
-                width: '50%',
-                columns: [{
-                    width: '35%',
-                    text: 'Ket',
-                    style: ['size08']
-                }, {
-                    width: '3%',
-                    text: ':',
-                    style: ['size08']
-                }, {
-                    width: '*',
-                    text: unitPaymentCorrection.remark,
-                    style: ['size08']
+                    width: '50%',
+                    columns: [{
+                        width: '35%',
+                        text: 'Nomor Nota Retur',
+                        style: ['size08']
+                    }, {
+                            width: '3%',
+                            text: ':',
+                            style: ['size08']
+                        }, {
+                            width: '*',
+                            text: unitPaymentCorrection.returNoteNo,
+                            style: ['size08']
+                        }]
                 }]
-            }, {
-                width: '50%',
-                columns: [{
-                    width: '35%',
-                    text: 'NT',
-                    style: ['size08']
-                }, {
-                    width: '3%',
-                    text: ':',
-                    style: ['size08']
-                }, {
-                    width: '*',
-                    text: unitPaymentCorrection.returNoteNo,
-                    style: ['size08']
-                }]
-            }]
         }, '\n'];
 
     var signature = [{
@@ -330,23 +349,23 @@ module.exports = function (unitPaymentCorrection) {
             stack: ['Diperiksa,', 'Verifikasi', '\n\n\n\n', '(                               )'],
             style: ['center']
         }, {
-            width: '25%',
-            stack: ['Mengetahui,', 'Pimpinan Bagian', '\n\n\n\n', '(                               )'],
-            style: ['center']
-        }, {
-            width: '25%',
-            stack: ['Tanda Terima,', 'Bagian Pembelian', '\n\n\n\n', '(                               )'],
-            style: ['center']
-        }, {
-            width: '25%',
-            stack: ['Dibuat Oleh,', ' ', '\n\n\n\n', `(  ${unitPaymentCorrection._createdBy}  )`],
-            style: ['center']
-        }],
+                width: '25%',
+                stack: ['Mengetahui,', 'Pimpinan Bagian', '\n\n\n\n', '(                               )'],
+                style: ['center']
+            }, {
+                width: '25%',
+                stack: ['Tanda Terima,', 'Bagian Pembelian', '\n\n\n\n', '(                               )'],
+                style: ['center']
+            }, {
+                width: '25%',
+                stack: ['Dibuat Oleh,', ' ', '\n\n\n\n', `(  ${unitPaymentCorrection._createdBy}  )`],
+                style: ['center']
+            }],
         style: ['size08']
     }, '\n', {
-        text: `Dicetak Oleh ${unitPaymentCorrection._createdBy}`,
-        style: ['size08']
-    }];
+            text: `Dicetak Oleh ${unitPaymentCorrection._createdBy}`,
+            style: ['size08']
+        }];
 
     var dd = {
         pageSize: 'A5',

@@ -121,6 +121,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     valid.division._id = new ObjectId(valid.division._id);
                     valid.supplierId = new ObjectId(valid.supplierId);
                     valid.supplier._id = new ObjectId(valid.supplierId);
+                    valid.date = new Date(valid.date);
+                    valid.invoceDate = new Date(valid.invoceDate);
+                    valid.dueDate = new Date(valid.dueDate);
 
                     if (valid.category != null) {
                         valid.categoryId = new ObjectId(valid.categoryId);
@@ -135,9 +138,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
                     for (var item of valid.items) {
                         for (var _urn of getURN) {
-                            if (new ObjectId(item.unitReceiptNoteId).equals(new ObjectId(_urn._id))) {
+                            if (item.unitReceiptNoteId.toString() === _urn._id.toString()) {
                                 item.unitReceiptNoteId = new ObjectId(_urn._id);
-                                item.unitReceiptNote._id = new ObjectId(_urn._id);
+                                item.unitReceiptNote = _urn;
                                 break;
                             }
                         }

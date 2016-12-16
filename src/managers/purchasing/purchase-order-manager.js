@@ -136,8 +136,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     valid.category = _purchaseRequest.category;
                     valid.categoryId = new ObjectId(_purchaseRequest.category._id);
                     valid.category._id = new ObjectId(_purchaseRequest.category._id);
-                    valid.date = _purchaseRequest.date;
-                    valid.expectedDeliveryDate = _purchaseRequest.expectedDeliveryDate;
+                    valid.date = new Date(_purchaseRequest.date);
+                    valid.expectedDeliveryDate = new Date(_purchaseRequest.expectedDeliveryDate);
                     for (var poItem of valid.items) {
                         for (var _prItem of _purchaseRequest.items)
                             if (_prItem.product._id.toString() === poItem.product._id.toString()) {
@@ -146,7 +146,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 break;
                             }
                     }
-                    // valid.items = items;
                 }
 
                 if (!valid.stamp) {
@@ -393,13 +392,21 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-    getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo) {
+    getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo, state) {
         return new Promise((resolve, reject) => {
             var sorting = {
                 "purchaseRequest.date": -1,
                 "purchaseRequest.no": 1
             };
             var query = Object.assign({});
+
+            if (state !== -1) {
+                Object.assign(query, {
+                    status :{
+                        value : state
+                    }
+                });
+            }
 
             if (unitId !== "undefined" && unitId !== "") {
                 Object.assign(query, {

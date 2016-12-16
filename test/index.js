@@ -36,7 +36,7 @@ describe('#dl-module', function(done) {
     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
     test('@PURCHASING/PURCHASE ORDER', './purchasing/purchase-order');
     test('@PURCHASING/PURCHASE ORDER EXTERNAL', './purchasing/purchase-order-external'); 
-    
+    test('@PURCHASING/DELIVERY ORDER', './purchasing/delivery-order');
 
     
      test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');
