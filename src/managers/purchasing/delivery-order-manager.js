@@ -828,7 +828,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             unique: true
         }
 
-        return this.collection.createIndexes([dateIndex, refNoIndex]);
+        return this.collection.createIndexes([dateIndex]);
     }
 
 }
