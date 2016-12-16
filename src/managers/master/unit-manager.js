@@ -20,32 +20,33 @@ module.exports = class UnitManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deleted = {
-            _deleted: false
-        };
-        var query = paging.keyword ? {
-            '$and': [deleted]
-        } : deleted;
+        var _default = {
+                _deleted: false
+            },
+            pagingFilter = paging.filter || {},
+            keywordFilter = {},
+            query = {};
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterDivisionName = {
-                'division.name': {
+            var codeFilter = {
+                'code': {
                     '$regex': regex
                 }
             };
-            var filterName = {
+            var nameFilter = {
                 'name': {
                     '$regex': regex
                 }
             };
-
-            var $or = {
-                '$or': [filterDivisionName, filterName]
+            var divisionNameFilter = {
+                'division.name': {
+                    '$regex': regex
+                }
             };
-
-            query['$and'].push($or);
+            keywordFilter['$or'] = [codeFilter, nameFilter, divisionNameFilter];
         }
+        query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
     }
 
@@ -55,15 +56,12 @@ module.exports = class UnitManager extends BaseManager {
             var valid = unit;
             // 1. begin: Declare promises.
             var getUnitPromise = this.collection.singleOrDefault({
-                "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
-                    }
-                }, {
-                    code: valid.code
-                }]
+                _id: {
+                    '$ne': new ObjectId(valid._id)
+                },
+                code: valid.code
             });
-            var getDivision = valid.divisionId && (valid.divisionId || '').toString().trim().length > 0 ? this.divisionManager.getSingleByIdOrDefault(valid.divisionId) : Promise.resolve(null);
+            var getDivision = ObjectId.isValid(valid.divisionId) ? this.divisionManager.getSingleByIdOrDefault(new ObjectId(valid.divisionId)) : Promise.resolve(null);
 
             // 2. begin: Validation.
             Promise.all([getUnitPromise, getDivision])
@@ -85,7 +83,7 @@ module.exports = class UnitManager extends BaseManager {
 
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 

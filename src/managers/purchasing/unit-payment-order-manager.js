@@ -10,6 +10,7 @@ var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitReceiptNoteManager = require('./unit-receipt-note-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
+var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
 
 module.exports = class UnitPaymentOrderManager extends BaseManager {
     constructor(db, user) {
@@ -41,11 +42,11 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                 }]
             });
 
-            Promise.all([getUnitPaymentOrderPromise, getUnitReceiptNote])
+            Promise.all([getUnitPaymentOrderPromise].concat(getUnitReceiptNote))
                 .then(results => {
                     var _module = results[0];
                     var now = new Date();
-                    var getURN = results[1];
+                    var getURN = results.slice(1, results.length);
                     if (!valid.divisionId)
                         errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
                     else if (valid.division) {
@@ -120,6 +121,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     valid.division._id = new ObjectId(valid.division._id);
                     valid.supplierId = new ObjectId(valid.supplierId);
                     valid.supplier._id = new ObjectId(valid.supplierId);
+                    valid.date = new Date(valid.date);
+                    valid.invoceDate = new Date(valid.invoceDate);
+                    valid.dueDate = new Date(valid.dueDate);
 
                     if (valid.category != null) {
                         valid.categoryId = new ObjectId(valid.categoryId);
@@ -134,9 +138,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
 
                     for (var item of valid.items) {
                         for (var _urn of getURN) {
-                            if (new ObjectId(item.unitReceiptNoteId).equals(new ObjectId(_urn._id))) {
+                            if (item.unitReceiptNoteId.toString() === _urn._id.toString()) {
                                 item.unitReceiptNoteId = new ObjectId(_urn._id);
-                                item.unitReceiptNote._id = new ObjectId(_urn._id);
+                                item.unitReceiptNote = _urn;
                                 break;
                             }
                         }
@@ -299,12 +303,37 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                     fulfillment.pphValue = validUnitPaymentOrder.vatRate * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit;
                                                     fulfillment.pphDate = validUnitPaymentOrder.vatDate;
                                                 }
+                                                break;
                                             }
                                         }
+                                        purchaseOrder.status = poStatusEnum.PAYMENT;
                                         break;
                                     }
 
                                 }
+                            }
+                        }
+                        var isFull = true;
+                        for (var poItem of purchaseOrder.items) {
+                            for(var fulfillment of poItem.fulfillments)
+                                {
+                                    if(!fulfillment.interNoteNo || fulfillment.interNoteNo === '')
+                                    {
+                                        isFull=false;
+                                        break;
+                                    }
+                                }
+                                if(!isFull){
+                                    break;
+                                }
+                        }
+
+                        if(isFull)
+                        {
+                            purchaseOrder.status = poStatusEnum.COMPLETE;
+                        }else{
+                            if(purchaseOrder.isClosed && purchaseOrder.status.name === 'PAYMENT'){
+                                purchaseOrder.status = poStatusEnum.PREMATURE;
                             }
                         }
                         tasks.push(this.purchaseOrderManager.update(purchaseOrder));
@@ -356,7 +385,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                                     var fulfillmentNo = fulfillment.unitReceiptNoteNo || '';
                                                                     var unitReceiptNoteNo = unitPaymentOrderItem.unitReceiptNote.no || '';
                                                                     var interNoteNo = fulfillment.interNoteNo || '';
-                                                                    if (interNoteNo == validUnitPaymentOrder.no && fulfillmentNo == unitReceiptNoteNo) {
+                                                                    if (interNoteNo === validUnitPaymentOrder.no && fulfillmentNo === unitReceiptNoteNo) {
                                                                         fulfillment.invoiceDate = '';
                                                                         fulfillment.invoiceNo = '';
                                                                         fulfillment.interNoteDate = '';
@@ -446,17 +475,6 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         }
 
         return this.collection.createIndexes([dateIndex, noIndex]);
-    }
-
-    generateNo(unit, category) {
-        var now = new Date();
-        var stamp = now / 1000 | 0;
-        var code = stamp.toString();
-        var locale = 'id-ID';
-        var moment = require('moment');
-        moment.locale(locale);
-        var no = `SPB${unit.toUpperCase()}${category.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
-        return no;
     }
 
 }

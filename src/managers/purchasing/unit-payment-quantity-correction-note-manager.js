@@ -30,10 +30,10 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                    "no": valid.no
-                }, {
-                    _deleted: false
-                }]
+                        "no": valid.no
+                    }, {
+                        _deleted: false
+                    }]
             });
 
             var getUnitPaymentOrder = valid.unitPaymentOrder && ObjectId.isValid(valid.unitPaymentOrder._id) ? this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id) : Promise.resolve(null);
@@ -67,6 +67,9 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                     // if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
                     //     errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
+                    if (!valid.date || valid.date == '')
+                        errors["date"] = i18n.__("UnitPaymentQuantityCorrectionNote.date.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.date._:Correction Date"));
+
                     if (valid.items) {
                         if (valid.items.length > 0) {
                             var itemErrors = [];
@@ -74,12 +77,12 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                 var itemError = {};
                                 for (var _unitPaymentOrderItem of valid.unitPaymentOrder.items) {
                                     for (var _unitReceiptNoteItem of _unitPaymentOrderItem.unitReceiptNote.items) {
-                                        if (_unitReceiptNoteItem.purchaseOrderId.toString() == item.purchaseOrderId.toString() && _unitReceiptNoteItem.product._id.toString() == item.productId.toString()) {
+                                        if (_unitReceiptNoteItem.purchaseOrderId.toString() === item.purchaseOrderId.toString() && _unitReceiptNoteItem.product._id.toString() === item.productId.toString()) {
                                             if (item.quantity <= 0)
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
                                             else if (item.quantity > _unitReceiptNoteItem.deliveredQuantity)
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.lessThan:%s must not be greater than quantity on unit payment order", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
-                                            else if (item.quantity == _unitReceiptNoteItem.deliveredQuantity)
+                                            else if (item.quantity === _unitReceiptNoteItem.deliveredQuantity)
                                                 itemError["quantity"] = i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity.noChanges: no changes", i18n.__("UnitPaymentQuantityCorrectionNote.items.quantity._:Quantity"));
 
                                             itemErrors.push(itemError);
@@ -103,13 +106,32 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
                     valid.unitPaymentOrderId = _unitPaymentOrder._id;
                     valid.unitPaymentOrder = _unitPaymentOrder;
                     valid.priceCorrectionType = "Jumlah";
+                    valid.date = new Date(valid.date);
+
+                    if (valid.invoiceCorrectionDate) {
+                        valid.invoiceCorrectionDate = new Date(valid.invoiceCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.incomeTaxCorrectionDate) {
+                        valid.incomeTaxCorrectionDate = new Date(valid.incomeTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.vatTaxCorrectionDate) {
+                        valid.vatTaxCorrectionDate = new Date(valid.vatTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
 
                     for (var item of valid.items) {
                         for (var _unitPaymentOrderItem of _unitPaymentOrder.items) {
@@ -201,11 +223,12 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                 for (var _fulfillment of _poItem.fulfillments) {
                                     var qty = 0, priceTotal = 0, pricePerUnit = 0;
                                     if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentQuantityCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
-                                        qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
-                                        priceTotal = qty * _item.pricePerUnit;
+                                        // qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
+                                        // priceTotal = qty * _item.pricePerUnit;
+                                        priceTotal = _item.quantity * _item.pricePerUnit;
                                         pricePerUnit = _item.pricePerUnit;
                                         _item.pricePerUnit = pricePerUnit;
-                                        _item.quantity = qty;
+                                        // _item.quantity = qty;
                                         _item.priceTotal = priceTotal;
                                         break;
                                     }
@@ -232,17 +255,6 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                 });
 
         });
-    }
-
-    generateNo(unit, category) {
-        var now = new Date();
-        var stamp = now / 1000 | 0;
-        var code = stamp.toString();
-        var locale = 'id-ID';
-        var moment = require('moment');
-        moment.locale(locale);
-        var no = `NDO${unit.toUpperCase()}${category.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
-        return no;
     }
 
     create(unitPaymentQuantityCorrectionNote) {
@@ -277,7 +289,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                             var _unitPaymentOrderNo = fulfillmentPoItem.interNoteNo || '';
                                                             var _unitReceiptNoteNo = fulfillmentPoItem.unitReceiptNoteNo || '';
 
-                                                            if (unitPaymentQuantityCorrectionNoteItem.unitReceiptNoteNo == _unitReceiptNoteNo && validData.unitPaymentOrder.no == _unitPaymentOrderNo) {
+                                                            if (unitPaymentQuantityCorrectionNoteItem.unitReceiptNoteNo === _unitReceiptNoteNo && validData.unitPaymentOrder.no === _unitPaymentOrderNo) {
 
                                                                 var _correction = {};
                                                                 var _qty = 0;
@@ -317,9 +329,9 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                             var _unitPaymentOrder = validData.unitPaymentOrder;
                                             for (var _item of validData.items) {
                                                 for (var _unitReceiptNote of _unitPaymentOrder.items) {
-                                                    if (_item.unitReceiptNoteNo == _unitReceiptNote.unitReceiptNote.no) {
+                                                    if (_item.unitReceiptNoteNo === _unitReceiptNote.unitReceiptNote.no) {
                                                         for (var _unitReceiptNoteItem of _unitReceiptNote.unitReceiptNote.items) {
-                                                            if (_item.purchaseOrderId.toString() == _unitReceiptNoteItem.purchaseOrderId.toString() && _item.product._id.toString() == _unitReceiptNoteItem.product._id.toString()) {
+                                                            if (_item.purchaseOrderId.toString() === _unitReceiptNoteItem.purchaseOrderId.toString() && _item.product._id.toString() === _unitReceiptNoteItem.product._id.toString()) {
                                                                 var _correction = {
                                                                     correctionDate: validData.date,
                                                                     correctionNo: validData.no,
@@ -400,12 +412,14 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                 for (var _fulfillment of _poItem.fulfillments) {
                                     var qty = 0, priceTotal = 0, pricePerUnit = 0;
                                     if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentQuantityCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
-                                        qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
-                                        priceTotal = qty * _item.pricePerUnit;
+                                        // qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
+                                        // priceTotal = qty * _item.pricePerUnit;
+                                        priceTotal = _item.quantity * _item.pricePerUnit;
                                         pricePerUnit = _item.pricePerUnit;
                                         _item.pricePerUnit = pricePerUnit;
-                                        _item.quantity = qty;
+                                        // _item.quantity = qty;
                                         _item.priceTotal = priceTotal;
+
                                         break;
                                     }
                                 }

@@ -12,6 +12,7 @@ var UnitManager = require('../master/unit-manager');
 var SupplierManager = require('../master/supplier-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
+var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
 
 module.exports = class UnitReceiptNoteManager extends BaseManager {
     constructor(db, user) {
@@ -133,6 +134,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     valid.supplier = _supplier;
                     valid.deliveryOrderId = new ObjectId(_deliveryOrder._id);
                     valid.deliveryOrder = _deliveryOrder;
+                    valid.date = new Date(valid.date);
 
                     for (var item of valid.items) {
                         for (var _po of _purchaseOrderList) {
@@ -236,8 +238,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     }
 
                     Promise.all(getPurchaseOrderById)
-                        .then(results => {
-                            for (var purchaseOrder of results) {
+                        .then(purchaseOrders => {
+                            for (var purchaseOrder of purchaseOrders) {
                                 for (var poItem of purchaseOrder.items) {
                                     for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
                                         if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
@@ -246,13 +248,13 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                     var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                     var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
 
-                                                    if (fulfillmentNo == deliveryOrderNo && !fulfillment.unitReceiptNoteNo) {
+                                                    if (fulfillmentNo === deliveryOrderNo && !fulfillment.unitReceiptNoteNo) {
                                                         fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
                                                         fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
                                                         fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
                                                         fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
                                                         break;
-                                                    } else if (fulfillmentNo == deliveryOrderNo && fulfillment.unitReceiptNoteNo) {
+                                                    } else if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo) {
                                                         var _fulfillment = fulfillment;
                                                         _fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
                                                         _fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
@@ -267,6 +269,22 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                         }
                                     }
                                 }
+                                var _isClosed = true;
+                                for(var poItem of purchaseOrder.items)
+                                {
+                                    var sum = poItem.fulfillments.reduce(function (a,b) { return a + b.unitReceiptNoteDeliveredQuantity; }, 0);
+                                    if(sum !== poItem.realizationQuantity)
+                                    {
+                                        _isClosed = false;
+                                        break;
+                                    }
+                                }
+                                if(_isClosed)
+                                {
+                                    purchaseOrder.status = poStatusEnum.RECEIVED;
+                                }else{
+                                    purchaseOrder.status = poStatusEnum.RECEIVING;
+                                }
                                 tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
                             }
                             Promise.all(tasksUpdatePoInternal)
@@ -276,7 +294,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                             for (var _item of _deliveryOrder.items) {
                                                 for (var _fulfillment of _item.fulfillments) {
                                                     for (var item of validUnitReceiptNote.items) {
-                                                        if (_fulfillment.purchaseOrder._id.toString() == item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() == item.product._id.toString()) {
+                                                        if (_fulfillment.purchaseOrder._id.toString() === item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() === item.product._id.toString()) {
                                                             var _realizationQuantity = {
                                                                 no: validUnitReceiptNote.no,
                                                                 deliveredQuantity: item.deliveredQuantity
@@ -293,7 +311,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                     for (var _qty of _fulfillment.realizationQuantity) {
                                                         _total += _qty.deliveredQuantity;
                                                     }
-                                                    if (_total != _fulfillment.deliveredQuantity) {
+                                                    if (_total !== _fulfillment.deliveredQuantity) {
                                                         _item.isClosed = false;
                                                         break;
                                                     }
@@ -373,13 +391,13 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                     for (var purchaseOrder of results) {
                                         for (var poItem of purchaseOrder.items) {
                                             for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
-                                                if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
-                                                    if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
+                                                if (unitReceiptNoteItem.purchaseOrderId.toString() === purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() === purchaseOrder.unitId.toString()) {
+                                                    if (unitReceiptNoteItem.product._id.toString() === poItem.product._id.toString()) {
                                                         for (var fulfillment of poItem.fulfillments) {
                                                             var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
 
-                                                            if (fulfillmentNo == deliveryOrderNo && fulfillment.unitReceiptNoteNo == validUnitReceiptNote.no) {
+                                                            if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo === validUnitReceiptNote.no) {
                                                                 fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
                                                                 fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
                                                                 fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
@@ -391,6 +409,22 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                 }
                                             }
                                         }
+                                        var _isClosed = true;
+                                        for(var poItem of purchaseOrder.items)
+                                        {
+                                            var sum = poItem.fulfillments.reduce(function (a,b) { return a + b.unitReceiptNoteDeliveredQuantity; }, 0);
+                                            if(sum !== poItem.realizationQuantity)
+                                            {
+                                                _isClosed = false;
+                                                break;
+                                            }
+                                        }
+                                        if(_isClosed)
+                                        {
+                                            purchaseOrder.status = poStatusEnum.RECEIVED;
+                                        }else{
+                                            purchaseOrder.status = poStatusEnum.RECEIVING;
+                                        }
                                         tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
                                     }
                                     Promise.all(tasksUpdatePoInternal)
@@ -400,9 +434,9 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                     for (var _item of _deliveryOrder.items) {
                                                         for (var _fulfillment of _item.fulfillments) {
                                                             for (var item of validUnitReceiptNote.items) {
-                                                                if (_fulfillment.purchaseOrder._id.toString() == item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() == item.product._id.toString()) {
+                                                                if (_fulfillment.purchaseOrder._id.toString() === item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() === item.product._id.toString()) {
                                                                     for (var realizationQty of _fulfillment.realizationQuantity) {
-                                                                        if (realizationQty.no == validUnitReceiptNote.no) {
+                                                                        if (realizationQty.no === validUnitReceiptNote.no) {
                                                                             realizationQty.deliveredQuantity = item.deliveredQuantity;
                                                                             break;
                                                                         }
@@ -418,7 +452,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                             for (var _qty of _fulfillment.realizationQuantity) {
                                                                 _total += _qty.deliveredQuantity;
                                                             }
-                                                            if (_total != _fulfillment.deliveredQuantity) {
+                                                            if (_total !== _fulfillment.deliveredQuantity) {
                                                                 _item.isClosed = false;
                                                                 break;
                                                             }
@@ -503,19 +537,24 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                     for (var purchaseOrder of results) {
                                         for (var poItem of purchaseOrder.items) {
                                             for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
-                                                if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
-                                                    if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
+                                                if (unitReceiptNoteItem.purchaseOrderId.toString() === purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() === purchaseOrder.unitId.toString()) {
+                                                    if (unitReceiptNoteItem.product._id.toString() === poItem.product._id.toString()) {
                                                         for (var fulfillment of poItem.fulfillments) {
                                                             var fulfillmentNo = fulfillment.deliveryOderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
 
-                                                            if (fulfillmentNo == deliveryOrderNo && fulfillment.unitReceiptNoteNo == validUnitReceiptNote.no) {
+                                                            if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo === validUnitReceiptNote.no) {
                                                                 delete fulfillment.unitReceiptNoteNo;
                                                                 delete fulfillment.unitReceiptNoteDate;
                                                                 delete fulfillment.unitReceiptNoteDeliveredQuantity;
                                                                 delete fulfillment.unitReceiptDeliveredUom;
                                                             }
                                                         }
+                                                    }
+                                                    if(purchaseOrder.isClosed){
+                                                        purchaseOrder.status = poStatusEnum.ARRIVED;
+                                                    }else{
+                                                        purchaseOrder.status = poStatusEnum.ARRIVING;
                                                     }
                                                     unitReceiptNoteItem.purchaseOrder = purchaseOrder;
                                                 }
@@ -530,15 +569,15 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                     for (var _item of _deliveryOrder.items) {
                                                         for (var _fulfillment of _item.fulfillments) {
                                                             for (var item of validUnitReceiptNote.items) {
-                                                                if (_fulfillment.purchaseOrder._id.toString() == item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() == item.product._id.toString()) {
+                                                                if (_fulfillment.purchaseOrder._id.toString() === item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() === item.product._id.toString()) {
                                                                     var _index;
                                                                     for (var realizationQty of _fulfillment.realizationQuantity) {
-                                                                        if (realizationQty.no == validUnitReceiptNote.no) {
+                                                                        if (realizationQty.no === validUnitReceiptNote.no) {
                                                                             _index = _fulfillment.realizationQuantity.indexOf(realizationQty);
                                                                             break;
                                                                         }
                                                                     }
-                                                                    if (_index != null) {
+                                                                    if (_index !== null) {
                                                                         _fulfillment.realizationQuantity.splice(_index, 1);
                                                                     }
                                                                     break;
@@ -552,7 +591,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                             for (var _qty of _fulfillment.realizationQuantity) {
                                                                 _total += _qty.deliveredQuantity;
                                                             }
-                                                            if (_total != _fulfillment.deliveredQuantity) {
+                                                            if (_total !== _fulfillment.deliveredQuantity) {
                                                                 _item.isClosed = false;
                                                                 break;
                                                             }
@@ -642,15 +681,15 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
             var deleted = { _deleted: false };
             var createdBy = { _createdBy: _createdBy };
 
-            if (_no != "undefined" && _no != "") {
+            if (_no !== "undefined" && _no !== "") {
                 var no = { no: _no };
                 Object.assign(query, no);
             }
-            if (_unitId != "undefined" && _unitId != "") {
+            if (_unitId !== "undefined" && _unitId !== "") {
                 var unitId = { unitId: new ObjectId(_unitId) };
                 Object.assign(query, unitId);
             }
-            if (_categoryId != "undefined" && _categoryId != "") {
+            if (_categoryId !== "undefined" && _categoryId !== "") {
                 var categoryId = {
                     "items": {
                         $elemMatch: {
@@ -660,11 +699,11 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 };
                 Object.assign(query, categoryId);
             }
-            if (_supplierId != "undefined" && _supplierId != "") {
+            if (_supplierId !== "undefined" && _supplierId !== "") {
                 var supplierId = { supplierId: new ObjectId(_supplierId) };
                 Object.assign(query, supplierId);
             }
-            if (_dateFrom != "undefined" && _dateFrom != "null" && _dateFrom != "" && _dateTo != "undefined" && _dateTo != "null" && _dateTo != "") {
+            if (_dateFrom !== "undefined" && _dateFrom !== "null" && _dateFrom !== "" && _dateTo !== "undefined" && _dateTo !== "null" && _dateTo !== "") {
                 var date = {
                     date: {
                         $gte: _dateFrom,
@@ -685,17 +724,6 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     reject(e);
                 });
         });
-    }
-
-    generateNo(_unitCode) {
-        var now = new Date();
-        var stamp = now / 1000 | 0;
-        var code = stamp.toString();
-        var locale = 'id-ID';
-        var moment = require('moment');
-        moment.locale(locale);
-        var no = `BTU${(_unitCode || "").toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
-        return no;
     }
 
     _createIndexes() {
