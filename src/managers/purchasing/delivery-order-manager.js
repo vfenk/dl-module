@@ -102,7 +102,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 if (ObjectId.isValid(doItem.purchaseOrderExternal._id))
                     getPoExternal.push(this.purchaseOrderExternalManager.getSingleByIdOrDefault(doItem.purchaseOrderExternal._id));
 
-            Promise.all([getDeliveryderPromise, getSupplier,getDeliveryderByRefNoPromise].concat(getPoExternal))
+            Promise.all([getDeliveryderPromise, getSupplier, getDeliveryderByRefNoPromise].concat(getPoExternal))
                 .then(results => {
                     var _module = results[0];
                     var _supplier = results[1];
@@ -113,10 +113,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan tidak boleh kosong";
                     else if (_module)
                         errors["no"] = i18n.__("DeliveryOrder.no.isExists:%s is already exists", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan sudah terdaftar";
-                     
-                     if (!valid.refNo || valid.refNo === "")
+
+                    if (!valid.refNo || valid.refNo === "")
                         errors["refNo"] = i18n.__("DeliveryOrder.refNo.isRequired:%s is required", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan tidak boleh kosong";
-                     else if (_dobyRefNo)
+                    else if (_dobyRefNo)
                         errors["refNo"] = i18n.__("DeliveryOrder.refNo.isExists:%s is already exists", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan sudah terdaftar";
 
                     if (!valid.date || valid.date === "")
@@ -242,9 +242,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var code = stamp.toString();
             this._createIndexes()
                 .then((createIndexResults) => {
+                    deliveryOrder.refNo = generateCode();
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
-                            validDeliveryOrder.refNo = generateCode();
                             validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
                             //UPDATE PO INTERNAL
                             var poId = new ObjectId();
