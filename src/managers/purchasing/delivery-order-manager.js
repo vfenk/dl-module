@@ -87,22 +87,37 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         "no": valid.no
                     }]
             });
+            var getDeliveryderByRefNoPromise = this.collection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        "refNo": valid.refNo
+                    }]
+            });
             var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
             var getPoExternal = [];
             for (var doItem of valid.items || [])
                 if (ObjectId.isValid(doItem.purchaseOrderExternal._id))
                     getPoExternal.push(this.purchaseOrderExternalManager.getSingleByIdOrDefault(doItem.purchaseOrderExternal._id));
 
-            Promise.all([getDeliveryderPromise, getSupplier].concat(getPoExternal))
+            Promise.all([getDeliveryderPromise, getSupplier,getDeliveryderByRefNoPromise].concat(getPoExternal))
                 .then(results => {
                     var _module = results[0];
                     var _supplier = results[1];
-                    var _poExternals = results.slice(2, results.length) || [];
+                    var _dobyRefNo = results[2];
+                    var _poExternals = results.slice(3, results.length) || [];
 
                     if (!valid.no || valid.no === "")
                         errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan tidak boleh kosong";
                     else if (_module)
                         errors["no"] = i18n.__("DeliveryOrder.no.isExists:%s is already exists", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan sudah terdaftar";
+                     
+                     if (!valid.refNo || valid.refNo === "")
+                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isRequired:%s is required", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan tidak boleh kosong";
+                     else if (_dobyRefNo)
+                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isExists:%s is already exists", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan sudah terdaftar";
 
                     if (!valid.date || valid.date === "")
                         errors["date"] = i18n.__("DeliveryOrder.date.isRequired:%s is required", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh kosong";
