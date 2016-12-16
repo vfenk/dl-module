@@ -190,6 +190,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                     valid.supplier = _supplier;
                     valid.supplierId = new ObjectId(valid.supplier._id);
+                    valid.date = new Date(valid.date);
+                    valid.supplierDoDate = new Date(valid.supplierDoDate);
+
 
                     for (var item of valid.items) {
                         for (var poExternal of _poExternals) {

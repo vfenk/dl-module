@@ -151,6 +151,9 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 valid.budgetId = _budget._id;
                 valid.budget = _budget;
 
+                valid.date = new Date(valid.date);
+                valid.expectedDeliveryDate = new Date(valid.expectedDeliveryDate);
+
                 for (var prItem of valid.items) {
                     for (var _product of _products) {
                         if (prItem.product._id.toString() === _product._id.toString()) {

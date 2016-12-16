@@ -106,6 +106,25 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
                     valid.unitPaymentOrderId = _unitPaymentOrder._id;
                     valid.unitPaymentOrder = _unitPaymentOrder;
+                    valid.date = new Date(valid.date);
+
+                    if (valid.invoiceCorrectionDate) {
+                        valid.invoiceCorrectionDate = new Date(valid.invoiceCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.incomeTaxCorrectionDate) {
+                        valid.incomeTaxCorrectionDate = new Date(valid.incomeTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.vatTaxCorrectionDate) {
+                        valid.vatTaxCorrectionDate = new Date(valid.vatTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
 
                     for (var item of valid.items) {
                         for (var _unitPaymentOrderItem of _unitPaymentOrder.items) {

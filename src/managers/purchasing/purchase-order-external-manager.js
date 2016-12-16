@@ -355,6 +355,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 valid.currency = _currency;
                 valid.currency._id = new ObjectId(valid.currency._id);
                 valid.vat = _vat;
+                valid.date = new Date(valid.date);
+                valid.expectedDeliveryDate = new Date(valid.expectedDeliveryDate);
 
                 var items = [];
 

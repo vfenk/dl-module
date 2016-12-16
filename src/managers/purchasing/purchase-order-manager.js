@@ -136,8 +136,8 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                     valid.category = _purchaseRequest.category;
                     valid.categoryId = new ObjectId(_purchaseRequest.category._id);
                     valid.category._id = new ObjectId(_purchaseRequest.category._id);
-                    valid.date = _purchaseRequest.date;
-                    valid.expectedDeliveryDate = _purchaseRequest.expectedDeliveryDate;
+                    valid.date = new Date(_purchaseRequest.date);
+                    valid.expectedDeliveryDate = new Date(_purchaseRequest.expectedDeliveryDate);
                     for (var poItem of valid.items) {
                         for (var _prItem of _purchaseRequest.items)
                             if (_prItem.product._id.toString() === poItem.product._id.toString()) {
@@ -146,7 +146,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 break;
                             }
                     }
-                    // valid.items = items;
                 }
 
                 if (!valid.stamp) {
