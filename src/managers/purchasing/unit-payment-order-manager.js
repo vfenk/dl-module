@@ -42,11 +42,11 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                 }]
             });
 
-            Promise.all([getUnitPaymentOrderPromise, getUnitReceiptNote])
+            Promise.all([getUnitPaymentOrderPromise].concat(getUnitReceiptNote))
                 .then(results => {
                     var _module = results[0];
                     var now = new Date();
-                    var getURN = results[1];
+                    var getURN = results.slice(1, results.length);
                     if (!valid.divisionId)
                         errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
                     else if (valid.division) {
