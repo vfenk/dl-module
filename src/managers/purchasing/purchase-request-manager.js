@@ -236,13 +236,21 @@ module.exports = class PurchaseRequestManager extends BaseManager {
         });
     }
 
-    getDataPRMonitoring(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo) {
+    getDataPRMonitoring(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo, state) {
         return new Promise((resolve, reject) => {
             var sorting = {
                 "date": -1,
                 "no": 1
             };
             var query = Object.assign({});
+
+            if (state !== -1) {
+                Object.assign(query, {
+                    status: {
+                        value: state
+                    }
+                });
+            }
 
             if (unitId !== "undefined" && unitId !== "") {
                 Object.assign(query, {

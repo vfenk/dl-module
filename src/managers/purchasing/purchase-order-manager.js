@@ -393,13 +393,21 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-    getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo) {
+    getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo, state) {
         return new Promise((resolve, reject) => {
             var sorting = {
                 "purchaseRequest.date": -1,
                 "purchaseRequest.no": 1
             };
             var query = Object.assign({});
+
+            if (state !== -1) {
+                Object.assign(query, {
+                    status :{
+                        value : state
+                    }
+                });
+            }
 
             if (unitId !== "undefined" && unitId !== "") {
                 Object.assign(query, {
