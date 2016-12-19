@@ -11,7 +11,8 @@ module.exports = {
         machine: require('./data-util/master/machine-data-util'),
         lotMachine: require('./data-util/master/lot-machine-data-util'),
         category: require('./data-util/master/category-data-util'),
-        lampStandard: require('./data-util/master/lamp-standard-data-util')
+        lampStandard: require('./data-util/master/lamp-standard-data-util'),
+        instruction: require('./data-util/master/instruction-data-util')
     },
     purchasing:{
         purchaseRequest: require('./data-util/purchasing/purchase-request-data-util'),
@@ -24,5 +25,8 @@ module.exports = {
         unitPaymentOrder: require('./data-util/transaction/unit-payment-order-data-util'),
         unitPaymentPriceCorrectionNote: require('./data-util/transaction/unit-payment-price-correction-note-data-util'),
         unitPaymentQuantityCorrectionNote: require('./data-util/transaction/unit-payment-quantity-correction-note-data-util')
+    },
+    production: {
+        purchaseRequest: require('./data-util/production/finishing-printing/production-order-data-util'),
     }
 };
