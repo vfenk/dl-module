@@ -35,7 +35,6 @@ module.exports = class ProductionOrderManager extends BaseManager {
         var query = {};
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-
             var filterSalesContract = {
                 'salesContractNo': {
                     '$regex': regex
