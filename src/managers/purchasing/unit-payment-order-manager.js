@@ -6,6 +6,7 @@ var assert = require('assert');
 var map = DLModels.map;
 var i18n = require('dl-i18n');
 var UnitPaymentOrder = DLModels.purchasing.UnitPaymentOrder;
+var UnitReceiptNote = DLModels.purchasing.UnitReceiptNote;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitReceiptNoteManager = require('./unit-receipt-note-manager');
 var BaseManager = require('module-toolkit').BaseManager;
@@ -172,7 +173,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         for (var _urn of getURN) {
                             if (item.unitReceiptNoteId.toString() === _urn._id.toString()) {
                                 item.unitReceiptNoteId = new ObjectId(_urn._id);
-                                item.unitReceiptNote = _urn;
+                                item.unitReceiptNote = new UnitReceiptNote(item.unitReceiptNote);
                                 break;
                             }
                         }
