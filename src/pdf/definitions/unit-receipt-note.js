@@ -171,7 +171,7 @@ module.exports = function(unitReceiptNote) {
                     width: '35%',
                     stack: ['Yang Menerima\n\n\n\n\n', '(_______________________)'],
                     style: 'center'
-                },]
+                }]
             }
             ],
             style: ['size08']

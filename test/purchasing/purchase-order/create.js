@@ -1,13 +1,13 @@
 require("should");
 var helper = require("../../helper");
 
-var purchaseRequestDataUtil = require('../../data').transaction.purchaseRequest;
+var purchaseRequestDataUtil = require("../../data-util/purchasing/purchase-request-data-util");
 var validatePR = require("dl-models").validator.purchasing.purchaseRequest;
 var PurchaseRequestManager = require("../../../src/managers/purchasing/purchase-request-manager");
 var purchaseRequestManager = null;
 var purchaseRequest;
 
-var purchaseOrderDataUtil = require('../../data').transaction.purchaseOrder;
+var purchaseOrderDataUtil = require("../../data-util/purchasing/purchase-order-data-util");
 var validatePO = require("dl-models").validator.purchasing.purchaseOrder;
 var PurchaseOrderManager = require("../../../src/managers/purchasing/purchase-order-manager");
 var purchaseOrderManager = null;
@@ -23,7 +23,7 @@ before('#00. connect db', function(done) {
                 username: 'dev'
             });
 
-            purchaseRequestDataUtil.getNew()
+            purchaseRequestDataUtil.getNewTestData()
                 .then(pr => {
                     purchaseRequest = pr;
                     validatePR(purchaseRequest);
@@ -39,14 +39,15 @@ before('#00. connect db', function(done) {
 });
 
 it('#01. should failed when create new purchase-order with unposted purchase-request', function(done) {
-    purchaseOrderDataUtil.getNew(purchaseRequest)
+    purchaseOrderDataUtil.getNewData(purchaseRequest)
+        .then((purchaseOrder) => {
+            return purchaseOrderManager.create(purchaseOrder);
+        })
         .then(po => {
-            purchaseOrder = po;
-            validatePO(purchaseOrder);
             done(purchaseRequest, "purchase-request cannot be used to create purchase-order due unposted status");
         })
         .catch(e => {
-            e.errors.should.have.property('purchaseRequest');
+            e.errors.should.have.property('purchaseRequestId');
             done();
         });
 });
@@ -59,10 +60,16 @@ it('#02. should success when create new purchase-order with posted purchase-requ
             purchaseRequestManager.getSingleById(prId)
                 .then(pr => {
                     purchaseRequest = pr;
-                    purchaseOrderDataUtil.getNew(purchaseRequest)
+                    purchaseOrderDataUtil.getNewData(purchaseRequest)
+                        .then((purchaseOrder) => {
+                            return purchaseOrderManager.create(purchaseOrder);
+                        })
+                        .then((id) => {
+                            return purchaseOrderManager.getSingleById(id);
+                        })
                         .then(po => {
                             purchaseOrder = po;
-                            validatePO(purchaseOrder);
+                            // validatePO(purchaseOrder);
                             done();
                         })
                         .catch(e => {
@@ -109,7 +116,13 @@ it('#04. purchase-order items should the same as purchase-request items', functi
 });
 
 it('#05. should failed when create new purchase-order with already used purchase-request', function(done) {
-    purchaseOrderDataUtil.getNew(purchaseRequest)
+    purchaseOrderDataUtil.getNewData(purchaseRequest)
+        .then((purchaseOrder) => {
+            return purchaseOrderManager.create(purchaseOrder);
+        })
+        .then((id) => {
+            return purchaseOrderManager.getSingleById(id);
+        })
         .then(po => {
             purchaseOrder = po;
             purchaseOrder.purchaseRequest = purchaseRequest;
@@ -122,4 +135,3 @@ it('#05. should failed when create new purchase-order with already used purchase
             done();
         });
 });
-

@@ -15,7 +15,7 @@ module.exports = function (unitPaymentCorrection) {
 
     items = [].concat.apply([], items);
 
-    var currency = unitPaymentCorrection.items.find(r => true).currency.symbol;
+    var currency = unitPaymentCorrection.items.find(r => true).currency.code;
 
     var locale = global.config.locale;
 
@@ -24,7 +24,7 @@ module.exports = function (unitPaymentCorrection) {
 
     var numberLocaleOptions = {
         style: 'decimal',
-        maximumFractionDigits: 4,
+        maximumFractionDigits: 4
 
     };
     var header = [

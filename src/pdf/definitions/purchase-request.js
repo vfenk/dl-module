@@ -88,7 +88,7 @@ module.exports = function (purchaseRequest) {
                 columns: [{
                     width: '*',
                     stack: [`Sukoharjo, ${moment(purchaseRequest.date).format(locale.date.format)} `],
-                    alignment: "right",
+                    alignment: "right"
                 }],
                 style: ['size08']
             }
@@ -178,7 +178,7 @@ module.exports = function (purchaseRequest) {
                         }, {
                             width: '*',
                             stack: [purchaseRequest.category.name, `${getDateexpected}`, purchaseRequest.remark]
-                        },]
+                        }]
                 }]
             }
             ],

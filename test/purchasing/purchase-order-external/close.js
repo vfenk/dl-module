@@ -1,13 +1,13 @@
 require("should");
 var helper = require("../../helper");
-
-var purchaseOrderDataUtil = require('../../data').transaction.purchaseOrder;
+ 
+var purchaseOrderDataUtil = require("../../data-util/purchasing/purchase-order-data-util");
 var validatePR = require("dl-models").validator.purchasing.purchaseOrder;
 var PurchaseOrderManager = require("../../../src/managers/purchasing/purchase-order-manager");
 var purchaseOrderManager = null;
 var purchaseOrders;
 
-var purchaseOrderExternalDataUtil = require('../../data').transaction.purchaseOrderExternal;
+var purchaseOrderExternalDataUtil = require("../../data-util/purchasing/purchase-order-external-data-util");
 var validatePO = require("dl-models").validator.purchasing.purchaseOrderExternal;
 var PurchaseOrderExternalManager = require("../../../src/managers/purchasing/purchase-order-external-manager");
 var purchaseOrderExternalManager = null;
@@ -54,10 +54,13 @@ it('#02. should isPosted = true', function (done) {
 
 it('#03. should success when closing purchase-order-external', function (done) {
     purchaseOrderExternalManager.close(purchaseOrderExternal._id)
-        .then(poe => {
-            purchaseOrderExternal = poe;
-            purchaseOrderExternal.isClosed.should.equal(true);
-            done();
+        .then(poExId => {
+            purchaseOrderExternalManager.getSingleById(poExId)
+                .then((poe) => {
+                    purchaseOrderExternal = poe;
+                    purchaseOrderExternal.isClosed.should.equal(true);
+                    done();
+                })
         })
         .catch(e => {
             done(e);
