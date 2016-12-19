@@ -1,39 +1,39 @@
-"use strict"
+'use strict'
 
 // external deps 
 var ObjectId = require("mongodb").ObjectId;
-var BaseManager = require("module-toolkit").BaseManager;
+var BaseManager = require('module-toolkit').BaseManager;
 var moment = require("moment");
 var sqlConnect = require("./sqlConnect");
 
 // internal deps 
-require("mongodb-toolkit");
+require('mongodb-toolkit');
 
-var PurchaseRequestManager = require("../managers/purchasing/purchase-request-manager");
-var PurchaseOrderManager = require('../managers/purchasing/purchase-order-manager');
+var SupplierManager = require('../managers/master/supplier-manager');
+var CategoryManager = require("../managers/master/category-manager");
+var DivisionManager = require("../managers/master/division-manager");
+var UnitManager = require("../managers/master/unit-manager");
 var PurchaseOrderExternalManager = require('../managers/purchasing/purchase-order-external-manager');
 var DeliveryOrderManager = require('../managers/purchasing/delivery-order-manager');
 var UnitReceiptNoteManager = require('../managers/purchasing/unit-receipt-note-manager');
-var UnitPaymentOrderManager = require('../managers/purchasing/unit-payment-order-manager');
-var SupplierManager = require('../managers/master/supplier-manager');
 
-module.exports = class FactPurchaseDurationEtlManager {
+module.exports = class FactTimelinessSupplierEtlManager {
     constructor(db, user) {
-        this.purchaseRequestManager = new PurchaseRequestManager(db, user);
-        this.purchaseOrderManager = new PurchaseOrderManager(db, user);
+        this.supplierManager = new SupplierManager(db, user);
+        this.categoryManager = new CategoryManager(db, user);
+        this.divisionManager = new DivisionManager(db, user);
+        this.unitManager = new UnitManager(db, user);
         this.purchaseOrderExternalManager = new PurchaseOrderExternalManager(db, user);
         this.deliveryOrderManager = new DeliveryOrderManager(db, user);
         this.unitReceiptNoteManager = new UnitReceiptNoteManager(db, user);
-        this.unitPaymentOrderManager = new UnitPaymentOrderManager(db, user);
-        this.supplierManager = new SupplierManager(db, user);
     }
-    
+
     run() {
         return this.extract()
             .then((data) => this.transform(data))
             .then((data) => this.load(data));
     }
-
+    
     joinPurchaseOrder(purchaseRequests) {
         var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
             return this.purchaseOrderManager.collection.find({
@@ -247,60 +247,5 @@ module.exports = class FactPurchaseDurationEtlManager {
             return [].concat.apply([], results);
         });
         return Promise.resolve([].concat.apply([], result));
-    }
-
-    
-
-    getRangeMonth(days) {
-        if (days == null) {
-            return null;
-        } else if (days == 0) {
-            return "0 hari";
-        } else if (days <= 30) {
-            return "1-30 hari";
-        } else if (days <= 60) {
-            return "31-60 hari";
-        } else if (days <= 90) {
-            return "61-90 hari";
-        } else {
-            return ">90 hari";
-        }
-    }
-
-    getRangeWeek(days) {
-        if (days == null) {
-            return null;
-        } else if (days == 0) {
-            return "0 hari";
-        } else if (days <= 7) {
-            return "1-7 hari";
-        } else if (days <= 14) {
-            return "8-14 hari";
-        } else if (days <= 21) {
-            return "15-21 hari";
-        } else if (days <= 30) {
-            return "22-30 hari";
-        } else {
-            return ">30 hari";
-        }
-    }
-
-    load(data) {
-        // var _id= new ObjectId();
-        // return new Promise((resolve, reject) => {
-        //     sqlConnect.getConnect()
-        //     .then((request) => {
-        //         var self = this;
-        //         var query = 'INSERT INTO Fact_Durasi_Pembelian (ID, Nomor_PO_Internal, Nomor_Surat_Jalan, ) values (ID:'+_id+')';
-        //         request.query(query, function (err, salesResult) {
-        //             self.migrateDataStores(request, salesResult)
-        //             .then(sales => {
-        //                 resolve(sales);
-        //             }).catch(err => {
-        //                 console.log(err);
-        //             });
-        //         });
-        //     });
-        // });        
     }
 }
