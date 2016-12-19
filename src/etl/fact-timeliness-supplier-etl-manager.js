@@ -34,7 +34,7 @@ module.exports = class FactTimelinessSupplierEtlManager {
             .then((data) => this.load(data));
     }
     
-    joinPurchaseOrder(purchaseRequests) {
+    joinCategoryManager(supplierManager) {
         var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
             return this.purchaseOrderManager.collection.find({
                     purchaseRequestId: purchaseRequest._id
