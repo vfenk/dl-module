@@ -74,15 +74,24 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
         var errors = {};
         return new Promise((resolve, reject) => {
             var valid = windingProductionOutput;
-            var processDate= new Date(valid.date);
             // 1. begin: Declare promises.
             var getWindingProductionOutputPromise = this.collection.singleOrDefault({
-                    "$and": [{
-                    _id: {
-                        '$ne': new ObjectId(valid._id)
+                    "$and" : [{
+                        _id : {
+                            "$ne" : new ObjectId(valid._id)
                     }
-                }, {
-                    _deleted: false
+                    },{
+                        _deleted : false
+                    },{
+                        date : valid.date
+                    },{
+                        productId : valid.productId && ObjectId.isValid(valid.productId) ? (new ObjectId(valid.productId)) : ''
+                    },{
+                        machineId : valid.machine && ObjectId.isValid(valid.machine._id) ? (new ObjectId(valid.machine._id)) : ''
+                    },{
+                        shift : valid.shift
+                    },{
+                        unitId : valid.unitId && ObjectId.isValid(valid.unitId) ? (new ObjectId(valid.unitId)) : ''
                 }]
             });
 
@@ -110,32 +119,32 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 var now = new Date();
                 
                 valid.product=_product;
-                if(_lotmachine)
-                {
-                    if(_lotmachine.data.length > 0){
-                        for(var a of _lotmachine.data)
-                        {
-                            if(a.productId==valid.productId && a.machineId==valid.machineId) {
-                            // if(a._id.toString() == valid.lotMachineId.toString()) {
-                                _Lm = a; break;
-                            }
+
+                if(_lotmachine.data.length > 0){
+                    for(var a of _lotmachine.data)
+                    {
+                        if(a.productId==valid.productId && a.machineId==valid.machineId) {
+                        // if(a._id.toString() == valid.lotMachineId.toString()) {
+                            _Lm = a;
+                            break;
+                        }
+                    }
+                }
+
+                if(_threadSpecification.data.length > 0){
+                    for(var b of _threadSpecification.data)
+                    {
+                        if(b.productId==valid.productId) {
+                        // if(b._id.toString() == valid.threadSpecificationId.toString()) {
+                            _Ts = b;
+                            break;
                         }
                     }
                 }
                 
-                if(_threadSpecification)
-                {
-                    if(_threadSpecification.data.length > 0){
-                        for(var b of _threadSpecification.data)
-                        {
-                            if(b.productId=valid.productId) {
-                            // if(b._id.toString() == valid.threadSpecificationId.toString()) {
-                                _Ts = b; break;
-                            }
-                        }
-                    }
+                if(_module){
+                    errors["shift"] = i18n.__(`WindingProductionOutput.shift.isRequired:%s with same Product, Machine, Spinning and Date is already exists`, i18n.__("WindingQualitySampling.shift._:Shift")); //"Spinning dengan produk, mesin dan tanggal,shift,dan mesin yang sama tidak boleh";
                 }
-                
                    
                 if (!valid.shift || valid.shift == '')
                     errors["shift"] = i18n.__("WindingProductionOutput.shift.isRequired:%s is required", i18n.__("WindingProductionOutput.shift._:Shift"));
@@ -149,9 +158,6 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                     if (!valid.unit._id)
                         errors["unit"] = i18n.__("WindingProductionOutput.unit.isRequired:%s is required", i18n.__("WindingProductionOutput.unit._:Unit"));
                 
-                }
-                else if(!valid.unit){
-                    errors["unit"] = i18n.__("WindingProductionOutput.unit.isRequired:%s is required", i18n.__("WindingProductionOutput.unit._:Unit"));
                 }
                 
 
@@ -207,12 +213,12 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 }
 
                 if (!_Ts)
-                    errors["product"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is not exists", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification")); 
+                    errors["threadSpecification"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is not exists", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification")); 
                 else if (!valid.threadSpecificationId)
-                    errors["product"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is required", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification"));
+                    errors["threadSpecification"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is required", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification"));
                 else if (valid.threadSpecification) {
                     if (!valid.threadSpecification._id)
-                        errors["product"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is required", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification"));
+                        errors["threadSpecification"] = i18n.__("WindingProductionOutput.threadSpecification.isRequired:%s is required", i18n.__("WindingProductionOutput.threadSpecification._:ThreadSpecification"));
                 }
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
@@ -222,7 +228,6 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 valid.unitId=new ObjectId(_unit._id);
                 valid.machineId=new ObjectId(_machine._id);
                 valid.productId=new ObjectId(_product._id);
-                valid.date=processDate;
 
                 valid = new WindingProductionOutput(windingProductionOutput);
                 valid.stamp(this.user.username, 'manager');
@@ -251,7 +256,8 @@ module.exports = class WindingProductionOutputManager extends BaseManager {
                 shift:1,
                 machineId: 1,
                 productId: 1
-            }
+            },
+            unique: true
         }
 
         return this.collection.createIndexes([dateIndex, codeIndex]);

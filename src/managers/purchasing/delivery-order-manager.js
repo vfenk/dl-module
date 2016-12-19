@@ -11,8 +11,12 @@ var map = DLModels.map;
 var DeliveryOrder = DLModels.purchasing.DeliveryOrder;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var PurchaseOrderExternalManager = require('./purchase-order-external-manager');
+var PurchaseRequestManager = require('./purchase-request-manager');
 var i18n = require('dl-i18n');
 var SupplierManager = require('../master/supplier-manager');
+var prStatusEnum = DLModels.purchasing.enum.PurchaseRequestStatus;
+var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
+var generateCode = require('../../utils/code-generator');
 
 module.exports = class DeliveryOrderManager extends BaseManager {
     constructor(db, user) {
@@ -20,6 +24,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         this.collection = this.db.use(map.purchasing.collection.DeliveryOrder);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
         this.purchaseOrderExternalManager = new PurchaseOrderExternalManager(db, user);
+        this.purchaseRequestManager = new PurchaseRequestManager(db, user);
         this.supplierManager = new SupplierManager(db, user);
     }
 
@@ -79,8 +84,17 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     },
                     _deleted: false
                 }, {
-                    "no": valid.no
-                }]
+                        "no": valid.no
+                    }]
+            });
+            var getDeliveryderByRefNoPromise = this.collection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        "refNo": valid.refNo
+                    }]
             });
             var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
             var getPoExternal = [];
@@ -88,21 +102,27 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 if (ObjectId.isValid(doItem.purchaseOrderExternal._id))
                     getPoExternal.push(this.purchaseOrderExternalManager.getSingleByIdOrDefault(doItem.purchaseOrderExternal._id));
 
-            Promise.all([getDeliveryderPromise, getSupplier].concat(getPoExternal))
+            Promise.all([getDeliveryderPromise, getSupplier, getDeliveryderByRefNoPromise].concat(getPoExternal))
                 .then(results => {
                     var _module = results[0];
                     var _supplier = results[1];
-                    var _poExternals = results.slice(2, results.length) || [];
+                    var _dobyRefNo = results[2];
+                    var _poExternals = results.slice(3, results.length) || [];
 
                     if (!valid.no || valid.no === "")
                         errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan tidak boleh kosong";
                     else if (_module)
                         errors["no"] = i18n.__("DeliveryOrder.no.isExists:%s is already exists", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan sudah terdaftar";
 
+                    if (!valid.refNo || valid.refNo === "")
+                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isRequired:%s is required", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan tidak boleh kosong";
+                    else if (_dobyRefNo)
+                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isExists:%s is already exists", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan sudah terdaftar";
+
                     if (!valid.date || valid.date === "")
                         errors["date"] = i18n.__("DeliveryOrder.date.isRequired:%s is required", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh kosong";
-                    else if (valid.date > now)
-                        errors["date"] = i18n.__("DeliveryOrder.date.isGreater:%s is greater than today", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
+                    // else if (valid.date > now)
+                    //     errors["date"] = i18n.__("DeliveryOrder.date.isGreater:%s is greater than today", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
                     if (!valid.supplierDoDate || valid.supplierDoDate === "")
                         errors["supplierDoDate"] = i18n.__("DeliveryOrder.supplierDoDate.isRequired:%s is required", i18n.__("DeliveryOrder.supplierDoDate._:SupplierDoDate"));//"Tanggal surat jalan supplier tidak boleh kosong";
 
@@ -164,12 +184,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
                     valid.supplier = _supplier;
                     valid.supplierId = new ObjectId(valid.supplier._id);
+                    valid.date = new Date(valid.date);
+                    valid.supplierDoDate = new Date(valid.supplierDoDate);
+
 
                     for (var item of valid.items) {
                         for (var poExternal of _poExternals) {
@@ -213,16 +236,18 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var tasks = [];
             var tasksPoExternal = [];
+            var tasksPR = [];
             var getPurchaseOrderById = [];
+            var getPRById = [];
 
             var now = new Date();
             var stamp = now / 1000 | 0;
             var code = stamp.toString();
             this._createIndexes()
                 .then((createIndexResults) => {
+                    deliveryOrder.refNo = generateCode();
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
-                            validDeliveryOrder.refNo = `${code}-${validDeliveryOrder.no}`;
                             validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
                             //UPDATE PO INTERNAL
                             var poId = new ObjectId();
@@ -230,115 +255,149 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
                                     if (!poId.equals(fulfillmentItem.purchaseOrder._id)) {
                                         poId = new ObjectId(fulfillmentItem.purchaseOrder._id);
-                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id))
+                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id)) {
                                             getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
+                                            getPRById.push(this.purchaseRequestManager.getSingleById(fulfillmentItem.purchaseOrder.purchaseRequest._id));
+                                        }
                                     }
                                 }
                             }
                             Promise.all(getPurchaseOrderById)
-                                .then(results => {
-                                    for (var purchaseOrder of results) {
-                                        for (var poItem of purchaseOrder.items) {
-                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                for (var fulfillment of validDeliveryOrderItem.fulfillments) {
-                                                    if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
-                                                        var fulfillmentObj = {
-                                                            deliveryOderNo: validDeliveryOrder.no,
-                                                            deliveryOderDeliveredQuantity: fulfillment.deliveredQuantity,
-                                                            deliveryOderDate: validDeliveryOrder.date,
-                                                            supplierDoDate: validDeliveryOrder.supplierDoDate
-                                                        };
-                                                        poItem.fulfillments.push(fulfillmentObj);
-
-                                                        var totalRealize = 0;
-                                                        for (var poItemFulfillment of poItem.fulfillments) {
-                                                            totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
-                                                        }
-                                                        poItem.realizationQuantity = totalRealize;
-                                                        if (poItem.realizationQuantity == poItem.dealQuantity)
-                                                            poItem.isClosed = true;
-                                                        else
-                                                            poItem.isClosed = false;
-                                                        fulfillment.purchaseOrder = purchaseOrder;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        for (var poItem of purchaseOrder.items) {
-                                            if (poItem.isClosed == false) {
-                                                purchaseOrder.isClosed = false;
-                                                break;
-                                            }
-                                            else
-                                                purchaseOrder.isClosed = true;
-                                        }
-                                        tasks.push(this.purchaseOrderManager.update(purchaseOrder));
-                                    }
-                                    Promise.all(tasks)
-                                        .then(results => {
-                                            //UPDATE PO EXTERNAL
-                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                getPurchaseOrderById = [];
-                                                for (var poExternalItem of purchaseOrderExternal.items) {
-                                                    if (ObjectId.isValid(poExternalItem._id))
-                                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(poExternalItem._id));
-                                                }
-                                            }
-                                            Promise.all(getPurchaseOrderById)
-                                                .then(results => {
+                                .then((_purchaseOrders) => {
+                                    Promise.all(getPRById)
+                                        .then((_purchaseRequests) => {
+                                            for (var purchaseOrder of _purchaseOrders) {
+                                                for (var poItem of purchaseOrder.items) {
                                                     for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                        var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                        for (var result of results) {
-                                                            for (var poExternalItem of purchaseOrderExternal.items) {
-                                                                if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() === result._id.toString())
-                                                                    poExternalItem = result;
-                                                                break;
-                                                            }
-                                                        }
-                                                        if (result.isClosed == false) {
-                                                            purchaseOrderExternal.isClosed = false;
-                                                        }
-                                                        else
-                                                            purchaseOrderExternal.isClosed = true;
+                                                        for (var fulfillment of validDeliveryOrderItem.fulfillments) {
+                                                            if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
+                                                                var fulfillmentObj = {
+                                                                    deliveryOderNo: validDeliveryOrder.no,
+                                                                    deliveryOderDeliveredQuantity: fulfillment.deliveredQuantity,
+                                                                    deliveryOderDate: validDeliveryOrder.date,
+                                                                    supplierDoDate: validDeliveryOrder.supplierDoDate
+                                                                };
+                                                                poItem.fulfillments.push(fulfillmentObj);
 
-                                                        validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
-                                                        tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
-                                                    }
+                                                                var totalRealize = 0;
+                                                                for (var poItemFulfillment of poItem.fulfillments) {
+                                                                    totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
+                                                                }
+                                                                poItem.realizationQuantity = totalRealize;
+                                                                if (poItem.realizationQuantity === poItem.dealQuantity)
+                                                                { poItem.isClosed = true; }
+                                                                else
+                                                                { poItem.isClosed = false; }
+                                                                fulfillment.purchaseOrder = purchaseOrder;
 
-                                                    Promise.all(tasksPoExternal)
-                                                        .then(results => {
-                                                            var getPoExternalByID = [];
-                                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                                if (ObjectId.isValid(validDeliveryOrderItem.purchaseOrderExternal._id))
-                                                                    getPoExternalByID.push(this.purchaseOrderExternalManager.getSingleById(validDeliveryOrderItem.purchaseOrderExternal._id));
-                                                            }
-                                                            Promise.all(getPoExternalByID)
-                                                                .then(results => {
-                                                                    for (var poExternal of results) {
-                                                                        for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                                            if (validDeliveryOrderItem.purchaseOrderExternal._id.equals(poExternal._id)) {
-                                                                                validDeliveryOrderItem.purchaseOrderExternal = poExternal;
+                                                                for (var _purchaseRequest of _purchaseRequests) {
+                                                                    if (_purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
+                                                                        for (var _prItem of _purchaseRequest.items) {
+                                                                            if (_prItem.product._id.equals(fulfillment.product._id)) {
+                                                                                _prItem.deliveryOrderNos.push(validDeliveryOrder.no);
                                                                                 break;
                                                                             }
                                                                         }
+                                                                        break;
                                                                     }
-                                                                    this.collection.insert(validDeliveryOrder)
-                                                                        .then(id => {
-                                                                            resolve(id);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                for (var _poItem of purchaseOrder.items) {
+                                                    if (_poItem.isClosed === false) {
+                                                        purchaseOrder.isClosed = false;
+                                                        purchaseOrder.status = poStatusEnum.ARRIVING;
+                                                        break;
+                                                    }
+                                                    else
+                                                        purchaseOrder.isClosed = true;
+                                                    purchaseOrder.status = poStatusEnum.ARRIVED;
+                                                }
+
+                                                for (var _pr of _purchaseRequests) {
+                                                    if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
+                                                        if (purchaseOrder.isClosed) {
+                                                            _pr.status = prStatusEnum.COMPLETE;
+                                                        }
+                                                        else {
+                                                            _pr.status = prStatusEnum.ARRIVING;
+                                                        }
+                                                        tasksPR.push(this.purchaseRequestManager.update(_pr));
+                                                        break;
+                                                    }
+                                                }
+                                                tasks.push(this.purchaseOrderManager.update(purchaseOrder));
+                                            }
+                                            Promise.all(tasks.concat(tasksPR))
+                                                .then(results => {
+                                                    //UPDATE PO EXTERNAL
+                                                    for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                        var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
+                                                        getPurchaseOrderById = [];
+                                                        for (var poExternalItem of purchaseOrderExternal.items) {
+                                                            if (ObjectId.isValid(poExternalItem._id))
+                                                                getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(poExternalItem._id));
+                                                        }
+                                                    }
+                                                    Promise.all(getPurchaseOrderById)
+                                                        .then(results => {
+                                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                                var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
+                                                                for (var result of results) {
+                                                                    for (var poExternalItem of purchaseOrderExternal.items) {
+                                                                        if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() === result._id.toString())
+                                                                            poExternalItem = result;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                if (result.isClosed === false) {
+                                                                    purchaseOrderExternal.isClosed = false;
+                                                                }
+                                                                else
+                                                                    purchaseOrderExternal.isClosed = true;
+
+                                                                validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
+                                                                tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
+                                                            }
+
+                                                            Promise.all(tasksPoExternal)
+                                                                .then(results => {
+                                                                    var getPoExternalByID = [];
+                                                                    for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                                        if (ObjectId.isValid(validDeliveryOrderItem.purchaseOrderExternal._id))
+                                                                            getPoExternalByID.push(this.purchaseOrderExternalManager.getSingleById(validDeliveryOrderItem.purchaseOrderExternal._id));
+                                                                    }
+                                                                    Promise.all(getPoExternalByID)
+                                                                        .then(results => {
+                                                                            for (var poExternal of results) {
+                                                                                for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                                                    if (validDeliveryOrderItem.purchaseOrderExternal._id.equals(poExternal._id)) {
+                                                                                        validDeliveryOrderItem.purchaseOrderExternal = poExternal;
+                                                                                        break;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            this.collection.insert(validDeliveryOrder)
+                                                                                .then(id => {
+                                                                                    resolve(id);
+                                                                                })
+                                                                                .catch(e => {
+                                                                                    reject(e);
+                                                                                })
                                                                         })
                                                                         .catch(e => {
                                                                             reject(e);
-                                                                        })
+                                                                        });
                                                                 })
                                                                 .catch(e => {
                                                                     reject(e);
-                                                                });
+                                                                })
                                                         })
                                                         .catch(e => {
                                                             reject(e);
-                                                        })
+                                                        });
                                                 })
                                                 .catch(e => {
                                                     reject(e);
@@ -367,7 +426,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var tasks = [];
             var tasksPoExternal = [];
+            var tasksPR = [];
             var getPurchaseOrderById = [];
+            var getPRById = [];
+
             this._createIndexes()
                 .then((createIndexResults) => {
                     this._validate(deliveryOrder)
@@ -378,118 +440,138 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
                                     if (!poId.equals(fulfillmentItem.purchaseOrder._id)) {
                                         poId = new ObjectId(fulfillmentItem.purchaseOrder._id);
-                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id))
+                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id)) {
                                             getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
+                                            getPRById.push(this.purchaseRequestManager.getSingleById(fulfillmentItem.purchaseOrder.purchaseRequest._id));
+                                        }
                                     }
                                 }
                             }
                             Promise.all(getPurchaseOrderById)
-                                .then(results => {
-                                    for (var purchaseOrder of results) {
-                                        for (var poItem of purchaseOrder.items) {
-                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                for (var fulfillment of validDeliveryOrderItem.fulfillments) {
-                                                    if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
+                                .then((_purchaseOrders) => {
+                                    Promise.all(getPRById)
+                                        .then((_purchaseRequests) => {
+                                            for (var purchaseOrder of _purchaseOrders) {
+                                                for (var poItem of purchaseOrder.items) {
+                                                    for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                        for (var fulfillment of validDeliveryOrderItem.fulfillments) {
+                                                            if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
 
-                                                        for (var poItemFulfillment of poItem.fulfillments) {
-                                                            if (poItemFulfillment.deliveryOderNo == validDeliveryOrder.no) {
-                                                                poItemFulfillment.deliveryOderNo = validDeliveryOrder.no;
-                                                                poItemFulfillment.deliveryOderDeliveredQuantity = fulfillment.deliveredQuantity;
-                                                                poItemFulfillment.deliveryOderDate = validDeliveryOrder.date;
-                                                                poItemFulfillment.supplierDoDate = validDeliveryOrder.supplierDoDate;
+                                                                for (var poItemFulfillment of poItem.fulfillments) {
+                                                                    if (poItemFulfillment.deliveryOderNo === validDeliveryOrder.no) {
+                                                                        poItemFulfillment.deliveryOderNo = validDeliveryOrder.no;
+                                                                        poItemFulfillment.deliveryOderDeliveredQuantity = fulfillment.deliveredQuantity;
+                                                                        poItemFulfillment.deliveryOderDate = validDeliveryOrder.date;
+                                                                        poItemFulfillment.supplierDoDate = validDeliveryOrder.supplierDoDate;
+                                                                        break;
+                                                                    }
+                                                                }
+
+                                                                var totalRealize = 0;
+                                                                for (var poItemFulfillment of poItem.fulfillments) {
+                                                                    totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
+                                                                }
+                                                                poItem.realizationQuantity = totalRealize;
+                                                                if (poItem.realizationQuantity === poItem.dealQuantity)
+                                                                    poItem.isClosed = true;
+                                                                else
+                                                                    poItem.isClosed = false;
+                                                                fulfillment.purchaseOrder = purchaseOrder;
                                                                 break;
                                                             }
                                                         }
-
-                                                        var totalRealize = 0;
-                                                        for (var poItemFulfillment of poItem.fulfillments) {
-                                                            totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
-                                                        }
-                                                        poItem.realizationQuantity = totalRealize;
-                                                        if (poItem.realizationQuantity == poItem.dealQuantity)
-                                                            poItem.isClosed = true;
-                                                        else
-                                                            poItem.isClosed = false;
-                                                        fulfillment.purchaseOrder = purchaseOrder;
-                                                        break;
                                                     }
+                                                    for (var poItem of purchaseOrder.items) {
+                                                        if (poItem.isClosed === false) {
+                                                            purchaseOrder.isClosed = false;
+                                                            break;
+                                                        }
+                                                        else
+                                                            purchaseOrder.isClosed = true;
+                                                    }
+                                                    for (var _pr of _purchaseRequests) {
+                                                        if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
+                                                            if (purchaseOrder.isClosed) {
+                                                                _pr.status = prStatusEnum.COMPLETE;
+                                                            }
+                                                            else if (_pr.status.name !== "COMPLETE") {
+                                                                _pr.status = prStatusEnum.ARRIVING;
+                                                            }
+                                                            tasksPR.push(this.purchaseRequestManager.update(_pr));
+                                                            break;
+                                                        }
+                                                    }
+                                                    tasks.push(this.purchaseOrderManager.update(purchaseOrder));
                                                 }
                                             }
-                                            for (var poItem of purchaseOrder.items) {
-                                                if (poItem.isClosed == false) {
-                                                    purchaseOrder.isClosed = false;
-                                                    break;
-                                                }
-                                                else
-                                                    purchaseOrder.isClosed = true;
-                                            }
-                                            tasks.push(this.purchaseOrderManager.update(purchaseOrder));
-                                        }
-                                    }
-                                    Promise.all(tasks)
-                                        .then(results => {
-                                            //UPDATE PO EXTERNAL
-                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                getPurchaseOrderById = [];
-                                                for (var poExternalItem of purchaseOrderExternal.items) {
-                                                    if (ObjectId.isValid(poExternalItem._id))
-                                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(poExternalItem._id));
-                                                }
-                                            }
-                                            Promise.all(getPurchaseOrderById)
+                                            Promise.all(tasks.concat(tasksPR))
                                                 .then(results => {
+                                                    //UPDATE PO EXTERNAL
                                                     for (var validDeliveryOrderItem of validDeliveryOrder.items) {
                                                         var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                        for (var result of results) {
-                                                            for (var poExternalItem of purchaseOrderExternal.items) {
-                                                                if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() === result._id.toString())
-                                                                    poExternalItem = result;
-                                                                break;
-                                                            }
+                                                        getPurchaseOrderById = [];
+                                                        for (var poExternalItem of purchaseOrderExternal.items) {
+                                                            if (ObjectId.isValid(poExternalItem._id))
+                                                                getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(poExternalItem._id));
                                                         }
-                                                        if (result.isClosed == false) {
-                                                            purchaseOrderExternal.isClosed = false;
-                                                        }
-                                                        else
-                                                            purchaseOrderExternal.isClosed = true;
-
-                                                        validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
-                                                        tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
                                                     }
-                                                    
-                                                    Promise.all(tasksPoExternal)
+                                                    Promise.all(getPurchaseOrderById)
                                                         .then(results => {
-                                                            var getPoExternalByID = [];
                                                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                                if (ObjectId.isValid(validDeliveryOrderItem.purchaseOrderExternal._id))
-                                                                    getPoExternalByID.push(this.purchaseOrderExternalManager.getSingleById(validDeliveryOrderItem.purchaseOrderExternal._id));
-                                                            }
-                                                            Promise.all(getPoExternalByID)
-                                                                .then(results => {
-                                                                    for (var poExternal of results) {
-                                                                        for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                                            if (validDeliveryOrderItem.purchaseOrderExternal._id.equals(poExternal._id)) {
-                                                                                validDeliveryOrderItem.purchaseOrderExternal = poExternal;
-                                                                                break;
-                                                                            }
-                                                                        }
+                                                                var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
+                                                                for (var result of results) {
+                                                                    for (var poExternalItem of purchaseOrderExternal.items) {
+                                                                        if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() === result._id.toString())
+                                                                            poExternalItem = result;
+                                                                        break;
                                                                     }
-                                                                    this.collection.update(validDeliveryOrder)
-                                                                        .then(id => {
-                                                                            resolve(id);
+                                                                }
+                                                                if (result.isClosed === false) {
+                                                                    purchaseOrderExternal.isClosed = false;
+                                                                }
+                                                                else
+                                                                    purchaseOrderExternal.isClosed = true;
+
+                                                                validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
+                                                                tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
+                                                            }
+
+                                                            Promise.all(tasksPoExternal)
+                                                                .then(results => {
+                                                                    var getPoExternalByID = [];
+                                                                    for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                                        if (ObjectId.isValid(validDeliveryOrderItem.purchaseOrderExternal._id))
+                                                                            getPoExternalByID.push(this.purchaseOrderExternalManager.getSingleById(validDeliveryOrderItem.purchaseOrderExternal._id));
+                                                                    }
+                                                                    Promise.all(getPoExternalByID)
+                                                                        .then(results => {
+                                                                            for (var poExternal of results) {
+                                                                                for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                                                    if (validDeliveryOrderItem.purchaseOrderExternal._id.equals(poExternal._id)) {
+                                                                                        validDeliveryOrderItem.purchaseOrderExternal = poExternal;
+                                                                                        break;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            this.collection.update(validDeliveryOrder)
+                                                                                .then(id => {
+                                                                                    resolve(id);
+                                                                                })
+                                                                                .catch(e => {
+                                                                                    reject(e);
+                                                                                })
                                                                         })
                                                                         .catch(e => {
                                                                             reject(e);
-                                                                        })
+                                                                        });
                                                                 })
                                                                 .catch(e => {
                                                                     reject(e);
-                                                                });
+                                                                })
                                                         })
                                                         .catch(e => {
                                                             reject(e);
-                                                        })
+                                                        });
                                                 })
                                                 .catch(e => {
                                                     reject(e);
@@ -517,7 +599,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var tasks = [];
             var tasksPoExternal = [];
+            var tasksPR = [];
             var getPurchaseOrderById = [];
+            var getPRById = [];
             this._createIndexes()
                 .then((createIndexResults) => {
                     this._validate(deliveryOrder)
@@ -530,118 +614,160 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 for (var fulfillmentItem of validDeliveryOrderItem.fulfillments) {
                                     if (!poId.equals(fulfillmentItem.purchaseOrder._id)) {
                                         poId = new ObjectId(fulfillmentItem.purchaseOrder._id);
-                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id))
+                                        if (ObjectId.isValid(fulfillmentItem.purchaseOrder._id)) {
                                             getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(fulfillmentItem.purchaseOrder._id));
+                                            getPRById.push(this.purchaseRequestManager.getSingleById(fulfillmentItem.purchaseOrder.purchaseRequest._id));
+                                        }
                                     }
                                 }
                             }
+
                             Promise.all(getPurchaseOrderById)
-                                .then(results => {
-                                    for (var purchaseOrder of results) {
-                                        for (var poItem of purchaseOrder.items) {
-                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                for (var fulfillment of validDeliveryOrderItem.fulfillments) {
-                                                    if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
-                                                        var _index;
-                                                        for (var poItemFulfillment of poItem.fulfillments) {
-                                                            if (poItemFulfillment.deliveryOderNo === validDeliveryOrder.no) {
-                                                                _index = poItem.fulfillments.indexOf(poItemFulfillment);
-                                                                break;
-                                                            }
-                                                        }
-                                                        if (_index != null) {
-                                                            poItem.fulfillments.splice(_index, 1);
-                                                        }
-
-                                                        var totalRealize = 0;
-                                                        for (var poItemFulfillment of poItem.fulfillments) {
-                                                            totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
-                                                        }
-                                                        poItem.realizationQuantity = totalRealize;
-                                                        if (poItem.realizationQuantity === poItem.dealQuantity)
-                                                            poItem.isClosed = true;
-                                                        else
-                                                            poItem.isClosed = false;
-                                                        fulfillment.purchaseOrder = purchaseOrder;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            for (var poItem of purchaseOrder.items) {
-                                                if (poItem.isClosed === false) {
-                                                    purchaseOrder.isClosed = false;
-                                                    break;
-                                                }
-                                                else
-                                                    purchaseOrder.isClosed = true;
-                                            }
-                                            tasks.push(this.purchaseOrderManager.update(purchaseOrder));
-                                        }
-                                    }
-                                    Promise.all(tasks)
-                                        .then(results => {
-                                            //UPDATE PO EXTERNAL
-                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                getPurchaseOrderById = [];
-                                                for (var poExternalItem of purchaseOrderExternal.items) {
-                                                    if (ObjectId.isValid(poExternalItem._id))
-                                                        getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(poExternalItem._id));
-                                                }
-                                            }
-                                            Promise.all(getPurchaseOrderById)
-                                                .then(results => {
+                                .then((_purchaseOrders) => {
+                                    Promise.all(getPRById)
+                                        .then((_purchaseRequests) => {
+                                            for (var purchaseOrder of _purchaseOrders) {
+                                                for (var poItem of purchaseOrder.items) {
                                                     for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                        var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
-                                                        for (var result of results) {
-                                                            for (var poExternalItem of purchaseOrderExternal.items) {
-                                                                if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() === result._id.toString())
-                                                                    poExternalItem = result;
-                                                                break;
-                                                            }
-                                                        }
-                                                        if (result.isClosed == false) {
-                                                            purchaseOrderExternal.isClosed = false;
-                                                        }
-                                                        else
-                                                            purchaseOrderExternal.isClosed = true;
+                                                        for (var fulfillment of validDeliveryOrderItem.fulfillments) {
+                                                            if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
+                                                                var _index;
+                                                                for (var poItemFulfillment of poItem.fulfillments) {
+                                                                    if (poItemFulfillment.deliveryOderNo === validDeliveryOrder.no) {
+                                                                        _index = poItem.fulfillments.indexOf(poItemFulfillment);
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                if (_index != null) {
+                                                                    poItem.fulfillments.splice(_index, 1);
+                                                                }
 
-                                                        validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
-                                                        tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
-                                                    }
-                                                    
-                                                    Promise.all(tasksPoExternal)
-                                                        .then(results => {
-                                                            var getPoExternalByID = [];
-                                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                                if (ObjectId.isValid(validDeliveryOrderItem.purchaseOrderExternal._id))
-                                                                    getPoExternalByID.push(this.purchaseOrderExternalManager.getSingleById(validDeliveryOrderItem.purchaseOrderExternal._id));
-                                                            }
-                                                            Promise.all(getPoExternalByID)
-                                                                .then(results => {
-                                                                    for (var poExternal of results) {
-                                                                        for (var validDeliveryOrderItem of validDeliveryOrder.items) {
-                                                                            if (validDeliveryOrderItem.purchaseOrderExternal._id.equals(poExternal._id)) {
-                                                                                validDeliveryOrderItem.purchaseOrderExternal = poExternal;
+                                                                var totalRealize = 0;
+                                                                for (var poItemFulfillment of poItem.fulfillments) {
+                                                                    totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
+                                                                }
+                                                                poItem.realizationQuantity = totalRealize;
+                                                                if (poItem.realizationQuantity === poItem.dealQuantity)
+                                                                    poItem.isClosed = true;
+                                                                else
+                                                                    poItem.isClosed = false;
+                                                                fulfillment.purchaseOrder = purchaseOrder;
+
+                                                                for (var _purchaseRequest of _purchaseRequests) {
+                                                                    if (_purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
+                                                                        for (var _prItem of _purchaseRequest.items) {
+                                                                            if (_prItem.product._id.equals(fulfillment.product._id)) {
+                                                                                var _index = _prItem.deliveryOrderNos.indexOf(validDeliveryOrder.no);
+                                                                                _prItem.deliveryOrderNos.splice(_index, 1);
                                                                                 break;
                                                                             }
                                                                         }
+                                                                        break;
                                                                     }
-                                                                    this.collection.update(validDeliveryOrder)
-                                                                        .then(id => {
-                                                                            resolve(id);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    for (var poItem of purchaseOrder.items) {
+                                                        if (poItem.fulfillments.length > 0) {
+                                                            purchaseOrder.status = poStatusEnum.ARRIVING;
+                                                        }
+                                                        else {
+                                                            purchaseOrder.status = poStatusEnum.ORDERED;
+                                                        }
+                                                        break;
+                                                    }
+
+                                                    for (var _pr of _purchaseRequests) {
+                                                        if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
+                                                            if (purchaseOrder.isClosed) {
+                                                                _pr.status = prStatusEnum.COMPLETE;
+                                                            }
+                                                            else {
+                                                                for (var _prItem of _pr.items) {
+                                                                    if (_prItem.deliveryOrderNos.length > 0) {
+                                                                        _pr.status = prStatusEnum.ARRIVING;
+                                                                    } else {
+                                                                        _pr.status = prStatusEnum.ORDERED;
+                                                                    }
+                                                                    break;
+                                                                }
+                                                            }
+                                                            tasksPR.push(this.purchaseRequestManager.update(_pr));
+                                                            break;
+                                                        }
+                                                    }
+                                                    tasks.push(this.purchaseOrderManager.update(purchaseOrder));
+                                                }
+                                            }
+                                            Promise.all(tasks.concat(tasksPR))
+                                                .then(results => {
+                                                    //UPDATE PO EXTERNAL
+                                                    for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                        var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
+                                                        getPurchaseOrderById = [];
+                                                        for (var poExternalItem of purchaseOrderExternal.items) {
+                                                            if (ObjectId.isValid(poExternalItem._id))
+                                                                getPurchaseOrderById.push(this.purchaseOrderManager.getSingleById(poExternalItem._id));
+                                                        }
+                                                    }
+                                                    Promise.all(getPurchaseOrderById)
+                                                        .then(results => {
+                                                            for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                                var purchaseOrderExternal = validDeliveryOrderItem.purchaseOrderExternal;
+                                                                for (var result of results) {
+                                                                    for (var poExternalItem of purchaseOrderExternal.items) {
+                                                                        if (ObjectId.isValid(poExternalItem._id) && poExternalItem._id.toString() === result._id.toString())
+                                                                            poExternalItem = result;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                if (result.isClosed === false) {
+                                                                    purchaseOrderExternal.isClosed = false;
+                                                                }
+                                                                else
+                                                                    purchaseOrderExternal.isClosed = true;
+
+                                                                validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
+                                                                tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
+                                                            }
+
+                                                            Promise.all(tasksPoExternal)
+                                                                .then(results => {
+                                                                    var getPoExternalByID = [];
+                                                                    for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                                        if (ObjectId.isValid(validDeliveryOrderItem.purchaseOrderExternal._id))
+                                                                            getPoExternalByID.push(this.purchaseOrderExternalManager.getSingleById(validDeliveryOrderItem.purchaseOrderExternal._id));
+                                                                    }
+                                                                    Promise.all(getPoExternalByID)
+                                                                        .then(results => {
+                                                                            for (var poExternal of results) {
+                                                                                for (var validDeliveryOrderItem of validDeliveryOrder.items) {
+                                                                                    if (validDeliveryOrderItem.purchaseOrderExternal._id.equals(poExternal._id)) {
+                                                                                        validDeliveryOrderItem.purchaseOrderExternal = poExternal;
+                                                                                        break;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            this.collection.update(validDeliveryOrder)
+                                                                                .then(id => {
+                                                                                    resolve(id);
+                                                                                })
+                                                                                .catch(e => {
+                                                                                    reject(e);
+                                                                                })
                                                                         })
                                                                         .catch(e => {
                                                                             reject(e);
-                                                                        })
+                                                                        });
                                                                 })
                                                                 .catch(e => {
                                                                     reject(e);
-                                                                });
+                                                                })
                                                         })
                                                         .catch(e => {
                                                             reject(e);
-                                                        })
+                                                        });
                                                 })
                                                 .catch(e => {
                                                     reject(e);

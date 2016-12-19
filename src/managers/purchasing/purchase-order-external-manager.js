@@ -108,6 +108,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 .then(results => {
                                     for (var poInternal of results) {
                                         poInternal.isPosted = true;
+                                        poInternal.status = poStatusEnum.PROCESSING;
                                         tasks.push(this.purchaseOrderManager.update(poInternal));
                                     }
                                     Promise.all(tasks)
@@ -151,8 +152,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         .then(results => {
                                             for (var poInternal of results) {
                                                 poInternal.isPosted = false;
+                                                poInternal.status = poStatusEnum.CREATED;
                                                 tasks.push(this.purchaseOrderManager.update(poInternal));
-
                                             }
                                             Promise.all(tasks)
                                                 .then(results => {
@@ -191,7 +192,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     '$ne': new ObjectId(valid._id)
                 }
             }, {
-                "refNo": valid.refNo
+                "no": valid.no
             }]
         });
         var getCurrency = valid.currency && ObjectId.isValid(valid.currency._id) ? this.currencyManager.getSingleByIdOrDefault(valid.currency._id) : Promise.resolve(null);
@@ -216,7 +217,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 var _poInternals = results.slice(4, results.length);
 
                 if (_otherPurchaseOrder) {
-                    purchaseOrderExternalError["refNo"] = i18n.__("PurchaseOrderExternal.refNo.isExist:%s is exist", i18n.__("PurchaseOrderExternal.refNo._:Reference No"));
+                    purchaseOrderExternalError["no"] = i18n.__("PurchaseOrderExternal.no.isExist:%s is exist", i18n.__("PurchaseOrderExternal.no._:No"));
                 }
 
                 if (!valid.supplierId || valid.supplierId.toString() === "") {
@@ -354,6 +355,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 valid.currency = _currency;
                 valid.currency._id = new ObjectId(valid.currency._id);
                 valid.vat = _vat;
+                valid.date = new Date(valid.date);
+                valid.expectedDeliveryDate = new Date(valid.expectedDeliveryDate);
 
                 var items = [];
 
@@ -394,6 +397,8 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     post(listPurchaseOrderExternal) {
         var tasksUpdatePoInternal = [];
         var tasksUpdatePoEksternal = [];
+        var tasksUpdatePR=[];
+        var getPRById=[];
         var getPOItemById = [];
         var getPOExternalById = [];
         return new Promise((resolve, reject) => {
@@ -418,6 +423,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         for (var _poExternalItem of _purchaseOrderExternal.items) {
                                             for (var _purchaseOrder of _purchaseOrderList) {
                                                 if (_purchaseOrder._id.equals(_poExternalItem._id)) {
+                                                    getPRById.push(this.purchaseRequestManager.getSingleByIdOrDefault(_purchaseOrder.purchaseRequest._id));
                                                     _purchaseOrder.purchaseOrderExternalId = new ObjectId(_purchaseOrderExternal._id);
                                                     _purchaseOrder.purchaseOrderExternal = _purchaseOrderExternal;
                                                     _purchaseOrder.purchaseOrderExternal._id = new ObjectId(_purchaseOrderExternal._id);
@@ -434,6 +440,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                                     _purchaseOrder.vatRate = _purchaseOrderExternal.vatRate;
                                                     _purchaseOrder.useIncomeTax = _purchaseOrderExternal.useIncomeTax;
                                                     _purchaseOrder.isPosted = true;
+                                                    _purchaseOrder.status = poStatusEnum.ORDERED;
 
                                                     for (var poItem of _purchaseOrder.items) {
                                                         for (var itemExternal of _poExternalItem.items) {
@@ -460,10 +467,26 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 }
                             }
                             Promise.all(tasksUpdatePoInternal)
-                                .then(_listIdPoInternal => {
-                                    Promise.all(tasksUpdatePoEksternal)
-                                        .then(_listIdPoEksternal => {
-                                            resolve(_listIdPoEksternal);
+                                .then((_results) => {
+                                    Promise.all(getPRById)
+                                        .then((_prs) => {
+                                            for(var _pr of _prs){
+                                                _pr.status = prStatusEnum.ORDERED;
+                                                tasksUpdatePR.push(this.purchaseRequestManager.update(_pr));
+                                            }
+                                            Promise.all(tasksUpdatePR)
+                                                .then((_updatedId) => {
+                                                    Promise.all(tasksUpdatePoEksternal)
+                                                        .then((_listIdPoEksternal) => {
+                                                            resolve(_listIdPoEksternal);
+                                                        })
+                                                        .catch(e => {
+                                                            reject(e);
+                                                        })
+                                                })
+                                                .catch(e => {
+                                                    reject(e);
+                                                })
                                         })
                                         .catch(e => {
                                             reject(e);
@@ -526,11 +549,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
 
-    _getRomanNumeral(_number) {
-        var listRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXXII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX", "XXXI"];
-        return listRoman[_number];
-    }
-
     unpost(poExternalId) {
         return this.getSingleByIdOrDefault(poExternalId)
             .then((poExternal) => {
@@ -541,7 +559,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         return Promise.all(getPos)
                             .then((pos) => {
 
-                                var updatedPos = pos.map(po => {
+                                var updatePos = pos.map(po => {
 
                                     po.purchaseOrderExternalId = {};
                                     po.purchaseOrderExternal = {};
@@ -573,14 +591,37 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
                                 })
 
-                                return Promise.all(updatedPos);
+                                return Promise.all(updatePos);
                             })
                             .then((updatedPos) => {
+
+                                var getPrs = updatedPos.map((po) => {
+                                    return this.purchaseRequestManager.getSingleByIdOrDefault(po.purchaseRequest._id);
+                                })
+
+                                return Promise.all(getPrs);
+
+                            })
+                            .then((prs) => {
+
+                                var updatePrs = prs.map((pr) => {
+
+                                    pr.status = prStatusEnum.PROCESSING;
+
+                                    return this.purchaseRequestManager.update(pr)
+                                        .then((id) => this.purchaseRequestManager.getSingleByIdOrDefault(id));
+                                })
+                                
+                                return Promise.all(updatePrs);
+                            })
+                            .then((updatedPrs) => {
 
                                 valid.items = valid.items.map((po) => {
 
                                     po.isPosted = false;
                                     po.status = poStatusEnum.PROCESSING;
+
+                                    po.purchaseRequest.status = prStatusEnum.PROCESSING;
 
                                     return po;
                                 })
@@ -649,7 +690,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                         return Promise.all(getPos)
                             .then((pos) => {
 
-                                var voidedPos = pos.map((po) => {
+                                var voidPos = pos.map((po) => {
 
                                     po.status = poStatusEnum.VOID;
 
@@ -657,11 +698,42 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
                                 })
 
-                                return Promise.all(voidedPos);
+                                return Promise.all(voidPos);
                             })
-                            .then((voidedPos) => {
+                            // .then((voidedPos) => {
+
+                            //     var getPrs = voidedPos.map((po) => {
+                            //         return this.purchaseRequestManager.getSingleByIdOrDefault(po.purchaseRequest._id);
+                            //     })
+
+                            //     return Promise.all(getPrs);
+
+                            // })
+                            // .then((prs) => {
+
+                            //     var voidPrs = prs.map((pr) => {
+
+                            //         pr.status = prStatusEnum.VOID;
+
+                            //         return this.purchaseRequest.update(pr)
+                            //             .then((id) => this.purchaseRequestManager.getSingleByIdOrDefault(id));
+                            //     })
+
+                            //     return Promise.all(voidPrs);
+                            // })
+                            .then((voidedPrs) => {
 
                                 valid.status = poStatusEnum.VOID;
+
+                                valid.items = valid.items.map((po) => {
+
+                                    po.isPosted = false;
+                                    po.status = poStatusEnum.VOID;
+
+                                    // po.purchaseRequest.status = prStatusEnum.VOID;
+
+                                    return po;
+                                })
 
                                 return this.update(valid)
                                     .then((poExId) => {

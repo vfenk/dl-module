@@ -19,6 +19,11 @@ module.exports = {
         purchaseOrder: require('./data-util/purchasing/purchase-order-data-util'),
         purchaseOrderExternal: require('./data-util/purchasing/purchase-order-external-data-util'),
     },
+    purchasing:{
+        purchaseRequest: require('./data-util/purchasing/purchase-request-data-util'),
+        purchaseOrder: require('./data-util/purchasing/purchase-order-data-util'),
+        purchaseOrderExternal: require('./data-util/purchasing/purchase-order-external-data-util'),
+    },
     transaction: {
         deliveryOrder: require('./data-util/transaction/delivery-order-data-util'),
         unitReceiptNote: require('./data-util/transaction/unit-receipt-note-data-util'),

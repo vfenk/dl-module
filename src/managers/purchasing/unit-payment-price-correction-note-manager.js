@@ -30,10 +30,10 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                    "no": valid.no
-                }, {
-                    _deleted: false
-                }]
+                        "no": valid.no
+                    }, {
+                        _deleted: false
+                    }]
             });
 
             var getUnitPaymentOrder = valid.unitPaymentOrder && ObjectId.isValid(valid.unitPaymentOrder._id) ? this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id) : Promise.resolve(null);
@@ -66,6 +66,9 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                     // if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
                     //     errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
+                    if (!valid.date || valid.date == '')
+                        errors["date"] = i18n.__("UnitPaymentPriceCorrectionNote.date.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.date._:Correction Date"));
+
                     if (valid.items) {
                         if (valid.items.length > 0) {
                             var itemErrors = [];
@@ -97,12 +100,31 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
                     valid.unitPaymentOrderId = _unitPaymentOrder._id;
                     valid.unitPaymentOrder = _unitPaymentOrder;
+                    valid.date = new Date(valid.date);
+
+                    if (valid.invoiceCorrectionDate) {
+                        valid.invoiceCorrectionDate = new Date(valid.invoiceCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.incomeTaxCorrectionDate) {
+                        valid.incomeTaxCorrectionDate = new Date(valid.incomeTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.vatTaxCorrectionDate) {
+                        valid.vatTaxCorrectionDate = new Date(valid.vatTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
 
                     for (var item of valid.items) {
                         for (var _unitPaymentOrderItem of _unitPaymentOrder.items) {
@@ -231,6 +253,17 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 });
 
         });
+    }
+    
+    generateNo(unit) {
+        var now = new Date();
+        var stamp = now / 1000 | 0;
+        var code = stamp.toString();
+        var locale = 'id-ID';
+        var moment = require('moment');
+        moment.locale(locale);
+        var no = `NDO${unit.code.toUpperCase()}${moment(new Date()).format("YYMM")}${code}`;
+        return no;
     }
 
     create(unitPaymentPriceCorrectionNote) {
