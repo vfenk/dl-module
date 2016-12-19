@@ -12,7 +12,10 @@ describe('#dl-module', function(done) {
     // test('@auth/account-manager', './auth/account-manager-test');
     // test('@auth/role-manager', './auth/role-manager-test');
 
+    // test('@MASTER/BUDGET', './etl/fact-purchase-duration');
     // // Master
+
+
     test('@MASTER/BUDGET', './master/budget');
     test('@MASTER/BUYER', './master/buyer');
     test('@MASTER/CATEGORY', './master/category');
@@ -32,22 +35,31 @@ describe('#dl-module', function(done) {
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
 
     // //Purchasing 
-     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
+    // test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
     // test('@purchasing/purchase-request-manager', './purchasing/purchase-request-manager-test');
     // test('@purchasing/purchase-order-manager', './purchasing/purchase-order-manager-test');
     // test('@purchasing/purchase-order-external-manager', './purchasing/purchase-order-external-manager-test');
+    
+    test('@purchasing/purchase-order-external/unpost', './purchasing/purchase-order-external/unpost');
+    test('@purchasing/purchase-order-external/cancel', './purchasing/purchase-order-external/cancel');
+    test('@purchasing/purchase-order-external/close', './purchasing/purchase-order-external/close');
+
+    // ok
     // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
+    
     // test('@purchasing/unit-receipt-note', './purchasing/unit-receipt-note-manager-test');
     // test('@purchasing/unit-payment-price-correction-note', './purchasing/unit-payment-price-correction-note-manager-test');
     // test('@purchasing/unit-payment-order', './purchasing/unit-payment-order-test');
-
     // test('@purchasing/purchase-request/create', './purchasing/purchase-request/create');
     // test('@purchasing/purchase-request/post', './purchasing/purchase-request/post');
     // test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
     // test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
     // test('@purchasing/purchase-order-external/create', './purchasing/purchase-order-external/create');
+    
+    // ok
     // test('@purchasing/delivery-order/create', './purchasing/delivery-order/create');
     // test('@purchasing/unit-receipt-note/create', './purchasing/unit-receipt-note/create');
+    
     // test('@purchasing/unit-payment-order/create', './purchasing/unit-payment-order/create');
     // test('@purchasing/unit-payment-price-correction-note/create', './purchasing/unit-payment-price-correction-note/create');
     // test('@purchasing/unit-payment-quantity-correction-note/create', './purchasing/unit-payment-quantity-correction-note/create');
