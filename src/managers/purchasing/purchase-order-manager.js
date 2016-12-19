@@ -420,7 +420,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             }
             if (PODLNo !== "undefined" && PODLNo !== "") {
                 Object.assign(query, {
-                    "purchaseOrderExternal": PODLNo
+                    "purchaseOrderExternal.no": PODLNo
                 });
             }
             if (PRNo !== "undefined" && PRNo !== "") {
@@ -482,7 +482,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         $unwind: "$items"
                     }, {
                         $group: {
-                            _id: "$unit.division.name",
+                            _id: "$unit.division",
                             "pricetotal": {
                                 $sum: {
                                     $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -511,7 +511,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         $unwind: "$items"
                     }, {
                         $group: {
-                            _id: "$unit.division.name",
+                            _id: "$unit.division",
                             "pricetotal": {
                                 $sum: {
                                     $multiply: ["$items.pricePerDealUnit", "$items.dealQuantity", "$currencyRate"]
@@ -529,10 +529,10 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-    getDataPODetailUnit(startdate, enddate, divisi) {
+    getDataPODetailUnit(startdate, enddate, divisiId) {
         return new Promise((resolve, reject) => {
             if (startdate !== undefined && enddate !== undefined && startdate !== "" && enddate !== "") {
-                if (divisi === undefined) {
+                if (divisiId === undefined) {
                     this.collection.aggregate(
                         [{
                             $match: {
@@ -586,7 +586,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         "purchaseOrderExternal.isPosted": true
                                     }]
                                 }, {
-                                    "unit.division.name": divisi
+                                    "unit.division._id": new ObjectId(divisiId)
                                 }]
                             }
                         }, {
@@ -607,11 +607,9 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             resolve(result);
                         });
                 }
-
-
             }
             else {
-                if (divisi == undefined) {
+                if (divisiId == undefined) {
                     this.collection.aggregate(
                         [{
                             $match: {
@@ -651,7 +649,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         "_deleted": false
                                     }]
                                 }, {
-                                    "unit.division.name": divisi
+                                    "unit.division._id": new ObjectId(divisiId)
                                 }]
                             }
                         }, {
@@ -672,8 +670,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                             resolve(result);
                         });
                 }
-
-
             }
         });
     }
