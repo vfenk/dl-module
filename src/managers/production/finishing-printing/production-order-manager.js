@@ -21,7 +21,6 @@ module.exports = class ProductionOrderManager extends BaseManager {
         super(db, user);
 
         this.collection = this.db.collection(map.production.finishingPrinting.collection.SalesContract);
-        //this.collection= this.db.collection(map.production.finishingPrinting.collection.ProductionOrder);
         this.LampStandardManager = new LampStandardManager(db, user);
         this.BuyerManager= new BuyerManager(db,user);
         this.UomManager = new UomManager(db, user);
@@ -159,15 +158,27 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 else if (!valid.lampStandardId)
                     errors["lampStandard"] = i18n.__("ProductionOrder.lampStandard.isRequired:%s is required", i18n.__("ProductionOrder.lampStandard._:LampStandard")); //"lampStandard tidak boleh kosong";
                 
-                if (!valid.orderQuantity || valid.orderQuantity === 0)
+                 if (!valid.orderQuantity || valid.orderQuantity === 0)
                     errors["orderQuantity"] = i18n.__("ProductionOrder.orderQuantity.isRequired:%s is required", i18n.__("ProductionOrder.orderQuantity._:OrderQuantity")); //"orderQuantity tidak boleh kosong";
+                    else 
+                        {
+                            var totalqty=0;
+                            if(valid.details.length>0){
+                                for(var i of valid.details){
+                                    totalqty+=i.quantity;
+                                }
+                            }
+                            if(valid.orderQuantity!=totalqty){
+                                errors["orderQuantity"] = i18n.__("ProductionOrder.orderQuantity.shouldNot:%s should equal SUM quantity in details", i18n.__("ProductionOrder.orderQuantity._:OrderQuantity")); //"orderQuantity tidak boleh berbeda dari total jumlah detail";
+                        }
+                    }
                 
                 if (!valid.spelling || valid.spelling === 0)
                     errors["spelling"] = i18n.__("ProductionOrder.spelling.isRequired:%s is required", i18n.__("ProductionOrder.spelling._:Spelling")); //"spelling tidak boleh kosong";
                 
                 valid.details = valid.details || [];
                 if (valid.details && valid.details.length <= 0) {
-                    errors["details"] = i18n.__("ProductionOrder.details.isRequired:%s is required", i18n.__("ProductionOrder.details._:Detail")); //"Harus ada minimal 1 detail";
+                    errors["details"] = i18n.__("ProductionOrder.details.isRequired:%s is required", i18n.__("ProductionOrder.details._:Details")); //"Harus ada minimal 1 detail";
                 }
                 else if(valid.details.length>0) {
                     var detailErrors = [];
@@ -191,13 +202,8 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     }
                     if (detailErrors.length > 0)
                         errors.details = detailErrors;
-                    var totalqty=0;
-                    for(var i of valid.details){
-                        totalqty+=i.quantity;
-                    }
-                    if(valid.orderQuantity!=totalqty){
-                         errors["orderQuantity"] = i18n.__("ProductionOrder.orderQuantity.isRequired:%s is not equal SUM quantity details", i18n.__("ProductionOrder.orderQuantity._:OrderQuantity")); //"orderQuantity tidak boleh berbeda dari total jumlah detail";
-                    }
+                    
+                   
                 }
                 if(!valid.orderNo || valid.orderNo===''){
                     valid.orderNo = generateCode();
