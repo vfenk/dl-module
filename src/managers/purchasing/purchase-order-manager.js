@@ -755,7 +755,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                         "_deleted": false
                                     }]
                                 }, {
-                                    "isPosted": true
+                                    "purchaseOrderExternal.isPosted": true
                                 }]
                             }
 
@@ -783,7 +783,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         [{
                             $match: {
                                 $and: [{
-                                        "isPosted": true
+                                        "purchaseOrderExternal.isPosted": true
                                     }, {
                                         "_deleted": false
                                     }]
