@@ -809,8 +809,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 var supplierDoDate = {
                     supplierDoDate:
                     {
-                        $gte: dateFrom,
-                        $lte: dateTo
+                        $gte: new Date(dateFrom),
+                        $lte: new Date(dateTo)
                     }
                 };
                 Object.assign(query, supplierDoDate);
