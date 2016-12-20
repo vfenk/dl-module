@@ -42,7 +42,7 @@ module.exports = class InstructionManager extends BaseManager {
                     "$regex": regex
                 }
             };
-            keywordFilter["$or"] = [materialFilter, constructionFilter, proccessTypeFilter];
+            keywordFilter["$or"] = [materialFilter, constructionFilter, processTypeFilter];
         }
         query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
