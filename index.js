@@ -21,7 +21,8 @@ module.exports = {
             YarnEquivalentConversion: require('./src/managers/master/yarn-equivalent-conversion-manager'),
             UsterManager: require('./src/managers/master/uster-manager'),
             LampStandardManager: require('./src/managers/master/lamp-standard-manager'),
-            AccountBankManager: require('./src/managers/master/account-bank-manager')
+            AccountBankManager: require('./src/managers/master/account-bank-manager'),
+            InstructionManager: require('./src/managers/master/instruction-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
