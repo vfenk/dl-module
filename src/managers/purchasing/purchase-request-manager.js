@@ -249,9 +249,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
             if (state !== -1) {
                 Object.assign(query, {
-                    status: {
-                        value: state
-                    }
+                    "status.value": state
                 });
             }
 
@@ -278,8 +276,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
                 Object.assign(query, {
                     date: {
-                        $gte: dateFrom,
-                        $lte: dateTo
+                        $gte: new Date(dateFrom),
+                        $lte: new Date(dateTo)
                     }
                 });
             }

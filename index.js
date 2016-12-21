@@ -21,7 +21,8 @@ module.exports = {
             YarnEquivalentConversion: require('./src/managers/master/yarn-equivalent-conversion-manager'),
             UsterManager: require('./src/managers/master/uster-manager'),
             LampStandardManager: require('./src/managers/master/lamp-standard-manager'),
-            AccountBankManager: require('./src/managers/master/account-bank-manager')
+            AccountBankManager: require('./src/managers/master/account-bank-manager'),
+            InstructionManager: require('./src/managers/master/instruction-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
@@ -40,6 +41,9 @@ module.exports = {
                     WindingProductionOutput: require('./src/managers/production/spinning/winding/winding-production-output-manager')
                 },
                 DailySpinningProductionReportManager: require('./src/managers/production/spinning/daily-spinning-production-report-manager')
+            },
+            finishingPrinting:{
+                ProductionOrderManager: require('./src/managers/production/finishing-printing/production-order-manager') 
             }
         }
     },
