@@ -9,3 +9,7 @@ describe("CREATE SCENARIOS", function() {
 describe("UPDATE SCENARIOS", function() {
     require("./update");
 });
+
+describe("SPLIT SCENARIOS", function() {
+    require("./split");
+});
