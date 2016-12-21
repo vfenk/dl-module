@@ -7,6 +7,7 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Instruction = DLModels.master.Instruction;
+var assert = require('assert');
 var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 
@@ -115,5 +116,37 @@ module.exports = class InstructionManager extends BaseManager {
 
         return this.collection.createIndexes([dateIndex, nameIndex]);
     }
+
+    getMaterial(key,query){
+        return new Promise((resolve, reject) => {
+        var regex=new RegExp(key,"i");
+        this.collection.aggregate(
+                            [{
+                                $match: {
+                                    $and:[{
+                                    $and: [{
+                                        "processType": query
+                                    }, {
+                                        "_deleted": false
+                                    }]
+                                },{
+                                        "material": {
+                                            "$regex": regex
+                                        }
+                                    }]
+                                }
+
+                            }, {
+                                $group: {
+                                    _id: "$material"
+                                }
+                            }]
+                        )
+                        .toArray(function(err, result) {
+                            assert.equal(err, null);
+                            resolve(result);
+                        });
+    }
+        )};
 }
 
