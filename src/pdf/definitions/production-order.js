@@ -23,11 +23,11 @@ module.exports = function (productionOrder) {
                 width: '*',
                 stack: [{
                     text: iso,
-                    style: ['size06'],
+                    style: ['size06','bold'],
                     alignment: "right"
                 }, {
-                        text: 'SURAT ORDER PRODUKSI',
-                        style: ['size09'],
+                        text: 'SURAT PERINTAH PRODUKSI',
+                        style: ['size12','bold'],
                         alignment: "center"
                     }]
             }]
@@ -84,22 +84,276 @@ module.exports = function (productionOrder) {
             body: [].concat([thead], tbody,tfoot)
         }
     }];
+    var datas=[
+        {
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Nomor Order'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.orderNo
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Nama Buyer'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.buyer.name
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Jenis Proses'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.processType
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Material'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.material
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Konstruksi'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.construction
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Jenis Order'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.orderType
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Jumlah Order'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:orderQuantity + " " + productionOrder.uom.unit
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Jumlah Order + Spelling'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:spellOrder+" " + productionOrder.uom.unit
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Asal Kain Greige'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.originGreigeFabric
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Lebar Finish'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.finishWidth
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Design'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.design
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Standar Handling'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.handlingStandard
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'RUN'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.RUN
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Standar Shrinkage'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.shrinkageStandard, 
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Panjang Roll'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.rollLength
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Standar Lampu'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.lampStandard.name
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Sample'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.sample
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Keterangan'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:productionOrder.remark
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Tanggal Delivery'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:`${moment(productionOrder.deliveryDate).format(locale.date.format)}`
+                }]
+        },{
+            columns: [
+                {
+                    width: '40%',
+                    text: 'Tanggal Order dibuat'
+                }, {
+                    width: '3%',
+                    text:':'
+                },
+                {
+                    width: '*',
+                    text:`${moment(productionOrder._updatedDate).format(locale.date.format)}`
+                }]
+        }, '\n'
+    ];
 
     var body = [
         '\n', {
             stack: [{
                 columns: [{
                     width: '55%',
-                    columns: [{
-                        width: '40%',
-                        stack: ['Nomor Order', 'Nama Buyer' , 'Material', 'Konstruksi','Jenis Order','Jumlah Order','Jumlah Order Spelling','Asal Kain Greige', 'Lebar Finish', 'Design', 'Standar Handling', 'RUN', 'Standar Shrinkage', 'Panjang Roll', 'Standar Lampu','Sample', 'Keterangan', 'Tanggal Delivery','Tanggal Order dibuat']
-                    }, {
-                            width: '3%',
-                            stack: [':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':']
-                    }, {
-                            width: '*',
-                            stack:[productionOrder.orderNo, productionOrder.buyer.name, productionOrder.material, productionOrder.construction, productionOrder.orderType, orderQuantity + " " + productionOrder.uom.unit,spellOrder+" " + productionOrder.uom.unit, productionOrder.originGreigeFabric, productionOrder.finishWidth,productionOrder.design, productionOrder.handlingStandard, productionOrder.RUN, productionOrder.shrinkageStandard, productionOrder.rollLength, productionOrder.lampStandard.name, productionOrder.sample, productionOrder.remark, `${moment(productionOrder.deliveryDate).format(locale.date.format)}`, `${moment(productionOrder._updatedDate).format(locale.date.format)}`]
-                        }]
+                    stack:[datas]
                 },
                 {
                     width:'*',
@@ -169,6 +423,9 @@ module.exports = function (productionOrder) {
             },
             size10: {
                 fontSize: 10
+            },
+            size12: {
+                fontSize: 12
             },
             size15: {
                 fontSize: 15
