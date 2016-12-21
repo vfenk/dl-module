@@ -100,9 +100,19 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                 item.product._id = new ObjectId(item.product._id);
                                 if (item.product._id && item.defaultQuantity) {
                                     if (item.product._id.equals(sourcePoItem.product._id)) {
-                                        if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
-                                            itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isGreater:%s is greater than the first PO", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh lebih besar dari PO asal";
-                                            break;
+                                        if (valid.items.length == valid.sourcePurchaseOrder.items.length) {
+
+                                            if (item.defaultQuantity >= sourcePoItem.defaultQuantity) {
+                                                itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isGreater:%s cannot be greater than or equal the first PO", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh lebih besar dari PO asal";
+                                                break;
+                                            }
+                                        }
+                                        else {
+
+                                            if (item.defaultQuantity > sourcePoItem.defaultQuantity) {
+                                                itemError["defaultQuantity"] = i18n.__("PurchaseOrder.items.defaultQuantity.isGreater:%s is greater than the first PO", i18n.__("PurchaseOrder.items.defaultQuantity._:DefaultQuantity")); //"Jumlah default tidak boleh lebih besar dari PO asal";
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -907,5 +917,23 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         };
 
         return this.collection.createIndexes([dateIndex, noIndex]);
+    }
+
+    getListPOByPR(_purchaseRequestNo) {
+        return new Promise((resolve, reject) => {
+            if (_purchaseRequestNo === '')
+                resolve(null);
+            var query = {
+                "purchaseRequest.no": _purchaseRequestNo,
+                _deleted: false
+            };
+            this.getq(query)
+                .then(module => {
+                    resolve(module);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
     }
 };
