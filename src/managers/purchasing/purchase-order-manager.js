@@ -918,22 +918,4 @@ module.exports = class PurchaseOrderManager extends BaseManager {
 
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
-
-    getListPOByPR(_purchaseRequestNo) {
-        return new Promise((resolve, reject) => {
-            if (_purchaseRequestNo === '')
-                resolve(null);
-            var query = {
-                "purchaseRequest.no": _purchaseRequestNo,
-                _deleted: false
-            };
-            this.getq(query)
-                .then(module => {
-                    resolve(module);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
-    }
 };
