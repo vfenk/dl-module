@@ -310,8 +310,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
             }
             Promise.all(getPurchaseOrderById)
                 .then(results => {
-                    for (var result of results) {
-                        var purchaseOrder = result;
+                    for (var purchaseOrder of results) {
                         for (var poItem of purchaseOrder.items) {
                             for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
                                 for (var unitReceiptNoteItem of unitPaymentOrderItem.unitReceiptNote.items) {
@@ -324,16 +323,16 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                 fulfillment.invoiceNo = validUnitPaymentOrder.invoceNo;
                                                 fulfillment.interNoteDate = validUnitPaymentOrder.date;
                                                 fulfillment.interNoteNo = validUnitPaymentOrder.no;
-                                                fulfillment.interNoteValue = unitReceiptNoteItem.pricePerDealUnit;
+                                                fulfillment.interNoteValue = unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                 fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
                                                 if (validUnitPaymentOrder.incomeTaxNo) {
                                                     fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
                                                     fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
-                                                    fulfillment.ppnValue = 0.1 * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit;
+                                                    fulfillment.ppnValue = 0.1 * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                 }
-                                                if (validUnitPaymentOrder.vatNo) {
+                                                if (validUnitPaymentOrder.vatNo) { 
                                                     fulfillment.pphNo = validUnitPaymentOrder.vatNo;
-                                                    fulfillment.pphValue = validUnitPaymentOrder.vatRate * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit;
+                                                    fulfillment.pphValue = validUnitPaymentOrder.vatRate * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                     fulfillment.pphDate = validUnitPaymentOrder.vatDate;
                                                 }
                                                 break;
