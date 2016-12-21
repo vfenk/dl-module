@@ -76,7 +76,7 @@ module.exports = class FactTopTenSupplierEtlManager {
                     categoryType: purchaseOrder.category.name.toLowerCase() == 'bahan baku' ? 'BAHAN BAKU' : 'NON BAHAN BAKU',
                     categoryName: purchaseOrder.category.name,
                     poExternalNo: purchaseOrderExternal.no,
-                    poExternalDate: purchaseOrderExternal.date,
+                    poExternalDate: moment(purchaseOrderExternal.date).format('L'),
                     quantity: purchaseOrderItem.dealQuantity,
                     pricePerUnit: purchaseOrderItem.pricePerDealUnit,
                     currencyRate: purchaseOrderExternal.currencyRate,
@@ -99,7 +99,7 @@ module.exports = class FactTopTenSupplierEtlManager {
 
                 var count = 1;
                 for (var item of data) {
-                    sqlQuery = sqlQuery.concat("insert into fact_top_ten_supplier([ID Top Ten Supplier], [Nama Supplier], [Jenis Kategori], [Nama Kategori], [Nomor PO Eksternal], [Tanggal PO Eksternal], [Jumlah Beli], [Harga Satuan Barang], [Rate yang disepakati], [Total Harga], [Nama Divisi], [Nama Unit]) values(" + count + ", '" + item.supplierName + "', '" + item.categoryType + "', '" + item.categoryName + "', '" + item.poExternalNo + "', '" + item.poExternalDate + "', " + item.quantity + ", " + item.pricePerUnit + ", " + item.currencyRate + ", '', " + item.total + ", '" + item.divisionName + "', '" + item.unitName + "'); ");
+                    sqlQuery = sqlQuery.concat("insert into fact_top_ten_supplier([ID Top Ten Supplier], [Nama Supplier], [Jenis Kategori], [Nama Kategori], [Nomor PO Eksternal], [Tanggal PO Eksternal], [Jumlah Beli], [Harga Satuan Barang], [Rate yang disepakati], [Total Harga], [Nama Divisi], [Nama Unit]) values(" + count + ", '" + item.supplierName + "', '" + item.categoryType + "', '" + item.categoryName + "', '" + item.poExternalNo + "', '" + item.poExternalDate + "', " + item.quantity + ", " + item.pricePerUnit + ", " + item.currencyRate + ", " + item.total + ", '" + item.divisionName + "', '" + item.unitName + "'); ");
 
                     count = count + 1;
                 }

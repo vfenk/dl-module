@@ -51,16 +51,16 @@ module.exports = class DimSupplierEtlManager {
 
                 var count = 1;
                 for (var item of data) {
-                    sqlQuery = sqlQuery.concat("insert into DimSupplier([ID Supplier], [Kode Supplier] ,[Nama Supplier]) values(" + count + ", '" + item.supplierCode + "', '" + item.supplierName + "'); ");
+                    sqlQuery = sqlQuery.concat("insert into DimSupplier([ID Dim Supplier], [Kode Supplier] ,[Nama Supplier]) values(" + count + ", '" + item.supplierCode + "', '" + item.supplierName + "'); ");
 
                     count = count + 1;
                 }
 
                 request.multiple = true;
 
-                // return request.query(sqlQuery)
+                return request.query(sqlQuery)
                 // return request.query('select count(*) from DimSupplier')
-                return request.query('select top 1 * from DimSupplier')
+                // return request.query('select top 1 * from DimSupplier')
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();

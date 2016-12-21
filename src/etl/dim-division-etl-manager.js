@@ -51,16 +51,16 @@ module.exports = class DimDivisionEtlManager {
 
                 var count = 1;
                 for (var item of data) {
-                    sqlQuery = sqlQuery.concat("insert into [Dim Divisi]([ID Divisi], [Kode Divisi] ,[Nama Divisi]) values(" + count + ", '" + item.divisionCode + "', '" + item.divisionName + "'); ");
+                    sqlQuery = sqlQuery.concat("insert into dimdivisi(id_dim_divisi, kode_divisi, nama_divisi) values(" + count + ", '" + item.divisionCode + "', '" + item.divisionName + "'); ");
 
                     count = count + 1;
                 }
 
                 request.multiple = true;
 
-                // return request.query(sqlQuery)
-                // return request.query('select count(*) from [Dim Divisi]')
-                return request.query('select top 1 * from [Dim Divisi]')
+                return request.query(sqlQuery)
+                // return request.query('select count(*) from dimdivisi')
+                // return request.query('select top 1 * from dimdivisi')
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();

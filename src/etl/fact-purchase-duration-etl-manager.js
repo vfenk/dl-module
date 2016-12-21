@@ -208,50 +208,53 @@ module.exports = class FactPurchaseDurationEtlManager {
             var unitReceiptNote = item.unitReceiptNote;
             var unitPaymentOrder = item.unitPaymentOrder;
 
-            var results = purchaseRequest.items.map((poItem) => {
-                var poDays = purchaseOrder ? moment(purchaseOrder.date).diff(moment(purchaseRequest.date), "days") : -1;
-                var poExtDays = purchaseOrderExternal ? moment(purchaseOrderExternal.date).diff(moment(purchaseOrder.date), "days") : -1;
-                var doDays = deliveryOrder ? moment(deliveryOrder.date).diff(moment(purchaseOrderExternal.date), "days") : -1;
-                var uroDays = unitReceiptNote ? moment(unitReceiptNote.date).diff(moment(deliveryOrder.date), "days") : -1;
-                var upoDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(unitReceiptNote.date), "days") : -1;
-                var catType = unitPaymentOrder ?  unitPaymentOrder.category.name : "";
+            if (item.purchaseOrder) {
 
-                return {
-                    purchaseRequestNo: purchaseRequest ? purchaseRequest.no : "",
-                    purchaseOrderNo: purchaseOrder ? purchaseOrder.no : "",
-                    purchaseOrderExternalNo: purchaseOrderExternal ? purchaseOrderExternal.no : "",
-                    deliveryOrderNo: deliveryOrder ? deliveryOrder.no : "",
-                    unitReceiptNoteNo: unitReceiptNote ? unitReceiptNote.no : "",
-                    unitPaymentOrderNo: unitPaymentOrder ? unitPaymentOrder.no : "",
+                var results = purchaseRequest.items.map((poItem) => {
+                    var poExtDays = purchaseOrderExternal ? moment(purchaseOrderExternal.date).diff(moment(purchaseOrder.date), "days") : null;
+                    var doDays = deliveryOrder ? moment(deliveryOrder.date).diff(moment(purchaseOrderExternal.date), "days") : null;
+                    var uroDays = unitReceiptNote ? moment(unitReceiptNote.date).diff(moment(deliveryOrder.date), "days") : null;
+                    var upoDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(unitReceiptNote.date), "days") : null;
+                    var poDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(purchaseOrder.date), "days") : null;                    
+                    var catType = purchaseRequest.category.name;
 
-                    purchaseRequestDate: purchaseRequest ? purchaseRequest.date : null,
-                    purchaseOrderDays: poDays,
-                    purchaseOrderDate: purchaseOrder ? purchaseOrder.date : null,
-                    purchaseOrderExternalDays: poExtDays,
-                    purchaseOrderExternalDate: purchaseOrderExternal ? purchaseOrderExternal.date : null,
-                    deliveryOrderDays: doDays,
-                    deliveryOrderDate: deliveryOrder ? deliveryOrder.date : null,
-                    unitReceiptNoteDays: uroDays,
-                    unitReceiptNoteDate: unitReceiptNote ? unitReceiptNote.date : null,
-                    unitPaymentOrderDays: upoDays,
-                    unitPaymentOrderDate: unitPaymentOrder ? unitPaymentOrder.date : null,
-                    purchaseOrderDaysRange: this.getRangeWeek(poDays),
-                    purchaseOrderExternalDaysRange: this.getRangeMonth(poExtDays),
-                    deliveryOrderDaysRange: this.getRangeWeek(doDays),
-                    unitReceiptNoteDaysRange: this.getRangeWeek(uroDays),
-                    unitPaymentOrderDaysRange: this.getRangeMonth(upoDays),
-                    divisionName: unitPaymentOrder ? unitPaymentOrder.division.name : null,
-                    unitName: purchaseRequest ? purchaseRequest.unit.name : null,
-                    categoryName: unitPaymentOrder ? unitPaymentOrder.category.name : null,
-                    categoryType: this.getCategoryType(catType),
-                    supplierName: unitPaymentOrder ? unitPaymentOrder.supplier.name : null,
-                    buyerName: purchaseOrder ? purchaseOrder._createdBy : null,
-                    divisionCode: unitPaymentOrder ? unitPaymentOrder.division.code : null,
-                    supplierCode: unitPaymentOrder ? unitPaymentOrder.supplier.code : null,
-                    buyerCode: purchaseOrder ? purchaseOrder.buyer.code : null,                    
-                };
-            });
-            return [].concat.apply([], results);
+                    return {
+                        purchaseRequestNo: purchaseRequest ? `'${purchaseRequest.no}'` : null,
+                        purchaseOrderNo: purchaseOrder ? `'${purchaseOrder.no}'` : null,
+                        purchaseOrderExternalNo: purchaseOrderExternal ? `'${purchaseOrderExternal.no}'` : null,
+                        deliveryOrderNo: deliveryOrder ? `'${deliveryOrder.no}'` : null,
+                        unitReceiptNoteNo: unitReceiptNote ? `'${unitReceiptNote.no}'` : null,
+                        unitPaymentOrderNo: unitPaymentOrder ? `'${unitPaymentOrder.no}'` : null,
+
+                        purchaseRequestDate: purchaseRequest ? `'${moment(purchaseRequest.date).format('L')}'` : null,
+                        purchaseOrderDays: poDays,
+                        purchaseOrderDate: purchaseOrder ? `'${moment(purchaseOrder.date).format('L')}'` : null,
+                        purchaseOrderExternalDays: poExtDays,
+                        purchaseOrderExternalDate: purchaseOrderExternal ? `'${moment(purchaseOrderExternal.date).format('L')}'` : null,
+                        deliveryOrderDays: doDays,
+                        deliveryOrderDate: deliveryOrder ? `'${moment(deliveryOrder.date).format('L')}'` : null,
+                        unitReceiptNoteDays: uroDays,
+                        unitReceiptNoteDate: unitReceiptNote ? `'${moment(unitReceiptNote.date).format('L')}'` : null,
+                        unitPaymentOrderDays: upoDays,
+                        unitPaymentOrderDate: unitPaymentOrder ? `'${moment(unitPaymentOrder.date).format('L')}'` : null,
+                        purchaseOrderDaysRange: this.getRangeWeek(poDays) ? `'${this.getRangeWeek(poDays)}'` : null,
+                        purchaseOrderExternalDaysRange: this.getRangeMonth(poExtDays) ? `'${this.getRangeMonth(poExtDays)}'` : null,
+                        deliveryOrderDaysRange: this.getRangeWeek(doDays) ? `'${this.getRangeWeek(doDays)}'` : null,
+                        unitReceiptNoteDaysRange: this.getRangeWeek(uroDays) ? `'${this.getRangeWeek(uroDays)}'` : null,
+                        unitPaymentOrderDaysRange: this.getRangeMonth(upoDays) ? `'${this.getRangeMonth(upoDays)}'` : null,
+                        divisionName: purchaseRequest ? `'${purchaseRequest.unit.division.name}'` : null,
+                        unitName: purchaseRequest ? `'${purchaseRequest.unit.name}'` : null,
+                        categoryName: purchaseRequest ? `'${purchaseRequest.category.name}'` : null,
+                        categoryType: purchaseRequest ? `'${this.getCategoryType(catType)}'` : null,
+                        supplierName: purchaseOrderExternal ? `'${purchaseOrderExternal.supplier.name}'` : null,
+                        buyerName: purchaseOrder ? `'${purchaseOrder._createdBy}'` : null,
+                        divisionCode: purchaseRequest ? `'${purchaseRequest.unit.division.code}'` : null,
+                        supplierCode: unitPaymentOrder ? `'${unitPaymentOrder.supplier.code}'` : null,
+                        buyerCode: purchaseOrder ? `'${purchaseOrder.buyer.code}'` : null,
+                    };
+                });
+                return [].concat.apply([], results);
+            }
         });
         return Promise.resolve([].concat.apply([], result));
     }
@@ -259,35 +262,31 @@ module.exports = class FactPurchaseDurationEtlManager {
 
 
     getRangeMonth(days) {
-        if (days == null) {
-            return null;
-        } else if (days == 0) {
+        if (days === 0) {
             return "0 hari";
-        } else if (days <= 30) {
+        } else if (days >= 1 && days <= 30) {
             return "1-30 hari";
-        } else if (days <= 60) {
+        } else if (days >= 31 && days <= 60) {
             return "31-60 hari";
-        } else if (days <= 90) {
+        } else if (days >= 61 && days <= 90) {
             return "61-90 hari";
-        } else {
+        } else if (days > 90) {
             return ">90 hari";
         }
     }
 
     getRangeWeek(days) {
-        if (days == null) {
-            return null;
-        } else if (days == 0) {
+        if (days === 0) {
             return "0 hari";
-        } else if (days <= 7) {
+        } else if (days >= 1 && days <= 7) {
             return "1-7 hari";
-        } else if (days <= 14) {
+        } else if (days >= 8 && days <= 14) {
             return "8-14 hari";
-        } else if (days <= 21) {
+        } else if (days >= 15 && days <= 21) {
             return "15-21 hari";
-        } else if (days <= 30) {
+        } else if (days >= 22 && days <= 30) {
             return "22-30 hari";
-        } else {
+        } else if (days > 30) {
             return ">30 hari";
         }
     }
@@ -308,16 +307,21 @@ module.exports = class FactPurchaseDurationEtlManager {
 
                 var count = 1;
                 for (var item of data) {
-                    sqlQuery = sqlQuery.concat("insert into fact_durasi_pembelian([ID Durasi Pembelian], [Nomor PO Internal], [Nomor PO Eksternal], [Nomor Surat Jalan], [Nomor Bon Unit], [Nomor Nota Intern], [Selisih Day PR_PO], [Selisih Day PO_SJ], [Selisih Day SJ_BU], [Selisih Day BU_NI], [Selisih Day PR_NI], [Range PR_PO], [Range PO_SJ], [Range SJ_BU], [Range BU_NI], [Range PR_NI], [Tanggal PO Internal], [Tanggal PO Eksternal], [Tanggal Surat Jalan], [Tanggal Bon Unit], [Tanggal Nota Intern], [Nama Divisi], [Nama Unit], [Nama Kategori], [Jenis Kategori], [Nama Supplier], [Staff Pembelian yang menerima PR], Kode_Divisi, Kode_Supplier, [Kode_Staff_Pembelian]) values("+ count +", '"+ item.purchaseOrderNo +"', '"+ item.purchaseOrderExternalNo +"', '"+ item.deliveryOrderNo +"', '"+ item.unitReceiptNoteNo +"', '"+ item.unitPaymentOrderNo +"', "+ item.purchaseOrderDays +", "+ item.purchaseOrderExternalDays +", "+ item.deliveryOrderDays +", "+ item.unitReceiptNoteDays +", "+ item.unitPaymentOrderDays +", '"+ item.purchaseOrderDaysRange +"', '"+ item.purchaseOrderExternalDaysRange +"', '"+ item.deliveryOrderDaysRange +"', '"+ item.unitReceiptNoteDaysRange +"', '"+ item.unitPaymentOrderDaysRange +"', "+ item.purchaseOrderDate +", "+ item.purchaseOrderExternalDate +", "+ item.deliveryOrderDate +", "+ item.unitReceiptNoteDate +", "+ item.unitPaymentOrderDate +", '"+ item.divisionName +"', '"+ item.unitName +"', '"+ item.categoryName +"', '"+ item.categoryType +"', '"+ item.supplierName +"', '"+ item.buyerName +"', '"+ item.divisionCode +"', '"+ item.supplierCode +"', '"+ item.buyerCode +"'); ");
 
-                    count++;
+                    if (item) {
+                        sqlQuery = sqlQuery.concat(`insert into fact_durasi_pembelian([ID Durasi Pembelian], [Nomor PO Internal], [Nomor PO Eksternal], [Nomor Surat Jalan], [Nomor Bon Unit], [Nomor Nota Intern], [Selisih Day PR_PO], [Selisih Day PO_SJ], [Selisih Day SJ_BU], [Selisih Day BU_NI], [Selisih Day PR_NI], [Range PR_PO], [Range PO_SJ], [Range SJ_BU], [Range BU_NI], [Range PR_NI], [Tanggal PO Internal], [Tanggal PO Eksternal], [Tanggal Surat Jalan], [Tanggal Bon Unit], [Tanggal Nota Intern], [Nama Divisi], [Nama Unit], [Nama Kategori], [Jenis Kategori], [Nama Supplier], [Staff Pembelian yang menerima PR], [Kode_Divisi], [Kode_Supplier], [Kode_Staff_Pembelian]) values(${count}, ${item.purchaseRequestNo}, ${item.purchaseOrderExternalNo}, ${item.deliveryOrderNo}, ${item.unitReceiptNoteNo}, ${item.unitPaymentOrderNo}, ${item.purchaseOrderExternalDays}, ${item.deliveryOrderDays}, ${item.unitReceiptNoteDays}, ${item.unitPaymentOrderDays}, ${item.purchaseOrderDays}, ${item.purchaseOrderExternalDaysRange}, ${item.deliveryOrderDaysRange}, ${item.unitReceiptNoteDaysRange}, ${item.unitPaymentOrderDaysRange}, ${item.purchaseOrderDaysRange}, ${item.purchaseOrderDate}, ${item.purchaseOrderExternalDate}, ${item.deliveryOrderDate}, ${item.unitReceiptNoteDate}, ${item.unitPaymentOrderDate}, ${item.divisionName}, ${item.unitName}, ${item.categoryName}, ${item.categoryType}, ${item.supplierName}, ${item.buyerName}, ${item.divisionCode}, ${item.supplierCode}, ${item.buyerCode}); `);
+
+                        count++;
+
+                    }
+
                 }
 
                 request.multiple = true;
 
-                // return request.query(sqlQuery)
-                // return request.query('select count(*) from fact-purchase-duration')
-                return request.query('select top 1 * from fact-purchase-duration')
+                return request.query(sqlQuery)
+                    // return request.query('select count(*) from fact_durasi_pembelian')
+                    // return request.query('select top 1 * from fact_durasi_pembelian')
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();
