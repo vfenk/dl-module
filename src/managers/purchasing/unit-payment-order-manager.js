@@ -6,6 +6,7 @@ var assert = require('assert');
 var map = DLModels.map;
 var i18n = require('dl-i18n');
 var UnitPaymentOrder = DLModels.purchasing.UnitPaymentOrder;
+var UnitReceiptNote = DLModels.purchasing.UnitReceiptNote;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitReceiptNoteManager = require('./unit-receipt-note-manager');
 var BaseManager = require('module-toolkit').BaseManager;
@@ -36,10 +37,10 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                    "no": valid.no
-                }, {
-                    _deleted: false
-                }]
+                        "no": valid.no
+                    }, {
+                        _deleted: false
+                    }]
             });
 
             Promise.all([getUnitPaymentOrderPromise].concat(getUnitReceiptNote))
@@ -47,50 +48,82 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     var _module = results[0];
                     var now = new Date();
                     var getURN = results.slice(1, results.length);
-                    if (!valid.divisionId)
+                    if (!valid.divisionId) {
                         errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
+                    }
                     else if (valid.division) {
                         if (!valid.division._id)
                             errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
                     }
-                    else if (!valid.division)
+                    else if (!valid.division) {
                         errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
+                    }
 
-                    if (!valid.date || valid.date == '')
+                    if (!valid.date || valid.date == '') {
                         errors["date"] = i18n.__("UnitPaymentOrder.date.isRequired:%s is required", i18n.__("UnitPaymentOrder.date._:Date")); //tanggal surat perintah bayar tidak boleh kosong";
+                    }
 
-                    if (!valid.invoceNo || valid.invoceNo == '')
+                    if (!valid.invoceNo || valid.invoceNo == '') {
                         errors["invoceNo"] = i18n.__("UnitPaymentOrder.invoceNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.invoceNo._:InvoceNo")); //No. surat invoice tidak boleh kosong";
-
-                    if (!valid.invoceDate || valid.invoceDate == '')
+                    }
+                    if (!valid.invoceDate || valid.invoceDate == '') {
                         errors["invoceDate"] = i18n.__("UnitPaymentOrder.invoceDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.invoceDate._:InvoceDate")); //tanggal surat invoice tidak boleh kosong";
-
-                    if (!valid.supplierId)
+                    }
+                    if (!valid.supplierId) {
                         errors["supplier"] = i18n.__("UnitPaymentOrder.supplier.isRequired:%s name is required", i18n.__("UnitPaymentOrder.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
+                    }
                     else if (valid.supplier) {
                         if (!valid.supplier._id)
                             errors["supplier"] = i18n.__("UnitPaymentOrder.supplier.isRequired:%s name is required", i18n.__("UnitPaymentOrder.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
                     }
-                    else if (!valid.supplier)
+                    else if (!valid.supplier) {
                         errors["supplier"] = i18n.__("UnitPaymentOrder.supplier.isRequired:%s name is required", i18n.__("UnitPaymentOrder.supplier._:Category")); //"Category tidak boleh kosong";
-
-                    if (!valid.categoryId)
+                    }
+                    if (!valid.categoryId) {
                         errors["category"] = i18n.__("UnitPaymentOrder.category.isRequired:%s name is required", i18n.__("UnitPaymentOrder.category._:Category")); //"Category tidak boleh kosong";
+                    }
                     else if (valid.category) {
                         if (!valid.supplier._id)
                             errors["category"] = i18n.__("UnitPaymentOrder.category.isRequired:%s name is required", i18n.__("UnitPaymentOrder.category._:Category")); //"Category tidak boleh kosong";
                     }
-                    else if (!valid.category)
+                    else if (!valid.category) {
                         errors["category"] = i18n.__("UnitPaymentOrder.category.isRequired:%s name is required", i18n.__("UnitPaymentOrder.category._:Category")); //"Category tidak boleh kosong";
-
-                    if (!valid.dueDate || valid.dueDate == '')
+                    }
+                    if (!valid.dueDate || valid.dueDate == '') {
                         errors["dueDate"] = i18n.__("UnitPaymentOrder.dueDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.dueDate._:DueDate")); //tanggal jatuh tempo tidak boleh kosong";
-
-                    if (!valid.paymentMethod || valid.paymentMethod == '')
+                    }
+                    if (!valid.paymentMethod || valid.paymentMethod == '') {
                         errors["paymentMethod"] = i18n.__("UnitPaymentOrder.paymentMethod.isRequired:%s is required", i18n.__("UnitPaymentOrder.paymentMethod._:PaymentMethod")); //Term pembayaran tidak boleh kosong";
-
-                    if (!valid.currency)
+                    }
+                    if (!valid.currency) {
                         errors["currency"] = i18n.__("UnitPaymentOrder.currency.isRequired:%s name is required", i18n.__("UnitPaymentOrder.currency._:Currency")); //"currency tidak boleh kosong";
+                    }
+                    if (valid.useVat) {
+                        if (valid.vat) {
+                            if (!valid.vat._id) {
+                                errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
+                            }
+                        } else {
+                            errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
+                        }
+
+                        if (!valid.vatNo || valid.vatNo == '') {
+                            errors["vatNo"] = i18n.__("UnitPaymentOrder.vatNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatNo._:Nomor Faktur Pajak (PPh)"));
+                        }
+
+                        if (!valid.vatDate || valid.vatDate == '') {
+                            errors["vatDate"] = i18n.__("UnitPaymentOrder.vatDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatDate._:Tanggal Faktur Pajak (PPh)"));
+                        }
+                    }
+                    if (valid.useIncomeTax) {
+                        if (!valid.incomeTaxNo || valid.incomeTaxNo == '') {
+                            errors["incomeTaxNo"] = i18n.__("UnitPaymentOrder.incomeTaxNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.incomeTaxNo._:Nomor Faktur Pajak (PPn)"));
+                        }
+
+                        if (!valid.incomeTaxDate || valid.incomeTaxDate == '') {
+                            errors["incomeTaxDate"] = i18n.__("UnitPaymentOrder.incomeTaxDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.incomeTaxDate._:Tanggal Faktur Pajak (PPn)"));
+                        }
+                    }
 
                     if (valid.items) {
                         if (valid.items.length <= 0) {
@@ -102,7 +135,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('unitPaymentOrder does not pass validation', errors));
                     }
                     if (!valid.useVat) {
@@ -140,7 +173,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         for (var _urn of getURN) {
                             if (item.unitReceiptNoteId.toString() === _urn._id.toString()) {
                                 item.unitReceiptNoteId = new ObjectId(_urn._id);
-                                item.unitReceiptNote = _urn;
+                                item.unitReceiptNote = new UnitReceiptNote(item.unitReceiptNote);
                                 break;
                             }
                         }
@@ -315,24 +348,21 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         }
                         var isFull = true;
                         for (var poItem of purchaseOrder.items) {
-                            for(var fulfillment of poItem.fulfillments)
-                                {
-                                    if(!fulfillment.interNoteNo || fulfillment.interNoteNo === '')
-                                    {
-                                        isFull=false;
-                                        break;
-                                    }
-                                }
-                                if(!isFull){
+                            for (var fulfillment of poItem.fulfillments) {
+                                if (!fulfillment.interNoteNo || fulfillment.interNoteNo === '') {
+                                    isFull = false;
                                     break;
                                 }
+                            }
+                            if (!isFull) {
+                                break;
+                            }
                         }
 
-                        if(isFull)
-                        {
+                        if (isFull) {
                             purchaseOrder.status = poStatusEnum.COMPLETE;
-                        }else{
-                            if(purchaseOrder.isClosed && purchaseOrder.status.name === 'PAYMENT'){
+                        } else {
+                            if (purchaseOrder.isClosed && purchaseOrder.status.name === 'PAYMENT') {
                                 purchaseOrder.status = poStatusEnum.PREMATURE;
                             }
                         }
