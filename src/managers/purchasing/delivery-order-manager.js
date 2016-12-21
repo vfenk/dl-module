@@ -272,16 +272,16 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         for (var fulfillment of validDeliveryOrderItem.fulfillments) {
                                                             if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
                                                                 var fulfillmentObj = {
-                                                                    deliveryOderNo: validDeliveryOrder.no,
-                                                                    deliveryOderDeliveredQuantity: fulfillment.deliveredQuantity,
-                                                                    deliveryOderDate: validDeliveryOrder.date,
+                                                                    deliveryOrderNo: validDeliveryOrder.no,
+                                                                    deliveryOrderDeliveredQuantity: fulfillment.deliveredQuantity,
+                                                                    deliveryOrderDate: validDeliveryOrder.date,
                                                                     supplierDoDate: validDeliveryOrder.supplierDoDate
                                                                 };
                                                                 poItem.fulfillments.push(fulfillmentObj);
 
                                                                 var totalRealize = 0;
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
+                                                                    totalRealize += poItemFulfillment.deliveryOrderDeliveredQuantity;
                                                                 }
                                                                 poItem.realizationQuantity = totalRealize;
                                                                 if (poItem.realizationQuantity === poItem.dealQuantity)
@@ -458,10 +458,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                             if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
 
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    if (poItemFulfillment.deliveryOderNo === validDeliveryOrder.no) {
-                                                                        poItemFulfillment.deliveryOderNo = validDeliveryOrder.no;
-                                                                        poItemFulfillment.deliveryOderDeliveredQuantity = fulfillment.deliveredQuantity;
-                                                                        poItemFulfillment.deliveryOderDate = validDeliveryOrder.date;
+                                                                    if (poItemFulfillment.deliveryOrderNo === validDeliveryOrder.no) {
+                                                                        poItemFulfillment.deliveryOrderNo = validDeliveryOrder.no;
+                                                                        poItemFulfillment.deliveryOrderDeliveredQuantity = fulfillment.deliveredQuantity;
+                                                                        poItemFulfillment.deliveryOrderDate = validDeliveryOrder.date;
                                                                         poItemFulfillment.supplierDoDate = validDeliveryOrder.supplierDoDate;
                                                                         break;
                                                                     }
@@ -469,7 +469,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                                                                 var totalRealize = 0;
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
+                                                                    totalRealize += poItemFulfillment.deliveryOrderDeliveredQuantity;
                                                                 }
                                                                 poItem.realizationQuantity = totalRealize;
                                                                 if (poItem.realizationQuantity === poItem.dealQuantity)
@@ -633,7 +633,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                             if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
                                                                 var _index;
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    if (poItemFulfillment.deliveryOderNo === validDeliveryOrder.no) {
+                                                                    if (poItemFulfillment.deliveryOrderNo === validDeliveryOrder.no) {
                                                                         _index = poItem.fulfillments.indexOf(poItemFulfillment);
                                                                         break;
                                                                     }
@@ -644,7 +644,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                                                                 var totalRealize = 0;
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
+                                                                    totalRealize += poItemFulfillment.deliveryOrderDeliveredQuantity;
                                                                 }
                                                                 poItem.realizationQuantity = totalRealize;
                                                                 if (poItem.realizationQuantity === poItem.dealQuantity)

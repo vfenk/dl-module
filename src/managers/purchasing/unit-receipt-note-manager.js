@@ -245,7 +245,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                         if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
                                             if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
                                                 for (var fulfillment of poItem.fulfillments) {
-                                                    var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                    var fulfillmentNo = fulfillment.deliveryOrderNo || '';
                                                     var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
 
                                                     if (fulfillmentNo === deliveryOrderNo && !fulfillment.unitReceiptNoteNo) {
@@ -394,7 +394,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                 if (unitReceiptNoteItem.purchaseOrderId.toString() === purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() === purchaseOrder.unitId.toString()) {
                                                     if (unitReceiptNoteItem.product._id.toString() === poItem.product._id.toString()) {
                                                         for (var fulfillment of poItem.fulfillments) {
-                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                            var fulfillmentNo = fulfillment.deliveryOrderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
 
                                                             if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo === validUnitReceiptNote.no) {
@@ -540,7 +540,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                 if (unitReceiptNoteItem.purchaseOrderId.toString() === purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() === purchaseOrder.unitId.toString()) {
                                                     if (unitReceiptNoteItem.product._id.toString() === poItem.product._id.toString()) {
                                                         for (var fulfillment of poItem.fulfillments) {
-                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                            var fulfillmentNo = fulfillment.deliveryOrderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
 
                                                             if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo === validUnitReceiptNote.no) {
