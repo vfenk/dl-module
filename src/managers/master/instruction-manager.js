@@ -147,6 +147,6 @@ module.exports = class InstructionManager extends BaseManager {
                             resolve(result);
                         });
     }
-        )};
+        )}
 }
 
