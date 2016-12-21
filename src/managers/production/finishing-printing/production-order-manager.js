@@ -73,7 +73,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     errors["construction"] = i18n.__("ProductionOrder.instruction.isRequired:%s is required", i18n.__("ProductionOrder.instruction._:Instruction")); //"Buyer tidak boleh kosong";
                 else{
                     valid.construction=valid.instruction.construction;
-                    valid.material=valid.material._id;
+                    valid.material=valid.instruction.material;
                 }
 
                 if (valid.uom) {
