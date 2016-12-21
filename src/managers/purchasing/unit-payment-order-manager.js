@@ -98,23 +98,23 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     if (!valid.currency) {
                         errors["currency"] = i18n.__("UnitPaymentOrder.currency.isRequired:%s name is required", i18n.__("UnitPaymentOrder.currency._:Currency")); //"currency tidak boleh kosong";
                     }
-                    if (valid.useVat) {
-                        if (valid.vat) {
-                            if (!valid.vat._id) {
-                                errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
-                            }
-                        } else {
-                            errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
-                        }
+                    // if (valid.useVat) {
+                    //     if (valid.vat) {
+                    //         if (!valid.vat._id) {
+                    //             errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
+                    //         }
+                    //     } else {
+                    //         errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
+                    //     }
 
-                        if (!valid.vatNo || valid.vatNo == '') {
-                            errors["vatNo"] = i18n.__("UnitPaymentOrder.vatNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatNo._:Nomor Faktur Pajak (PPh)"));
-                        }
+                    //     if (!valid.vatNo || valid.vatNo == '') {
+                    //         errors["vatNo"] = i18n.__("UnitPaymentOrder.vatNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatNo._:Nomor Faktur Pajak (PPh)"));
+                    //     }
 
-                        if (!valid.vatDate || valid.vatDate == '') {
-                            errors["vatDate"] = i18n.__("UnitPaymentOrder.vatDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatDate._:Tanggal Faktur Pajak (PPh)"));
-                        }
-                    }
+                    //     if (!valid.vatDate || valid.vatDate == '') {
+                    //         errors["vatDate"] = i18n.__("UnitPaymentOrder.vatDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatDate._:Tanggal Faktur Pajak (PPh)"));
+                    //     }
+                    // }
                     if (valid.useIncomeTax) {
                         if (!valid.incomeTaxNo || valid.incomeTaxNo == '') {
                             errors["incomeTaxNo"] = i18n.__("UnitPaymentOrder.incomeTaxNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.incomeTaxNo._:Nomor Faktur Pajak (PPn)"));
