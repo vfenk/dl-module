@@ -35,6 +35,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
         var query = {};
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
+
             var filterSalesContract = {
                 'salesContractNo': {
                     '$regex': regex
@@ -54,17 +55,10 @@ module.exports = class ProductionOrderManager extends BaseManager {
         var errors = {};
 
         var valid=productionOrder;
-        var query={
-            filter:{
-                material: valid.material,
-                construction:valid.construction,
-                processType:valid.processType
-            }
-        }
         var getBuyer = ObjectId.isValid(valid.buyerId) ? this.BuyerManager.getSingleByIdOrDefault(valid.buyerId) : Promise.resolve(null);
         var getLampStandard = ObjectId.isValid(valid.lampStandardId) ? this.LampStandardManager.getSingleByIdOrDefault(valid.lampStandardId) : Promise.resolve(null);
         var getUom = valid.uom && ObjectId.isValid(valid.uomId) ? this.UomManager.getSingleByIdOrDefault(valid.uomId) : Promise.resolve(null);
-        var getInstruction= valid.material && valid.construction && valid.processType ? this.InstructionManager.read(query) : Promise.resolve(null);
+        var getInstruction= ObjectId.isValid(valid.instructionId) ? this.InstructionManager.getSingleByIdOrDefault(valid.instructionId) : Promise.resolve(null);
         return Promise.all([getBuyer, getLampStandard, getUom, getInstruction])
             .then(results => {
                 var _buyer = results[0];
@@ -72,17 +66,16 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 var _uom = results[2];
                 var _instruction = results[3];
                 var _instruct=null;
-                if(_instruction){
-                    if(_instruction.data.length>0){
-                        for(var i of _instruction.data){
-                            if(i.material==valid.material && i.construction==valid.construction && i.processType==valid.processType ){
-                                _instruct=i;break;
-                            }
-                        }
-                    }
+
+                if (!_instruction)
+                    errors["construction"] = i18n.__("ProductionOrder.instruction.isRequired:%s is not exists", i18n.__("ProductionOrder.instruction._:Instruction")); //"Buyer tidak boleh kosong";
+                else if (!valid.instructionId)
+                    errors["construction"] = i18n.__("ProductionOrder.instruction.isRequired:%s is required", i18n.__("ProductionOrder.instruction._:Instruction")); //"Buyer tidak boleh kosong";
+                else{
+                    valid.construction=valid.instruction.construction;
+                    valid.material=valid.material._id;
                 }
 
-                
                 if (valid.uom) {
                     if (!valid.uom.unit || valid.uom.unit == '')
                         errors["uom"] = i18n.__("ProductionOrder.uom.isRequired:%s is required", i18n.__("Product.uom._:Uom")); //"Satuan tidak boleh kosong";
@@ -104,15 +97,6 @@ module.exports = class ProductionOrderManager extends BaseManager {
 
                 if(!valid.rollLength || valid.rollLength===''){
                     errors["rollLength"]=i18n.__("ProductionOrder.rollLength.isRequired:%s is required", i18n.__("ProductionOrder.rollLength._:RollLength")); //"rollLength tidak boleh kosong";
-                }
-
-                if(!_instruct){
-                    errors["material"] = i18n.__("ProductionOrder.instruction.isRequired:%s is not exists", i18n.__("Product.instruction._:Instruction")); //"instruction tidak boleh kosong";
-                
-                }
-                else{
-                    valid.instruction=_instruct;
-                    valid.instructionId=new ObjectId(_instruct._id);
                 }
 
                 if(!valid.originGreigeFabric || valid.originGreigeFabric===''){
@@ -216,6 +200,9 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 if(valid.uom){
                     valid.uomId=new ObjectId(valid.uom._id);
                 }
+                if(valid.instruction){
+                    valid.instructionId=new ObjectId(valid.instruction._id);
+                }
                 valid.deliveryDate=new Date(valid.deliveryDate);
 
                 if (!valid.isExport)
@@ -266,10 +253,14 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         {_deleted:false}]
                     }).then(result=>{
                         if(result!=null){
-                            var scId=result._id;
-                                var prodOrders=result.productionOrders;
-                                prodOrders.push(validproductionOrder);
-                                result.productionOrders=prodOrders;
+                            var prodOrders=[validproductionOrder];
+                            prodOrders.push(result.productionOrders);
+                            result.productionOrders=prodOrders;
+                            if (!result.stamp){
+                                result = new SalesContract(result);
+                            }
+
+                            result.stamp(this.user.username, "manager");
                             this.collection.update(result)
                                 .then(id => {
                                     resolve(id);
@@ -320,8 +311,8 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         salesContractNo: validproductionOrder.salesContractNo},
                         {_deleted:false}]
                 }).then(result=>{
-                    var prodOrd=result.productionOrders;
                     var newProdOrder=[];
+                    var prodOrd=result.productionOrders;
                     for(var i of prodOrd){
                         if(i.orderNo==validproductionOrder.orderNo){
                             i=validproductionOrder;
@@ -329,6 +320,11 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         newProdOrder.push(i);
                     }
                     result.productionOrders=newProdOrder;
+                    if (!result.stamp){
+                        result = new SalesContract(result);
+                    }
+
+                    result.stamp(this.user.username, "manager");
                     this.collection.update(result)
                                 .then(id => {
                                     resolve(id);
@@ -336,6 +332,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                                 .catch(e => {
                                     reject(e);
                                 })
+                    
                 })
             }).catch(e => {
                 reject(e);
