@@ -12,7 +12,6 @@ describe('#dl-module', function(done) {
     // test('@auth/account-manager', './auth/account-manager-test');
     // test('@auth/role-manager', './auth/role-manager-test');
 
-<<<<<<< HEAD
     test('@ETL/DIM-CATEGORY', './etl/dim-category');
     test('@ETL/DIM-DIVISION', './etl/dim-division');
     test('@ETL/DIM-SUPPLIER', './etl/dim-supplier');
@@ -24,16 +23,6 @@ describe('#dl-module', function(done) {
     test('@ETL/FACT-PURCHASE-ORDER-COMPARISON', './etl/fact-purchase-order-comparison');
     test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');
 
-=======
-    // test('@ETL/DIM-CATEGORY', './etl/dim-category');
-    // test('@ETL/DIM-DIVISION', './etl/dim-division');
-    // test('@ETL/DIM-SUPPLIER', './etl/dim-supplier');
-    // test('@ETL/DIM-UNIT', './etl/dim-unit');
-    // test('@ETL/FACT-PURCHASE-DURATION', './etl/fact-purchase-duration');
-    // test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
-    // test('@ETL/FACT-TOTAL-NILAI-PEMBELIAN', './etl/fact-total-nilai-pembelian');
-    // test('@ETL/FACT-TOP-TEN-SUPPLIER', './etl/fact-top-ten-supplier');
->>>>>>> 436f45c23ffeb059ca0fe8afca8dade2848442cf
     // // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
     test('@MASTER/BUDGET', './master/budget');
@@ -52,18 +41,14 @@ describe('#dl-module', function(done) {
     test('@MASTER/USTER', './master/uster');
     test('@MASTER/VAT', './master/vat');
     test('@MASTER/YARN-EQUIVALENT-CONVERSION', './master/yarn-equivalent-coversion');
-    test('@MASTER/INSTRUCTION', './master/instruction');
 
-    // //Purchasing 
+    // // //Purchasing 
     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
     test('@PURCHASING/PURCHASE ORDER', './purchasing/purchase-order');
     test('@PURCHASING/PURCHASE ORDER EXTERNAL', './purchasing/purchase-order-external'); 
     test('@PURCHASING/DELIVERY ORDER', './purchasing/delivery-order');
     
     //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
-
-    
-    //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');
 
     // ok
     // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
@@ -88,6 +73,6 @@ describe('#dl-module', function(done) {
 
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
-    //test('@PRODUCTION/PRODUCTION ORDER', './production/finishing-printing/production-order');
-    test('@PRODUCTION/PRODUCTION ORDER', './production/finishing-printing/production-order/create');
+
+
 });
