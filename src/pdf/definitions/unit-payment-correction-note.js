@@ -290,7 +290,7 @@ module.exports = function (unitPaymentCorrection) {
                             style: ['size08']
                         }, {
                             width: '*',
-                            text: `Nomor ${unitPaymentCorrection.invoiceCorrectionNo} ${moment(unitPaymentCorrection.invoiceCorrectionDate).format(locale.date.format)}`,
+                            text: `Nomor ${unitPaymentCorrection.unitPaymentOrder.no}`,
                             style: ['size08']
                         }]
                 }, {
