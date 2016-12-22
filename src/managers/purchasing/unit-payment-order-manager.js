@@ -24,7 +24,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
     _validate(unitPaymentOrder) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = unitPaymentOrder;
+            var valid = unitPaymentOrder || {};
             var getUnitReceiptNote = [];
             if (Object.getOwnPropertyNames(valid).length > 0) {
                 for (var item of valid.items) {
