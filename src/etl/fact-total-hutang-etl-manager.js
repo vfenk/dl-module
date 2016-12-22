@@ -107,9 +107,9 @@ module.exports = class FactTotalHutang {
 
                 request.multiple = true;
 
-                return request.query(sqlQuery)
+                // return request.query(sqlQuery)
                 // return request.query('select count(*) from fact_total_hutang')
-                // return request.query('select top 1 * from fact_total_hutang')
+                return request.query('select top 1 * from fact_total_hutang')
                     .then((results) => {
                     console.log(results);
                     return Promise.resolve();

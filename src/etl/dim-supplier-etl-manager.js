@@ -58,9 +58,9 @@ module.exports = class DimSupplierEtlManager {
 
                 request.multiple = true;
 
-                return request.query(sqlQuery)
+                // return request.query(sqlQuery)
                 // return request.query('select count(*) from DimSupplier')
-                // return request.query('select top 1 * from DimSupplier')
+                return request.query('select top 1 * from DimSupplier')
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();

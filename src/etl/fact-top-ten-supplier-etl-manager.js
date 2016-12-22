@@ -106,9 +106,9 @@ module.exports = class FactTopTenSupplierEtlManager {
 
                 request.multiple = true;
 
-                return request.query(sqlQuery)
+                // return request.query(sqlQuery)
                     // return request.query('select count(*) from fact_top_ten_supplier')
-                    // return request.query('select top 1 * from fact_top_ten_supplier')
+                    return request.query('select top 1 * from fact_top_ten_supplier')
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();

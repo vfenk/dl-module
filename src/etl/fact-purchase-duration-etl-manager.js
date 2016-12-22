@@ -319,9 +319,9 @@ module.exports = class FactPurchaseDurationEtlManager {
 
                 request.multiple = true;
 
-                return request.query(sqlQuery)
+                // return request.query(sqlQuery)
                     // return request.query('select count(*) from fact_durasi_pembelian')
-                    // return request.query('select top 1 * from fact_durasi_pembelian')
+                    return request.query('select top 1 * from fact_durasi_pembelian')
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();
