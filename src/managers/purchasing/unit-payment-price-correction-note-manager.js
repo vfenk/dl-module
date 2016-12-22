@@ -224,6 +224,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                             priceTotal = pricePerUnit * _item.quantity;
                                         }
                                         else if (unitPaymentPriceCorrectionNote.correctionType === "Harga Total") {
+                                            pricePerUnit = _item.pricePerUnit;
                                             priceTotal = (_item.quantity * _poItem.pricePerDealUnit) - (_item.priceTotal)
                                         }
 
