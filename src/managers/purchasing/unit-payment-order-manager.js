@@ -38,8 +38,6 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     }
                 }, {
                         "no": valid.no
-                    }, {
-                        _deleted: false
                     }]
             });
 
@@ -330,7 +328,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                     fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
                                                     fulfillment.ppnValue = 0.1 * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                 }
-                                                if (validUnitPaymentOrder.vatNo) { 
+                                                if (validUnitPaymentOrder.vatNo) {
                                                     fulfillment.pphNo = validUnitPaymentOrder.vatNo;
                                                     fulfillment.pphValue = validUnitPaymentOrder.vatRate * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                     fulfillment.pphDate = validUnitPaymentOrder.vatDate;
