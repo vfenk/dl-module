@@ -2,7 +2,7 @@ var options = {
     manager: require("../../../src/managers/purchasing/unit-payment-order-manager"),
     model: require("dl-models").purchasing.UnitPaymentOrder,
     util: require("../../data-util/purchasing/unit-payment-order-data-util"),
-    validator: require("dl-models").validator.purchasing.unitPaymentOrder,
+    validator: require("dl-models").validator.purchasing.UnitPaymentOrder,
     createDuplicate: false,
     keys: ["no"]
 };
