@@ -48,4 +48,3 @@ it('#02. should error when create new blank data', function (done) {
             }
         })
 });
-
