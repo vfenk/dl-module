@@ -32,8 +32,8 @@ class UnitReceiptNoteDataUtil {
                                         purchaseOrder: fulfillment.purchaseOrder,
                                         remark: ''
                                     }
-                                })
-                            })
+                                });
+                            });
                             item = [].concat.apply([], item);
                             return item;
                         });
