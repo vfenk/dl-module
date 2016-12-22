@@ -7,7 +7,7 @@
     "test": "mocha test/index.js",
     "cover": "istanbul cover _mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "codeclimate":"codeclimate-test-reporter < ./coverage/lcov.info"
+    "codeclimate": "codeclimate-test-reporter < ./coverage/lcov.info"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
     "mongo-factory": "^1.0.0",
     "mongodb": "^2.2.5",
     "mongodb-toolkit": "git+https://github.com/pinkgorilla/mongodb-toolkit.git",
+    "mssql": "^3.3.0",
     "pdfmake": "^0.1.18",
     "sha1": "^1.1.1"
   },

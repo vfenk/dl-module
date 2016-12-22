@@ -72,14 +72,14 @@ module.exports = class FactTotalNilaiPembelianEtlManager {
             var results = purchaseOrder.items.map((purchaseOrderItem) => {
 
                 return {
-                    unitCode: purchaseOrder.unit.code,
-                    divisionName: purchaseOrder.unit.division.name,
-                    unitName: purchaseOrder.unit.name,
-                    categoryName: purchaseOrder.category.name,
-                    categoryCode: purchaseOrder.category.code,
-                    categoryType: purchaseOrder.category.name.toLowerCase() == 'bahan baku' ? 'BAHAN BAKU' : 'NON BAHAN BAKU',
-                    poExternalNo: purchaseOrderExternal.no,
-                    poExternalDate: purchaseOrderExternal.date,
+                    unitCode: `'${purchaseOrder.unit.code}'`,
+                    divisionName: `'${purchaseOrder.unit.division.name}'`,
+                    unitName: `'${purchaseOrder.unit.name}'`,
+                    categoryName: `'${purchaseOrder.category.name}'`,
+                    categoryCode: `'${purchaseOrder.category.code}'`,
+                    categoryType: `'${purchaseOrder.category.name.toLowerCase() == 'bahan baku' ? 'BAHAN BAKU' : 'NON BAHAN BAKU'}'`,
+                    poExternalNo: `'${purchaseOrderExternal.no}'`,
+                    poExternalDate: purchaseOrderExternal ? `'${moment(purchaseOrderExternal.date).format('L')}'` : null,
                     quantity: purchaseOrderItem.dealQuantity,
                     pricePerUnit: purchaseOrderItem.pricePerDealUnit,
                     currencyRate: purchaseOrderExternal.currencyRate,
@@ -100,16 +100,16 @@ module.exports = class FactTotalNilaiPembelianEtlManager {
 
                 var count = 1;
                 for (var item of data) {
-                    sqlQuery = sqlQuery.concat("insert into fact_total_nilai_pembelian([ID Total Nilai Pembelian], [Kode Unit], [Nama Divisi], [Nama Unit], [Nama Kategori], [Kode Kategori], [Jenis Kategori], [Nomor PO Eksternal], [Tanggal PO Eksternal], [Jumlah Beli], [Harga Satuan Barang], [Rate yang disepakati], [Total Harga]) values(" + count + ", '" + item.unitCode + "', '" + item.divisionName + "', '" + item.unitName + "', '" + item.categoryName + "', " + item.categoryCode + ", " + item.categoryType + ", " + item.poExternalNo + ", " + item.poExternalDate + ", '', '" + item.quantity + "', '" + item.pricePerUnit + "', '" + item.currencyRate + "', '" + item.total + "'); ");
+                    sqlQuery = sqlQuery.concat(`insert into fact_total_nilai_pembelian([ID Total Nilai Pembelian], [Nama Divisi], [Nama Unit], [Nama Kategori], [Jenis Kategori], [Nomor PO Eksternal], [Tanggal PO Eksternal], [Jumlah Beli], [Harga Satuan Barang], [Rate yang disepakati], [Total Harga],  kode_unit, kode_kategori) values(${count}, ${item.divisionName}, ${item.unitName}, ${item.categoryName}, ${item.categoryType}, ${item.poExternalNo}, ${item.poExternalDate}, ${item.quantity}, ${item.pricePerUnit}, ${item.currencyRate}, ${item.total}, ${item.unitCode}, ${item.categoryCode}); `);
 
                     count = count + 1;
                 }
 
                 request.multiple = true;
 
-                return request.query(sqlQuery)
+                // return request.query(sqlQuery)
                 // return request.query('select count(*) from fact_total_nilai_pembelian')
-                // return request.query('select top 1 * from fact_total_nilai_pembelian')
+                return request.query('select top 1 * from fact_total_nilai_pembelian')
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();

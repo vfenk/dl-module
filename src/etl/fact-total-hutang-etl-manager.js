@@ -43,7 +43,7 @@ module.exports = class FactTotalHutang {
             return this.unitPaymentOrderManager.collection.find({
                 items: {
                     "$elemMatch": {
-                        unitReceiptNoteId: unitReceiptNote._id.toString()
+                        unitReceiptNoteId: unitReceiptNote._id
                     }
                 }
             }).toArray()
@@ -73,8 +73,8 @@ module.exports = class FactTotalHutang {
 
                 return {
                     unitPaymentOrderNo: unitPaymentOrder.no,
-                    unitPaymentOrderDate: unitPaymentOrder.date,
-                    unitPaymentOrderDueDate: unitPaymentOrder.dueDate,
+                    unitPaymentOrderDate: moment(unitPaymentOrder.date).format('L'),
+                    unitPaymentOrderDueDate: moment(unitPaymentOrder.dueDate).format('L'),
                     supplierName: unitPaymentOrder.supplier.name,
                     categoryName: unitPaymentOrder.category.name,
                     categoryType: unitPaymentOrder.category.name.toLowerCase() == 'bahan baku' ? 'BAHAN BAKU' : 'NON BAHAN BAKU',
@@ -107,9 +107,9 @@ module.exports = class FactTotalHutang {
 
                 request.multiple = true;
 
-                return request.query(sqlQuery)
+                // return request.query(sqlQuery)
                 // return request.query('select count(*) from fact_total_hutang')
-                // return request.query('select top 1 * from fact_total_hutang')
+                return request.query('select top 1 * from fact_total_hutang')
                     .then((results) => {
                     console.log(results);
                     return Promise.resolve();
