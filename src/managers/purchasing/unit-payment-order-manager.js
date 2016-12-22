@@ -46,6 +46,11 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     var _module = results[0];
                     var now = new Date();
                     var getURN = results.slice(1, results.length);
+
+                    if (_module) {
+                        errors["no"] = i18n.__("UnitPaymentOrder.no.isExist:%s is exist", i18n.__("UnitPaymentOrder.no._:No"));
+                    }
+
                     if (!valid.divisionId) {
                         errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
                     }
