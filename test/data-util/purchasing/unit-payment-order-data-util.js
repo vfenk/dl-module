@@ -51,7 +51,7 @@ class UnitPaymentOrderDataUtil {
                             }]
                         };
                         return Promise.resolve(data);
-                    })
+                    });
             });
     }
 

@@ -51,8 +51,8 @@ class UnitPaymentPriceCorrectionNoteDataUtil {
                             items: itemsUnitPaymentPriceCorrectionNote
                         };
                         return Promise.resolve(data);
-                    })
-            })
+                    });
+            });
     }
 
     getNewTestData() {
