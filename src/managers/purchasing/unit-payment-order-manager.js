@@ -52,7 +52,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     }
 
                     if (!valid.divisionId) {
-                        errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
+                        errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi"));
                     }
                     else if (valid.division) {
                         if (!valid.division._id)
