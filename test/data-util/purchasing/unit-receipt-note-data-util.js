@@ -52,8 +52,8 @@ class UnitReceiptNoteDataUtil {
                             items: doItems
                         };
                         return Promise.resolve(data);
-                    })
-            })
+                    });
+            });
     }
 
      getNewTestData() {
