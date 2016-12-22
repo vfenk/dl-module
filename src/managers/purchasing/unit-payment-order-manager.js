@@ -26,7 +26,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = unitPaymentOrder;
             var getUnitReceiptNote = [];
-            if (valid) {
+            if (Object.getOwnPropertyNames(valid).length > 0) {
                 for (var item of valid.items) {
                     getUnitReceiptNote.push(ObjectId.isValid(item.unitReceiptNoteId) ? this.unitReceiptNote.getSingleByIdOrDefault(item.unitReceiptNoteId) : Promise.resolve(null));
                 }
