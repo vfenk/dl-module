@@ -188,7 +188,7 @@ module.exports = function (unitPaymentCorrection) {
 
     var useIncomeTax = unitPaymentCorrection.unitPaymentOrder.incomeTaxNo.length > 0 ? sum * 0.1 : 0;
 
-    var total = ['\n',
+    var totalKoreksiJumlah = ['\n',
         {
             columns: [{
                 width: '30%',
@@ -236,6 +236,26 @@ module.exports = function (unitPaymentCorrection) {
             margin: [350, 0, 0, 0]
         },
         '\n'];
+
+    var totalKoreksiHarga = ['\n',
+        {
+            columns: [{
+                width: '30%',
+                text: 'Jumlah',
+                style: ['size08']
+            }, {
+                    width: '5%',
+                    text: currency,
+                    style: ['size08']
+                }, {
+                    width: '65%',
+                    text: parseFloat(sum).toLocaleString(locale, locale.currency),
+                    style: ['size08', 'right']
+                }],
+            margin: [350, 0, 0, 0]
+        }, '\n'];
+
+    var total = unitPaymentCorrection.correctionType === "Jumlah" ? totalKoreksiJumlah : totalKoreksiHarga;
 
     var terbilang = {
         text: `Terbilang : ${Say(sum + useIncomeTax)}`,
@@ -290,7 +310,7 @@ module.exports = function (unitPaymentCorrection) {
                             style: ['size08']
                         }, {
                             width: '*',
-                            text: `Nomor ${unitPaymentCorrection.unitPaymentOrder.no}`,
+                            text: `${unitPaymentCorrection.unitPaymentOrder.no}`,
                             style: ['size08']
                         }]
                 }, {

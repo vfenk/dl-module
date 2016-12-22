@@ -1,7 +1,7 @@
 require("should");
 var helper = require("../../helper");
 
-var unitPaymentPriceCorrectionNote = require('../../data').transaction.unitPaymentPriceCorrectionNote;
+var unitPaymentPriceCorrectionNoteDataUtil = require("../../data-util/purchasing/unit-payment-price-correction-note-data-util");
 var UnitPaymentPriceCorrectionNoteManager = require("../../../src/managers/purchasing/unit-payment-price-correction-note-manager");
 var unitPaymentPriceCorrectionNoteManager = null;
 
@@ -34,7 +34,7 @@ it('#01. should error when create with empty data ', function(done) {
 });
 
 it('#02. should success when create new unit-payment-quantity-correction-note', function (done) {
-    unitPaymentPriceCorrectionNote.getNew()
+    unitPaymentPriceCorrectionNoteDataUtil.getNewTestData()
         .then((data) => {
             data._id.should.be.Object();
             createdId = data._id;
@@ -42,5 +42,21 @@ it('#02. should success when create new unit-payment-quantity-correction-note', 
         })
         .catch(e => {
             done(e);
+        });
+});
+
+
+it('#03. should success when get pdf ', function(done) {
+    unitPaymentPriceCorrectionNoteManager.pdf(createdId)
+        .then((binary) => {
+            done();
+        })
+        .catch(e => {
+            try {
+                done();
+            }
+            catch (ex) {
+                done(ex);
+            }
         });
 });
