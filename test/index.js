@@ -12,16 +12,16 @@ describe('#dl-module', function(done) {
     // test('@auth/account-manager', './auth/account-manager-test');
     // test('@auth/role-manager', './auth/role-manager-test');
 
-    test('@ETL/DIM-CATEGORY', './etl/dim-category');
-    test('@ETL/DIM-DIVISION', './etl/dim-division');
-    test('@ETL/DIM-SUPPLIER', './etl/dim-supplier');
-    test('@ETL/DIM-UNIT', './etl/dim-unit');
-    test('@ETL/FACT-PURCHASE-DURATION', './etl/fact-purchase-duration');
-    test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
-    test('@ETL/FACT-TOTAL-NILAI-PEMBELIAN', './etl/fact-total-nilai-pembelian');
-    test('@ETL/FACT-TOP-TEN-SUPPLIER', './etl/fact-top-ten-supplier');
-    test('@ETL/FACT-PURCHASE-ORDER-COMPARISON', './etl/fact-purchase-order-comparison');
-    test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');
+    // test('@ETL/DIM-CATEGORY', './etl/dim-category');
+    // test('@ETL/DIM-DIVISION', './etl/dim-division');
+    // test('@ETL/DIM-SUPPLIER', './etl/dim-supplier');
+    // test('@ETL/DIM-UNIT', './etl/dim-unit');
+    // test('@ETL/FACT-PURCHASE-DURATION', './etl/fact-purchase-duration');
+    // test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
+    // test('@ETL/FACT-TOTAL-NILAI-PEMBELIAN', './etl/fact-total-nilai-pembelian');
+    // test('@ETL/FACT-TOP-TEN-SUPPLIER', './etl/fact-top-ten-supplier');
+    // test('@ETL/FACT-PURCHASE-ORDER-COMPARISON', './etl/fact-purchase-order-comparison');
+    // test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');
 
     // // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
