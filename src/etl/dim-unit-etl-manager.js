@@ -52,7 +52,7 @@ module.exports = class DimUnitEtlManager {
 
                 var count = 1;
                 for (var item of data) {
-                    sqlQuery = sqlQuery.concat("insert into Dimunit([ID unit], [Kode unit] ,[Nama unit]) values(" + count + ", '" + item.unitCode + "', '" + item.unitName + "'); ");
+                    sqlQuery = sqlQuery.concat("insert into Dimunit([ID dim unit], [Kode unit], [Nama Divisi], [Nama unit]) values(" + count + ", '" + item.unitCode + "', '"+ item.divisionName +"', '" + item.unitName + "'); ");
 
                     count = count + 1;
                 }

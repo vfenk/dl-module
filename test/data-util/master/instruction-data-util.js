@@ -32,7 +32,7 @@ class InstructionDataUtil {
         var data = {
             material: 'CD 40 X CD 40 material',
             construction: '2/1 133 construction',
-            processType: 'WHITE',
+            processType: 'Finishing',
             steps:['BLEACHING','SCOURING','MERCERIZE']
         };
         return this.getSert(data);

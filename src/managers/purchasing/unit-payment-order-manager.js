@@ -24,9 +24,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
     _validate(unitPaymentOrder) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = unitPaymentOrder;
+            var valid = unitPaymentOrder || {};
             var getUnitReceiptNote = [];
-            if (valid) {
+            if (Object.getOwnPropertyNames(valid).length > 0) {
                 for (var item of valid.items) {
                     getUnitReceiptNote.push(ObjectId.isValid(item.unitReceiptNoteId) ? this.unitReceiptNote.getSingleByIdOrDefault(item.unitReceiptNoteId) : Promise.resolve(null));
                 }
@@ -38,8 +38,6 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     }
                 }, {
                         "no": valid.no
-                    }, {
-                        _deleted: false
                     }]
             });
 
@@ -48,8 +46,13 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     var _module = results[0];
                     var now = new Date();
                     var getURN = results.slice(1, results.length);
+
+                    if (_module) {
+                        errors["no"] = i18n.__("UnitPaymentOrder.no.isExist:%s is exist", i18n.__("UnitPaymentOrder.no._:No"));
+                    }
+
                     if (!valid.divisionId) {
-                        errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
+                        errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi"));
                     }
                     else if (valid.division) {
                         if (!valid.division._id)
@@ -98,23 +101,23 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     if (!valid.currency) {
                         errors["currency"] = i18n.__("UnitPaymentOrder.currency.isRequired:%s name is required", i18n.__("UnitPaymentOrder.currency._:Currency")); //"currency tidak boleh kosong";
                     }
-                    if (valid.useVat) {
-                        if (valid.vat) {
-                            if (!valid.vat._id) {
-                                errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
-                            }
-                        } else {
-                            errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
-                        }
+                    // if (valid.useVat) {
+                    //     if (valid.vat) {
+                    //         if (!valid.vat._id) {
+                    //             errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
+                    //         }
+                    //     } else {
+                    //         errors["vat"] = i18n.__("UnitPaymentOrder.vat.isRequired:%s name is required", i18n.__("UnitPaymentOrder.vat._:Jenis PPh"));
+                    //     }
 
-                        if (!valid.vatNo || valid.vatNo == '') {
-                            errors["vatNo"] = i18n.__("UnitPaymentOrder.vatNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatNo._:Nomor Faktur Pajak (PPh)"));
-                        }
+                    //     if (!valid.vatNo || valid.vatNo == '') {
+                    //         errors["vatNo"] = i18n.__("UnitPaymentOrder.vatNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatNo._:Nomor Faktur Pajak (PPh)"));
+                    //     }
 
-                        if (!valid.vatDate || valid.vatDate == '') {
-                            errors["vatDate"] = i18n.__("UnitPaymentOrder.vatDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatDate._:Tanggal Faktur Pajak (PPh)"));
-                        }
-                    }
+                    //     if (!valid.vatDate || valid.vatDate == '') {
+                    //         errors["vatDate"] = i18n.__("UnitPaymentOrder.vatDate.isRequired:%s is required", i18n.__("UnitPaymentOrder.vatDate._:Tanggal Faktur Pajak (PPh)"));
+                    //     }
+                    // }
                     if (valid.useIncomeTax) {
                         if (!valid.incomeTaxNo || valid.incomeTaxNo == '') {
                             errors["incomeTaxNo"] = i18n.__("UnitPaymentOrder.incomeTaxNo.isRequired:%s is required", i18n.__("UnitPaymentOrder.incomeTaxNo._:Nomor Faktur Pajak (PPn)"));
@@ -310,8 +313,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
             }
             Promise.all(getPurchaseOrderById)
                 .then(results => {
-                    for (var result of results) {
-                        var purchaseOrder = result;
+                    for (var purchaseOrder of results) {
                         for (var poItem of purchaseOrder.items) {
                             for (var unitPaymentOrderItem of validUnitPaymentOrder.items) {
                                 for (var unitReceiptNoteItem of unitPaymentOrderItem.unitReceiptNote.items) {
@@ -324,16 +326,16 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                 fulfillment.invoiceNo = validUnitPaymentOrder.invoceNo;
                                                 fulfillment.interNoteDate = validUnitPaymentOrder.date;
                                                 fulfillment.interNoteNo = validUnitPaymentOrder.no;
-                                                fulfillment.interNoteValue = unitReceiptNoteItem.pricePerDealUnit;
+                                                fulfillment.interNoteValue = unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                 fulfillment.interNoteDueDate = validUnitPaymentOrder.dueDate;
                                                 if (validUnitPaymentOrder.incomeTaxNo) {
                                                     fulfillment.ppnNo = validUnitPaymentOrder.incomeTaxNo;
                                                     fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
-                                                    fulfillment.ppnValue = 0.1 * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit;
+                                                    fulfillment.ppnValue = 0.1 * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                 }
                                                 if (validUnitPaymentOrder.vatNo) {
                                                     fulfillment.pphNo = validUnitPaymentOrder.vatNo;
-                                                    fulfillment.pphValue = validUnitPaymentOrder.vatRate * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit;
+                                                    fulfillment.pphValue = validUnitPaymentOrder.vatRate * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                     fulfillment.pphDate = validUnitPaymentOrder.vatDate;
                                                 }
                                                 break;

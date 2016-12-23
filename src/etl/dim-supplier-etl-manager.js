@@ -51,7 +51,7 @@ module.exports = class DimSupplierEtlManager {
 
                 var count = 1;
                 for (var item of data) {
-                    sqlQuery = sqlQuery.concat("insert into DimSupplier([ID Supplier], [Kode Supplier] ,[Nama Supplier]) values(" + count + ", '" + item.supplierCode + "', '" + item.supplierName + "'); ");
+                    sqlQuery = sqlQuery.concat("insert into DimSupplier([ID Dim Supplier], [Kode Supplier] ,[Nama Supplier]) values(" + count + ", '" + item.supplierCode + "', '" + item.supplierName + "'); ");
 
                     count = count + 1;
                 }

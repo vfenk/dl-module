@@ -249,9 +249,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
             if (state !== -1) {
                 Object.assign(query, {
-                    status: {
-                        value: state
-                    }
+                    "status.value": state
                 });
             }
 
