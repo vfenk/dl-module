@@ -10,7 +10,7 @@ class UnitPaymentQuantityCorrectionNoteDataUtil {
         return helper
             .getManager(UnitPaymentQuantityCorrectionNote)
             .then(manager => {
-                return Promise.all([unitPaymentOrder.getNew()])
+                return Promise.all([unitPaymentOrder.getNewTestData()])
                     .then(results => {
                         var dataUnitPaymentOrder = results[0];
                         var itemsUnitPaymentQuantityCorrectionNote = dataUnitPaymentOrder.items.map(unitPaymentOrder => {
