@@ -20,7 +20,7 @@ class UnitPaymentQuantityCorrectionNoteDataUtil {
                                     purchaseOrder: unitReceiptNoteItem.purchaseOrder,
                                     productId: unitReceiptNoteItem.product._id,
                                     product: unitReceiptNoteItem.product,
-                                    quantity: unitReceiptNoteItem.deliveredQuantity,
+                                    quantity: unitReceiptNoteItem.deliveredQuantity-1,
                                     uomId: unitReceiptNoteItem.deliveredUom._id,
                                     uom: unitReceiptNoteItem.deliveredUom,
                                     pricePerUnit: unitReceiptNoteItem.pricePerDealUnit,
