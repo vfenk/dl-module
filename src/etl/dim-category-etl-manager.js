@@ -53,7 +53,7 @@ module.exports = class DimCategoryEtlManager {
                 var count = 1;
                 for (var item of data) {
                     sqlQuery = sqlQuery.concat("insert into DimKategori([ID Dim Kategori], [Kode Kategori] ,[Nama Kategori], [Jenis Kategori]) values(" + count + ", '" + item.categoryCode + "', '" + item.categoryName + "', '" + item.categoryType + "'); ");
-
+                 
                     count = count + 1;
                 }
 
