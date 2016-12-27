@@ -265,10 +265,9 @@ module.exports = function (unitPaymentCorrection) {
         [{
             stack: [
                 '\n',
-                'Sukoharjo, 24 Agustus 2016',
+                `Sukoharjo, ${moment(unitPaymentCorrection.date).format(locale.date.format)}`,
                 '\n\n\n\n',
-                'Gunawan Adi Nugroho',
-                'Pimp. Pembelian D',
+                '_____________________________',
                 '\n'
             ],
             colSpan: 5,

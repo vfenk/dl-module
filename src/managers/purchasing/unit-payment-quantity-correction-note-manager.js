@@ -112,7 +112,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
 
                     valid.unitPaymentOrderId = _unitPaymentOrder._id;
                     valid.unitPaymentOrder = _unitPaymentOrder;
-                    valid.priceCorrectionType = "Jumlah";
+                    valid.correctionType = "Jumlah";
                     valid.date = new Date(valid.date);
 
                     if (valid.invoiceCorrectionDate) {
@@ -174,7 +174,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
     _getQuery(paging) {
         var deletedFilter = {
             _deleted: false,
-            priceCorrectionType: "Jumlah"
+            correctionType: "Jumlah"
         },
             keywordFilter = {};
 
@@ -295,7 +295,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                 var _qty = 0;
                                                                 _correction.correctionDate = validData.date;
                                                                 _correction.correctionNo = validData.no;
-                                                                _correction.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
+                                                                _correction.correctionRemark = `Koreksi ${validData.correctionType}`;
 
                                                                 if (!fulfillmentPoItem.correction) {
                                                                     fulfillmentPoItem.correction = [];
@@ -338,7 +338,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                     correctionQuantity: _item.quantity,
                                                                     correctionPricePerUnit: _item.pricePerUnit,
                                                                     correctionPriceTotal: _item.priceTotal,
-                                                                    correctionRemark: `Koreksi ${validData.priceCorrectionType}`
+                                                                    correctionRemark: `Koreksi ${validData.correctionType}`
                                                                 };
                                                                 _unitReceiptNoteItem.correction.push(_correction);
                                                                 break;

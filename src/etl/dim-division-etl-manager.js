@@ -61,6 +61,7 @@ module.exports = class DimDivisionEtlManager {
                 // return request.query(sqlQuery)
                 // return request.query('select count(*) from dimdivisi')
                 return request.query('select top 1 * from dimdivisi')
+
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();

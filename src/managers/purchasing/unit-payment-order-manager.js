@@ -24,9 +24,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
     _validate(unitPaymentOrder) {
         var errors = {};
         return new Promise((resolve, reject) => {
-            var valid = unitPaymentOrder;
+            var valid = unitPaymentOrder || {};
             var getUnitReceiptNote = [];
-            if (valid) {
+            if (Object.getOwnPropertyNames(valid).length > 0) {
                 for (var item of valid.items) {
                     getUnitReceiptNote.push(ObjectId.isValid(item.unitReceiptNoteId) ? this.unitReceiptNote.getSingleByIdOrDefault(item.unitReceiptNoteId) : Promise.resolve(null));
                 }
@@ -38,8 +38,6 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     }
                 }, {
                         "no": valid.no
-                    }, {
-                        _deleted: false
                     }]
             });
 
@@ -48,8 +46,13 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     var _module = results[0];
                     var now = new Date();
                     var getURN = results.slice(1, results.length);
+
+                    if (_module) {
+                        errors["no"] = i18n.__("UnitPaymentOrder.no.isExist:%s is exist", i18n.__("UnitPaymentOrder.no._:No"));
+                    }
+
                     if (!valid.divisionId) {
-                        errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi")); //"Unit tidak boleh kosong";
+                        errors["division"] = i18n.__("UnitPaymentOrder.division.isRequired:%s is required", i18n.__("UnitPaymentOrder.division._:Divisi"));
                     }
                     else if (valid.division) {
                         if (!valid.division._id)
@@ -330,7 +333,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                                     fulfillment.ppnDate = validUnitPaymentOrder.incomeTaxDate
                                                     fulfillment.ppnValue = 0.1 * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                 }
-                                                if (validUnitPaymentOrder.vatNo) { 
+                                                if (validUnitPaymentOrder.vatNo) {
                                                     fulfillment.pphNo = validUnitPaymentOrder.vatNo;
                                                     fulfillment.pphValue = validUnitPaymentOrder.vatRate * unitReceiptNoteItem.deliveredQuantity * unitReceiptNoteItem.pricePerDealUnit * purchaseOrder.currency.rate;
                                                     fulfillment.pphDate = validUnitPaymentOrder.vatDate;
