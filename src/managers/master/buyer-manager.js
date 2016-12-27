@@ -112,7 +112,7 @@ module.exports = class BuyerManager extends BaseManager {
                     var data = [];
                     if (dataFile != "") {
                         for (var i = 1; i < dataFile.length; i++) {
-                            data.push({ "code": dataFile[i][0], "name": dataFile[i][1], "address": dataFile[i][2], "country": dataFile[i][3], "contact": dataFile[i][4], "tempo": dataFile[i][5] });
+                            data.push({ "code": dataFile[i][0], "name": dataFile[i][1], "address": dataFile[i][2], "country": dataFile[i][3], "type": dataFile[i][4], "contact": dataFile[i][5], "tempo": dataFile[i][6] });
                         }
                     }
                     var dataError = [], errorMessage;
@@ -123,6 +123,17 @@ module.exports = class BuyerManager extends BaseManager {
                         }
                         if (data[i]["name"] === "" || data[i]["name"] === undefined) {
                             errorMessage = errorMessage + "Nama tidak boleh kosong, ";
+                        }
+                        if (data[i]["type"] === "" || data[i]["type"] === undefined) {
+                            errorMessage = errorMessage + "Jenis Buyer tidak boleh kosong, ";
+                        } else {
+                            if (data[i]["type"] !== "Lokal") {
+                                if (data[i]["type"] !== "Ekspor") {
+                                    if (data[i]["type"] !== "Internal") {
+                                        errorMessage = errorMessage + "Jenis Buyer harus salah satu dari  Lokal, Ekspor, Internal ";
+                                    }
+                                }
+                            }
                         }
                         if (data[i]["country"] === "" || data[i]["country"] === undefined) {
                             errorMessage = errorMessage + "Negara tidak boleh kosong, ";
@@ -138,7 +149,7 @@ module.exports = class BuyerManager extends BaseManager {
                         }
 
                         if (errorMessage !== "") {
-                            dataError.push({ "code": data[i]["code"], "name": data[i]["name"], "address": data[i]["address"], "country": data[i]["country"], "contact": data[i]["contact"], "tempo": data[i]["tempo"], "Error": errorMessage });
+                            dataError.push({ "code": data[i]["code"], "name": data[i]["name"], "address": data[i]["address"], "country": data[i]["country"], "type":data[i]["type"], "contact": data[i]["contact"], "tempo": data[i]["tempo"], "Error": errorMessage });
                         }
                     }
                     if (dataError.length === 0) {
