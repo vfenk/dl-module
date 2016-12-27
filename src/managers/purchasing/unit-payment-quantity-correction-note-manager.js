@@ -30,10 +30,10 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                    "no": valid.no
-                }, {
-                    _deleted: false
-                }]
+                        "no": valid.no
+                    }, {
+                        _deleted: false
+                    }]
             });
 
             var getUnitPaymentOrder = valid.unitPaymentOrder && ObjectId.isValid(valid.unitPaymentOrder._id) ? this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id) : Promise.resolve(null);
@@ -66,6 +66,9 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
 
                     // if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
                     //     errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
+
+                    if (!valid.date || valid.date == '')
+                        errors["date"] = i18n.__("UnitPaymentQuantityCorrectionNote.date.isRequired:%s is required", i18n.__("UnitPaymentQuantityCorrectionNote.date._:Correction Date"));
 
                     if (valid.items) {
                         if (valid.items.length > 0) {
@@ -103,13 +106,32 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
                     valid.unitPaymentOrderId = _unitPaymentOrder._id;
                     valid.unitPaymentOrder = _unitPaymentOrder;
-                    valid.priceCorrectionType = "Jumlah";
+                    valid.correctionType = "Jumlah";
+                    valid.date = new Date(valid.date);
+
+                    if (valid.invoiceCorrectionDate) {
+                        valid.invoiceCorrectionDate = new Date(valid.invoiceCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.incomeTaxCorrectionDate) {
+                        valid.incomeTaxCorrectionDate = new Date(valid.incomeTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.vatTaxCorrectionDate) {
+                        valid.vatTaxCorrectionDate = new Date(valid.vatTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
 
                     for (var item of valid.items) {
                         for (var _unitPaymentOrderItem of _unitPaymentOrder.items) {
@@ -152,7 +174,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
     _getQuery(paging) {
         var deletedFilter = {
             _deleted: false,
-            priceCorrectionType: "Jumlah"
+            correctionType: "Jumlah"
         },
             keywordFilter = {};
 
@@ -273,7 +295,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                 var _qty = 0;
                                                                 _correction.correctionDate = validData.date;
                                                                 _correction.correctionNo = validData.no;
-                                                                _correction.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
+                                                                _correction.correctionRemark = `Koreksi ${validData.correctionType}`;
 
                                                                 if (!fulfillmentPoItem.correction) {
                                                                     fulfillmentPoItem.correction = [];
@@ -316,7 +338,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                                     correctionQuantity: _item.quantity,
                                                                     correctionPricePerUnit: _item.pricePerUnit,
                                                                     correctionPriceTotal: _item.priceTotal,
-                                                                    correctionRemark: `Koreksi ${validData.priceCorrectionType}`
+                                                                    correctionRemark: `Koreksi ${validData.correctionType}`
                                                                 };
                                                                 _unitReceiptNoteItem.correction.push(_correction);
                                                                 break;
@@ -390,12 +412,14 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                                 for (var _fulfillment of _poItem.fulfillments) {
                                     var qty = 0, priceTotal = 0, pricePerUnit = 0;
                                     if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentQuantityCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
-                                        qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
-                                        priceTotal = qty * _item.pricePerUnit;
+                                        // qty = _fulfillment.unitReceiptNoteDeliveredQuantity - _item.quantity;
+                                        // priceTotal = qty * _item.pricePerUnit;
+                                        priceTotal = _item.quantity * _item.pricePerUnit;
                                         pricePerUnit = _item.pricePerUnit;
                                         _item.pricePerUnit = pricePerUnit;
-                                        _item.quantity = qty;
+                                        // _item.quantity = qty;
                                         _item.priceTotal = priceTotal;
+
                                         break;
                                     }
                                 }

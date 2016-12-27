@@ -47,7 +47,7 @@ class UnitPaymentPriceCorrectionNoteDataUtil {
                                 vatTaxCorrectionNo: `UT/UPPCN/PPH/${codeGenerator()}`,
                                 vatTaxCorrectionDate: new Date(),
                                 unitCoverLetterNo: `UT/UPPCN/Letter/${codeGenerator()}`,
-                                priceCorrectionType: 'Harga Satuan',
+                                correctionType: 'Harga Satuan',
                                 remark: 'Unit Test Unit payment price correction',
                                 items:  itemsUnitPaymentPriceCorrectionNote
                             };

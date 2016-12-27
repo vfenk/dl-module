@@ -30,10 +30,10 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                    "no": valid.no
-                }, {
-                    _deleted: false
-                }]
+                        "no": valid.no
+                    }, {
+                        _deleted: false
+                    }]
             });
 
             var getUnitPaymentOrder = valid.unitPaymentOrder && ObjectId.isValid(valid.unitPaymentOrder._id) ? this.unitPaymentOrderManager.getSingleByIdOrDefault(valid.unitPaymentOrder._id) : Promise.resolve(null);
@@ -66,6 +66,9 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                     // if (!valid.invoiceCorrectionDate || valid.invoiceCorrectionDate == '')
                     //     errors["invoiceCorrectionDate"] = i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.invoiceCorrectionDate._:Invoice Correction Date"));
 
+                    if (!valid.date || valid.date == '')
+                        errors["date"] = i18n.__("UnitPaymentPriceCorrectionNote.date.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.date._:Correction Date"));
+
                     if (valid.items) {
                         if (valid.items.length > 0) {
                             var itemErrors = [];
@@ -97,12 +100,31 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                     }
 
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('module-toolkit').ValidationError ;
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
 
                     valid.unitPaymentOrderId = _unitPaymentOrder._id;
                     valid.unitPaymentOrder = _unitPaymentOrder;
+                    valid.date = new Date(valid.date);
+
+                    if (valid.invoiceCorrectionDate) {
+                        valid.invoiceCorrectionDate = new Date(valid.invoiceCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.incomeTaxCorrectionDate) {
+                        valid.incomeTaxCorrectionDate = new Date(valid.incomeTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
+
+                    if (valid.vatTaxCorrectionDate) {
+                        valid.vatTaxCorrectionDate = new Date(valid.vatTaxCorrectionDate);
+                    } else {
+                        valid.vatTaxCorrectionDate = null;
+                    }
 
                     for (var item of valid.items) {
                         for (var _unitPaymentOrderItem of _unitPaymentOrder.items) {
@@ -145,8 +167,8 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         var deletedFilter = {
             _deleted: false,
             $or: [
-                { priceCorrectionType: "Harga Satuan" },
-                { priceCorrectionType: "Harga Total" }
+                { correctionType: "Harga Satuan" },
+                { correctionType: "Harga Total" }
             ]
         },
             keywordFilter = {};
@@ -197,11 +219,12 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                 for (var _fulfillment of _poItem.fulfillments) {
                                     var pricePerUnit = 0, priceTotal = 0;
                                     if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentPriceCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
-                                        if (unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Satuan") {
+                                        if (unitPaymentPriceCorrectionNote.correctionType === "Harga Satuan") {
                                             pricePerUnit = _poItem.pricePerDealUnit - _item.pricePerUnit;
                                             priceTotal = pricePerUnit * _item.quantity;
                                         }
-                                        else if (unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Total") {
+                                        else if (unitPaymentPriceCorrectionNote.correctionType === "Harga Total") {
+                                            pricePerUnit = _item.pricePerUnit;
                                             priceTotal = (_item.quantity * _poItem.pricePerDealUnit) - (_item.priceTotal)
                                         }
 
@@ -273,7 +296,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                                 _correction.correctionNo = validData.no;
                                                                 _correction.correctionQuantity = unitPaymentPriceCorrectionNoteItem.quantity;
                                                                 _correction.correctionPriceTotal = (unitPaymentPriceCorrectionNoteItem.priceTotal * unitPaymentPriceCorrectionNoteItem.currency.rate) - (unitPaymentPriceCorrectionNoteItem.quantity * _poItem.pricePerDealUnit * unitPaymentPriceCorrectionNoteItem.currency.rate);
-                                                                _correction.correctionRemark = `Koreksi ${validData.priceCorrectionType}`;
+                                                                _correction.correctionRemark = `Koreksi ${validData.correctionType}`;
                                                                 fulfillmentPoItem.correction.push(_correction);
                                                                 break;
                                                             }
@@ -302,7 +325,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                                                     correctionQuantity: _item.quantity,
                                                                     correctionPricePerUnit: _item.pricePerUnit,
                                                                     correctionPriceTotal: _item.priceTotal,
-                                                                    correctionRemark: `Koreksi ${validData.priceCorrectionType}`
+                                                                    correctionRemark: `Koreksi ${validData.correctionType}`
                                                                 };
                                                                 _unitReceiptNoteItem.correction.push(_correction);
                                                                 break;
@@ -377,11 +400,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                                 for (var _fulfillment of _poItem.fulfillments) {
                                     var pricePerUnit = 0, priceTotal = 0;
                                     if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentPriceCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
-                                        if (unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Satuan") {
+                                        if (unitPaymentPriceCorrectionNote.correctionType === "Harga Satuan") {
                                             pricePerUnit = _poItem.pricePerDealUnit - _item.pricePerUnit;
                                             priceTotal = pricePerUnit * _item.quantity;
                                         }
-                                        else if (unitPaymentPriceCorrectionNote.priceCorrectionType === "Harga Total") {
+                                        else if (unitPaymentPriceCorrectionNote.correctionType === "Harga Total") {
                                             priceTotal = (_item.quantity * _poItem.pricePerDealUnit) - (_item.priceTotal)
                                         }
 

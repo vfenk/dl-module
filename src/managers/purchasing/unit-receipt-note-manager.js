@@ -134,6 +134,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     valid.supplier = _supplier;
                     valid.deliveryOrderId = new ObjectId(_deliveryOrder._id);
                     valid.deliveryOrder = _deliveryOrder;
+                    valid.date = new Date(valid.date);
 
                     for (var item of valid.items) {
                         for (var _po of _purchaseOrderList) {
@@ -244,7 +245,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                         if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
                                             if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
                                                 for (var fulfillment of poItem.fulfillments) {
-                                                    var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                    var fulfillmentNo = fulfillment.deliveryOrderNo || '';
                                                     var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
 
                                                     if (fulfillmentNo === deliveryOrderNo && !fulfillment.unitReceiptNoteNo) {
@@ -393,7 +394,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                 if (unitReceiptNoteItem.purchaseOrderId.toString() === purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() === purchaseOrder.unitId.toString()) {
                                                     if (unitReceiptNoteItem.product._id.toString() === poItem.product._id.toString()) {
                                                         for (var fulfillment of poItem.fulfillments) {
-                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                            var fulfillmentNo = fulfillment.deliveryOrderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
 
                                                             if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo === validUnitReceiptNote.no) {
@@ -539,7 +540,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                                                 if (unitReceiptNoteItem.purchaseOrderId.toString() === purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() === purchaseOrder.unitId.toString()) {
                                                     if (unitReceiptNoteItem.product._id.toString() === poItem.product._id.toString()) {
                                                         for (var fulfillment of poItem.fulfillments) {
-                                                            var fulfillmentNo = fulfillment.deliveryOderNo || '';
+                                                            var fulfillmentNo = fulfillment.deliveryOrderNo || '';
                                                             var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
 
                                                             if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo === validUnitReceiptNote.no) {
@@ -705,8 +706,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
             if (_dateFrom !== "undefined" && _dateFrom !== "null" && _dateFrom !== "" && _dateTo !== "undefined" && _dateTo !== "null" && _dateTo !== "") {
                 var date = {
                     date: {
-                        $gte: _dateFrom,
-                        $lte: _dateTo
+                        $gte: new Date(_dateFrom),
+                        $lte: new Date(_dateTo)
                     }
                 };
                 Object.assign(query, date);

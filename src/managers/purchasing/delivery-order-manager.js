@@ -16,6 +16,7 @@ var i18n = require('dl-i18n');
 var SupplierManager = require('../master/supplier-manager');
 var prStatusEnum = DLModels.purchasing.enum.PurchaseRequestStatus;
 var poStatusEnum = DLModels.purchasing.enum.PurchaseOrderStatus;
+var generateCode = require('../../utils/code-generator');
 
 module.exports = class DeliveryOrderManager extends BaseManager {
     constructor(db, user) {
@@ -83,8 +84,17 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     },
                     _deleted: false
                 }, {
-                    "no": valid.no
-                }]
+                        "no": valid.no
+                    }]
+            });
+            var getDeliveryderByRefNoPromise = this.collection.singleOrDefault({
+                "$and": [{
+                    _id: {
+                        '$ne': new ObjectId(valid._id)
+                    }
+                }, {
+                        "refNo": valid.refNo
+                    }]
             });
             var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
             var getPoExternal = [];
@@ -92,21 +102,27 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 if (ObjectId.isValid(doItem.purchaseOrderExternal._id))
                     getPoExternal.push(this.purchaseOrderExternalManager.getSingleByIdOrDefault(doItem.purchaseOrderExternal._id));
 
-            Promise.all([getDeliveryderPromise, getSupplier].concat(getPoExternal))
+            Promise.all([getDeliveryderPromise, getSupplier, getDeliveryderByRefNoPromise].concat(getPoExternal))
                 .then(results => {
                     var _module = results[0];
                     var _supplier = results[1];
-                    var _poExternals = results.slice(2, results.length) || [];
+                    var _dobyRefNo = results[2];
+                    var _poExternals = results.slice(3, results.length) || [];
 
                     if (!valid.no || valid.no === "")
                         errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan tidak boleh kosong";
                     else if (_module)
                         errors["no"] = i18n.__("DeliveryOrder.no.isExists:%s is already exists", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan sudah terdaftar";
 
+                    if (!valid.refNo || valid.refNo === "")
+                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isRequired:%s is required", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan tidak boleh kosong";
+                    else if (_dobyRefNo)
+                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isExists:%s is already exists", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan sudah terdaftar";
+
                     if (!valid.date || valid.date === "")
                         errors["date"] = i18n.__("DeliveryOrder.date.isRequired:%s is required", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh kosong";
-                    else if (valid.date > now)
-                        errors["date"] = i18n.__("DeliveryOrder.date.isGreater:%s is greater than today", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
+                    // else if (valid.date > now)
+                    //     errors["date"] = i18n.__("DeliveryOrder.date.isGreater:%s is greater than today", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
                     if (!valid.supplierDoDate || valid.supplierDoDate === "")
                         errors["supplierDoDate"] = i18n.__("DeliveryOrder.supplierDoDate.isRequired:%s is required", i18n.__("DeliveryOrder.supplierDoDate._:SupplierDoDate"));//"Tanggal surat jalan supplier tidak boleh kosong";
 
@@ -174,6 +190,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                     valid.supplier = _supplier;
                     valid.supplierId = new ObjectId(valid.supplier._id);
+                    valid.date = new Date(valid.date);
+                    valid.supplierDoDate = new Date(valid.supplierDoDate);
+
 
                     for (var item of valid.items) {
                         for (var poExternal of _poExternals) {
@@ -226,9 +245,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var code = stamp.toString();
             this._createIndexes()
                 .then((createIndexResults) => {
+                    deliveryOrder.refNo = generateCode();
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
-                            validDeliveryOrder.refNo = `${code}-${validDeliveryOrder.no}`;
                             validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
                             //UPDATE PO INTERNAL
                             var poId = new ObjectId();
@@ -253,16 +272,16 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                         for (var fulfillment of validDeliveryOrderItem.fulfillments) {
                                                             if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
                                                                 var fulfillmentObj = {
-                                                                    deliveryOderNo: validDeliveryOrder.no,
-                                                                    deliveryOderDeliveredQuantity: fulfillment.deliveredQuantity,
-                                                                    deliveryOderDate: validDeliveryOrder.date,
+                                                                    deliveryOrderNo: validDeliveryOrder.no,
+                                                                    deliveryOrderDeliveredQuantity: fulfillment.deliveredQuantity,
+                                                                    deliveryOrderDate: validDeliveryOrder.date,
                                                                     supplierDoDate: validDeliveryOrder.supplierDoDate
                                                                 };
                                                                 poItem.fulfillments.push(fulfillmentObj);
 
                                                                 var totalRealize = 0;
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
+                                                                    totalRealize += poItemFulfillment.deliveryOrderDeliveredQuantity;
                                                                 }
                                                                 poItem.realizationQuantity = totalRealize;
                                                                 if (poItem.realizationQuantity === poItem.dealQuantity)
@@ -298,7 +317,6 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                 }
 
                                                 for (var _pr of _purchaseRequests) {
-
                                                     if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
                                                         if (purchaseOrder.isClosed) {
                                                             _pr.status = prStatusEnum.COMPLETE;
@@ -440,10 +458,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                             if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
 
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    if (poItemFulfillment.deliveryOderNo === validDeliveryOrder.no) {
-                                                                        poItemFulfillment.deliveryOderNo = validDeliveryOrder.no;
-                                                                        poItemFulfillment.deliveryOderDeliveredQuantity = fulfillment.deliveredQuantity;
-                                                                        poItemFulfillment.deliveryOderDate = validDeliveryOrder.date;
+                                                                    if (poItemFulfillment.deliveryOrderNo === validDeliveryOrder.no) {
+                                                                        poItemFulfillment.deliveryOrderNo = validDeliveryOrder.no;
+                                                                        poItemFulfillment.deliveryOrderDeliveredQuantity = fulfillment.deliveredQuantity;
+                                                                        poItemFulfillment.deliveryOrderDate = validDeliveryOrder.date;
                                                                         poItemFulfillment.supplierDoDate = validDeliveryOrder.supplierDoDate;
                                                                         break;
                                                                     }
@@ -451,7 +469,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                                                                 var totalRealize = 0;
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
+                                                                    totalRealize += poItemFulfillment.deliveryOrderDeliveredQuantity;
                                                                 }
                                                                 poItem.realizationQuantity = totalRealize;
                                                                 if (poItem.realizationQuantity === poItem.dealQuantity)
@@ -615,7 +633,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                             if (purchaseOrder._id.equals(fulfillment.purchaseOrder._id) && poItem.product._id.equals(fulfillment.product._id)) {
                                                                 var _index;
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    if (poItemFulfillment.deliveryOderNo === validDeliveryOrder.no) {
+                                                                    if (poItemFulfillment.deliveryOrderNo === validDeliveryOrder.no) {
                                                                         _index = poItem.fulfillments.indexOf(poItemFulfillment);
                                                                         break;
                                                                     }
@@ -626,7 +644,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                                                                 var totalRealize = 0;
                                                                 for (var poItemFulfillment of poItem.fulfillments) {
-                                                                    totalRealize += poItemFulfillment.deliveryOderDeliveredQuantity;
+                                                                    totalRealize += poItemFulfillment.deliveryOrderDeliveredQuantity;
                                                                 }
                                                                 poItem.realizationQuantity = totalRealize;
                                                                 if (poItem.realizationQuantity === poItem.dealQuantity)
@@ -634,25 +652,46 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                 else
                                                                     poItem.isClosed = false;
                                                                 fulfillment.purchaseOrder = purchaseOrder;
-                                                                break;
+
+                                                                for (var _purchaseRequest of _purchaseRequests) {
+                                                                    if (_purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
+                                                                        for (var _prItem of _purchaseRequest.items) {
+                                                                            if (_prItem.product._id.equals(fulfillment.product._id)) {
+                                                                                var _index = _prItem.deliveryOrderNos.indexOf(validDeliveryOrder.no);
+                                                                                _prItem.deliveryOrderNos.splice(_index, 1);
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                        break;
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
                                                     for (var poItem of purchaseOrder.items) {
-                                                        if (poItem.isClosed === false) {
-                                                            purchaseOrder.isClosed = false;
-                                                            break;
+                                                        if (poItem.fulfillments.length > 0) {
+                                                            purchaseOrder.status = poStatusEnum.ARRIVING;
                                                         }
-                                                        else
-                                                            purchaseOrder.isClosed = true;
+                                                        else {
+                                                            purchaseOrder.status = poStatusEnum.ORDERED;
+                                                        }
+                                                        break;
                                                     }
+
                                                     for (var _pr of _purchaseRequests) {
                                                         if (_pr._id.toString() === purchaseOrder.purchaseRequest._id.toString()) {
                                                             if (purchaseOrder.isClosed) {
                                                                 _pr.status = prStatusEnum.COMPLETE;
                                                             }
                                                             else {
-                                                                _pr.status = prStatusEnum.ARRIVING;
+                                                                for (var _prItem of _pr.items) {
+                                                                    if (_prItem.deliveryOrderNos.length > 0) {
+                                                                        _pr.status = prStatusEnum.ARRIVING;
+                                                                    } else {
+                                                                        _pr.status = prStatusEnum.ORDERED;
+                                                                    }
+                                                                    break;
+                                                                }
                                                             }
                                                             tasksPR.push(this.purchaseRequestManager.update(_pr));
                                                             break;
@@ -770,8 +809,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 var supplierDoDate = {
                     supplierDoDate:
                     {
-                        $gte: dateFrom,
-                        $lte: dateTo
+                        $gte: new Date(dateFrom),
+                        $lte: new Date(dateTo)
                     }
                 };
                 Object.assign(query, supplierDoDate);

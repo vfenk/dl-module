@@ -16,10 +16,10 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should error when create new buyer with empty data", function(done) {
+it("#01. should success when create etl for pr", function(done) {
     instanceManager.run()
         .then(() => {
-            done("Should not be able to create data with empty data");
+            done();
         })
         .catch((e) => {
             done(e);
