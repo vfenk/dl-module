@@ -9,6 +9,7 @@ var map = DLModels.map;
 var Division = DLModels.master.Division;
 var BaseManager = require("module-toolkit").BaseManager;
 var i18n = require("dl-i18n");
+var generateCode = require("../../utils/code-generator");
 
 module.exports = class DivisionManager extends BaseManager {
 
