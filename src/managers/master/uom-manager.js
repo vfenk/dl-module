@@ -107,7 +107,7 @@ module.exports = class UomManager extends BaseManager {
                     var dataError = [], errorMessage;
                     for (var i = 0; i < data.length; i++) {
                         errorMessage = "";
-                        if (data[i]["unit"] === "" || data[i]["unit"] === undefined) {
+                        if ((data[i]["unit"]).toLowerCase() === "" || (data[i]["unit"] === undefined).toLowerCase()) {
                             errorMessage = errorMessage + "Unit tidak boleh kosong, ";
                         }
                         for (var j = 0; j < uom.length; j++) {

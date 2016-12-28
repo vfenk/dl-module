@@ -138,7 +138,7 @@ module.exports = class ProductManager extends BaseManager {
                                     var data = [];
                                     if (dataFile != "") {
                                         for (var i = 1; i < dataFile.length; i++) {
-                                            data.push({ "code": dataFile[i][0], "name": dataFile[i][1], "uom": dataFile[i][2], "currency": dataFile[i][3], "price": dataFile[i][4], "description": dataFile[i][5] });
+                                            data.push({ "code": dataFile[i][0], "name": dataFile[i][1], "uom": dataFile[i][2], "currency": dataFile[i][3], "price": dataFile[i][4], "tags":dataFile[i][5], "description": dataFile[i][6] });
                                         }
                                     }
                                     var dataError = [], errorMessage;
@@ -198,7 +198,7 @@ module.exports = class ProductManager extends BaseManager {
                                         }
 
                                         if (errorMessage !== "") {
-                                            dataError.push({ "code": data[i]["code"], "name": data[i]["name"], "uom": data[i]["uom"], "currency": data[i]["currency"], "price": data[i]["price"], "description": data[i]["description"], "Error": errorMessage });
+                                            dataError.push({ "code": data[i]["code"], "name": data[i]["name"], "uom": data[i]["uom"], "currency": data[i]["currency"], "price": data[i]["price"], "tags":data[i]["tags"], "description": data[i]["description"], "Error": errorMessage });
                                         }
                                     }
                                     if (dataError.length === 0) {
