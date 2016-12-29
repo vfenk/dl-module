@@ -11,7 +11,7 @@ before("#00. connect db", function(done) {
             });
             done();
         })
-        .catch(e => {
+        .catch((e) => {
             done(e);
         });
 });
@@ -25,3 +25,14 @@ it("#01. should success when create etl fact-purchasing", function(done) {
             done(e);
         });
 });
+
+// it("#01. should success when log synchronize date after updating fact-purchasing", function(done) {
+//     instanceManager.lastSynchDate()
+//         .then(() => {
+//             // console.log(a);
+//             done();
+//         })
+//         .catch((e) => {
+//             done(e);
+//         });
+// });
