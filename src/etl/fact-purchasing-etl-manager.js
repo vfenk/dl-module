@@ -285,16 +285,20 @@ module.exports = class FactPurchasingEtlManager {
         return Promise.resolve([].concat.apply([], result));
     }
 
-    getSqlData() {
-        return new Promise(function (resolve, reject) {
-            sqlConnect.getConnect()
-                .then((connect) => {
-                    var request = connect;
-                    request.query("select * from [fact pembelian]", function (err, stores) {
-                        resolve(stores);
+    lastSynchDate() {
+        return sqlConnect.getConnect()
+            .then((request) => {
+                var lastSynch = 'Fact Pembelian';
+                return request.query(`insert into [fact last synchronized date]([fact name], [last synchronized]) values ('${lastSynch}', '${moment().format('L')}'); `)
+                    .then((results) => {
+                        console.log(results);
+                        return Promise.resolve();
                     });
-                });
-        });
+            })
+            .catch((err) => {
+                console.log(err);
+                return Promise.reject(err);
+            });
     }
 
 
@@ -368,8 +372,8 @@ module.exports = class FactPurchasingEtlManager {
                 // });
 
                 return request.query(sqlQuery)
-                // return request.query('select count(*) from fact_durasi_pembelian')
-                // return request.query('select top 1 * from [fact pembelian]')
+                    // return request.query('select count(*) from fact_durasi_pembelian')
+                    // return request.query('select top 1 * from [fact pembelian]')
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();
