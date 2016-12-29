@@ -72,7 +72,7 @@ module.exports = class UomManager extends BaseManager {
             });
     }
 
-     getUOM() {
+    getUOM() {
         return new Promise((resolve, reject) => {
             var query = {
                 _deleted: false
@@ -109,10 +109,11 @@ module.exports = class UomManager extends BaseManager {
                         errorMessage = "";
                         if (data[i]["unit"] === "" || data[i]["unit"] === undefined) {
                             errorMessage = errorMessage + "Unit tidak boleh kosong, ";
-                        }
-                        for (var j = 0; j < uom.length; j++) {
-                            if ((uom[j]["unit"]).toLowerCase() === (data[i]["unit"]).toLowerCase()) {
-                                errorMessage = errorMessage + "Unit tidak boleh duplikat";
+                        } else {
+                            for (var j = 0; j < uom.length; j++) {
+                                if ((uom[j]["unit"]).toLowerCase() === (data[i]["unit"]).toLowerCase()) {
+                                    errorMessage = errorMessage + "Unit tidak boleh duplikat";
+                                }
                             }
                         }
                         if (errorMessage !== "") {
