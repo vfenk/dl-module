@@ -107,11 +107,11 @@ module.exports = class UomManager extends BaseManager {
                     var dataError = [], errorMessage;
                     for (var i = 0; i < data.length; i++) {
                         errorMessage = "";
-                        if ((data[i]["unit"]).toLowerCase() === "" || (data[i]["unit"] === undefined).toLowerCase()) {
+                        if (data[i]["unit"] === "" || data[i]["unit"] === undefined) {
                             errorMessage = errorMessage + "Unit tidak boleh kosong, ";
                         }
                         for (var j = 0; j < uom.length; j++) {
-                            if (uom[j]["unit"] === data[i]["unit"]) {
+                            if ((uom[j]["unit"]).toLowerCase() === (data[i]["unit"]).toLowerCase()) {
                                 errorMessage = errorMessage + "Unit tidak boleh duplikat";
                             }
                         }
