@@ -26,13 +26,13 @@ module.exports = class FactPurchasingEtlManager {
         this.unitReceiptNoteManager = new UnitReceiptNoteManager(db, user);
         this.unitPaymentOrderManager = new UnitPaymentOrderManager(db, user);
         this.supplierManager = new SupplierManager(db, user);
-    }
+    };
 
     run() {
         return this.extract()
             .then((data) => this.transform(data))
             .then((data) => this.load(data));
-    }
+    };
 
     joinPurchaseOrder(purchaseRequests) {
         var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
@@ -61,7 +61,7 @@ module.exports = class FactPurchasingEtlManager {
             .then(((joinPurchaseOrder) => {
                 return Promise.resolve([].concat.apply([], joinPurchaseOrder));
             }));
-    }
+    };
 
     joinPurchaseOrderExternal(purchaseRequests) {
         var joinPurchaseOrderExternals = purchaseRequests.map((purchaseRequest) => {
@@ -90,7 +90,7 @@ module.exports = class FactPurchasingEtlManager {
             .then(((joinPurchaseOrderExternal) => {
                 return Promise.resolve([].concat.apply([], joinPurchaseOrderExternal));
             }));
-    }
+    };
 
     joinDeliveryOrder(purchaseRequests) {
         var joinDeliveryOrders = purchaseRequests.map((purchaseRequest) => {
@@ -120,29 +120,31 @@ module.exports = class FactPurchasingEtlManager {
             .then(((joinDeliveryOrder) => {
                 return Promise.resolve([].concat.apply([], joinDeliveryOrder));
             }));
-    }
+    };
 
-    joinUnitReceiptNote(data) {
-        var joinUnitReceiptNotes = data.map((item) => {
-            var getUnitReceiptNotes = item.deliveryOrder ? this.unitReceiptNoteManager.collection.find({
-                deliveryOrderId: item.deliveryOrder._id
-            }).toArray() : Promise.resolve([]);
+    joinUnitReceiptNote(purchaseRequests) {
+        var joinUnitReceiptNotes = purchaseRequests.map((item) => {
+            return this.unitReceiptNoteManager.collection.find({
+                purchaseRequestId: purchaseRequest._id
+            })
 
-            return getUnitReceiptNotes.then((unitReceiptNotes) => {
+                .toArray()
+                .then((joinUnitReceiptNotes) => {
+                    var arr = joinUnitReceiptNotes.map((joinUnitReceiptNote) => {
+                        return {
+                            purchaseRequest: purchaseRequest,
+                            unitReceiptNote: unitReceiptNote
+                        };
+                    });
 
-
-                var arr = unitReceiptNotes.map((unitReceiptNote) => {
-                    var obj = Object.assign({}, item);
-                    obj.unitReceiptNote = unitReceiptNote;
-                    return obj;
+                    if (arr.length === 0) {
+                        arr.push({
+                            purchaseRequest: purchaseRequest,
+                            unitReceiptNote: null
+                        });
+                    };
+                    return Promise.resolve(arr);
                 });
-                if (arr.length == 0) {
-                    arr.push(Object.assign({}, item, {
-                        unitReceiptNote: null
-                    }));
-                }
-                return Promise.resolve(arr);
-            });
         });
         return Promise.all(joinUnitReceiptNotes)
             .then((joinUnitReceiptNote => {
@@ -178,66 +180,6 @@ module.exports = class FactPurchasingEtlManager {
         return Promise.all(joinUnitPaymentOrders)
             .then((joinUnitPaymentOrder => {
                 return Promise.resolve([].concat.apply([], joinUnitPaymentOrder));
-            }));
-    }
-
-    joinUnitPaymentOrder(data) {
-        var joinUnitPaymentOrders = data.map((item) => {
-            var getUnitPaymentOrders = item.unitReceiptNote ? this.unitPaymentOrderManager.collection.find({
-                items: {
-                    "$elemMatch": {
-                        unitReceiptNoteId: item.unitReceiptNote._id
-                    }
-                }
-            }).toArray() : Promise.resolve([]);
-
-            return getUnitPaymentOrders.then((unitPaymentOrders) => {
-
-                var arr = unitPaymentOrders.map((unitPaymentOrder) => {
-                    var obj = Object.assign({}, item);
-                    obj.unitPaymentOrder = unitPaymentOrder;
-                    return obj;
-                });
-                if (arr.length == 0) {
-                    arr.push(Object.assign({}, item, {
-                        unitPaymentOrder: null
-                    }));
-                }
-                return Promise.resolve(arr);
-            });
-        });
-        return Promise.all(joinUnitPaymentOrders)
-            .then((joinUnitPaymentOrder => {
-                return Promise.resolve([].concat.apply([], joinUnitPaymentOrder));
-            }));
-    }
-
-    joinPurchaseOrderExternal(purchaseRequests) {
-        var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
-            return this.purchaseOrderManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
-            })
-                .toArray()
-                .then((purchaseOrders) => {
-                    var arr = purchaseOrders.map((purchaseOrder) => {
-                        return {
-                            purchaseRequest: purchaseRequest,
-                            purchaseOrder: purchaseOrder
-                        };
-                    });
-
-                    if (arr.length === 0) {
-                        arr.push({
-                            purchaseRequest: purchaseRequest,
-                            purchaseOrder: null
-                        });
-                    };
-                    return Promise.resolve(arr);
-                });
-        });
-        return Promise.all(joinPurchaseOrders)
-            .then(((joinPurchaseOrder) => {
-                return Promise.resolve([].concat.apply([], joinPurchaseOrder));
             }));
     }
 
