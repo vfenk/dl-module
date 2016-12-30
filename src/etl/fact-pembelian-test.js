@@ -181,6 +181,65 @@ module.exports = class FactPurchasingEtlManager {
             }));
     }
 
+    joinUnitPaymentOrder(data) {
+        var joinUnitPaymentOrders = data.map((item) => {
+            var getUnitPaymentOrders = item.unitReceiptNote ? this.unitPaymentOrderManager.collection.find({
+                items: {
+                    "$elemMatch": {
+                        unitReceiptNoteId: item.unitReceiptNote._id
+                    }
+                }
+            }).toArray() : Promise.resolve([]);
+
+            return getUnitPaymentOrders.then((unitPaymentOrders) => {
+
+                var arr = unitPaymentOrders.map((unitPaymentOrder) => {
+                    var obj = Object.assign({}, item);
+                    obj.unitPaymentOrder = unitPaymentOrder;
+                    return obj;
+                });
+                if (arr.length == 0) {
+                    arr.push(Object.assign({}, item, {
+                        unitPaymentOrder: null
+                    }));
+                }
+                return Promise.resolve(arr);
+            });
+        });
+        return Promise.all(joinUnitPaymentOrders)
+            .then((joinUnitPaymentOrder => {
+                return Promise.resolve([].concat.apply([], joinUnitPaymentOrder));
+            }));
+    }
+
+    joinPurchaseOrderExternal(purchaseRequests) {
+        var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
+            return this.purchaseOrderManager.collection.find({
+                purchaseRequestId: purchaseRequest._id
+            })
+                .toArray()
+                .then((purchaseOrders) => {
+                    var arr = purchaseOrders.map((purchaseOrder) => {
+                        return {
+                            purchaseRequest: purchaseRequest,
+                            purchaseOrder: purchaseOrder
+                        };
+                    });
+
+                    if (arr.length === 0) {
+                        arr.push({
+                            purchaseRequest: purchaseRequest,
+                            purchaseOrder: null
+                        });
+                    };
+                    return Promise.resolve(arr);
+                });
+        });
+        return Promise.all(joinPurchaseOrders)
+            .then(((joinPurchaseOrder) => {
+                return Promise.resolve([].concat.apply([], joinPurchaseOrder));
+            }));
+    }
 
     extract() {
         var timestamp = new Date(1970, 1, 1);
