@@ -34,34 +34,34 @@ module.exports = class FactPurchasingEtlManager {
             .then((data) => this.load(data));
     };
 
-    joinPurchaseOrder(purchaseRequests) {
-        var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
-            return this.purchaseOrderManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
-            })
-                .toArray()
-                .then((purchaseOrders) => {
-                    var arr = purchaseOrders.map((purchaseOrder) => {
-                        return {
-                            purchaseRequest: purchaseRequest,
-                            purchaseOrder: purchaseOrder
-                        };
-                    });
+    // joinPurchaseOrder(purchaseRequests) {
+    //     var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
+    //         return this.purchaseOrderManager.collection.find({
+    //             purchaseRequestId: purchaseRequest._id
+    //         })
+    //             .toArray()
+    //             .then((purchaseOrders) => {
+    //                 var arr = purchaseOrders.map((purchaseOrder) => {
+    //                     return {
+    //                         purchaseRequest: purchaseRequest,
+    //                         purchaseOrder: purchaseOrder
+    //                     };
+    //                 });
 
-                    if (arr.length === 0) {
-                        arr.push({
-                            purchaseRequest: purchaseRequest,
-                            purchaseOrder: null
-                        });
-                    };
-                    return Promise.resolve(arr);
-                });
-        });
-        return Promise.all(joinPurchaseOrders)
-            .then(((joinPurchaseOrder) => {
-                return Promise.resolve([].concat.apply([], joinPurchaseOrder));
-            }));
-    };
+    //                 if (arr.length === 0) {
+    //                     arr.push({
+    //                         purchaseRequest: purchaseRequest,
+    //                         purchaseOrder: null
+    //                     });
+    //                 };
+    //                 return Promise.resolve(arr);
+    //             });
+    //     });
+    //     return Promise.all(joinPurchaseOrders)
+    //         .then(((joinPurchaseOrder) => {
+    //             return Promise.resolve([].concat.apply([], joinPurchaseOrder));
+    //         }));
+    // };
 
     joinPurchaseOrderExternal(purchaseRequests) {
         var joinPurchaseOrderExternals = purchaseRequests.map((purchaseRequest) => {
@@ -92,96 +92,96 @@ module.exports = class FactPurchasingEtlManager {
             }));
     };
 
-    joinDeliveryOrder(purchaseRequests) {
-        var joinDeliveryOrders = purchaseRequests.map((purchaseRequest) => {
-            return this.deliveryOrderManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
-            })
+    // joinDeliveryOrder(purchaseRequests) {
+    //     var joinDeliveryOrders = purchaseRequests.map((purchaseRequest) => {
+    //         return this.deliveryOrderManager.collection.find({
+    //             purchaseRequestId: purchaseRequest._id
+    //         })
 
-                .toArray()
-                .then((deliveryOrders) => {
-                    var arr = deliveryOrders.map((deliveryOrder) => {
-                        return {
-                            purchaseRequest: purchaseRequest,
-                            deliveryOrder: deliveryOrder
-                        };
-                    });
+    //             .toArray()
+    //             .then((deliveryOrders) => {
+    //                 var arr = deliveryOrders.map((deliveryOrder) => {
+    //                     return {
+    //                         purchaseRequest: purchaseRequest,
+    //                         deliveryOrder: deliveryOrder
+    //                     };
+    //                 });
 
-                    if (arr.length === 0) {
-                        arr.push({
-                            purchaseRequest: purchaseRequest,
-                            deliveryOrder: null
-                        });
-                    };
-                    return Promise.resolve(arr);
-                });
-        });
-        return Promise.all(joinDeliveryOrders)
-            .then(((joinDeliveryOrder) => {
-                return Promise.resolve([].concat.apply([], joinDeliveryOrder));
-            }));
-    };
+    //                 if (arr.length === 0) {
+    //                     arr.push({
+    //                         purchaseRequest: purchaseRequest,
+    //                         deliveryOrder: null
+    //                     });
+    //                 };
+    //                 return Promise.resolve(arr);
+    //             });
+    //     });
+    //     return Promise.all(joinDeliveryOrders)
+    //         .then(((joinDeliveryOrder) => {
+    //             return Promise.resolve([].concat.apply([], joinDeliveryOrder));
+    //         }));
+    // };
 
-    joinUnitReceiptNote(purchaseRequests) {
-        var joinUnitReceiptNotes = purchaseRequests.map((item) => {
-            return this.unitReceiptNoteManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
-            })
+    // joinUnitReceiptNote(purchaseRequests) {
+    //     var joinUnitReceiptNotes = purchaseRequests.map((item) => {
+    //         return this.unitReceiptNoteManager.collection.find({
+    //             purchaseRequestId: purchaseRequest._id
+    //         })
 
-                .toArray()
-                .then((joinUnitReceiptNotes) => {
-                    var arr = joinUnitReceiptNotes.map((joinUnitReceiptNote) => {
-                        return {
-                            purchaseRequest: purchaseRequest,
-                            unitReceiptNote: unitReceiptNote
-                        };
-                    });
+    //             .toArray()
+    //             .then((joinUnitReceiptNotes) => {
+    //                 var arr = joinUnitReceiptNotes.map((joinUnitReceiptNote) => {
+    //                     return {
+    //                         purchaseRequest: purchaseRequest,
+    //                         unitReceiptNote: unitReceiptNote
+    //                     };
+    //                 });
 
-                    if (arr.length === 0) {
-                        arr.push({
-                            purchaseRequest: purchaseRequest,
-                            unitReceiptNote: null
-                        });
-                    };
-                    return Promise.resolve(arr);
-                });
-        });
-        return Promise.all(joinUnitReceiptNotes)
-            .then((joinUnitReceiptNote => {
-                return Promise.resolve([].concat.apply([], joinUnitReceiptNote));
-            }));
-    }
+    //                 if (arr.length === 0) {
+    //                     arr.push({
+    //                         purchaseRequest: purchaseRequest,
+    //                         unitReceiptNote: null
+    //                     });
+    //                 };
+    //                 return Promise.resolve(arr);
+    //             });
+    //     });
+    //     return Promise.all(joinUnitReceiptNotes)
+    //         .then((joinUnitReceiptNote => {
+    //             return Promise.resolve([].concat.apply([], joinUnitReceiptNote));
+    //         }));
+    // }
 
-    joinUnitPaymentOrder(data) {
-        var joinUnitPaymentOrders = data.map((item) => {
-            var getUnitPaymentOrders = item.unitReceiptNote ? this.unitPaymentOrderManager.collection.find({
-                items: {
-                    "$elemMatch": {
-                        unitReceiptNoteId: item.unitReceiptNote._id
-                    }
-                }
-            }).toArray() : Promise.resolve([]);
+    // joinUnitPaymentOrder(data) {
+    //     var joinUnitPaymentOrders = data.map((item) => {
+    //         var getUnitPaymentOrders = item.unitReceiptNote ? this.unitPaymentOrderManager.collection.find({
+    //             items: {
+    //                 "$elemMatch": {
+    //                     unitReceiptNoteId: item.unitReceiptNote._id
+    //                 }
+    //             }
+    //         }).toArray() : Promise.resolve([]);
 
-            return getUnitPaymentOrders.then((unitPaymentOrders) => {
+    //         return getUnitPaymentOrders.then((unitPaymentOrders) => {
 
-                var arr = unitPaymentOrders.map((unitPaymentOrder) => {
-                    var obj = Object.assign({}, item);
-                    obj.unitPaymentOrder = unitPaymentOrder;
-                    return obj;
-                });
-                if (arr.length == 0) {
-                    arr.push(Object.assign({}, item, {
-                        unitPaymentOrder: null
-                    }));
-                }
-                return Promise.resolve(arr);
-            });
-        });
-        return Promise.all(joinUnitPaymentOrders)
-            .then((joinUnitPaymentOrder => {
-                return Promise.resolve([].concat.apply([], joinUnitPaymentOrder));
-            }));
-    }
+    //             var arr = unitPaymentOrders.map((unitPaymentOrder) => {
+    //                 var obj = Object.assign({}, item);
+    //                 obj.unitPaymentOrder = unitPaymentOrder;
+    //                 return obj;
+    //             });
+    //             if (arr.length == 0) {
+    //                 arr.push(Object.assign({}, item, {
+    //                     unitPaymentOrder: null
+    //                 }));
+    //             }
+    //             return Promise.resolve(arr);
+    //         });
+    //     });
+    //     return Promise.all(joinUnitPaymentOrders)
+    //         .then((joinUnitPaymentOrder => {
+    //             return Promise.resolve([].concat.apply([], joinUnitPaymentOrder));
+    //         }));
+    // }
 
     extract() {
         var timestamp = new Date(1970, 1, 1);
@@ -190,11 +190,11 @@ module.exports = class FactPurchasingEtlManager {
                 "$gt": timestamp
             }
         }).toArray()
-            .then((puchaseRequests) => this.joinPurchaseOrder(puchaseRequests))
-            .then((results) => this.joinPurchaseOrderExternal(results))
-            .then((results) => this.joinDeliveryOrder(results))
-            .then((results) => this.joinUnitReceiptNote(results))
-            .then((results) => this.joinUnitPaymentOrder(results));
+            // .then((puchaseRequests) => this.joinPurchaseOrder(puchaseRequests))
+            .then((puchaseRequests) => this.joinPurchaseOrderExternal(puchaseRequests))
+        // .then((results) => this.joinDeliveryOrder(results))
+        // .then((results) => this.joinUnitReceiptNote(results))
+        // .then((results) => this.joinUnitPaymentOrder(results));
     }
 
     transform(data) {
@@ -287,7 +287,7 @@ module.exports = class FactPurchasingEtlManager {
         return sqlConnect.getConnect()
             .then((request) => {
                 var lastSynch = 'Fact Pembelian';
-                return request.query(`insert into [fact last synchronized date]([fact name], [last synchronized]) values ('${lastSynch}', '${moment().format('L')}'); `)
+                return request.query(`select last [last synchronized] from [fact last synchronized date]; `)
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();
@@ -341,45 +341,51 @@ module.exports = class FactPurchasingEtlManager {
     load(data) {
         return sqlConnect.getConnect()
             .then((request) => {
+                var lastSynchDate = this.lastSynchDate();
+                Promise.all([lastSynchDate]).then((date) => {
+                    var sqlQuery = '';
+                    var count = 1;
+                    for (var item of data) {
+                        if (item.updateddate >= date[0]) {
+                            if (item) {
+                                //query updateddate
+                                break;
+                            }
 
-                var sqlQuery = '';
+                            sqlQuery = sqlQuery.concat(`insert into [fact pembelian]([id fact pembelian], [id pr], [nomor pr], [tanggal pr], [tanggal kedatangan yang diharapkan], [kode budget], [nama budget], [kode unit], [nama unit], [kode divisi], [nama divisi], [kode kategori], [nama kategori], [jenis kategori], [kode produk], [nama produk], [id po internal], [nomor po internal], [tanggal po internal], [jumlah selisih hari po eksternal-po internal], [selisih hari po internal], [nama staff pembelian], [id po eksternal], [nomor po eksternal], [tanggal po eksternal], [jumlah selisih hari do-po eksternal], [selisih hari do-po eksternal], [kode supplier], [nama supplier], [kode mata uang], [nama mata uang], [metode pembayaran], [nilai mata uang], [jumlah barang], [uom], [harga per unit], [total harga], [id do], [nomor do], [tanggal do], [jumlah selisih hari urn-do], [selisih hari urn-do], [id urn], [nomor urn], [tanggal urn], [jumlah selisih hari upo-urn], [selisih hari upo-urn], [id upo], [nomor upo], [tanggal upo], [jumlah selisih hari upo-po internal], [selisih hari upo-po internal], [invoice price]) values(${count}, ${item.purchaseRequestId}, ${item.purchaseRequestNo}, ${item.purchaseRequestDate}, ${item.expectedDeliveryDate}, ${item.budgetCode}, ${item.budgetName}, ${item.unitCode}, ${item.unitName}, ${item.divisionCode}, ${item.divisionName}, ${item.categoryCode}, ${item.categoryName}, ${item.categoryType}, ${item.productCode}, ${item.productName}, ${item.purchaseOrderId}, ${item.purchaseOrderNo}, ${item.purchaseOrderDate}, ${item.purchaseOrderExternalDays}, ${item.purchaseOrderExternalDaysRange}, ${item.purchasingStaffName}, ${item.purchaseOrderExternalId}, ${item.purchaseOrderExternalNo}, ${item.purchaseOrderExternalDate}, ${item.deliveryOrderDays}, ${item.deliveryOrderDaysRange}, ${item.supplierCode}, ${item.supplierName}, ${item.currencyCode}, ${item.currencyName}, ${item.paymentMethod}, ${item.currencyRate}, ${item.purchaseQuantity}, ${item.uom}, ${item.pricePerUnit}, ${item.totalPrice}, ${item.deliveryOrderId}, ${item.deliveryOrderNo}, ${item.deliveryOrderDate}, ${item.unitReceiptNoteDays}, ${item.unitReceiptNoteDaysRange}, ${item.unitReceiptNoteId}, ${item.unitReceiptNoteNo}, ${item.unitReceiptNoteDate}, ${item.unitPaymentOrderDays}, ${item.unitPaymentOrderDaysRange}, ${item.unitPaymentOrderId}, ${item.unitPaymentOrderNo}, ${item.unitPaymentOrderDate}, ${item.purchaseOrderDays}, ${item.purchaseOrderDaysRange}, ${item.invoicePrice}); `);
 
-                var count = 1;
-                for (var item of data) {
-
-                    if (item) {
-                        sqlQuery = sqlQuery.concat(`insert into [fact pembelian]([id fact pembelian], [id pr], [nomor pr], [tanggal pr], [tanggal kedatangan yang diharapkan], [kode budget], [nama budget], [kode unit], [nama unit], [kode divisi], [nama divisi], [kode kategori], [nama kategori], [jenis kategori], [kode produk], [nama produk], [id po internal], [nomor po internal], [tanggal po internal], [jumlah selisih hari po eksternal-po internal], [selisih hari po internal], [nama staff pembelian], [id po eksternal], [nomor po eksternal], [tanggal po eksternal], [jumlah selisih hari do-po eksternal], [selisih hari do-po eksternal], [kode supplier], [nama supplier], [kode mata uang], [nama mata uang], [metode pembayaran], [nilai mata uang], [jumlah barang], [uom], [harga per unit], [total harga], [id do], [nomor do], [tanggal do], [jumlah selisih hari urn-do], [selisih hari urn-do], [id urn], [nomor urn], [tanggal urn], [jumlah selisih hari upo-urn], [selisih hari upo-urn], [id upo], [nomor upo], [tanggal upo], [jumlah selisih hari upo-po internal], [selisih hari upo-po internal], [invoice price]) values(${count}, ${item.purchaseRequestId}, ${item.purchaseRequestNo}, ${item.purchaseRequestDate}, ${item.expectedDeliveryDate}, ${item.budgetCode}, ${item.budgetName}, ${item.unitCode}, ${item.unitName}, ${item.divisionCode}, ${item.divisionName}, ${item.categoryCode}, ${item.categoryName}, ${item.categoryType}, ${item.productCode}, ${item.productName}, ${item.purchaseOrderId}, ${item.purchaseOrderNo}, ${item.purchaseOrderDate}, ${item.purchaseOrderExternalDays}, ${item.purchaseOrderExternalDaysRange}, ${item.purchasingStaffName}, ${item.purchaseOrderExternalId}, ${item.purchaseOrderExternalNo}, ${item.purchaseOrderExternalDate}, ${item.deliveryOrderDays}, ${item.deliveryOrderDaysRange}, ${item.supplierCode}, ${item.supplierName}, ${item.currencyCode}, ${item.currencyName}, ${item.paymentMethod}, ${item.currencyRate}, ${item.purchaseQuantity}, ${item.uom}, ${item.pricePerUnit}, ${item.totalPrice}, ${item.deliveryOrderId}, ${item.deliveryOrderNo}, ${item.deliveryOrderDate}, ${item.unitReceiptNoteDays}, ${item.unitReceiptNoteDaysRange}, ${item.unitReceiptNoteId}, ${item.unitReceiptNoteNo}, ${item.unitReceiptNoteDate}, ${item.unitPaymentOrderDays}, ${item.unitPaymentOrderDaysRange}, ${item.unitPaymentOrderId}, ${item.unitPaymentOrderNo}, ${item.unitPaymentOrderDate}, ${item.purchaseOrderDays}, ${item.purchaseOrderDaysRange}, ${item.invoicePrice}); `);
-
-                        count++;
-
+                            count++;
+                        }
                     }
 
-                }
+                    request.multiple = true;
 
-                request.multiple = true;
+                    // var fs = require("fs");
+                    // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
 
-                // var fs = require("fs");
-                // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
+                    // fs.writeFile(path, sqlQuery, function (error) {
+                    //     if (error) {
+                    //         console.error("write error:  " + error.message);
+                    //     } else {
+                    //         console.log("Successful Write to " + path);
+                    //     }
+                    // });
 
-                // fs.writeFile(path, sqlQuery, function (error) {
-                //     if (error) {
-                //         console.error("write error:  " + error.message);
-                //     } else {
-                //         console.log("Successful Write to " + path);
-                //     }
-                // });
+                    return request.query(sqlQuery)
+                        // return request.query('select count(*) from fact_durasi_pembelian')
+                        // return request.query('select top 1 * from [fact pembelian]')
+                        .then((results) => {
+                            console.log(results);
+                            return Promise.resolve();
+                        })
+                })
+                    .catch((err) => {
+                        console.log(err);
+                        return Promise.reject(err);
+                    });
 
-                return request.query(sqlQuery)
-                    // return request.query('select count(*) from fact_durasi_pembelian')
-                    // return request.query('select top 1 * from [fact pembelian]')
-                    .then((results) => {
-                        console.log(results);
-                        return Promise.resolve();
-                    })
             })
-            .catch((err) => {
-                console.log(err);
-                return Promise.reject(err);
-            });
+
+
     }
 }
