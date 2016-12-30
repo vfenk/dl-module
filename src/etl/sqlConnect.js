@@ -8,16 +8,18 @@ var config = {
     port: "1433",
     options: {
         encrypt: true
-    }
+    },
+    connectionTimeout: 120 * 60 * 1000,
+    requestTimeout: 1000000
 
 };
 
-module.exports= {
-    getConnect: function() {
+module.exports = {
+    getConnect: function () {
         return new Promise((resolve, reject) => {
             sql.connect(config, function (err) {
-                resolve( new sql.Request());
+                resolve(new sql.Request());
             })
         });
-    } 
+    }
 }
