@@ -34,37 +34,128 @@ module.exports = class FactPurchasingEtlManager {
             .then((data) => this.load(data));
     };
 
-    // joinPurchaseOrder(purchaseRequests) {
-    //     var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
-    //         return this.purchaseOrderManager.collection.find({
-    //             purchaseRequestId: purchaseRequest._id
-    //         })
-    //             .toArray()
-    //             .then((purchaseOrders) => {
-    //                 var arr = purchaseOrders.map((purchaseOrder) => {
-    //                     return {
-    //                         purchaseRequest: purchaseRequest,
-    //                         purchaseOrder: purchaseOrder
-    //                     };
-    //                 });
+    findPurchaseRequest(purchaseRequests) {
+        var findPurchaseRequests = purchaseRequests.map((purchaseRequest) => {
+            return this.purchaseRequestManager.collection.find({
+                purchaseRequestId: purchaseRequest._id
+            })
+                .toArray()
+                .then((purchaseRequests) => {
+                    var arr = purchaseRequests.map((purchaseRequest) => {
+                        return {
+                            purchaseRequest: purchaseRequest,
+                            // purchaseOrder: purchaseOrder
+                        };
+                    });
 
-    //                 if (arr.length === 0) {
-    //                     arr.push({
-    //                         purchaseRequest: purchaseRequest,
-    //                         purchaseOrder: null
-    //                     });
-    //                 };
-    //                 return Promise.resolve(arr);
-    //             });
-    //     });
-    //     return Promise.all(joinPurchaseOrders)
-    //         .then(((joinPurchaseOrder) => {
-    //             return Promise.resolve([].concat.apply([], joinPurchaseOrder));
-    //         }));
-    // };
+                    if (arr.length == 0)
+                        arr.push({
+                            purchaseRequest: purchaseRequest,
+                            // purchaseOrder: null
+                        });
+                    return Promise.resolve(arr);
+                });
+        });
+        return Promise.all(findPurchaseRequests)
+            .then((findPurchaseRequest => {
+                return Promise.resolve([].concat.apply([], findPurchaseRequest));
+            }));
+    };
 
-    joinPurchaseOrderExternal(purchaseRequests) {
-        var joinPurchaseOrderExternals = purchaseRequests.map((purchaseRequest) => {
+    joinPurchaseRequest(data) {
+        var joinPurchaseRequests = data.map((item) => {
+            var getPurchaseRequest = item.purchaseRequest ? this.purchaseRequestManager.collection.find({
+                items: {
+                    "$elemMatch": {
+                        _id: item.purchaseRequest._id
+                    }
+                }
+            }).toArray() : Promise.resolve([]);
+
+            return getPurchaseRequest.then((purchaseRequests) => {
+                var arr = purchaseRequests.map((purchaseRequest) => {
+                    var obj = Object.assign({}, item);
+                    obj.purchaseRequest = purchaseRequest;
+                    return obj;
+                });
+
+                if (arr.length == 0) {
+                    arr.push(Object.assign({}, item, {
+                        purchaseRequest: null
+                    }));
+                }
+                return Promise.resolve(arr);
+            });
+        });
+
+        return Promise.all(joinPurchaseRequests)
+            .then(((joinPurchaseRequest) => {
+                return Promise.resolve([].concat.apply([], joinPurchaseRequest));
+            }));
+    };
+
+    findPurchaseOrder(purchaseOrders) {
+        var findPurchaseOrders = purchaseOrders.map((purchaseOrder) => {
+            return this.purchaseOrderManager.collection.find({
+                purchaseRequestId: purchaseOrder.purchaseRequest._id
+            })
+                .toArray()
+                .then((purchaseOrders) => {
+                    var arr = purchaseOrders.map((purchaseOrder) => {
+                        return {
+                            purchaseRequest: purchaseOrder.purchaseRequest,
+                            purchaseOrder: purchaseOrder
+                        };
+                    });
+
+                    if (arr.length == 0)
+                        arr.push({
+                            purchaseRequest: purchaseOrder.purchaseRequest,
+                            purchaseOrder: null
+                        });
+                    return Promise.resolve(arr);
+                });
+        });
+        return Promise.all(findPurchaseOrders)
+            .then((findPurchaseOrder => {
+                return Promise.resolve([].concat.apply([], findPurchaseOrder));
+            }));
+    }
+
+    joinPurchaseOrder(data) {
+        var joinPurchaseOrders = data.map((item) => {
+            var getPurchaseOrder = item.purchaseRequest ? this.purchaseOrderManager.collection.find({
+                items: {
+                    "$elemMatch": {
+                        _id: item.purchaseRequest._id
+                    }
+                }
+            }).toArray() : Promise.resolve([]);
+
+            return getPurchaseOrder.then((purchaseOrders) => {
+                var arr = purchaseOrders.map((purchaseOrder) => {
+                    var obj = Object.assign({}, item);
+                    obj.purchaseOrder = purchaseOrder;
+                    return obj;
+                });
+
+                if (arr.length == 0) {
+                    arr.push(Object.assign({}, item, {
+                        purchaseOrder: null
+                    }));
+                }
+                return Promise.resolve(arr);
+            });
+        });
+
+        return Promise.all(joinPurchaseOrders)
+            .then(((joinPurchaseOrder) => {
+                return Promise.resolve([].concat.apply([], joinPurchaseOrder));
+            }));
+    }
+
+    findPurchaseOrderExternal(purchaseOrderExternals) {
+        var findPurchaseOrderExternals = purchaseOrderExternals.map((purchaseOrderExternal) => {
             return this.purchaseOrderExternalManager.collection.find({
                 purchaseRequestId: purchaseRequest._id
             })
@@ -77,124 +168,259 @@ module.exports = class FactPurchasingEtlManager {
                         };
                     });
 
-                    if (arr.length === 0) {
+                    if (arr.length == 0)
                         arr.push({
                             purchaseRequest: purchaseRequest,
                             purchaseOrderExternal: null
                         });
-                    };
                     return Promise.resolve(arr);
                 });
         });
+        return Promise.all(findPurchaseOrderExternals)
+            .then((findPurchaseOrderExternal => {
+                return Promise.resolve([].concat.apply([], findPurchaseOrderExternal));
+            }));
+    }
+
+    joinPurchaseOrderExternal(data) {
+        var joinPurchaseOrderExternals = data.map((item) => {
+            var getPurchaseOrderExternal = item.purchaseOrder ? this.purchaseOrderExternalManager.collection.find({
+                items: {
+                    "$elemMatch": {
+                        _id: item.purchaseOrder._id
+                    }
+                }
+            }).toArray() : Promise.resolve([]);
+
+            return getPurchaseOrderExternal.then((purchaseOrderExternals) => {
+                var arr = purchaseOrderExternals.map((purchaseOrderExternal) => {
+                    var obj = Object.assign({}, item);
+                    obj.purchaseOrderExternal = purchaseOrderExternal;
+                    return obj;
+                });
+
+                if (arr.length == 0) {
+                    arr.push(Object.assign({}, item, {
+                        purchaseOrderExternal: null
+                    }));
+                }
+                return Promise.resolve(arr);
+            });
+        });
+
         return Promise.all(joinPurchaseOrderExternals)
             .then(((joinPurchaseOrderExternal) => {
                 return Promise.resolve([].concat.apply([], joinPurchaseOrderExternal));
             }));
-    };
+    }
 
-    // joinDeliveryOrder(purchaseRequests) {
-    //     var joinDeliveryOrders = purchaseRequests.map((purchaseRequest) => {
-    //         return this.deliveryOrderManager.collection.find({
-    //             purchaseRequestId: purchaseRequest._id
-    //         })
+    findDeliveryOrder(purchaseRequests) {
+        var findDeliveryOrders = purchaseRequests.map((purchaseRequest) => {
+            return this.deliveryOrderManager.collection.find({
+                purchaseRequestId: purchaseRequest._id
+            })
+                .toArray()
+                .then((deliveryOrders) => {
+                    var arr = deliveryOrders.map((deliveryOrder) => {
+                        return {
+                            purchaseRequest: purchaseRequest,
+                            deliveryOrder: deliveryOrder
+                        };
+                    });
 
-    //             .toArray()
-    //             .then((deliveryOrders) => {
-    //                 var arr = deliveryOrders.map((deliveryOrder) => {
-    //                     return {
-    //                         purchaseRequest: purchaseRequest,
-    //                         deliveryOrder: deliveryOrder
-    //                     };
-    //                 });
+                    if (arr.length == 0)
+                        arr.push({
+                            purchaseRequest: purchaseRequest,
+                            deliveryOrder: null
+                        });
+                    return Promise.resolve(arr);
+                });
+        });
+        return Promise.all(findDeliveryOrders)
+            .then((findDeliveryOrder => {
+                return Promise.resolve([].concat.apply([], findDeliveryOrder));
+            }));
+    }
 
-    //                 if (arr.length === 0) {
-    //                     arr.push({
-    //                         purchaseRequest: purchaseRequest,
-    //                         deliveryOrder: null
-    //                     });
-    //                 };
-    //                 return Promise.resolve(arr);
-    //             });
-    //     });
-    //     return Promise.all(joinDeliveryOrders)
-    //         .then(((joinDeliveryOrder) => {
-    //             return Promise.resolve([].concat.apply([], joinDeliveryOrder));
-    //         }));
-    // };
+    joinDeliveryOrder(data) {
+        var joinDeliveryOrders = data.map((item) => {
+            var getDeliveryOrders = item.purchaseOrderExternal ? this.deliveryOrderManager.collection.find({
+                items: {
+                    "$elemMatch": {
+                        purchaseOrderExternalId: item.purchaseOrderExternal._id
+                    }
+                }
+            }).toArray() : Promise.resolve([]);
 
-    // joinUnitReceiptNote(purchaseRequests) {
-    //     var joinUnitReceiptNotes = purchaseRequests.map((item) => {
-    //         return this.unitReceiptNoteManager.collection.find({
-    //             purchaseRequestId: purchaseRequest._id
-    //         })
+            return getDeliveryOrders.then((deliveryOrders) => {
 
-    //             .toArray()
-    //             .then((joinUnitReceiptNotes) => {
-    //                 var arr = joinUnitReceiptNotes.map((joinUnitReceiptNote) => {
-    //                     return {
-    //                         purchaseRequest: purchaseRequest,
-    //                         unitReceiptNote: unitReceiptNote
-    //                     };
-    //                 });
+                var arr = deliveryOrders.map((deliveryOrder) => {
+                    var obj = Object.assign({}, item);
+                    obj.deliveryOrder = deliveryOrder;
+                    return obj;
+                });
+                if (arr.length == 0) {
+                    arr.push(Object.assign({}, item, {
+                        deliveryOrder: null
+                    }));
+                }
+                return Promise.resolve(arr);
+            });
+        });
+        return Promise.all(joinDeliveryOrders)
+            .then((joinDeliveryOrder => {
+                return Promise.resolve([].concat.apply([], joinDeliveryOrder));
+            }));
+    }
 
-    //                 if (arr.length === 0) {
-    //                     arr.push({
-    //                         purchaseRequest: purchaseRequest,
-    //                         unitReceiptNote: null
-    //                     });
-    //                 };
-    //                 return Promise.resolve(arr);
-    //             });
-    //     });
-    //     return Promise.all(joinUnitReceiptNotes)
-    //         .then((joinUnitReceiptNote => {
-    //             return Promise.resolve([].concat.apply([], joinUnitReceiptNote));
-    //         }));
-    // }
+    findUnitReceiptNote(purchaseRequests) {
+        var findUnitReceiptNotes = purchaseRequests.map((purchaseRequest) => {
+            return this.unitReceiptNoteManager.collection.find({
+                purchaseRequestId: purchaseRequest._id
+            })
+                .toArray()
+                .then((unitReceiptNotes) => {
+                    var arr = unitReceiptNotes.map((unitReceiptNote) => {
+                        return {
+                            purchaseRequest: purchaseRequest,
+                            unitReceiptNote: unitReceiptNote
+                        };
+                    });
 
-    // joinUnitPaymentOrder(data) {
-    //     var joinUnitPaymentOrders = data.map((item) => {
-    //         var getUnitPaymentOrders = item.unitReceiptNote ? this.unitPaymentOrderManager.collection.find({
-    //             items: {
-    //                 "$elemMatch": {
-    //                     unitReceiptNoteId: item.unitReceiptNote._id
-    //                 }
-    //             }
-    //         }).toArray() : Promise.resolve([]);
+                    if (arr.length == 0)
+                        arr.push({
+                            purchaseRequest: purchaseRequest,
+                            unitReceiptNote: null
+                        });
+                    return Promise.resolve(arr);
+                });
+        });
+        return Promise.all(findUnitReceiptNotes)
+            .then((findUnitReceiptNote => {
+                return Promise.resolve([].concat.apply([], findUnitReceiptNote));
+            }));
+    }
 
-    //         return getUnitPaymentOrders.then((unitPaymentOrders) => {
+    joinUnitReceiptNote(data) {
+        var joinUnitReceiptNotes = data.map((item) => {
+            var getUnitReceiptNotes = item.deliveryOrder ? this.unitReceiptNoteManager.collection.find({
+                deliveryOrderId: item.deliveryOrder._id
+            }).toArray() : Promise.resolve([]);
 
-    //             var arr = unitPaymentOrders.map((unitPaymentOrder) => {
-    //                 var obj = Object.assign({}, item);
-    //                 obj.unitPaymentOrder = unitPaymentOrder;
-    //                 return obj;
-    //             });
-    //             if (arr.length == 0) {
-    //                 arr.push(Object.assign({}, item, {
-    //                     unitPaymentOrder: null
-    //                 }));
-    //             }
-    //             return Promise.resolve(arr);
-    //         });
-    //     });
-    //     return Promise.all(joinUnitPaymentOrders)
-    //         .then((joinUnitPaymentOrder => {
-    //             return Promise.resolve([].concat.apply([], joinUnitPaymentOrder));
-    //         }));
-    // }
+            return getUnitReceiptNotes.then((unitReceiptNotes) => {
+
+
+                var arr = unitReceiptNotes.map((unitReceiptNote) => {
+                    var obj = Object.assign({}, item);
+                    obj.unitReceiptNote = unitReceiptNote;
+                    return obj;
+                });
+                if (arr.length == 0) {
+                    arr.push(Object.assign({}, item, {
+                        unitReceiptNote: null
+                    }));
+                }
+                return Promise.resolve(arr);
+            });
+        });
+        return Promise.all(joinUnitReceiptNotes)
+            .then((joinUnitReceiptNote => {
+                return Promise.resolve([].concat.apply([], joinUnitReceiptNote));
+            }));
+    }
+
+    findUnitPaymentOrder(purchaseRequests) {
+        var findUnitPaymentOrders = purchaseRequests.map((purchaseRequest) => {
+            return this.unitPaymentOrderManager.collection.find({
+                purchaseRequestId: purchaseRequest._id
+            })
+                .toArray()
+                .then((unitPaymentOrders) => {
+                    var arr = unitPaymentOrders.map((unitPaymentOrder) => {
+                        return {
+                            purchaseRequest: purchaseRequest,
+                            unitPaymentOrder: unitPaymentOrder
+                        };
+                    });
+
+                    if (arr.length == 0)
+                        arr.push({
+                            purchaseRequest: purchaseRequest,
+                            unitPaymentOrder: null
+                        });
+                    return Promise.resolve(arr);
+                });
+        });
+        return Promise.all(findUnitPaymentOrders)
+            .then((findUnitPaymentOrder => {
+                return Promise.resolve([].concat.apply([], findUnitPaymentOrder));
+            }));
+    }
+
+    joinUnitPaymentOrder(data) {
+        var joinUnitPaymentOrders = data.map((item) => {
+            var getUnitPaymentOrders = item.unitReceiptNote ? this.unitPaymentOrderManager.collection.find({
+                items: {
+                    "$elemMatch": {
+                        unitReceiptNoteId: item.unitReceiptNote._id
+                    }
+                }
+            }).toArray() : Promise.resolve([]);
+
+            return getUnitPaymentOrders.then((unitPaymentOrders) => {
+
+                var arr = unitPaymentOrders.map((unitPaymentOrder) => {
+                    var obj = Object.assign({}, item);
+                    obj.unitPaymentOrder = unitPaymentOrder;
+                    return obj;
+                });
+                if (arr.length == 0) {
+                    arr.push(Object.assign({}, item, {
+                        unitPaymentOrder: null
+                    }));
+                }
+                return Promise.resolve(arr);
+            });
+        });
+        return Promise.all(joinUnitPaymentOrders)
+            .then((joinUnitPaymentOrder => {
+                return Promise.resolve([].concat.apply([], joinUnitPaymentOrder));
+            }));
+    }
+
+    getLastSynchDate() {
+        return sqlConnect.getConnect()
+            .then((date) => {
+                return date.query(`SELECT TOP 1 [synch date] FROM [last synch date] ORDER BY [last synch id] DESC; `)
+                    .then((result) => {
+                        // console.log(result);
+                        return Promise.resolve(result);
+                    });
+            })
+            .catch((err) => {
+                // console.log(err);
+                return Promise.reject(err);
+            });
+    }
 
     extract() {
+        // var timestamp = this.getLastSynchDate();
         var timestamp = new Date(1970, 1, 1);
+        // return Promise.all([timestamp]).then((lastSynchDate) => {
         return this.purchaseRequestManager.collection.find({
             _updatedDate: {
+                // "$gt": lastSynchDate[0][0]['synch date']
                 "$gt": timestamp
             }
         }).toArray()
-            // .then((puchaseRequests) => this.joinPurchaseOrder(puchaseRequests))
-            .then((puchaseRequests) => this.joinPurchaseOrderExternal(puchaseRequests))
-        // .then((results) => this.joinDeliveryOrder(results))
-        // .then((results) => this.joinUnitReceiptNote(results))
-        // .then((results) => this.joinUnitPaymentOrder(results));
+            .then((purchaseRequests) => this.findPurchaseRequest(purchaseRequests))
+            .then((results) => this.joinPurchaseOrder(results))
+            .then((results) => this.joinPurchaseOrderExternal(results))
+            .then((results) => this.joinDeliveryOrder(results))
+            .then((results) => this.joinUnitReceiptNote(results))
+            .then((results) => this.joinUnitPaymentOrder(results));
+            // .then((purchaseRequest) => this.findPurchaseOrderExternal(purchaseRequest))
+        // });
     }
 
     transform(data) {
@@ -217,6 +443,7 @@ module.exports = class FactPurchasingEtlManager {
                     var catType = purchaseRequest.category.name;
 
                     return {
+                        // updatedDate: purchaseRequest ? moment(purchaseRequest._updatedDate).format('L') : null,
                         purchaseRequestId: purchaseRequest ? `'${purchaseRequest._id}'` : null,
                         purchaseRequestNo: purchaseRequest ? `'${purchaseRequest.no}'` : null,
                         purchaseRequestDate: purchaseRequest ? `'${moment(purchaseRequest.date).format('L')}'` : null,
@@ -341,51 +568,49 @@ module.exports = class FactPurchasingEtlManager {
     load(data) {
         return sqlConnect.getConnect()
             .then((request) => {
-                var lastSynchDate = this.lastSynchDate();
-                Promise.all([lastSynchDate]).then((date) => {
-                    var sqlQuery = '';
-                    var count = 1;
-                    for (var item of data) {
-                        if (item.updateddate >= date[0]) {
-                            if (item) {
-                                //query updateddate
-                                break;
-                            }
+                // var lastSynchDate = this.lastSynchDate();
+                // Promise.all([lastSynchDate]).then((date) => {
+                var sqlQuery = '';
+                var count = 1;
+                for (var item of data) {
+                    // if (item.updatedDate >= date[0]) {
+                    // if (item) {
+                    //query updateddate
+                    // break;
+                    // }
 
-                            sqlQuery = sqlQuery.concat(`insert into [fact pembelian]([id fact pembelian], [id pr], [nomor pr], [tanggal pr], [tanggal kedatangan yang diharapkan], [kode budget], [nama budget], [kode unit], [nama unit], [kode divisi], [nama divisi], [kode kategori], [nama kategori], [jenis kategori], [kode produk], [nama produk], [id po internal], [nomor po internal], [tanggal po internal], [jumlah selisih hari po eksternal-po internal], [selisih hari po internal], [nama staff pembelian], [id po eksternal], [nomor po eksternal], [tanggal po eksternal], [jumlah selisih hari do-po eksternal], [selisih hari do-po eksternal], [kode supplier], [nama supplier], [kode mata uang], [nama mata uang], [metode pembayaran], [nilai mata uang], [jumlah barang], [uom], [harga per unit], [total harga], [id do], [nomor do], [tanggal do], [jumlah selisih hari urn-do], [selisih hari urn-do], [id urn], [nomor urn], [tanggal urn], [jumlah selisih hari upo-urn], [selisih hari upo-urn], [id upo], [nomor upo], [tanggal upo], [jumlah selisih hari upo-po internal], [selisih hari upo-po internal], [invoice price]) values(${count}, ${item.purchaseRequestId}, ${item.purchaseRequestNo}, ${item.purchaseRequestDate}, ${item.expectedDeliveryDate}, ${item.budgetCode}, ${item.budgetName}, ${item.unitCode}, ${item.unitName}, ${item.divisionCode}, ${item.divisionName}, ${item.categoryCode}, ${item.categoryName}, ${item.categoryType}, ${item.productCode}, ${item.productName}, ${item.purchaseOrderId}, ${item.purchaseOrderNo}, ${item.purchaseOrderDate}, ${item.purchaseOrderExternalDays}, ${item.purchaseOrderExternalDaysRange}, ${item.purchasingStaffName}, ${item.purchaseOrderExternalId}, ${item.purchaseOrderExternalNo}, ${item.purchaseOrderExternalDate}, ${item.deliveryOrderDays}, ${item.deliveryOrderDaysRange}, ${item.supplierCode}, ${item.supplierName}, ${item.currencyCode}, ${item.currencyName}, ${item.paymentMethod}, ${item.currencyRate}, ${item.purchaseQuantity}, ${item.uom}, ${item.pricePerUnit}, ${item.totalPrice}, ${item.deliveryOrderId}, ${item.deliveryOrderNo}, ${item.deliveryOrderDate}, ${item.unitReceiptNoteDays}, ${item.unitReceiptNoteDaysRange}, ${item.unitReceiptNoteId}, ${item.unitReceiptNoteNo}, ${item.unitReceiptNoteDate}, ${item.unitPaymentOrderDays}, ${item.unitPaymentOrderDaysRange}, ${item.unitPaymentOrderId}, ${item.unitPaymentOrderNo}, ${item.unitPaymentOrderDate}, ${item.purchaseOrderDays}, ${item.purchaseOrderDaysRange}, ${item.invoicePrice}); `);
+                    sqlQuery = sqlQuery.concat(`insert into [fact pembelian]([id fact pembelian], [id pr], [nomor pr], [tanggal pr], [tanggal kedatangan yang diharapkan], [kode budget], [nama budget], [kode unit], [nama unit], [kode divisi], [nama divisi], [kode kategori], [nama kategori], [jenis kategori], [kode produk], [nama produk], [id po internal], [nomor po internal], [tanggal po internal], [jumlah selisih hari po eksternal-po internal], [selisih hari po internal], [nama staff pembelian], [id po eksternal], [nomor po eksternal], [tanggal po eksternal], [jumlah selisih hari do-po eksternal], [selisih hari do-po eksternal], [kode supplier], [nama supplier], [kode mata uang], [nama mata uang], [metode pembayaran], [nilai mata uang], [jumlah barang], [uom], [harga per unit], [total harga], [id do], [nomor do], [tanggal do], [jumlah selisih hari urn-do], [selisih hari urn-do], [id urn], [nomor urn], [tanggal urn], [jumlah selisih hari upo-urn], [selisih hari upo-urn], [id upo], [nomor upo], [tanggal upo], [jumlah selisih hari upo-po internal], [selisih hari upo-po internal], [invoice price]) values(${count}, ${item.purchaseRequestId}, ${item.purchaseRequestNo}, ${item.purchaseRequestDate}, ${item.expectedDeliveryDate}, ${item.budgetCode}, ${item.budgetName}, ${item.unitCode}, ${item.unitName}, ${item.divisionCode}, ${item.divisionName}, ${item.categoryCode}, ${item.categoryName}, ${item.categoryType}, ${item.productCode}, ${item.productName}, ${item.purchaseOrderId}, ${item.purchaseOrderNo}, ${item.purchaseOrderDate}, ${item.purchaseOrderExternalDays}, ${item.purchaseOrderExternalDaysRange}, ${item.purchasingStaffName}, ${item.purchaseOrderExternalId}, ${item.purchaseOrderExternalNo}, ${item.purchaseOrderExternalDate}, ${item.deliveryOrderDays}, ${item.deliveryOrderDaysRange}, ${item.supplierCode}, ${item.supplierName}, ${item.currencyCode}, ${item.currencyName}, ${item.paymentMethod}, ${item.currencyRate}, ${item.purchaseQuantity}, ${item.uom}, ${item.pricePerUnit}, ${item.totalPrice}, ${item.deliveryOrderId}, ${item.deliveryOrderNo}, ${item.deliveryOrderDate}, ${item.unitReceiptNoteDays}, ${item.unitReceiptNoteDaysRange}, ${item.unitReceiptNoteId}, ${item.unitReceiptNoteNo}, ${item.unitReceiptNoteDate}, ${item.unitPaymentOrderDays}, ${item.unitPaymentOrderDaysRange}, ${item.unitPaymentOrderId}, ${item.unitPaymentOrderNo}, ${item.unitPaymentOrderDate}, ${item.purchaseOrderDays}, ${item.purchaseOrderDaysRange}, ${item.invoicePrice}); `);
 
-                            count++;
-                        }
-                    }
+                    count++;
+                    // }
+                }
 
-                    request.multiple = true;
+                request.multiple = true;
 
-                    // var fs = require("fs");
-                    // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
+                // var fs = require("fs");
+                // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
 
-                    // fs.writeFile(path, sqlQuery, function (error) {
-                    //     if (error) {
-                    //         console.error("write error:  " + error.message);
-                    //     } else {
-                    //         console.log("Successful Write to " + path);
-                    //     }
-                    // });
+                // fs.writeFile(path, sqlQuery, function (error) {
+                //     if (error) {
+                //         console.error("write error:  " + error.message);
+                //     } else {
+                //         console.log("Successful Write to " + path);
+                //     }
+                // });
 
-                    return request.query(sqlQuery)
-                        // return request.query('select count(*) from fact_durasi_pembelian')
-                        // return request.query('select top 1 * from [fact pembelian]')
-                        .then((results) => {
-                            console.log(results);
-                            return Promise.resolve();
-                        })
-                })
-                    .catch((err) => {
-                        console.log(err);
-                        return Promise.reject(err);
-                    });
-
+                return request.query(sqlQuery)
+                    // return request.query('select count(*) from fact_durasi_pembelian')
+                    // return request.query('select top 1 * from [fact pembelian]')
+                    .then((results) => {
+                        console.log(results);
+                        return Promise.resolve();
+                    })
             })
-
+            .catch((err) => {
+                console.log(err);
+                return Promise.reject(err);
+            });
 
     }
+
 }
