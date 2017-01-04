@@ -4,7 +4,7 @@ var Manager = require("../../../src/etl/fact-pembelian-test");
 var instanceManager = null;
 var should = require("should");
 
-before("#00. connect db", function(done) {
+before("#00. connect db", function (done) {
     helper.getDb()
         .then((db) => {
             instanceManager = new Manager(db, {
@@ -17,12 +17,25 @@ before("#00. connect db", function(done) {
         });
 });
 
-it("#01. should success when create etl fact-purchasing", function(done) {
+it("#01. should success when create etl fact-purchasing", function (done) {
     instanceManager.run()
-        .then(() => {
+        .then((a) => {
+            console.log(a);
+            // var fs = require("fs");
+            // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
+
+            // fs.writeFile(path, a, function (error) {
+            //     if (error) {
+            //         console.error("write error:  " + error.message);
+            //     } else {
+            //         console.log("Successful Write to " + path);
+            //     }
+            // });
+
             done();
         })
         .catch((e) => {
+            console.log(e);
             done(e);
         });
 });

@@ -34,66 +34,6 @@ module.exports = class FactPurchasingEtlManager {
             .then((data) => this.load(data));
     };
 
-    findPurchaseRequest(purchaseRequests) {
-        var findPurchaseRequests = purchaseRequests.map((purchaseRequest) => {
-            return this.purchaseRequestManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
-            })
-                .toArray()
-                .then((purchaseRequests) => {
-                    var arr = purchaseRequests.map((purchaseRequest) => {
-                        return {
-                            purchaseRequest: purchaseRequest,
-                            // purchaseOrder: purchaseOrder
-                        };
-                    });
-
-                    if (arr.length == 0)
-                        arr.push({
-                            purchaseRequest: purchaseRequest,
-                            // purchaseOrder: null
-                        });
-                    return Promise.resolve(arr);
-                });
-        });
-        return Promise.all(findPurchaseRequests)
-            .then((findPurchaseRequest => {
-                return Promise.resolve([].concat.apply([], findPurchaseRequest));
-            }));
-    };
-
-    joinPurchaseRequest(data) {
-        var joinPurchaseRequests = data.map((item) => {
-            var getPurchaseRequest = item.purchaseRequest ? this.purchaseRequestManager.collection.find({
-                items: {
-                    "$elemMatch": {
-                        _id: item.purchaseRequest._id
-                    }
-                }
-            }).toArray() : Promise.resolve([]);
-
-            return getPurchaseRequest.then((purchaseRequests) => {
-                var arr = purchaseRequests.map((purchaseRequest) => {
-                    var obj = Object.assign({}, item);
-                    obj.purchaseRequest = purchaseRequest;
-                    return obj;
-                });
-
-                if (arr.length == 0) {
-                    arr.push(Object.assign({}, item, {
-                        purchaseRequest: null
-                    }));
-                }
-                return Promise.resolve(arr);
-            });
-        });
-
-        return Promise.all(joinPurchaseRequests)
-            .then(((joinPurchaseRequest) => {
-                return Promise.resolve([].concat.apply([], joinPurchaseRequest));
-            }));
-    };
-
     findPurchaseOrder(purchaseOrders) {
         var findPurchaseOrders = purchaseOrders.map((purchaseOrder) => {
             return this.purchaseOrderManager.collection.find({
@@ -101,17 +41,17 @@ module.exports = class FactPurchasingEtlManager {
             })
                 .toArray()
                 .then((purchaseOrders) => {
-                    var arr = purchaseOrders.map((purchaseOrder) => {
+                    var arr = purchaseOrders.map((item) => {
                         return {
-                            purchaseRequest: purchaseOrder.purchaseRequest,
-                            purchaseOrder: purchaseOrder
+                            purchaseRequest: item.purchaseRequest,
+                            // purchaseOrder: item
                         };
                     });
 
                     if (arr.length == 0)
                         arr.push({
-                            purchaseRequest: purchaseOrder.purchaseRequest,
-                            purchaseOrder: null
+                            purchaseRequest: item.purchaseRequest,
+                            // purchaseOrder: null
                         });
                     return Promise.resolve(arr);
                 });
@@ -122,34 +62,30 @@ module.exports = class FactPurchasingEtlManager {
             }));
     }
 
-    joinPurchaseOrder(data) {
-        var joinPurchaseOrders = data.map((item) => {
-            var getPurchaseOrder = item.purchaseRequest ? this.purchaseOrderManager.collection.find({
-                items: {
-                    "$elemMatch": {
-                        _id: item.purchaseRequest._id
-                    }
-                }
-            }).toArray() : Promise.resolve([]);
+    joinPurchaseOrder(purchaseRequests) {
+        var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
+            return this.purchaseOrderManager.collection.find({
+                purchaseRequestId: purchaseRequest._id
+            })
+                .toArray()
+                .then((purchaseOrders) => {
+                    var arr = purchaseOrders.map((purchaseOrder) => {
+                        return {
+                            purchaseRequest: purchaseRequest,
+                            purchaseOrder: purchaseOrder
+                        };
+                    });
 
-            return getPurchaseOrder.then((purchaseOrders) => {
-                var arr = purchaseOrders.map((purchaseOrder) => {
-                    var obj = Object.assign({}, item);
-                    obj.purchaseOrder = purchaseOrder;
-                    return obj;
+                    if (arr.length == 0)
+                        arr.push({
+                            purchaseRequest: purchaseRequest,
+                            purchaseOrder: null
+                        });
+                    return Promise.resolve(arr);
                 });
-
-                if (arr.length == 0) {
-                    arr.push(Object.assign({}, item, {
-                        purchaseOrder: null
-                    }));
-                }
-                return Promise.resolve(arr);
-            });
         });
-
         return Promise.all(joinPurchaseOrders)
-            .then(((joinPurchaseOrder) => {
+            .then((joinPurchaseOrder => {
                 return Promise.resolve([].concat.apply([], joinPurchaseOrder));
             }));
     }
@@ -157,21 +93,21 @@ module.exports = class FactPurchasingEtlManager {
     findPurchaseOrderExternal(purchaseOrderExternals) {
         var findPurchaseOrderExternals = purchaseOrderExternals.map((purchaseOrderExternal) => {
             return this.purchaseOrderExternalManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
+                purchaseRequestId: purchaseOrderExternal.items[0].purchaseRequest._id
             })
                 .toArray()
-                .then((purchaseOrderExternals) => {
-                    var arr = purchaseOrderExternals.map((purchaseOrderExternal) => {
+                .then((purchaseOrderExternal) => {
+                    var arr = purchaseOrderExternals.map((item) => {
                         return {
-                            purchaseRequest: purchaseRequest,
-                            purchaseOrderExternal: purchaseOrderExternal
+                            purchaseRequest: item.items[0].purchaseRequest,
+                            // purchaseOrderExternal: purchaseOrderExternal
                         };
                     });
 
                     if (arr.length == 0)
                         arr.push({
                             purchaseRequest: purchaseRequest,
-                            purchaseOrderExternal: null
+                            // purchaseOrderExternal: null
                         });
                     return Promise.resolve(arr);
                 });
@@ -214,24 +150,24 @@ module.exports = class FactPurchasingEtlManager {
             }));
     }
 
-    findDeliveryOrder(purchaseRequests) {
-        var findDeliveryOrders = purchaseRequests.map((purchaseRequest) => {
+    findDeliveryOrder(deliveryOrders) {
+        var findDeliveryOrders = deliveryOrders.map((deliveryOrder) => {
             return this.deliveryOrderManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
+                purchaseRequestId: deliveryOrder.items[0].purchaseOrderExternal.items[0].purchaseRequest._id
             })
                 .toArray()
-                .then((deliveryOrders) => {
-                    var arr = deliveryOrders.map((deliveryOrder) => {
+                .then((deliveryOrder) => {
+                    var arr = deliveryOrders.map((item) => {
                         return {
-                            purchaseRequest: purchaseRequest,
-                            deliveryOrder: deliveryOrder
+                            purchaseRequest: item.items[0].purchaseOrderExternal.items[0].purchaseRequest,
+                            // deliveryOrder: deliveryOrder
                         };
                     });
 
                     if (arr.length == 0)
                         arr.push({
-                            purchaseRequest: purchaseRequest,
-                            deliveryOrder: null
+                            purchaseRequest: item.items[0].purchaseOrderExternal.items[0].purchaseRequest,
+                            // deliveryOrder: null
                         });
                     return Promise.resolve(arr);
                 });
@@ -273,24 +209,24 @@ module.exports = class FactPurchasingEtlManager {
             }));
     }
 
-    findUnitReceiptNote(purchaseRequests) {
-        var findUnitReceiptNotes = purchaseRequests.map((purchaseRequest) => {
+    findUnitReceiptNote(unitReceiptNotes) {
+        var findUnitReceiptNotes = unitReceiptNotes.map((unitReceiptNote) => {
             return this.unitReceiptNoteManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
+                purchaseRequestId: unitReceiptNote.items[0].purchaseOrder.purchaseRequest._id
             })
                 .toArray()
-                .then((unitReceiptNotes) => {
-                    var arr = unitReceiptNotes.map((unitReceiptNote) => {
+                .then((unitReceiptNote) => {
+                    var arr = unitReceiptNotes.map((item) => {
                         return {
-                            purchaseRequest: purchaseRequest,
-                            unitReceiptNote: unitReceiptNote
+                            purchaseRequest: item.items[0].purchaseOrder.purchaseRequest,
+                            // unitReceiptNote: unitReceiptNote
                         };
                     });
 
                     if (arr.length == 0)
                         arr.push({
-                            purchaseRequest: purchaseRequest,
-                            unitReceiptNote: null
+                            purchaseRequest: item.items[0].purchaseOrder.purchaseRequest,
+                            // unitReceiptNote: null
                         });
                     return Promise.resolve(arr);
                 });
@@ -329,24 +265,24 @@ module.exports = class FactPurchasingEtlManager {
             }));
     }
 
-    findUnitPaymentOrder(purchaseRequests) {
-        var findUnitPaymentOrders = purchaseRequests.map((purchaseRequest) => {
+    findUnitPaymentOrder(unitPaymentOrders) {
+        var findUnitPaymentOrders = unitPaymentOrders.map((unitPaymentOrder) => {
             return this.unitPaymentOrderManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
+                purchaseRequestId: unitPaymentOrder.items[0].unitReceiptNote.items[0].purchaseOrder.purchaseRequest._id
             })
                 .toArray()
-                .then((unitPaymentOrders) => {
-                    var arr = unitPaymentOrders.map((unitPaymentOrder) => {
+                .then((unitPaymentOrder) => {
+                    var arr = unitPaymentOrders.map((item) => {
                         return {
-                            purchaseRequest: purchaseRequest,
-                            unitPaymentOrder: unitPaymentOrder
+                            purchaseRequest: item.items[0].unitReceiptNote.items[0].purchaseOrder.purchaseRequest,
+                            // unitPaymentOrder: unitPaymentOrder
                         };
                     });
 
                     if (arr.length == 0)
                         arr.push({
-                            purchaseRequest: purchaseRequest,
-                            unitPaymentOrder: null
+                            purchaseRequest: item.items[0].unitReceiptNote.items[0].purchaseOrder.purchaseRequest,
+                            // unitPaymentOrder: null
                         });
                     return Promise.resolve(arr);
                 });
@@ -403,24 +339,117 @@ module.exports = class FactPurchasingEtlManager {
             });
     }
 
-    extract() {
+    getPRFromPO(timestamp) {
         // var timestamp = this.getLastSynchDate();
-        var timestamp = new Date(1970, 1, 1);
-        // return Promise.all([timestamp]).then((lastSynchDate) => {
-        return this.purchaseRequestManager.collection.find({
-            _updatedDate: {
-                // "$gt": lastSynchDate[0][0]['synch date']
-                "$gt": timestamp
-            }
-        }).toArray()
-            .then((purchaseRequests) => this.findPurchaseRequest(purchaseRequests))
-            .then((results) => this.joinPurchaseOrder(results))
-            .then((results) => this.joinPurchaseOrderExternal(results))
-            .then((results) => this.joinDeliveryOrder(results))
-            .then((results) => this.joinUnitReceiptNote(results))
-            .then((results) => this.joinUnitPaymentOrder(results));
-            // .then((purchaseRequest) => this.findPurchaseOrderExternal(purchaseRequest))
-        // });
+        // var timestamp = new Date(1970, 1, 1);
+        return Promise.all([timestamp]).then((lastSynchDate) => {
+            return this.purchaseOrderManager.collection.find({
+                _updatedDate: {
+                    "$gt": lastSynchDate[0][0]['synch date']
+                    // "$gt": timestamp
+                }
+            }).toArray()
+                .then((purchaseRequests) => this.findPurchaseOrder(purchaseRequests));
+        });
+    }
+
+    getPRFromPOX(timestamp) {
+        // var timestamp = this.getLastSynchDate();
+        // var timestamp = new Date(1970, 1, 1);
+        return Promise.all([timestamp]).then((lastSynchDate) => {
+            return this.purchaseOrderExternalManager.collection.find({
+                _updatedDate: {
+                    "$gt": lastSynchDate[0][0]['synch date']
+                    // "$gt": timestamp
+                }
+            }).toArray()
+                .then((purchaseRequests) => this.findPurchaseOrderExternal(purchaseRequests));
+        });
+    }
+
+    getPRFromDO(timestamp) {
+        // var timestamp = this.getLastSynchDate();
+        // var timestamp = new Date(1970, 1, 1);
+        return Promise.all([timestamp]).then((lastSynchDate) => {
+            return this.deliveryOrderManager.collection.find({
+                _updatedDate: {
+                    "$gt": lastSynchDate[0][0]['synch date']
+                    // "$gt": timestamp
+                }
+            }).toArray()
+                .then((purchaseRequests) => this.findDeliveryOrder(purchaseRequests));
+        });
+    }
+
+    getPRFromURN(timestamp) {
+        // var timestamp = this.getLastSynchDate();
+        // var timestamp = new Date(1970, 1, 1);
+        return Promise.all([timestamp]).then((lastSynchDate) => {
+            return this.unitReceiptNoteManager.collection.find({
+                _updatedDate: {
+                    "$gt": lastSynchDate[0][0]['synch date']
+                    // "$gt": timestamp
+                }
+            }).toArray()
+                .then((purchaseRequests) => this.findUnitReceiptNote(purchaseRequests))
+        });
+    }
+
+    getPRFromUPO(timestamp) {
+        // var timestamp = this.getLastSynchDate();
+        // var timestamp = new Date(1970, 1, 1);
+        return Promise.all([timestamp]).then((lastSynchDate) => {
+            return this.unitPaymentOrderManager.collection.find({
+                _updatedDate: {
+                    "$gt": lastSynchDate[0][0]['synch date']
+                    // "$gt": timestamp
+                }
+            }).toArray()
+                .then((purchaseRequests) => this.findUnitPaymentOrder(purchaseRequests))
+        });
+    }
+
+    extract() {
+        var timestamp = this.getLastSynchDate()
+        var getPRFromPO = this.getPRFromPO(timestamp);
+        var getPRFromPOX = this.getPRFromPOX(timestamp);
+        var getPRFromDO = this.getPRFromDO(timestamp);
+        var getPRFromURN = this.getPRFromURN(timestamp);
+        var getPRFromUPO = this.getPRFromUPO(timestamp);
+        return Promise.all([
+            getPRFromPO,
+            getPRFromPOX,
+            getPRFromDO,
+            getPRFromURN,
+            getPRFromUPO
+        ])
+            .then((result) => {
+
+                return Promise.resolve([].concat.apply([], result))
+                    .then((result) => {
+                        var purchaseRequest = this.removeDuplicates(result, "_id");
+                        return Promise.resolve(purchaseRequest);
+                    })
+                    .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
+                    .then((results) => this.joinPurchaseOrderExternal(results))
+                    .then((results) => this.joinDeliveryOrder(results))
+                    .then((results) => this.joinUnitReceiptNote(results))
+                    .then((results) => this.joinUnitPaymentOrder(results));
+            });
+    }
+
+    removeDuplicates(originalArray, prop) {
+        var newArray = [];
+        var lookupObject = {};
+
+        for (var i in originalArray) {
+            lookupObject[originalArray[i][prop]] = originalArray[i];
+        }
+
+        for (i in lookupObject) {
+            newArray.push(lookupObject[i]);
+        }
+        return newArray;
     }
 
     transform(data) {
@@ -509,23 +538,6 @@ module.exports = class FactPurchasingEtlManager {
         });
         return Promise.resolve([].concat.apply([], result));
     }
-
-    lastSynchDate() {
-        return sqlConnect.getConnect()
-            .then((request) => {
-                var lastSynch = 'Fact Pembelian';
-                return request.query(`select last [last synchronized] from [fact last synchronized date]; `)
-                    .then((results) => {
-                        console.log(results);
-                        return Promise.resolve();
-                    });
-            })
-            .catch((err) => {
-                console.log(err);
-                return Promise.reject(err);
-            });
-    }
-
 
     getRangeMonth(days) {
         if (days === 0) {
