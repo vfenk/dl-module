@@ -8,12 +8,14 @@ var map = DLModels.map;
 var Role = DLModels.auth.Role;
 var BaseManager = require('module-toolkit').BaseManager;
 var UnitManager = require("../master/unit-manager");
+var AccountManager = require("./account-manager");
 
 module.exports = class RoleManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.auth.collection.Role);
         this.unitManager = new UnitManager(db, user);
+        this.accountManager = new AccountManager(db, user);
     }
 
     _getQuery(paging) {
@@ -43,6 +45,36 @@ module.exports = class RoleManager extends BaseManager {
             query['$and'].push($or);
         }
         return query;
+    }
+
+    _afterUpdate(roleId) {
+        return this.getSingleById(roleId)
+            .then((role) => {
+                return this.accountManager.collection.find({
+                        roles: {
+                            "$elemMatch": {
+                                _id: roleId
+                            }
+                        }
+                    }).toArray()
+                    .then((accounts) => {
+                        var updateAccounts = accounts.map((account) => {
+                            account.roles = account.roles || [];
+                            var targetRole = account.roles.find((r) => r._id.toString() === role._id.toString());
+                            var index = account.roles.indexOf(targetRole);
+                            if (index >= 0) {
+                                account.roles[index] = role;
+                                return this.accountManager.update(account);
+                            }
+                            else
+                                return Promise.resolve(null);
+                        })
+                        return Promise.all(updateAccounts);
+                    })
+                    .then((updatedAccounts) => {
+                        return Promise.resolve(roleId);
+                    });
+            });
     }
 
     _validate(role) {

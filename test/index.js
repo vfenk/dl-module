@@ -10,7 +10,8 @@ describe('#dl-module', function(done) {
 
     // Auth
     // test('@auth/account-manager', './auth/account-manager-test');
-    // test('@auth/role-manager', './auth/role-manager-test');
+    test('@AUTH/ACCOUNT', './auth/account');
+    test('@AUTH/ROLE', './auth/role');
 
     // test('@ETL/DIM-CATEGORY', './etl/dim-category');
     // test('@ETL/DIM-DIVISION', './etl/dim-division');

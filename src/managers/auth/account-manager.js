@@ -133,7 +133,7 @@ module.exports = class AccountManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = account;
             // 1. begin: Declare promises.
-            var getAccountPromise = this.collection.singleOrDefault({
+            var getAccountPromise = this.collection.firstOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
