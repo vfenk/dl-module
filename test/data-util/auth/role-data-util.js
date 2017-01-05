@@ -1,5 +1,6 @@
 "use strict";
 var _getSert = require("../getsert");
+var Unit = require("../master/unit-data-util");
 var generateCode = require("../../../src/utils/code-generator");
 
 class RoleDataUtil {
@@ -13,24 +14,40 @@ class RoleDataUtil {
     }
 
     getNewData() {
-        var Model = require("dl-models").auth.Role;
-        var data = new Model();
+        return Unit.getTestData()
+            .then((unit) => {
+                var Model = require("dl-models").auth.Role;
+                var data = new Model();
 
-        var code = generateCode();
-        data.code = code;
-        data.name = `Role[${code}]`;
-        data.description = ` data for unit testing.`;
+                var code = generateCode();
+                data.code = code;
+                data.name = `Role[${code}]`;
+                data.description = ` data for unit testing.`;
+                data.permissions = [{
+                    unit: unit,
+                    unitId: unit._id,
+                    permission: 7
+                }];
 
-        return Promise.resolve(data);
+                return Promise.resolve(data);
+            })
+    }
+
+    getNewTestData() {
+        return this.getNewData()
+            .then(this.getSert);
     }
 
     getTestData() {
-        var data = {
-            code: "UT-ADM",
-            name: "Admin-UT",
-            description: "Unit test administrator"
-        };
-        return this.getSert(data);
+        return this.getNewData()
+            .then((data) => {
+
+                data.code = "UT-ADM-P";
+                data.name = "Admin-UT-P";
+                data.description = "Unit test administrator with permissions";
+
+                return this.getSert(data);
+            });
     }
 }
 module.exports = new RoleDataUtil();
