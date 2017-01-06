@@ -34,6 +34,34 @@ module.exports = class FactPurchasingEtlManager {
             .then((data) => this.load(data));
     };
 
+    findPurchaseRequest(purchaseRequests) {
+        var findPurchaseRequests = purchaseRequests.map((purchaseRequest) => {
+            return this.purchaseRequestManager.collection.find({
+                purchaseRequestId: purchaseRequest._id
+            })
+                .toArray()
+                .then((purchaseRequests) => {
+                    var arr = purchaseRequests.map((purchaseRequest) => {
+                        return {
+                            purchaseRequest: purchaseRequest,
+                            // purchaseOrder: item
+                        };
+                    });
+
+                    if (arr.length == 0)
+                        arr.push({
+                            purchaseRequest: purchaseRequest,
+                            // purchaseOrder: null
+                        });
+                    return Promise.resolve(arr);
+                });
+        });
+        return Promise.all(findPurchaseRequests)
+            .then(((findPurchaseRequest) => {
+                return Promise.resolve([].concat.apply([], findPurchaseRequest));
+            }));
+    }
+
     findPurchaseOrder(purchaseOrders) {
         var findPurchaseOrders = purchaseOrders.map((purchaseOrder) => {
             return this.purchaseOrderManager.collection.find({
@@ -62,23 +90,25 @@ module.exports = class FactPurchasingEtlManager {
             }));
     }
 
+
+
     joinPurchaseOrder(purchaseRequests) {
         var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
             return this.purchaseOrderManager.collection.find({
-                purchaseRequestId: purchaseRequest._id
+                purchaseRequestId: purchaseRequest.purchaseRequest._id
             })
                 .toArray()
                 .then((purchaseOrders) => {
                     var arr = purchaseOrders.map((purchaseOrder) => {
                         return {
-                            purchaseRequest: purchaseRequest,
+                            purchaseRequest: purchaseRequest.purchaseRequest,
                             purchaseOrder: purchaseOrder
                         };
                     });
 
                     if (arr.length == 0)
                         arr.push({
-                            purchaseRequest: purchaseRequest,
+                            purchaseRequest: purchaseRequest.purchaseRequest,
                             purchaseOrder: null
                         });
                     return Promise.resolve(arr);
@@ -339,6 +369,20 @@ module.exports = class FactPurchasingEtlManager {
             });
     }
 
+    getPRFromPR(timestamp) {
+        // var timestamp = this.getLastSynchDate();
+        // var timestamp = new Date(1970, 1, 1);
+        return Promise.all([timestamp]).then((lastSynchDate) => {
+            return this.purchaseRequestManager.collection.find({
+                _updatedDate: {
+                    "$gt": lastSynchDate[0][0]['synch date']
+                    // "$gt": timestamp
+                }
+            }).toArray()
+                .then((purchaseRequests) => this.findPurchaseRequest(purchaseRequests));
+        });
+    }
+
     getPRFromPO(timestamp) {
         // var timestamp = this.getLastSynchDate();
         // var timestamp = new Date(1970, 1, 1);
@@ -410,13 +454,15 @@ module.exports = class FactPurchasingEtlManager {
     }
 
     extract() {
-        var timestamp = this.getLastSynchDate()
+        var timestamp = this.getLastSynchDate();
+        var getPRFromPR = this.getPRFromPR(timestamp)
         var getPRFromPO = this.getPRFromPO(timestamp);
         var getPRFromPOX = this.getPRFromPOX(timestamp);
         var getPRFromDO = this.getPRFromDO(timestamp);
         var getPRFromURN = this.getPRFromURN(timestamp);
         var getPRFromUPO = this.getPRFromUPO(timestamp);
         return Promise.all([
+            getPRFromPR,
             getPRFromPO,
             getPRFromPOX,
             getPRFromDO,
@@ -427,29 +473,35 @@ module.exports = class FactPurchasingEtlManager {
 
                 return Promise.resolve([].concat.apply([], result))
                     .then((result) => {
-                        var purchaseRequest = this.removeDuplicates(result, "_id");
-                        return Promise.resolve(purchaseRequest);
-                    })
-                    .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
-                    .then((results) => this.joinPurchaseOrderExternal(results))
-                    .then((results) => this.joinDeliveryOrder(results))
-                    .then((results) => this.joinUnitReceiptNote(results))
-                    .then((results) => this.joinUnitPaymentOrder(results));
+                        var purchaseRequests = this.removeDuplicate(result);
+                        // return Promise.all(purchaseRequests)
+                        // .then((purchaseRequest) => {
+                        return Promise.all(purchaseRequests)
+                            // })
+                            .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
+                            .then((results) => this.joinPurchaseOrderExternal(results))
+                            .then((results) => this.joinDeliveryOrder(results))
+                            .then((results) => this.joinUnitReceiptNote(results))
+                            .then((results) => this.joinUnitPaymentOrder(results));
+                    });
             });
     }
 
-    removeDuplicates(originalArray, prop) {
-        var newArray = [];
-        var lookupObject = {};
+    removeDuplicate(objectsArray) {
+        var usedObjects = {};
 
-        for (var i in originalArray) {
-            lookupObject[originalArray[i][prop]] = originalArray[i];
+        for (var i = objectsArray.length - 1; i >= 0; i--) {
+            var so = JSON.stringify(objectsArray[i]);
+
+            if (usedObjects[so]) {
+                objectsArray.splice(i, 1);
+
+            } else {
+                usedObjects[so] = true;
+            }
         }
 
-        for (i in lookupObject) {
-            newArray.push(lookupObject[i]);
-        }
-        return newArray;
+        return objectsArray;
     }
 
     transform(data) {
