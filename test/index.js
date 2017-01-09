@@ -12,6 +12,7 @@ describe('#dl-module', function(done) {
     // test('@auth/account-manager', './auth/account-manager-test');
     test('@AUTH/ACCOUNT', './auth/account');
     test('@AUTH/ROLE', './auth/role');
+    test('@AUTH/API-ENDPOINT', './auth/api-endpoint');
 
     // test('@ETL/DIM-CATEGORY', './etl/dim-category');
     // test('@ETL/DIM-DIVISION', './etl/dim-division');
