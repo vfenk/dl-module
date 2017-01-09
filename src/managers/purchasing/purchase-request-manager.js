@@ -297,6 +297,63 @@ module.exports = class PurchaseRequestManager extends BaseManager {
         });
     }
 
+    getDataPRMonitoringAllUser(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo, state) {
+        return new Promise((resolve, reject) => {
+            var sorting = {
+                "date": -1,
+                "no": 1
+            };
+            var query = Object.assign({});
+
+            if (state !== -1) {
+                Object.assign(query, {
+                    "status.value": state
+                });
+            }
+
+            if (unitId !== "undefined" && unitId !== "") {
+                Object.assign(query, {
+                    unitId: new ObjectId(unitId)
+                });
+            }
+            if (categoryId !== "undefined" && categoryId !== "") {
+                Object.assign(query, {
+                    categoryId: new ObjectId(categoryId)
+                });
+            }
+            if (budgetId !== "undefined" && budgetId !== "") {
+                Object.assign(query, {
+                    budgetId: new ObjectId(budgetId)
+                });
+            }
+            if (PRNo !== "undefined" && PRNo !== "") {
+                Object.assign(query, {
+                    "no": PRNo
+                });
+            }
+            if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
+                Object.assign(query, {
+                    date: {
+                        $gte: new Date(dateFrom),
+                        $lte: new Date(dateTo)
+                    }
+                });
+            }
+            query = Object.assign(query, { 
+                _deleted: false,
+                isPosted: true
+            });
+
+            this.collection.find(query).sort(sorting).toArray()
+                .then((purchaseRequests) => {
+                    resolve(purchaseRequests);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+
     _createIndexes() {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.PurchaseRequest}__updatedDate`,
