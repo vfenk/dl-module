@@ -6,12 +6,12 @@ var i18n = require('dl-i18n');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var ApiEndpoint = DLModels.auth.ApiEndpoint;
-var BaseManager = require('module-toolkit').BaseManager; 
+var BaseManager = require('module-toolkit').BaseManager;
 
 module.exports = class ApiEndpointManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
-        this.collection = this.db.use(map.auth.collection.ApiEndpoint); 
+        this.collection = this.db.use(map.auth.collection.ApiEndpoint);
         this.roleCollection = this.db.use(map.auth.collection.Role);
     }
 
@@ -61,7 +61,7 @@ module.exports = class ApiEndpointManager extends BaseManager {
             query['$and'].push($or);
         }
         return query;
-    } 
+    }
 
     _validate(apiEndpoint) {
         var errors = {};
@@ -84,8 +84,8 @@ module.exports = class ApiEndpointManager extends BaseManager {
                     "$in": roleIds
                 }
             }).toArray();
-                // 2. begin: Validation.
-            Promise.all([getDuplicateApiEndpoint,getRoles])
+            // 2. begin: Validation.
+            Promise.all([getDuplicateApiEndpoint, getRoles])
                 .then(results => {
                     var _duplicateApiEndpoint = results[0];
                     var _roles = results[1];
@@ -98,7 +98,7 @@ module.exports = class ApiEndpointManager extends BaseManager {
 
                     if (!valid.method || valid.method == '')
                         errors["method"] = "Method Harus diisi";
-                        
+
                     if (!valid.uri || valid.uri == '')
                         errors["uri"] = "Uri Harus diisi";
 
@@ -135,7 +135,33 @@ module.exports = class ApiEndpointManager extends BaseManager {
                 })
                 .catch(e => {
                     reject(e);
-                })
+                });
         });
     }
-}
+
+    registerMany(endpoints) {
+        return this.collection.find({
+                name: {
+                    "$in": endpoints.map((endpoint) => endpoint.name)
+                }
+            }).toArray()
+            .then((dbEndpoints) => {
+                dbEndpoints.forEach((endpoint) => {
+                    var delta = endpoints.find((item) => item.name === endpoint.name);
+                    if (delta) {
+                        endpoint.uri = delta.uri;
+                        endpoint.method = delta.method;
+                    }
+                });
+                return Promise.resolve(dbEndpoints);
+            })
+            .then((dbEndpoints) => {
+                var existingNames = dbEndpoints.map((dbEndpoint) => dbEndpoint.name);
+                var newEndpoints = endpoints.filter((endpoint) => existingNames.indexOf(endpoint.name) < 0);
+
+                var createPromises = newEndpoints.map((dbEndpoint) => this.create(dbEndpoint));
+                var updatePromises = dbEndpoints.map((dbEndpoint) => this.update(dbEndpoint));
+                return Promise.all(createPromises.concat(updatePromises));
+            });
+    }
+};
