@@ -127,7 +127,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     var isDuplicate = valueArr.some(function (item, idx) {
                         var itemError = {};
                         if (valueArr.indexOf(item) != idx) {
-                            itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isDuplicate:%s is duplicate", i18n.__("PurchaseRequest.items.product.name._:Name")); //"Nama barang tidak boleh kosong";
+                            itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isDuplicate:%s is duplicate", i18n.__("PurchaseRequest.items.product.name._:Product")); //"Nama barang tidak boleh kosong";
                         }
                         if (Object.getOwnPropertyNames(itemError).length > 0) {
                             itemErrors[valueArr.indexOf(item)]= itemError;
@@ -139,7 +139,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                         for (var item of valid.items) {
                             var itemError = {};
                             if (!item.product || !item.product._id) {
-                                itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isRequired:%s is required", i18n.__("PurchaseRequest.items.product.name._:Name")); //"Nama barang tidak boleh kosong";
+                                itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isRequired:%s is required", i18n.__("PurchaseRequest.items.product.name._:Product")); //"Nama barang tidak boleh kosong";
                             }
                             if (item.quantity <= 0) {
                                 itemError["quantity"] = i18n.__("PurchaseRequest.items.quantity.isRequired:%s is required", i18n.__("PurchaseRequest.items.quantity._:Quantity")); //Jumlah barang tidak boleh kosong";
