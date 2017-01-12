@@ -77,5 +77,8 @@ module.exports = {
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")
             }
         }
+    },
+    etl: {
+        factPembelian: require("./src/etl/fact-pembelian")
     }
 }
