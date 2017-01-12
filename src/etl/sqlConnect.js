@@ -1,11 +1,10 @@
 var sql = require("mssql");
 
 var config = {
-    server: "danliris-uat.database.windows.net",
-    database: "danliris-dwh-uat",
-    user: "danliris-admin",
-    password: "Standar123",
-    port: "1433",
+    server: "efrata.database.windows.net",
+    database: "bateeq DWH",
+    user: "Adminbateeq",
+    password: "Standar123.",
     options: {
         encrypt: true
     },
