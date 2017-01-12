@@ -26,7 +26,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     _validate(purchaseOrder) {
         var errors = {};
         var valid = purchaseOrder;
-        // valid._id = ObjectId.isValid(valid._id) ? new ObjectId(valid._id) : new ObjectId();
         var getPurchaseOrder = this.collection.singleOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
