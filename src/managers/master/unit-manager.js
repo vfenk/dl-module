@@ -21,8 +21,8 @@ module.exports = class UnitManager extends BaseManager {
 
     _getQuery(paging) {
         var _default = {
-                _deleted: false
-            },
+            _deleted: false
+        },
             pagingFilter = paging.filter || {},
             keywordFilter = {},
             query = {};
@@ -99,7 +99,7 @@ module.exports = class UnitManager extends BaseManager {
                 })
         });
     }
-     getUnit() {
+    getUnit() {
         return new Promise((resolve, reject) => {
             var query = {
                 _deleted: false
@@ -133,14 +133,25 @@ module.exports = class UnitManager extends BaseManager {
                                     data.push({ "code": dataFile[i][0], "division": dataFile[i][1], "name": dataFile[i][2], "description": dataFile[i][3] });
                                 }
                             }
-                            var dataError = [], errorMessage;
+                            var dataError = [], errorMessage; 
+                            var flag = false;
                             for (var i = 0; i < data.length; i++) {
                                 errorMessage = "";
                                 if (data[i]["code"] === "" || data[i]["code"] === undefined) {
                                     errorMessage = errorMessage + "Kode tidak boleh kosong, ";
+                                } else {
+                                    for (var j = 0; j < div.length; j++) {
+                                        if ((div[j]["name"]).toLowerCase() === (data[i]["division"]).toLowerCase()) {
+                                            flag = true;
+                                            break;
+                                        }
+                                    }
+                                    if (flag === false) {
+                                        errorMessage = errorMessage + "Divisi tidak terdaftar di Master Divisi";
+                                    }
                                 }
                                 if (data[i]["division"] === "" || data[i]["division"] === undefined) {
-                                    errorMessage = errorMessage + "Division tidak boleh kosong, ";
+                                    errorMessage = errorMessage + "Divisi tidak boleh kosong, ";
                                 }
                                 if (data[i]["name"] === "" || data[i]["name"] === undefined) {
                                     errorMessage = errorMessage + "Nama tidak boleh kosong, ";
@@ -153,18 +164,7 @@ module.exports = class UnitManager extends BaseManager {
                                         errorMessage = errorMessage + "Nama tidak boleh duplikat, ";
                                     }
                                 }
-                                 var flag =false; 
-                                for (var j = 0; j < div.length; j++) { 
-                                    if (div[j]["name"] === data[i]["division"])
-                                    {
-                                        flag=true; 
-                                        break;
-                                    } 
-                                }
-                                if (flag===false)
-                                    {
-                                        errorMessage = errorMessage + "Divisi tidak terdaftar di Master Divisi";
-                                    } 
+
                                 if (errorMessage !== "") {
                                     dataError.push({ "code": data[i]["code"], "division": data[i]["division"], "name": data[i]["name"], "description": data[i]["description"], "Error": errorMessage });
                                 }

@@ -116,7 +116,7 @@ module.exports = class DivisionManager extends BaseManager {
                             errorMessage = errorMessage + "Nama tidak boleh kosong, ";
                         }
                         for (var j = 0; j < division.length; j++) { 
-                            if (division[j]["name"] === data[i]["name"]) {
+                            if ((division[j]["name"]).toLowerCase() === (data[i]["name"]).toLowerCase()) {
                                 errorMessage = errorMessage + "Nama tidak boleh duplikat";
                             }
                         }

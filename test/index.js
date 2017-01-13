@@ -10,7 +10,9 @@ describe('#dl-module', function(done) {
 
     // Auth
     // test('@auth/account-manager', './auth/account-manager-test');
-    // test('@auth/role-manager', './auth/role-manager-test');
+    test('@AUTH/ACCOUNT', './auth/account');
+    test('@AUTH/ROLE', './auth/role');
+    test('@AUTH/API-ENDPOINT', './auth/api-endpoint');
 
     // test('@ETL/DIM-CATEGORY', './etl/dim-category');
     // test('@ETL/DIM-DIVISION', './etl/dim-division');
@@ -22,6 +24,7 @@ describe('#dl-module', function(done) {
     // test('@ETL/FACT-TOP-TEN-SUPPLIER', './etl/fact-top-ten-supplier');
     // test('@ETL/FACT-PURCHASE-ORDER-COMPARISON', './etl/fact-purchase-order-comparison');
     // test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');
+    test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
