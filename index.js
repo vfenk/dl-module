@@ -43,7 +43,8 @@ module.exports = {
                 DailySpinningProductionReportManager: require('./src/managers/production/spinning/daily-spinning-production-report-manager')
             },
             finishingPrinting:{
-                ProductionOrderManager: require('./src/managers/production/finishing-printing/production-order-manager') 
+                ProductionOrderManager: require('./src/managers/production/finishing-printing/production-order-manager'),
+                MonitoringEventManager: require('./src/managers/production/finishing-printing/monitoring-event-manager') 
             }
         }
     },
