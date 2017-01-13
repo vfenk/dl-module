@@ -230,6 +230,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     _beforeInsert(purchaseOrder) {
         purchaseOrder.no = generateCode();
         purchaseOrder.status = poStatusEnum.CREATED;
+        purchaseOrder._createdDate = new Date();
         return Promise.resolve(purchaseOrder);
     }
 

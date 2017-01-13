@@ -94,6 +94,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             this._validate(purchaseOrderExternal)
                 .then(validPurchaseOrderExternal => {
                     validPurchaseOrderExternal.no = generateCode();
+                    validPurchaseOrderExternal._createdDate = new Date();
                     validPurchaseOrderExternal.supplierId = new ObjectId(validPurchaseOrderExternal.supplierId);
                     validPurchaseOrderExternal.supplier._id = new ObjectId(validPurchaseOrderExternal.supplier._id);
                     this.collection.insert(validPurchaseOrderExternal)
@@ -364,6 +365,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 valid.vat = _vat;
                 valid.date = new Date(valid.date);
                 valid.expectedDeliveryDate = new Date(valid.expectedDeliveryDate);
+                valid.currencyRate = parseInt(valid.currencyRate);
 
                 var items = [];
 

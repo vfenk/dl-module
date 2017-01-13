@@ -315,6 +315,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                             var tasks = [];
                             var getPurchaseOrderById = [];
                             validData.no = generateCode();
+                            validData._createdDate = new Date();
                             if (validData.unitPaymentOrder.useIncomeTax)
                                 validData.returNoteNo = generateCode();
                             //Update PO Internal
@@ -437,4 +438,64 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
+
+    _getQueryAllUnitPaymentCorrection(paging) {
+        var deletedFilter = {
+            _deleted: false
+        },
+            keywordFilter = {};
+
+        var query = {};
+
+        if (paging.keyword) {
+            var regex = new RegExp(paging.keyword, "i");
+
+            var filterNo = {
+                'no': {
+                    '$regex': regex
+                }
+            };
+
+            var filterSupplierName = {
+                'unitPaymentOrder.supplier.name': {
+                    '$regex': regex
+                }
+            };
+
+            var filterUnitCoverLetterNo = {
+                "unitCoverLetterNo": {
+                    '$regex': regex
+                }
+            };
+
+            keywordFilter = {
+                '$or': [filterNo, filterSupplierName, filterUnitCoverLetterNo]
+            };
+        }
+        query = {
+            '$and': [deletedFilter, paging.filter, keywordFilter]
+        }
+        return query;
+    }
+
+    readAllUnitPaymentCorrection(paging) {
+        var _paging = Object.assign({
+            page: 1,
+            size: 20,
+            order: {},
+            filter: {},
+            select: []
+        }, paging);
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                var query = this._getQueryAllUnitPaymentCorrection(_paging);
+                return this.collection
+                    .where(query)
+                    .select(_paging.select)
+                    .page(_paging.page, _paging.size)
+                    .order(_paging.order)
+                    .execute();
+            });
+    }
+
 }
