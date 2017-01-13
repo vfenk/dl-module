@@ -130,7 +130,7 @@ module.exports = function (purchaseRequest) {
                 text: item.product.code,
                 style: ['size07', 'left']
             }, {
-                text: item.product.name,
+                text: item.product.name+'\n'+item.remark,
                 style: ['size07', 'left']
             }, {
                 text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.product.uom.unit,
@@ -168,9 +168,9 @@ module.exports = function (purchaseRequest) {
         '\n', {
             stack: [{
                 columns: [{
-                    width: '60%',
+                    width: '80%',
                     columns: [{
-                        width: '30%',
+                        width: '25%',
                         stack: ['Kategori', 'Diminta Datang', 'Keterangan']
                     }, {
                             width: '3%',

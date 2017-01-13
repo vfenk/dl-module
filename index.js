@@ -2,7 +2,8 @@ module.exports = {
     managers: {
         auth: {
             AccountManager: require("./src/managers/auth/account-manager"),
-            RoleManager: require("./src/managers/auth/role-manager")
+            RoleManager: require("./src/managers/auth/role-manager"),
+            ApiEndpointManager: require("./src/managers/auth/api-endpoint-manager")
         },
         master: {
             BuyerManager: require("./src/managers/master/buyer-manager"),
@@ -77,5 +78,8 @@ module.exports = {
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")
             }
         }
+    },
+    etl: {
+        factPembelian: require("./src/etl/fact-pembelian")
     }
 }
