@@ -3,5 +3,5 @@ describe("BASIC CRUD SCENARIOS", function() {
 });
 
 describe("GET SCENARIOS", function() {
-    require("./get-material");
+    require("./get-grouping");
 });
