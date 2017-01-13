@@ -249,6 +249,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     this._validate(deliveryOrder)
                         .then(validDeliveryOrder => {
                             validDeliveryOrder.supplierId = new ObjectId(validDeliveryOrder.supplierId);
+                            validDeliveryOrder._createdDate = new Date();
                             //UPDATE PO INTERNAL
                             var poId = new ObjectId();
                             for (var validDeliveryOrderItem of validDeliveryOrder.items) {
