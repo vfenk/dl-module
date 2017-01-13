@@ -130,7 +130,7 @@ module.exports = function (purchaseRequest) {
                 text: item.product.code,
                 style: ['size07', 'left']
             }, {
-                text: item.product.name,
+                text: item.product.name+'\n'+item.remark,
                 style: ['size07', 'left']
             }, {
                 text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.product.uom.unit,
