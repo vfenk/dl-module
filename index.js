@@ -74,7 +74,9 @@ module.exports = {
                 uom: require("./test/data-util/master/uom-data-util"),
                 uster: require("./test/data-util/master/uster-data-util"),
                 vat: require("./test/data-util/master/vat-data-util"),
-                yarnEquivalentConversion: require("./test/data-util/master/yarn-equivalent-conversion-data-util")
+                yarnEquivalentConversion: require("./test/data-util/master/yarn-equivalent-conversion-data-util"),
+                orderType: require('./test/data-util/master/order-type-data-util'),
+                processType: require('./test/data-util/master/process-type-data-util')
             },
             purchasing:{
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")
