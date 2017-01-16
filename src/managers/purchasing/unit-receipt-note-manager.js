@@ -739,4 +739,37 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
 
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
-}
+
+    getAllData(filter) {
+        return new Promise((resolve, reject) => {
+            var sorting = {
+                "date": -1,
+                "no": 1
+            };
+            var query = Object.assign({});
+            query = Object.assign(query, filter);
+            query = Object.assign(query, {
+                _deleted: false
+            });
+
+            var _select = ["no",
+                "date",
+                "unit",
+                "supplier",
+                "deliveryOrder.no",
+                "remark",
+                "items.product",
+                "items.deliveredQuantity",
+                "items.deliveredUom",
+                "items.remark"];
+
+            this.collection.where(query).select(_select).order(sorting).execute()
+                .then((results) => {
+                    resolve(results.data);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
+};
