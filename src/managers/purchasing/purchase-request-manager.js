@@ -192,6 +192,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     _beforeInsert(purchaseRequest) {
         purchaseRequest.no = generateCode();
         purchaseRequest.status = prStatusEnum.CREATED;
+        PurchaseRequest._createdDate = new Date();
         return Promise.resolve(purchaseRequest);
     }
 
@@ -252,6 +253,28 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     reject(e);
                 });
 
+        });
+    }
+
+    getAllDataPR(filter) {
+        return new Promise((resolve, reject) => {
+            var sorting = {
+                "date": -1,
+                "no": 1
+            };
+            var query = Object.assign({});
+            query = Object.assign(query, filter);
+            query = Object.assign(query, {
+                _deleted: false
+            });
+
+            this.collection.find(query).sort(sorting).toArray()
+                .then((purchaseRequests) => {
+                    resolve(purchaseRequests);
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 

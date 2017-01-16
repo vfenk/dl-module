@@ -244,6 +244,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     this._validate(unitPaymentOrder)
                         .then(validUnitPaymentOrder => {
                             validUnitPaymentOrder.no = generateCode();
+                            validUnitPaymentOrder._createdDate = new Date();
                             this.collection.insert(validUnitPaymentOrder)
                                 .then(id => {
                                     this.updatePO(validUnitPaymentOrder)
