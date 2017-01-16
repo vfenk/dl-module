@@ -201,7 +201,7 @@ module.exports = class AccountManager extends BaseManager {
                         }
                     }
                     if (roleErrors.length > 0)
-                        errors.permissions = roleErrors;
+                        errors.roles = roleErrors;
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(errors).length > 0) {
