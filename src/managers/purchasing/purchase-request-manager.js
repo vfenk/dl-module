@@ -278,6 +278,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 "category",
                 "remark",
                 "isPosted",
+                "isUsed",
+                "_createdBy",
                 "items.product",
                 "items.quantity",
                 "items.remark"
