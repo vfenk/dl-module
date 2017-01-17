@@ -537,6 +537,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                 "vatNo",
                 "vatDate",
                 "_createdBy",
+                "category.name",
                 "items.unitReceiptNote.no",
                 "items.unitReceiptNote.date",
                 "items.unitReceiptNote.items.purchaseOrder.purchaseOrderExternal.no",
