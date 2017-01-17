@@ -478,24 +478,51 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         return query;
     }
 
-    readAllUnitPaymentCorrection(paging) {
-        var _paging = Object.assign({
-            page: 1,
-            size: 20,
-            order: {},
-            filter: {},
-            select: []
-        }, paging);
-        return this._createIndexes()
-            .then((createIndexResults) => {
-                var query = this._getQueryAllUnitPaymentCorrection(_paging);
-                return this.collection
-                    .where(query)
-                    .select(_paging.select)
-                    .page(_paging.page, _paging.size)
-                    .order(_paging.order)
-                    .execute();
+    getAllData(filter) {
+        return new Promise((resolve, reject) => {
+            var sorting = {
+                "date": -1,
+                "no": 1
+            };
+            var query = Object.assign({});
+            query = Object.assign(query, filter);
+            query = Object.assign(query, {
+                _deleted: false
             });
-    }
 
+            var _select=["no",
+            "date",
+            "correctionType",
+            "unitPaymentOrder.no",
+            "invoiceCorrectionNo",
+            "invoiceCorrectionDate",
+            "incomeTaxCorrectionNo",
+            "incomeTaxCorrectionDate",
+            "vatTaxCorrectionNo",
+            "vatTaxCorrectionDate",
+            "unitPaymentOrder.supplier",
+            "unitPaymentOrder.items.uniReceiptNote.no",
+            "unitPaymentOrder.items.uniReceiptNote.date",
+            "unitPaymentOrder.items.uniReceiptNote.items.purchaseOrder._id",
+            "returNoteNo",
+            "remark",
+            "items.purchaseOrder.purchaseOrderExternal.no",
+            "items.purchaseOrder.purchaseRequest.no",
+            "item.product",
+            "item.quantity",
+            "item.uom",
+            "item.pricePerUnit",
+            "item.currency",
+            "item.priceTotal"
+            ];
+
+            this.collection.where(query).select(_select).order(sorting).execute()
+                .then((results) => {
+                    resolve(results.data);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
 }

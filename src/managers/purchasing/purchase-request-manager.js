@@ -130,8 +130,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                             itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isDuplicate:%s is duplicate", i18n.__("PurchaseRequest.items.product.name._:Product")); //"Nama barang tidak boleh kosong";
                         }
                         if (Object.getOwnPropertyNames(itemError).length > 0) {
-                            itemErrors[valueArr.indexOf(item)]= itemError;
-                            itemErrors[idx]= itemError;
+                            itemErrors[valueArr.indexOf(item)] = itemError;
+                            itemErrors[idx] = itemError;
                         }
                         return valueArr.indexOf(item) != idx
                     });
@@ -268,9 +268,23 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 _deleted: false
             });
 
-            this.collection.find(query).sort(sorting).toArray()
-                .then((purchaseRequests) => {
-                    resolve(purchaseRequests);
+            var _select = [
+                "no",
+                "date",
+                "expectedDeliveryDate",
+                "budget.code",
+                "unit",
+                "currency",
+                "category",
+                "remark",
+                "isPosted",
+                "items.product",
+                "items.quantity",
+                "items.remark"
+            ];
+            this.collection .where(query).select(_select) .order(sorting) .execute()
+                  .then((purchaseRequests) => {
+                    resolve(purchaseRequests.data);
                 })
                 .catch(e => {
                     reject(e);

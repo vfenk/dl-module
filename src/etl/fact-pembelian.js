@@ -263,7 +263,7 @@ module.exports = class FactPurchasingEtlManager {
                     var urnDays = unitReceiptNote ? moment(unitReceiptNote.date).diff(moment(deliveryOrder.date), "days") : null;
                     var upoDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(unitReceiptNote.date), "days") : null;
                     var poDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(purchaseOrder.date), "days") : null;
-                    var lastDeliveredDate = deliveryOrder ? poItem.fulfillments.slice(-1)[0].deliveryOrderDate : null;
+                    var lastDeliveredDate = (poItem.fulfillments.length > 0) ? poItem.fulfillments.slice(-1)[0].deliveryOrderDate : null;
                     var catType = purchaseOrder.purchaseRequest.category.name;
 
                     return {
@@ -301,7 +301,7 @@ module.exports = class FactPurchasingEtlManager {
                         deliveryOrderDays: deliveryOrder ? `${doDays}` : null,
                         deliveryOrderDaysRange: deliveryOrder ? `'${this.getRangeMonth(doDays)}'` : null,
                         supplierCode: purchaseOrderExternal ? `'${purchaseOrderExternal.supplier.code}'` : null,
-                        supplierName: purchaseOrderExternal ? `'${purchaseOrderExternal.supplier.name}'` : null,
+                        supplierName: purchaseOrderExternal ? `'${purchaseOrderExternal.supplier.name.replace("[", ".").replace("}", ".").replace("\"", ".").replace("]", ".").replace("\"", ".").replace("{", ".").replace("'", ".")}'` : null,
                         currencyCode: purchaseOrderExternal ? `'${purchaseOrderExternal.currency.code}'` : null,
                         currencyName: purchaseOrderExternal ? `'${purchaseOrderExternal.currency.description}'` : null,
                         paymentMethod: purchaseOrderExternal ? `'${purchaseOrderExternal.paymentMethod}'` : null,
@@ -318,7 +318,7 @@ module.exports = class FactPurchasingEtlManager {
                         deliveryOrderDate: deliveryOrder ? `'${moment(deliveryOrder.date).format('L')}'` : null,
                         unitReceiptNoteDays: unitReceiptNote ? `${urnDays}` : null,
                         unitReceiptNoteDaysRange: unitReceiptNote ? `'${this.getRangeWeek(urnDays)}'` : null,
-                        status: deliveryOrder ? `'${this.getStatus(purchaseOrderExternal.expectedDeliveryDate, lastDeliveredDate)}'` : null,
+                        status: deliveryOrder ? `'${this.getStatus(moment(purchaseOrderExternal.expectedDeliveryDate), moment(lastDeliveredDate))}'` : null,
                         prNoAtDo: deliveryOrder ? `'${deliveryOrder.items[0].purchaseOrderExternal.items[0].purchaseRequest.no}'` : null,
 
                         unitReceiptNoteId: unitReceiptNote ? `'${unitReceiptNote._id}'` : null,
@@ -422,23 +422,6 @@ module.exports = class FactPurchasingEtlManager {
         return Promise.resolve([].concat.apply([], result));
     }
 
-    removeDuplicate(objectsArray) {
-        var usedObjects = {};
-
-        for (var i = objectsArray.length - 1; i >= 0; i--) {
-            var so = JSON.stringify(objectsArray[i]);
-
-            if (usedObjects[so]) {
-                objectsArray.splice(i, 1);
-
-            } else {
-                usedObjects[so] = true;
-            }
-        }
-
-        return objectsArray;
-    }
-
     load(data) {
         return sqlConnect.getConnect()
             .then((request) => {
@@ -460,7 +443,7 @@ module.exports = class FactPurchasingEtlManager {
                 // var fs = require("fs");
                 // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
 
-                // fs.writeFile(path, sqlQuery, function (error) {
+                // fs.writeFile(path, sqlQuery + storedProcedure + deleteTempTable, function (error) {
                 //     if (error) {
                 //         console.log("write error:  " + error.message);
                 //     } else {
