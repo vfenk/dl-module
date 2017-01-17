@@ -507,14 +507,15 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 "returNoteNo",
                 "remark",
                 "_createdBy",
+                "items.purchaseOrder._id",
                 "items.purchaseOrder.purchaseOrderExternal.no",
                 "items.purchaseOrder.purchaseRequest.no",
-                "item.product",
-                "item.quantity",
-                "item.uom",
-                "item.pricePerUnit",
-                "item.currency",
-                "item.priceTotal"
+                "items.product",
+                "items.quantity",
+                "items.uom",
+                "items.pricePerUnit",
+                "items.currency",
+                "items.priceTotal"
             ];
 
             this.collection.where(query).select(_select).order(sorting).execute()
