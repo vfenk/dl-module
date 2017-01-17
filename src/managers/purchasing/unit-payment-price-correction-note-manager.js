@@ -504,7 +504,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 "unitPaymentOrder.items.unitReceiptNote.no",
                 "unitPaymentOrder.items.unitReceiptNote.date",
                 "unitPaymentOrder.items.unitReceiptNote.items.purchaseOrder._id",
-                "returNoteNo",
+                "releaseOrderNoteNo",
                 "remark",
                 "_createdBy",
                 "items.purchaseOrder._id",
