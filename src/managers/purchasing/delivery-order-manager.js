@@ -865,6 +865,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var _select = ["no",
                 "date",
                 "supplier",
+                "_createdBy",
                 "items.purchaseOrderExternal",
                 "items.fulfillments.product",
                 "items.fulfillments.purchaseOrderQuantity",
