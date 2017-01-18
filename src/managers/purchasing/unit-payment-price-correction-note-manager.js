@@ -315,6 +315,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                             var tasks = [];
                             var getPurchaseOrderById = [];
                             validData.no = generateCode();
+                            validData._createdDate = new Date();
                             if (validData.unitPaymentOrder.useIncomeTax)
                                 validData.returNoteNo = generateCode();
                             //Update PO Internal
@@ -436,5 +437,94 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         }
 
         return this.collection.createIndexes([dateIndex, noIndex]);
+    }
+
+    _getQueryAllUnitPaymentCorrection(paging) {
+        var deletedFilter = {
+            _deleted: false
+        },
+            keywordFilter = {};
+
+        var query = {};
+
+        if (paging.keyword) {
+            var regex = new RegExp(paging.keyword, "i");
+
+            var filterNo = {
+                'no': {
+                    '$regex': regex
+                }
+            };
+
+            var filterSupplierName = {
+                'unitPaymentOrder.supplier.name': {
+                    '$regex': regex
+                }
+            };
+
+            var filterUnitCoverLetterNo = {
+                "unitCoverLetterNo": {
+                    '$regex': regex
+                }
+            };
+
+            keywordFilter = {
+                '$or': [filterNo, filterSupplierName, filterUnitCoverLetterNo]
+            };
+        }
+        query = {
+            '$and': [deletedFilter, paging.filter, keywordFilter]
+        }
+        return query;
+    }
+
+    getAllData(filter) {
+        return new Promise((resolve, reject) => {
+            var sorting = {
+                "date": -1,
+                "no": 1
+            };
+            var query = Object.assign({});
+            query = Object.assign(query, filter);
+            query = Object.assign(query, {
+                _deleted: false
+            });
+
+            var _select = ["no",
+                "date",
+                "correctionType",
+                "unitPaymentOrder.no",
+                "invoiceCorrectionNo",
+                "invoiceCorrectionDate",
+                "incomeTaxCorrectionNo",
+                "incomeTaxCorrectionDate",
+                "vatTaxCorrectionNo",
+                "vatTaxCorrectionDate",
+                "unitPaymentOrder.supplier",
+                "unitPaymentOrder.items.unitReceiptNote.no",
+                "unitPaymentOrder.items.unitReceiptNote.date",
+                "unitPaymentOrder.items.unitReceiptNote.items.purchaseOrder._id",
+                "releaseOrderNoteNo",
+                "remark",
+                "_createdBy",
+                "items.purchaseOrder._id",
+                "items.purchaseOrder.purchaseOrderExternal.no",
+                "items.purchaseOrder.purchaseRequest.no",
+                "items.product",
+                "items.quantity",
+                "items.uom",
+                "items.pricePerUnit",
+                "items.currency",
+                "items.priceTotal"
+            ];
+
+            this.collection.where(query).select(_select).order(sorting).execute()
+                .then((results) => {
+                    resolve(results.data);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
     }
 }
