@@ -69,7 +69,7 @@ module.exports = function (pox) {
                 alignment: "right",
                 style: ['size08']
             }, {
-                text: number,
+                text: `Nomor PO : ${number}`,
                 alignment: "right",
                 style: ['size09', 'bold']
             }]
