@@ -579,11 +579,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                                         break;
                                                                                     }
                                                                                 }
-                                                                                if (result.isClosed === false) {
-                                                                                    purchaseOrderExternal.isClosed = false;
+                                                                                for (var poeItem of purchaseOrderExternal.items) {
+                                                                                    if (poeItem.isClosed === false) {
+                                                                                        purchaseOrderExternal.isClosed = false;
+                                                                                        break;
+                                                                                    }
+                                                                                    else {
+                                                                                        purchaseOrderExternal.isClosed = true;
+                                                                                    }
                                                                                 }
-                                                                                else
-                                                                                    purchaseOrderExternal.isClosed = true;
 
                                                                                 validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
                                                                                 tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
@@ -792,11 +796,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                         break;
                                                                     }
                                                                 }
-                                                                if (result.isClosed === false) {
-                                                                    purchaseOrderExternal.isClosed = false;
+                                                                for (var poeItem of purchaseOrderExternal.items) {
+                                                                    if (poeItem.isClosed === false) {
+                                                                        purchaseOrderExternal.isClosed = false;
+                                                                        break;
+                                                                    }
+                                                                    else {
+                                                                        purchaseOrderExternal.isClosed = true;
+                                                                    }
                                                                 }
-                                                                else
-                                                                    purchaseOrderExternal.isClosed = true;
 
                                                                 validDeliveryOrderItem.purchaseOrderExternal = purchaseOrderExternal;
                                                                 tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
@@ -1112,11 +1120,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         break;
                     }
                 }
-                if (poInternal.isClosed === false) {
-                    purchaseOrderExternal.isClosed = false;
+                for (var poeItem of purchaseOrderExternal.items) {
+                    if (poeItem.isClosed === false) {
+                        purchaseOrderExternal.isClosed = false;
+                        break;
+                    }
+                    else {
+                        purchaseOrderExternal.isClosed = true;
+                    }
                 }
-                else
-                    purchaseOrderExternal.isClosed = true;
 
                 tasksPoExternal.push(this.purchaseOrderExternalManager.update(purchaseOrderExternal));
             }
