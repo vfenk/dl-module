@@ -223,7 +223,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
     }
 
     getRangeMonth(days) {
-        if (days === 0) {
+        if (days <= 0) {
             return "0 hari";
         } else if (days >= 1 && days <= 30) {
             return "1-30 hari";
@@ -237,7 +237,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
     }
 
     getRangeWeek(days) {
-        if (days === 0) {
+        if (days <= 0) {
             return "0 hari";
         } else if (days >= 1 && days <= 7) {
             return "1-7 hari";
