@@ -94,6 +94,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
             this._validate(purchaseOrderExternal)
                 .then(validPurchaseOrderExternal => {
                     validPurchaseOrderExternal.no = generateCode();
+                    validPurchaseOrderExternal._createdDate = new Date();
                     validPurchaseOrderExternal.supplierId = new ObjectId(validPurchaseOrderExternal.supplierId);
                     validPurchaseOrderExternal.supplier._id = new ObjectId(validPurchaseOrderExternal.supplier._id);
                     this.collection.insert(validPurchaseOrderExternal)
@@ -364,6 +365,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 valid.vat = _vat;
                 valid.date = new Date(valid.date);
                 valid.expectedDeliveryDate = new Date(valid.expectedDeliveryDate);
+                valid.currencyRate = parseInt(valid.currencyRate);
 
                 var items = [];
 
@@ -791,5 +793,45 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 valid.stamp(this.user.username, 'manager');
                 return Promise.resolve(valid);
             });
+    }
+
+    getAllData(filter) {
+        return new Promise((resolve, reject) => {
+            var sorting = {
+                "date": -1,
+                "no": 1
+            };
+            var query = Object.assign({});
+            query = Object.assign(query, filter);
+            query = Object.assign(query, {
+                _deleted: false
+            });
+
+            var _select = ["no",
+                "date",
+                "supplier",
+                "expectedDeliveryDate",
+                "freightCostBy",
+                "paymentMethod",
+                "paymentDueDays",
+                "currency",
+                "useIncomeTax",
+                "useVat",
+                "vat.rate",
+                "remark",
+                "isPosted",
+                "_createdBy",
+                "items.no",
+                "items.purchaseRequest.no",
+                "items.items"];
+
+            this.collection.where(query).select(_select).order(sorting).execute()
+                .then((results) => {
+                    resolve(results.data);
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
     }
 };

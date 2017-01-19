@@ -130,8 +130,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                             itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isDuplicate:%s is duplicate", i18n.__("PurchaseRequest.items.product.name._:Product")); //"Nama barang tidak boleh kosong";
                         }
                         if (Object.getOwnPropertyNames(itemError).length > 0) {
-                            itemErrors[valueArr.indexOf(item)]= itemError;
-                            itemErrors[idx]= itemError;
+                            itemErrors[valueArr.indexOf(item)] = itemError;
+                            itemErrors[idx] = itemError;
                         }
                         return valueArr.indexOf(item) != idx
                     });
@@ -192,6 +192,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     _beforeInsert(purchaseRequest) {
         purchaseRequest.no = generateCode();
         purchaseRequest.status = prStatusEnum.CREATED;
+        PurchaseRequest._createdDate = new Date();
         return Promise.resolve(purchaseRequest);
     }
 
@@ -252,6 +253,44 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     reject(e);
                 });
 
+        });
+    }
+
+    getAllDataPR(filter) {
+        return new Promise((resolve, reject) => {
+            var sorting = {
+                "date": -1,
+                "no": 1
+            };
+            var query = Object.assign({});
+            query = Object.assign(query, filter);
+            query = Object.assign(query, {
+                _deleted: false
+            });
+
+            var _select = [
+                "no",
+                "date",
+                "expectedDeliveryDate",
+                "budget.code",
+                "unit",
+                "currency",
+                "category",
+                "remark",
+                "isPosted",
+                "isUsed",
+                "_createdBy",
+                "items.product",
+                "items.quantity",
+                "items.remark"
+            ];
+            this.collection .where(query).select(_select) .order(sorting) .execute()
+                  .then((purchaseRequests) => {
+                    resolve(purchaseRequests.data);
+                })
+                .catch(e => {
+                    reject(e);
+                });
         });
     }
 

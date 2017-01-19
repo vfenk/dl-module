@@ -4,7 +4,7 @@ module.exports = function (purchaseRequest) {
 
     var items = [].concat.apply([], purchaseRequest.items);
 
-    var iso = "FM-6.00-06-004/R1";
+    var iso = "FM-PB-00-06-006";
     var number = purchaseRequest.no;
 
     var locale = global.config.locale; 
