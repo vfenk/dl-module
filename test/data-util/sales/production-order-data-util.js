@@ -76,9 +76,8 @@ class ProductionOrderDataUtil {
                 return Promise.resolve(data);
             });
     }
-    
 
-    getNewTestData() {
+    getNewTestData(isSingleDetail) {
         return helper
             .getManager(ProductionOrderManager)
             .then((manager) => {
