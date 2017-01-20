@@ -30,8 +30,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
     _getQuery(paging) {
         var deletedFilter = {
-            _deleted: false
-        }, keywordFilter = {};
+                _deleted: false
+            },
+            keywordFilter = {};
 
 
         var query = {};
@@ -67,7 +68,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             };
         }
 
-        query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
+        query = {
+            '$and': [deletedFilter, paging.filter, keywordFilter]
+        }
         return query;
     }
 
@@ -76,6 +79,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = deliveryOrder;
             var now = new Date();
+            
+            var dbData = this.getSingleByIdOrDefault(valid._id);
 
             var getDeliveryderPromise = this.collection.singleOrDefault({
                 "$and": [{
@@ -102,29 +107,30 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 if (ObjectId.isValid(doItem.purchaseOrderExternal._id))
                     getPoExternal.push(this.purchaseOrderExternalManager.getSingleByIdOrDefault(doItem.purchaseOrderExternal._id));
 
-            Promise.all([getDeliveryderPromise, getSupplier, getDeliveryderByRefNoPromise].concat(getPoExternal))
+            Promise.all([dbData, getDeliveryderPromise, getSupplier, getDeliveryderByRefNoPromise].concat(getPoExternal))
                 .then(results => {
-                    var _module = results[0];
-                    var _supplier = results[1];
-                    var _dobyRefNo = results[2];
-                    var _poExternals = results.slice(3, results.length) || [];
+                    var _original = results[0] ;
+                    var _module = results[1];
+                    var _supplier = results[2];
+                    var _dobyRefNo = results[3];
+                    var _poExternals = results.slice(4, results.length) || [];
 
                     if (!valid.no || valid.no === "")
-                        errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan tidak boleh kosong";
+                        errors["no"] = i18n.__("DeliveryOrder.no.isRequired:%s is required", i18n.__("DeliveryOrder.no._:No")); //"Nomor surat jalan tidak boleh kosong";
                     else if (_module)
-                        errors["no"] = i18n.__("DeliveryOrder.no.isExists:%s is already exists", i18n.__("DeliveryOrder.no._:No"));//"Nomor surat jalan sudah terdaftar";
+                        errors["no"] = i18n.__("DeliveryOrder.no.isExists:%s is already exists", i18n.__("DeliveryOrder.no._:No")); //"Nomor surat jalan sudah terdaftar";
 
-                    if (!valid.refNo || valid.refNo === "")
-                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isRequired:%s is required", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan tidak boleh kosong";
+                    if (_original && (!valid.refNo || valid.refNo === ""))
+                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isRequired:%s is required", i18n.__("DeliveryOrder.refNo._:Ref No")); //"Nomor surat jalan tidak boleh kosong";
                     else if (_dobyRefNo)
-                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isExists:%s is already exists", i18n.__("DeliveryOrder.refNo._:Ref No"));//"Nomor surat jalan sudah terdaftar";
+                        errors["refNo"] = i18n.__("DeliveryOrder.refNo.isExists:%s is already exists", i18n.__("DeliveryOrder.refNo._:Ref No")); //"Nomor surat jalan sudah terdaftar";
 
                     if (!valid.date || valid.date === "")
-                        errors["date"] = i18n.__("DeliveryOrder.date.isRequired:%s is required", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh kosong";
+                        errors["date"] = i18n.__("DeliveryOrder.date.isRequired:%s is required", i18n.__("DeliveryOrder.date._:Date")); //"Tanggal surat jalan tidak boleh kosong";
                     // else if (valid.date > now)
                     //     errors["date"] = i18n.__("DeliveryOrder.date.isGreater:%s is greater than today", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
                     if (!valid.supplierDoDate || valid.supplierDoDate === "")
-                        errors["supplierDoDate"] = i18n.__("DeliveryOrder.supplierDoDate.isRequired:%s is required", i18n.__("DeliveryOrder.supplierDoDate._:SupplierDoDate"));//"Tanggal surat jalan supplier tidak boleh kosong";
+                        errors["supplierDoDate"] = i18n.__("DeliveryOrder.supplierDoDate.isRequired:%s is required", i18n.__("DeliveryOrder.supplierDoDate._:SupplierDoDate")); //"Tanggal surat jalan supplier tidak boleh kosong";
 
                     if (!valid.supplierId || valid.supplierId.toString() === "")
                         errors["supplier"] = i18n.__("DeliveryOrder.supplier.name.isRequired:%s is required", i18n.__("DeliveryOrder.supplier.name._:NameSupplier")); //"Nama supplier tidak boleh kosong";    
@@ -142,13 +148,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             if (!doItem.purchaseOrderExternal) {
                                 purchaseOrderExternalItemHasErrors = true;
                                 purchaseOrderExternalError["purchaseOrderExternal"] = i18n.__("DeliveryOrder.items.purchaseOrderExternal.isRequired:%s is required", i18n.__("DeliveryOrder.items.purchaseOrderExternal._:PurchaseOrderExternal")); //"Purchase order external tidak boleh kosong";
-                            } else {
+                            }
+                            else {
                                 for (var _poExternal of _poExternals) {
                                     if (_poExternal._id.toString() == doItem.purchaseOrderExternal._id.toString()) {
                                         if (!_poExternal.isPosted) {
                                             purchaseOrderExternalItemHasErrors = true;
                                             purchaseOrderExternalError["purchaseOrderExternal"] = i18n.__("DeliveryOrder.items.purchaseOrderExternal.isPosted:%s is need to be posted", i18n.__("DeliveryOrder.items.purchaseOrderExternal._:PurchaseOrderExternal"));
-                                        } else if (_poExternal.isUsed) {
+                                        }
+                                        else if (_poExternal.isUsed) {
                                             purchaseOrderExternalItemHasErrors = true;
                                             purchaseOrderExternalError["purchaseOrderExternal"] = i18n.__("DeliveryOrder.items.purchaseOrderExternal.isUsed:%s is already closed", i18n.__("DeliveryOrder.items.purchaseOrderExternal._:PurchaseOrderExternal"));
                                         }
@@ -239,10 +247,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
     _afterInsert(id) {
         return this.getSingleById(id)
-            .then(this.getRealization)
-            .then(this.updatePurchaseRequest)
-            .then(this.updatePurchaseOrder)
-            .then(this.updatePurchaseOrderExternal)
+            .then((deliveryOrder) => this.getRealization(deliveryOrder))
+            .then((realizations) => this.updatePurchaseRequest(realizations))
+            .then((realizations) => this.updatePurchaseOrder(realizations))
+            .then((realizations) => this.updatePurchaseOrderExternal(realizations))
             .then(() => {
                 return this.syncItems(id);
             })
@@ -250,10 +258,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
     _afterUpdate(id) {
         return this.getSingleById(id)
-            .then(this.getRealization)
-            .then(this.updatePurchaseRequest)
-            .then(this.updatePurchaseOrder)
-            .then(this.updatePurchaseOrderExternal)
+            .then((deliveryOrder) => this.getRealization(deliveryOrder))
+            .then((realizations) => this.updatePurchaseRequest(realizations))
+            .then((realizations) => this.updatePurchaseOrder(realizations))
+            .then((realizations) => this.updatePurchaseOrderExternal(realizations))
             .then(() => {
                 return this.syncItems(id);
             })
@@ -288,18 +296,18 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         }
 
         var jobs = [];
-        for (var [purchaseRequestId, productIds] of map.entries()) {
+        map.forEach((productIds, purchaseRequestId) => {
             var job = this.purchaseRequestManager.getSingleById(purchaseRequestId)
                 .then((purchaseRequest) => {
                     for (var productId of productIds) {
-                        var prItem = purchaseRequest.items.find(item => item.productId.toString() === productId);
+                        var prItem = purchaseRequest.items.find(item => item.productId.toString() === productId.toString());
                         prItem.deliveryOrderNos = prItem.deliveryOrderNos || [];
                         prItem.deliveryOrderNos.push(deliveryOrder.no);
                     }
                     return this.purchaseRequestManager.update(purchaseRequest);
                 })
             jobs.push(job);
-        };
+        })
 
         return Promise.all(jobs).then((results) => {
             return Promise.resolve(realizations);
@@ -317,11 +325,12 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         }
 
         var jobs = [];
-        for (var [purchaseOrderId, realization] of map.entries()) {
+        map.forEach((realizations, purchaseOrderId) => {
             var job = this.purchaseOrderManager.getSingleById(purchaseOrderId)
                 .then((purchaseOrder) => {
-                    for (var productId of realization.productIds) {
-                        var poItem = purchaseOrder.items.find(item => item.productId.toString() === productId);
+                    for (var realization of realizations) {
+                        var productId = realization.productId;
+                        var poItem = purchaseOrder.items.find(item => item.product._id.toString() === productId.toString());
                         var deliveryOrder = realization.deliveryOrder;
                         var fullfilment = {
                             deliveryOrderNo: deliveryOrder.no,
@@ -334,13 +343,17 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         poItem.fullfilments.push(fullfilment);
                         poItem.realizationQuantity = poItem.fullfilments
                             .map(fullfilment => fullfilment.deliveryOrderDeliveredQuantity)
-                            .reduce((prev, curr, index) => { return prev + curr; }, 0);
+                            .reduce((prev, curr, index) => {
+                                return prev + curr;
+                            }, 0);
                         poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
                     }
 
                     purchaseOrder.isClosed = purchaseOrder.items
                         .map((item) => item.isClosed)
-                        .reduce((prev, curr, index) => { return prev && curr }, true);
+                        .reduce((prev, curr, index) => {
+                            return prev && curr
+                        }, true);
 
                     purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
                     return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
@@ -357,7 +370,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         });
                 })
             jobs.push(job);
-        };
+        })
 
         return Promise.all(jobs).then((results) => {
             return Promise.resolve(realizations);
@@ -378,12 +391,12 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         }
 
         var jobs = [];
-        for (var [purchaseOrderExternalId, purchaseOrderIds] of map.entries()) {
+        map.forEach((purchaseOrderIds, purchaseOrderExternalId) => {
             var job = this.purchaseOrderExternalManager.getSingleById(purchaseOrderExternalId)
                 .then((purchaseOrderExternal) => {
                     return Promise.all(purchaseOrderIds.map((purchaseOrderId) => {
-                        return this.purchaseOrderManager.getSingleById(purchaseOrderId)
-                    }))
+                            return this.purchaseOrderManager.getSingleById(purchaseOrderId)
+                        }))
                         .then((purchaseOrders) => {
 
                             for (var purchaseOrder of purchaseOrders) {
@@ -394,13 +407,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                             purchaseOrderExternal.isClosed = purchaseOrderExternal.items
                                 .map((item) => item.isClosed)
-                                .reduce((prev, curr, index) => { return prev && curr }, true);
+                                .reduce((prev, curr, index) => {
+                                    return prev && curr
+                                }, true);
 
-                            return this.PurchaseOrderExternalManager.update(purchaseOrderExternal);
+                            return this.purchaseOrderExternalManager.update(purchaseOrderExternal);
                         })
                 })
             jobs.push(job);
-        };
+        });
 
         return Promise.all(jobs);
     }
@@ -413,7 +428,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 })
                 return Promise.all(getPoExternals)
                     .then((purchaseOrderExternals) => {
-                        for (var puchaseOrderExternal of purchaseOrderExternals) {
+                        for (var purchaseOrderExternal of purchaseOrderExternals) {
                             var item = deliveryOrder.items.find(item => item.purchaseOrderExternalId.toString() === purchaseOrderExternal._id.toString())
                             item.purchaseOrderExternal = purchaseOrderExternal;
 
@@ -423,7 +438,11 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             }
                         }
                         return this.collection
-                            .updateOne({ _id: deliveryOrder._id }, { $set: deliveryOrder })
+                            .updateOne({
+                                _id: deliveryOrder._id
+                            }, {
+                                $set: deliveryOrder
+                            })
                             .then((result) => Promise.resolve(deliveryOrder._id));
                     })
             })
@@ -958,7 +977,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                                                 for (var _prItem of _pr.items) {
                                                                     if (_prItem.deliveryOrderNos.length > 0) {
                                                                         _pr.status = prStatusEnum.ARRIVING;
-                                                                    } else {
+                                                                    }
+                                                                    else {
                                                                         _pr.status = prStatusEnum.ORDERED;
                                                                     }
                                                                     break;
@@ -1069,21 +1089,28 @@ module.exports = class DeliveryOrderManager extends BaseManager {
     getDataDeliveryOrder(no, supplierId, dateFrom, dateTo, createdBy) {
         return new Promise((resolve, reject) => {
             var query = Object.assign({});
-            var deleted = { _deleted: false };
-            var _createdBy = { _createdBy: createdBy };
+            var deleted = {
+                _deleted: false
+            };
+            var _createdBy = {
+                _createdBy: createdBy
+            };
 
             if (no !== "undefined" && no !== "") {
-                var _no = { no: no };
+                var _no = {
+                    no: no
+                };
                 Object.assign(query, _no);
             }
             if (supplierId !== "undefined" && supplierId !== "") {
-                var _supplierId = { supplierId: new ObjectId(supplierId) };
+                var _supplierId = {
+                    supplierId: new ObjectId(supplierId)
+                };
                 Object.assign(query, _supplierId);
             }
             if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
                 var supplierDoDate = {
-                    supplierDoDate:
-                    {
+                    supplierDoDate: {
                         $gte: new Date(dateFrom),
                         $lte: new Date(dateTo)
                     }
@@ -1144,7 +1171,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 "items.fulfillments.product",
                 "items.fulfillments.purchaseOrderQuantity",
                 "items.fulfillments.purchaseOrderUom",
-                "items.fulfillments.deliveredQuantity"];
+                "items.fulfillments.deliveredQuantity"
+            ];
 
             this.collection.where(query).select(_select).order(sorting).execute()
                 .then((results) => {
@@ -1250,7 +1278,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                             for (var _prItem of _pr.items) {
                                                 if (_prItem.deliveryOrderNos.length > 0) {
                                                     _pr.status = prStatusEnum.ARRIVING;
-                                                } else {
+                                                }
+                                                else {
                                                     _pr.status = prStatusEnum.ORDERED;
                                                 }
                                                 break;
