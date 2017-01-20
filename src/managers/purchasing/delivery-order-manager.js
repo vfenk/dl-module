@@ -873,7 +873,6 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var query = Object.assign({});
             var deleted = { _deleted: false };
-            var _createdBy = { _createdBy: createdBy };
 
             if (no !== "undefined" && no !== "") {
                 var _no = { no: no };
@@ -893,8 +892,13 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 };
                 Object.assign(query, supplierDoDate);
             }
+            if (createdBy !== undefined && createdBy !== "") {
+                Object.assign(query, {
+                    _createdBy: createdBy
+                });
+            }
 
-            Object.assign(query, deleted, _createdBy);
+            Object.assign(query, deleted);
 
             this.collection
                 .where(query)
