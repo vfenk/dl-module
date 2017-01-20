@@ -10,9 +10,9 @@ describe('#dl-module', function (done) {
 
     // Auth
     // test('@auth/account-manager', './auth/account-manager-test');
-    test('@AUTH/ACCOUNT', './auth/account');
-    test('@AUTH/ROLE', './auth/role');
-    test('@AUTH/API-ENDPOINT', './auth/api-endpoint');
+    // test('@AUTH/ACCOUNT', './auth/account');
+    // test('@AUTH/ROLE', './auth/role');
+    // test('@AUTH/API-ENDPOINT', './auth/api-endpoint');
 
     // test('@ETL/DIM-CATEGORY', './etl/dim-category');
     // test('@ETL/DIM-DIVISION', './etl/dim-division');
@@ -24,7 +24,11 @@ describe('#dl-module', function (done) {
     // test('@ETL/FACT-TOP-TEN-SUPPLIER', './etl/fact-top-ten-supplier');
     // test('@ETL/FACT-PURCHASE-ORDER-COMPARISON', './etl/fact-purchase-order-comparison');
     // test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');
+<<<<<<< HEAD
     test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');
+=======
+    // test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
+>>>>>>> refs/remotes/upstream/dev
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
@@ -51,6 +55,7 @@ describe('#dl-module', function (done) {
     test('@MASTER/MACHINE-TYPE', './master/machine-type');
 
     //Purchasing 
+<<<<<<< HEAD
     // test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
     // test('@PURCHASING/PURCHASE ORDER', './purchasing/purchase-order');
     // test('@PURCHASING/PURCHASE ORDER EXTERNAL', './purchasing/purchase-order-external'); 
@@ -60,6 +65,17 @@ describe('#dl-module', function (done) {
     // test('@PURCHASING/UNIT PAYMENT PRICE CORRECTION', './purchasing/unit-payment-price-correction-note');
     // test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
 
+=======
+    test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
+    test('@PURCHASING/PURCHASE ORDER', './purchasing/purchase-order');
+    test('@PURCHASING/PURCHASE ORDER EXTERNAL', './purchasing/purchase-order-external'); 
+    test('@PURCHASING/DELIVERY ORDER', './purchasing/delivery-order'); 
+    test('@PURCHASING/UNIT RECEIPT NOTE', './purchasing/unit-receipt-note'); 
+    test('@PURCHASING/UNIT PAYMENT ORDER', './purchasing/unit-payment-order'); 
+    test('@PURCHASING/UNIT PAYMENT PRICE CORRECTION', './purchasing/unit-payment-price-correction-note');
+    test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
+    
+>>>>>>> refs/remotes/upstream/dev
     //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
 
     // ok
@@ -83,8 +99,18 @@ describe('#dl-module', function (done) {
 
     // //Production
 
+<<<<<<< HEAD
     test('@production/production-order', './production/finishing-printing/production-order/create');
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
+=======
+    // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+    // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
+    
+    //Sales
+
+    
+    test('@production/production-order', './sales/production-order/create');
+>>>>>>> refs/remotes/upstream/dev
 });
