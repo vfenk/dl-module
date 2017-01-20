@@ -68,7 +68,6 @@ module.exports = {
                 lampStandard: require("./test/data-util/master/lamp-standard-data-util"),
                 lotMachine: require("./test/data-util/master/lot-machine-data-util"),
                 machine: require("./test/data-util/master/machine-data-util"),
-                machineType:require("./test/data-util/master/machine-type-data-util"),
                 product: require("./test/data-util/master/product-data-util"),
                 supplier: require("./test/data-util/master/supplier-data-util"),
                 threadSpecification: require("./test/data-util/master/thread-specification-data-util"),
