@@ -403,7 +403,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-    getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo, state, createdBy) {
+    getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo, state) {
         return new Promise((resolve, reject) => {
             var sorting = {
                 "purchaseRequest.date": -1,
@@ -449,14 +449,11 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         $lte: new Date(dateTo)
                     }
                 });
-            } 
-            if (createdBy !== undefined && createdBy !== "") {
-                Object.assign(query, {
-                    _createdBy: createdBy
-                });
             }
-
-            query = Object.assign(query, { _deleted: false });
+            query = Object.assign(query, {
+                _createdBy: this.user.username,
+                _deleted: false
+            });
             this.collection.find(query).sort(sorting).toArray()
                 .then(purchaseOrders => {
                     resolve(purchaseOrders);

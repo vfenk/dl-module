@@ -19,8 +19,8 @@ module.exports = class BudgetManager extends BaseManager {
 
     _getQuery(paging) {
         var _default = {
-            _deleted: false
-        },
+                _deleted: false
+            },
             pagingFilter = paging.filter || {},
             keywordFilter = {},
             query = {};
@@ -79,7 +79,7 @@ module.exports = class BudgetManager extends BaseManager {
             });
     }
 
-    getBudget() {
+     getBudget() {
         return new Promise((resolve, reject) => {
             var query = {
                 _deleted: false
@@ -95,79 +95,64 @@ module.exports = class BudgetManager extends BaseManager {
                     reject(e);
                 });
         });
-    }
+    } 
 
     insert(dataFile) {
         return new Promise((resolve, reject) => {
-            // var budget;
-            var taskValidation = [];
+            var budget;
             this.getBudget()
                 .then(results => {
-                    var bugetList = results.data;
-                    var codeBudgetList = [];
-                    var nameBudgetList = [];
-                    if (bugetList.length > 0) {
-                        codeBudgetList = bugetList.map(function (item) { return item.code });
-                        nameBudgetList = bugetList.map(function (item) { return item.name });
-                    }
+                    budget = results.data;
                     var data = [];
-                    if (dataFile.length > 1) {
+                    if (dataFile != "") {
                         for (var i = 1; i < dataFile.length; i++) {
                             data.push({ "code": dataFile[i][0], "name": dataFile[i][1] });
                         }
                     }
                     var dataError = [], errorMessage;
-                    for (var budget of data) {
-                        errorMessage = [];
-                        if (budget.code === "" || budget.code === undefined) {
-                            errorMessage.push("Kode tidak boleh kosong");
+                    for (var i = 0; i < data.length; i++) {
+                        errorMessage = "";
+                        if (data[i]["code"] === "" || data[i]["code"] === undefined) {
+                            errorMessage = errorMessage + "Kode tidak boleh kosong, ";
                         }
-                        if (budget.name === "" || budget.name === undefined) {
-                            errorMessage.push("Nama tidak boleh kosong");
+                        if (data[i]["name"] === "" || data[i]["name"] === undefined) {
+                            errorMessage = errorMessage + "Nama tidak boleh kosong, ";
                         }
-                        else {
-                            if (codeBudgetList.indexOf(budget.code) !== -1) {
-                                errorMessage.push("Kode tidak boleh duplikat");
+                        for (var j = 0; j < budget.length; j++) {
+                            if (budget[j]["code"] === data[i]["code"]) {
+                                errorMessage = errorMessage + "Kode tidak boleh duplikat, ";
                             }
-                            if (nameBudgetList.indexOf(budget.name) !== -1) {
-                                errorMessage.push("Nama tidak boleh duplikat");
+                            if (budget[j]["name"] === data[i]["name"]) {
+                                errorMessage = errorMessage + "Nama tidak boleh duplikat";
                             }
                         }
-                        if (errorMessage.length > 0) {
-                            dataError.push({ "Kode": budget.code, "Nama": budget.name, "Error": errorMessage.join(", ") });
+                        if (errorMessage !== "") {
+                            dataError.push({ "code": data[i]["code"], "name": data[i]["name"], "Error": errorMessage });
                         }
                     }
                     if (dataError.length === 0) {
                         var newBudget = [];
-                        var taskInsertBudget = [];
-                        for (var _budget of data) {
-                            taskInsertBudget.push(this._validate(_budget));
+                        for (var i = 0; i < data.length; i++) {
+                            var valid = new Budget(data[i]);
+                            valid.stamp(this.user.username, 'manager');
+                            this.collection.insert(valid)
+                                .then(id => {
+                                    this.getSingleById(id)
+                                        .then(resultItem => {
+                                            newBudget.push(resultItem)
+                                            resolve(newBudget);
+                                        })
+                                        .catch(e => {
+                                            reject(e);
+                                        });
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                });
                         }
-                        Promise.all(taskInsertBudget)
-                            .then((validData) => {
-                                var taskInsertData = [];
-                                for (var valid of validData) {
-                                    taskInsertData.push({
-                                        insertOne:
-                                        {
-                                            "document": valid
-                                        }
-                                    });
-                                }
-                                this.collection.bulkWrite(taskInsertData)
-                                    .then((result) => {
-                                        resolve({result : true, data : result})
-                                    })
-                                    .catch(e => {
-                                        reject(e);
-                                    });
-                            })
-                            .catch(e => {
-                                reject(e);
-                            });
                     }
                     else {
-                        resolve({result : false, data : dataError});
+                        resolve(dataError);
                     }
                 })
         })
