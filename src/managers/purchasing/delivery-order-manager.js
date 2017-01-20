@@ -893,8 +893,13 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 };
                 Object.assign(query, supplierDoDate);
             }
+            if (createdBy !== undefined && createdBy !== "") {
+                Object.assign(query, {
+                    _createdBy: createdBy
+                });
+            }
 
-            Object.assign(query, deleted, _createdBy);
+            Object.assign(query, deleted);
 
             this.collection
                 .where(query)

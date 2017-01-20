@@ -707,7 +707,12 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 };
                 Object.assign(query, date);
             }
-            Object.assign(query, deleted, createdBy);
+            if (createdBy !== undefined && createdBy !== "") {
+                Object.assign(query, {
+                    _createdBy: createdBy
+                });
+            }
+            Object.assign(query, deleted);
 
             this.collection
                 .where(query)
