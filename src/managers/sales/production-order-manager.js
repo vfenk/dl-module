@@ -574,10 +574,10 @@ module.exports = class ProductionOrderManager extends BaseManager {
                             productionOrder=i;
                         }
                     }
-                    var getDefinition = require("../../../pdf/definitions/production-order");
+                    var getDefinition = require("../../pdf/definitions/production-order");
                     var definition = getDefinition(productionOrder);
 
-                    var generatePdf = require("../../../pdf/pdf-generator");
+                    var generatePdf = require("../../pdf/pdf-generator");
                     generatePdf(definition)
                         .then(binary => {
                             resolve(binary);
@@ -590,6 +590,41 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     reject(e);
                 });
 
+        });
+    }
+
+    getSingleProductionOrder(data){
+       return new Promise((resolve, reject) => {
+            var query = {"productionOrders": { "$elemMatch": { "orderNo": data}}};
+            this.collection.singleOrDefault(query).then((result) => {
+                var dataReturn = {};
+                for(var a of result.productionOrders){
+                    if(data === a.orderNo)
+                        dataReturn = new ProductionOrder(a);
+                }
+                resolve(dataReturn);
+            });
+        });
+    }
+
+    getDataProductionOrder(data){
+       return new Promise((resolve, reject) => {
+            var regex = new RegExp(data.keyword, "i");
+            var dataReturn= [];
+            this.collection.aggregate([{ $unwind : "$productionOrders" }])
+            .match({
+                $and:[{
+                    "productionOrders.orderNo" : {"$regex" : regex}
+                },{"_deleted" : false}]
+            })
+            .limit(20)
+            .toArray(function(err, result) {
+                        for(var a of result){
+                            var pOrder = new ProductionOrder(a.productionOrders)
+                            dataReturn.push(pOrder);
+                        }
+                        resolve(dataReturn);
+                    });
         });
     }
 }

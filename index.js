@@ -45,10 +45,13 @@ module.exports = {
                     WindingProductionOutput: require('./src/managers/production/spinning/winding/winding-production-output-manager')
                 },
                 DailySpinningProductionReportManager: require('./src/managers/production/spinning/daily-spinning-production-report-manager')
+            },
+            finishingPrinting:{
+                DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager') 
             }
         },
         sales:{
-            ProductionOrderManager: require('./src/managers/sales/production-order-manager') 
+            ProductionOrderManager: require('./src/managers/sales/production-order-manager')
         }
     },
     test: {

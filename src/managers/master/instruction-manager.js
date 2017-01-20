@@ -68,7 +68,7 @@ module.exports = class InstructionManager extends BaseManager {
         if(valid.orderType){
             if(valid.orderType.name){
                 if(valid.orderType.name == "Yarn Dyed" || valid.orderType.name == "Printing"){
-                    var getInstructionPromise = this.collection.singleOrDefault({
+                    getInstructionPromise = this.collection.singleOrDefault({
                         _id: {
                             "$ne": new ObjectId(valid._id)
                         },
@@ -79,7 +79,7 @@ module.exports = class InstructionManager extends BaseManager {
                         orderTypeId     :valid.orderType ? new ObjectId(valid.orderType._id) : ''
                     });
                 }else{
-                    var getInstructionPromise = this.collection.singleOrDefault({
+                    getInstructionPromise = this.collection.singleOrDefault({
                         _id: {
                             "$ne": new ObjectId(valid._id)
                         },
@@ -129,6 +129,17 @@ module.exports = class InstructionManager extends BaseManager {
                 else if(_instruction)
                     errors["orderType"] = i18n.__("Instruction.orderType.isExists:%s with same name, material and construction is already exists", i18n.__("Instruction.orderType._:OrderType")); // "Tipe Order sudah ada";
                 
+                if(valid.orderType){
+                    if(valid.orderType.name != "Printing" && valid.orderType.name != "Yarn Dyed"){
+                        if(!valid.colorTypeId || valid.colorTypeId.toString() == ""){
+                            errors["colorType"] = i18n.__("Instruction.colorType.isRequired:%s is required", i18n.__("Instruction.colorType._:ColorType")); // "Tipe Warna harus diisi";
+                        }else if(!_colorType){
+                            errors["colorType"] = i18n.__("Instruction.colorType.isRequired:%s is required", i18n.__("Instruction.colorType._:ColorType")); // "Tipe Warna harus diisi";
+                        }else if(_instruction)
+                            errors["colorType"] = i18n.__("Instruction.orderType.isExists:%s with same name, material, order type and construction is already exists", i18n.__("Instruction.colorType._:ColorType")); // "Tipe Warna harus diisi";
+                    }
+                }
+
                 if(!valid.steps || valid.steps.length < 1)
                     errors["steps"] = i18n.__("Instruction.steps.isRequired:%s is required", i18n.__("Instruction.steps._:Steps")); //"minimal harus ada 1 Step";
                 
@@ -147,9 +158,6 @@ module.exports = class InstructionManager extends BaseManager {
                 if(_colorType){
                     valid.colorType = _colorType;
                     valid.colorTypeId = new ObjectId(_colorType._id);
-                }else{
-                    valid.colorType = null;
-                    valid.colorTypeId = null;
                 }
 
                 valid = new Instruction(valid);
