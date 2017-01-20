@@ -25,7 +25,7 @@ describe('#dl-module', function (done) {
     // test('@ETL/FACT-PURCHASE-ORDER-COMPARISON', './etl/fact-purchase-order-comparison');
     // test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');
 
-    test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');
+    // test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');
 
 
     // Master
