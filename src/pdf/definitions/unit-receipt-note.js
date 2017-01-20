@@ -51,10 +51,10 @@ module.exports = function (unitReceiptNote) {
     var subHeader = [{
         columns: [
             {
-                width: '60%',
+                width: '50%',
                 stack: [{
                     columns: [{
-                        width: '30%',
+                        width: '25%',
                         text: 'Tanggal'
                     }, {
                             width: '5%',
@@ -65,7 +65,7 @@ module.exports = function (unitReceiptNote) {
                         }]
                 }, {
                         columns: [{
-                            width: '30%',
+                            width: '25%',
                             text: 'Diterima dari'
                         }, {
                                 width: '5%',
@@ -83,7 +83,7 @@ module.exports = function (unitReceiptNote) {
                 text: ''
             },
             {
-                width: '30%',
+                width: '40%',
                 stack: [{
                     columns: [{
                         width: '25%',
