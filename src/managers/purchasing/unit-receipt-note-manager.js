@@ -758,6 +758,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 "supplier",
                 "deliveryOrder.no",
                 "remark",
+                "_createdBy",
                 "items.product",
                 "items.deliveredQuantity",
                 "items.deliveredUom",

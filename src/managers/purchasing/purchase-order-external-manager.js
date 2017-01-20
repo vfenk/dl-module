@@ -820,6 +820,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 "vat.rate",
                 "remark",
                 "isPosted",
+                "_createdBy",
                 "items.no",
                 "items.purchaseRequest.no",
                 "items.items"];
