@@ -24,33 +24,45 @@ module.exports = class MachineManager extends BaseManager {
             },
             pagingFilter = paging.filter || {},
             keywordFilter = {},
+            divisionFilter = {},
             query = {};
 
         if (paging.keyword) {
-            var regex = new RegExp(paging.keyword, "i");
+            var keyRegex = new RegExp(paging.keyword, "i");
             var codeFilter = {
                 'code': {
-                    '$regex': regex
+                    '$regex': keyRegex
                 }
             };
             var nameFilter = {
                 'name': {
-                    '$regex': regex
+                    '$regex': keyRegex
                 }
             };
             var processFilter = {
                 'process': {
-                    '$regex': regex
+                    '$regex': keyRegex
                 }
             };
             var unitNameFilter = {
                 'unit.name': {
-                    '$regex': regex
+                    '$regex': keyRegex
                 }
             };
             keywordFilter['$or'] = [codeFilter, nameFilter, processFilter, unitNameFilter];
         }
-        query["$and"] = [_default, keywordFilter, pagingFilter];
+
+        if (paging.division)
+        {
+            var divRegex = new RegExp(paging.division, "i");
+            divisionFilter = {
+                'unit.division.name': {
+                    '$regex': divRegex
+                }
+            };
+        }
+
+        query["$and"] = [_default, keywordFilter, divisionFilter, pagingFilter];
         return query;
     }
 

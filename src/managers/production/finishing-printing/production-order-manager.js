@@ -54,10 +54,15 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     '$regex': regex
                 }
             };
-           
+
+            var filterProductionOrder = {
+                'productionOrders.orderNo': {
+                    '$regex': regex
+                }                
+            };
 
             keywordFilter = {
-                '$or': [filterSalesContract]
+                '$or': [filterSalesContract, filterProductionOrder]
             };
         }
         query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
