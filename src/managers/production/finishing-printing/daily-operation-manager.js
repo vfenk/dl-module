@@ -297,6 +297,8 @@ module.exports = class DailyOperationManager extends BaseManager {
                                 if(valid.goodOutput && valid.goodOutput != ''){
                                     if((valid.goodOutput + valid.badOutput) > valid.input){
                                         errors["badOutput"] = i18n.__("DailyOperation.kanban.partitions.badOutput.isNotBeMore:%s plus Good Output should not be more than input value", i18n.__("DailyOperation.kanban.partitions.badOutput._:BadOutput")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
+                                        errors["goodOutput"] = i18n.__("DailyOperation.kanban.partitions.goodOutput.isNotBeMore:%s plus bad Output should not be more than input value", i18n.__("DailyOperation.kanban.partitions.goodOutput._:GoodOutput")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
+                                        errors["input"] = i18n.__("DailyOperation.kanban.partitions.input.isNotBeLess:%s should not be less then good output plus bad output", i18n.__("DailyOperation.kanban.partitions.input._:Input")); //"nilai input harus lebih besar dari good output + bad output";
                                     }
                                 }
                             }
