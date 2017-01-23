@@ -46,12 +46,46 @@ class InstructionDataUtil {
     getTestData(data) {
         var testDataMaterial = data && data.product ? Promise.resolve(null) : material.getRandomTestData();
         var testDataOrderType = data && data.orderType ? Promise.resolve(null) : orderType.getTestData();
-        var testDataColorType = data && data.colorType ? Promise.resolve(null) : colorType.getTestData();
+        var testDataColorType = colorType.getTestData(); // : colorType.getTestData();
+        if(data.orderType){
+            if(data.orderType.name === "Printing" || data.orderType.name === "Yarn Dyed"){
+                    testDataColorType = Promise.resolve(null);
+            }
+        }
         return Promise.all([testDataMaterial, testDataOrderType, testDataColorType])
             .then((results) => {
                 var material = results[0];
                 var orderType = results[1];
                 var colorType = results[2];
+
+                var dataColorTypeId = null;
+                var dataColorType = null;
+                if(data.colorType)
+                {
+                    if(data.orderType){
+                        if(data.orderType.name != "Printing" && data.orderType.name != "Yarn Dyed"){
+                            dataColorTypeId = data.colorType._id;
+                            dataColorType = data.colorType;
+                        }
+                    }else if(orderType){
+                        if(orderType.name != "Printing" && orderType.name != "Yarn Dyed"){
+                            dataColorTypeId = data.colorType._id;
+                            dataColorType = data.colorType;
+                        }
+                    }
+                }else{
+                    if(data.orderType){
+                        if(data.orderType.name != "Printing" && data.orderType.name != "Yarn Dyed"){
+                            dataColorTypeId = colorType._id;
+                            dataColorType = colorType;
+                        }
+                    }else if(orderType){
+                        if(orderType.name != "Printing" && orderType.name != "Yarn Dyed"){
+                            dataColorTypeId = colorType._id;
+                            dataColorType = colorType;
+                        }
+                    }
+                }
 
                 var code = generateCode();
 
@@ -62,8 +96,8 @@ class InstructionDataUtil {
                         materialId : data && data.product ? data.product._id : material._id,
                         material : data && data.product ? data.product : material,
                         construction : data && data.construction ? data.construction : "2/1 133 X 72 63\"",
-                        colorTypeId : data && data.colorType ? data.colorType._id : colorType._id,
-                        colorType : data && data.colorType ? data.colorType : colorType,
+                        colorTypeId : dataColorTypeId,
+                        colorType : dataColorType,
                         steps : data && data.steps ? data.steps : ['GAS SINGEING DAN DESIZING', 'SCOURING', 'BLEACHING']
                     };
                 return this.getSert(dataReturn);
