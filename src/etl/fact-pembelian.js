@@ -214,7 +214,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
             _updatedDate: {
                 "$gt": timestamp
             }
-        }).toArray()
+        }).sort({no: 1}).toArray()
             .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
             .then((results) => this.joinPurchaseOrderExternal(results))
             .then((results) => this.joinDeliveryOrder(results))
