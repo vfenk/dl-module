@@ -121,7 +121,7 @@ module.exports = class DailyOperationManager extends BaseManager {
                     var getDailyOperation = Promise.resolve(null);
                     if(_productionOrder){
                         if(_productionOrder.orderType){
-                            if(_productionOrder.orderType.name != "Printing" && _productionOrder.orderType.name != "Yarn Dyed"){
+                            if(_productionOrder.orderType.name.trim().toLowerCase() != "printing" && _productionOrder.orderType.name.trim().toLowerCase() != "yarn dyed"){
                                 getData = this.getSingleByQueryOrDefault({
                                     '$and' : [{
                                             "productionOrder.orderNo" : valid.productionOrder ? valid.productionOrder.orderNo : ""
@@ -518,7 +518,7 @@ module.exports = class DailyOperationManager extends BaseManager {
                                         orderNo : result[dataSelect].orderNo,
                                         kanbanNo : result[dataSelect].kanbanNo,
                                         input : result[dataSelect].input,
-                                        ouput : (result[dataSelect].badOutput + result[dataSelect].goodOutput),
+                                        output : (result[dataSelect].badOutput + result[dataSelect].goodOutput),
                                         code : result[dataSelect].code
                                     };
                                     dataResults.push(data);
@@ -552,6 +552,8 @@ module.exports = class DailyOperationManager extends BaseManager {
                         .toArray(function(err, result) {
                             var dataResult;
                             for(var a of result){
+                                var date = new Date(a.kanban.partitions.dateOutput);
+                                var year = date.getFullYear();
                                 dataResult = {
                                     _id : a._id,
                                     salesContract : a.salesContract,
@@ -573,7 +575,7 @@ module.exports = class DailyOperationManager extends BaseManager {
         	                        machine : a.kanban.partitions.machine,
         	                        dateInput : a.kanban.partitions.dateInput,
         	                        input : a.kanban.partitions.input,
-        	                        dateOutput : a.kanban.partitions.dateOutput,
+        	                        dateOutput : year === 1900 ? '' : a.kanban.partitions.dateOutput,
         	                        goodOutput : a.kanban.partitions.goodOutput,
         	                        badOutput : a.kanban.partitions.badOutput,
         	                        badOutputDescription : a.kanban.partitions.badOutputDescription,
