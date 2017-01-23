@@ -144,13 +144,15 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                             if (item.quantity <= 0) {
                                 itemError["quantity"] = i18n.__("PurchaseRequest.items.quantity.isRequired:%s is required", i18n.__("PurchaseRequest.items.quantity._:Quantity")); //Jumlah barang tidak boleh kosong";
                             }
-                            if (Object.getOwnPropertyNames(itemError).length > 0) {
-                                itemErrors.push(itemError);
-                            }
+                            itemErrors.push(itemError);
                         }
                     }
-                    if (itemErrors.length > 0)
-                        errors.items = itemErrors;
+                    for (var itemError of itemErrors) {
+                        if (Object.getOwnPropertyNames(itemError).length > 0) {
+                            errors.items = itemErrors;
+                            break;
+                        }
+                    }
                 }
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
