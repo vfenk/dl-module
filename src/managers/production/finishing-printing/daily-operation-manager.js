@@ -518,7 +518,7 @@ module.exports = class DailyOperationManager extends BaseManager {
                                         orderNo : result[dataSelect].orderNo,
                                         kanbanNo : result[dataSelect].kanbanNo,
                                         input : result[dataSelect].input,
-                                        ouput : (result[dataSelect].badOutput + result[dataSelect].GoodOutput),
+                                        ouput : (result[dataSelect].badOutput + result[dataSelect].goodOutput),
                                         code : result[dataSelect].code
                                     };
                                     dataResults.push(data);
