@@ -1,11 +1,11 @@
 function test(name, path) {
-    describe(name, function() {
+    describe(name, function () {
         require(path);
     });
 }
 
 
-describe('#dl-module', function(done) {
+describe('#dl-module', function (done) {
     this.timeout(2 * 60000);
 
     // Auth
@@ -48,6 +48,7 @@ describe('#dl-module', function(done) {
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
     test('@MASTER/INSTRUCTION', './master/instruction');
+    test('@MASTER/MACHINE-TYPE', './master/machine-type');
 
     //Purchasing 
     // test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
@@ -63,7 +64,7 @@ describe('#dl-module', function(done) {
 
     // ok
     // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
-    
+
     // test('@purchasing/unit-receipt-note', './purchasing/unit-receipt-note-manager-test');
     // test('@purchasing/unit-payment-price-correction-note', './purchasing/unit-payment-price-correction-note-manager-test');
     // test('@purchasing/unit-payment-order', './purchasing/unit-payment-order-test');
@@ -71,17 +72,19 @@ describe('#dl-module', function(done) {
     // test('@purchasing/purchase-request/post', './purchasing/purchase-request/post');
     // test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
     // test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
-    
+
     // ok
     // test('@purchasing/delivery-order/create', './purchasing/delivery-order/create');
     // test('@purchasing/unit-receipt-note/create', './purchasing/unit-receipt-note/create');
-    
+
     // test('@purchasing/unit-payment-order/create', './purchasing/unit-payment-order/create');
     // test('@purchasing/unit-payment-price-correction-note/create', './purchasing/unit-payment-price-correction-note/create');
     // test('@purchasing/unit-payment-quantity-correction-note/create', './purchasing/unit-payment-quantity-correction-note/create');
 
     // //Production
 
+
+    // test('@production/production-order', './production/finishing-printing/production-order/create');
     // test('@sales/production-order', './sales/production-order/create');
 
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
@@ -89,7 +92,5 @@ describe('#dl-module', function(done) {
     test('@production/daily-operation', './production/finishing-printing/daily-operation');
     
     //Sales
-
-    
-    //test('@production/production-order', './sales/production-order/create');
+    test('@production/production-order', './sales/production-order/create');
 });
