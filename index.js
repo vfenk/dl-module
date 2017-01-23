@@ -26,7 +26,8 @@ module.exports = {
             InstructionManager: require('./src/managers/master/instruction-manager'),
             ProcessTypeManager: require('./src/managers/master/process-type-manager'),
             OrderTypeManager: require('./src/managers/master/order-type-manager'),
-            ColorTypeManager: require('./src/managers/master/color-type-manager')
+            ColorTypeManager: require('./src/managers/master/color-type-manager'),
+            StepManager: require('./src/managers/master/step-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),

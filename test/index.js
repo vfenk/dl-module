@@ -48,6 +48,7 @@ describe('#dl-module', function(done) {
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
     test('@MASTER/INSTRUCTION', './master/instruction');
+    test('@MASTER/STEP', './master/step');
 
     //Purchasing 
     // test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
