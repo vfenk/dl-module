@@ -18,6 +18,7 @@ module.exports = {
             BudgetManager: require('./src/managers/master/budget-manager'),
             ThreadSpecificationManager: require('./src/managers/master/thread-specification-manager'),
             MachineManager: require('./src/managers/master/machine-manager'),
+            MachineTypeManager: require('./src/managers/master/machine-type-manager'),
             LotMachineManager: require('./src/managers/master/lot-machine-manager'),
             YarnEquivalentConversion: require('./src/managers/master/yarn-equivalent-conversion-manager'),
             UsterManager: require('./src/managers/master/uster-manager'),
@@ -27,7 +28,8 @@ module.exports = {
             MonitoringEventTypeManager: require('./src/managers/master/monitoring-event-type-manager'),
             ProcessTypeManager: require('./src/managers/master/process-type-manager'),
             OrderTypeManager: require('./src/managers/master/order-type-manager'),
-            ColorTypeManager: require('./src/managers/master/color-type-manager')
+            ColorTypeManager: require('./src/managers/master/color-type-manager'),
+            StepManager: require('./src/managers/master/step-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
@@ -48,9 +50,12 @@ module.exports = {
                 DailySpinningProductionReportManager: require('./src/managers/production/spinning/daily-spinning-production-report-manager')
             },
             finishingPrinting:{
-                ProductionOrderManager: require('./src/managers/production/finishing-printing/production-order-manager'),
-                MonitoringEventManager: require('./src/managers/production/finishing-printing/monitoring-event-manager') 
+                MonitoringEventManager: require('./src/managers/production/finishing-printing/monitoring-event-manager'),
+                DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager') 
             }
+        },
+        sales:{
+            ProductionOrderManager: require('./src/managers/sales/production-order-manager')
         }
     },
     test: {
@@ -69,6 +74,7 @@ module.exports = {
                 lampStandard: require("./test/data-util/master/lamp-standard-data-util"),
                 lotMachine: require("./test/data-util/master/lot-machine-data-util"),
                 machine: require("./test/data-util/master/machine-data-util"),
+                machineType: require("./test/data-util/master/machine-type-data-util"),
                 product: require("./test/data-util/master/product-data-util"),
                 supplier: require("./test/data-util/master/supplier-data-util"),
                 threadSpecification: require("./test/data-util/master/thread-specification-data-util"),
@@ -79,7 +85,9 @@ module.exports = {
                 yarnEquivalentConversion: require("./test/data-util/master/yarn-equivalent-conversion-data-util"),
                 orderType: require('./test/data-util/master/order-type-data-util'),
                 processType: require('./test/data-util/master/process-type-data-util'),
-                monitoringEventType: require('./test/data-util/master/monitoring-event-type-data-util')
+                monitoringEventType: require('./test/data-util/master/monitoring-event-type-data-util'),
+                step : require('./test/data-util/master/step-data-util'),
+                instruction : require('./test/data-util/master/instruction-data-util')
             },
             purchasing:{
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")

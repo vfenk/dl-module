@@ -31,7 +31,9 @@ module.exports = {
         unitPaymentQuantityCorrectionNote: require('./data-util/transaction/unit-payment-quantity-correction-note-data-util')
     },
     production: {
-        productionOrder: require('./data-util/production/finishing-printing/production-order-data-util'),
         monitoringEvent: require('./data-util/production/finishing-printing/monitoring-event-data-util')
+    },
+    sales: {
+        productionOrder: require('./data-util/sales/production-order-data-util'),
     }
 };
