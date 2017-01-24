@@ -15,7 +15,8 @@ module.exports = {
         instruction: require('./data-util/master/instruction-data-util'),
         orderType: require('./data-util/master/order-type-data-util'),
         processType: require('./data-util/master/process-type-data-util'),
-        colorType: require('./data-util/master/color-type-data-util')
+        colorType: require('./data-util/master/color-type-data-util'),
+        monitoringEventType: require('./data-util/master/monitoring-event-type-data-util')
     },
     purchasing:{
         purchaseRequest: require('./data-util/purchasing/purchase-request-data-util'),
@@ -31,5 +32,6 @@ module.exports = {
     },
     production: {
         productionOrder: require('./data-util/production/finishing-printing/production-order-data-util'),
+        monitoringEvent: require('./data-util/production/finishing-printing/monitoring-event-data-util')
     }
 };
