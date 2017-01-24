@@ -23,10 +23,8 @@ describe('#dl-module', function (done) {
     // test('@ETL/FACT-TOTAL-NILAI-PEMBELIAN', './etl/fact-total-nilai-pembelian');
     // test('@ETL/FACT-TOP-TEN-SUPPLIER', './etl/fact-top-ten-supplier');
     // test('@ETL/FACT-PURCHASE-ORDER-COMPARISON', './etl/fact-purchase-order-comparison');
-    // test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');
-
-    // test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');
-
+    // test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');   
+    // test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
@@ -50,6 +48,7 @@ describe('#dl-module', function (done) {
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
     test('@MASTER/INSTRUCTION', './master/instruction');
+    test('@MASTER/STEP', './master/step');
     test('@MASTER/MACHINE-TYPE', './master/machine-type');
 
     //Purchasing 
@@ -62,7 +61,7 @@ describe('#dl-module', function (done) {
     test('@PURCHASING/UNIT PAYMENT PRICE CORRECTION', './purchasing/unit-payment-price-correction-note');
     test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
     
-    //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
+     test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
 
     // ok
     // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
@@ -85,13 +84,14 @@ describe('#dl-module', function (done) {
 
     // //Production
 
+
     // test('@production/production-order', './production/finishing-printing/production-order/create');
+    // test('@sales/production-order', './sales/production-order/create');
+
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
+    test('@production/daily-operation', './production/finishing-printing/daily-operation');
     
     //Sales
-
-    
     test('@production/production-order', './sales/production-order/create');
-
 });
