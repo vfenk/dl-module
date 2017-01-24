@@ -144,13 +144,15 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                             if (item.quantity <= 0) {
                                 itemError["quantity"] = i18n.__("PurchaseRequest.items.quantity.isRequired:%s is required", i18n.__("PurchaseRequest.items.quantity._:Quantity")); //Jumlah barang tidak boleh kosong";
                             }
-                            if (Object.getOwnPropertyNames(itemError).length > 0) {
-                                itemErrors.push(itemError);
-                            }
+                            itemErrors.push(itemError);
                         }
                     }
-                    if (itemErrors.length > 0)
-                        errors.items = itemErrors;
+                    for (var itemError of itemErrors) {
+                        if (Object.getOwnPropertyNames(itemError).length > 0) {
+                            errors.items = itemErrors;
+                            break;
+                        }
+                    }
                 }
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
@@ -284,8 +286,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 "items.quantity",
                 "items.remark"
             ];
-            this.collection .where(query).select(_select) .order(sorting) .execute()
-                  .then((purchaseRequests) => {
+            this.collection.where(query).select(_select).order(sorting).execute()
+                .then((purchaseRequests) => {
                     resolve(purchaseRequests.data);
                 })
                 .catch(e => {
@@ -294,7 +296,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
         });
     }
 
-    getDataPRMonitoring(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo, state) {
+    getDataPRMonitoring(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo, state, createdBy) {
         return new Promise((resolve, reject) => {
             var sorting = {
                 "date": -1,
@@ -336,8 +338,12 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                     }
                 });
             }
+            if (createdBy !== undefined && createdBy !== "") {
+                Object.assign(query, {
+                    _createdBy: createdBy
+                });
+            }
             query = Object.assign(query, {
-                _createdBy: this.user.username,
                 _deleted: false,
                 isPosted: true
             });

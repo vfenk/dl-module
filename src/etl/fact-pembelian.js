@@ -3,8 +3,7 @@
 // external deps 
 var ObjectId = require("mongodb").ObjectId;
 var BaseManager = require("module-toolkit").BaseManager;
-var moment = require("moment");
-var sqlConnect = require("./sqlConnect");
+var moment = require("moment"); 
 
 // internal deps 
 require("mongodb-toolkit");
@@ -17,8 +16,9 @@ var UnitReceiptNoteManager = require('../managers/purchasing/unit-receipt-note-m
 var UnitPaymentOrderManager = require('../managers/purchasing/unit-payment-order-manager');
 
 module.exports = class FactPurchasingEtlManager extends BaseManager{
-    constructor(db, user) {
+    constructor(db, user, sql) {
         super(db, user);
+        this.sql = sql;
         this.purchaseRequestManager = new PurchaseRequestManager(db, user);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
         this.purchaseOrderExternalManager = new PurchaseOrderExternalManager(db, user);
@@ -450,7 +450,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
     }
 
     load(data) {
-        return sqlConnect.getConnect()
+        return this.sql.getConnection()
             .then((request) => {
 
                 var sqlQuery = '';
