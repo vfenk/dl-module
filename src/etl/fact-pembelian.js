@@ -3,7 +3,7 @@
 // external deps 
 var ObjectId = require("mongodb").ObjectId;
 var BaseManager = require("module-toolkit").BaseManager;
-var moment = require("moment"); 
+var moment = require("moment");
 
 // internal deps 
 require("mongodb-toolkit");
@@ -14,8 +14,9 @@ var PurchaseOrderExternalManager = require('../managers/purchasing/purchase-orde
 var DeliveryOrderManager = require('../managers/purchasing/delivery-order-manager');
 var UnitReceiptNoteManager = require('../managers/purchasing/unit-receipt-note-manager');
 var UnitPaymentOrderManager = require('../managers/purchasing/unit-payment-order-manager');
+var startedDate = new Date();
 
-module.exports = class FactPurchasingEtlManager extends BaseManager{
+module.exports = class FactPurchasingEtlManager extends BaseManager {
     constructor(db, user, sql) {
         super(db, user);
         this.sql = sql;
@@ -28,8 +29,8 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
         this.migrationLog = this.db.collection("migrationLog");
     }
 
+
     run() {
-        var startedDate = new Date();
         this.migrationLog.insert({
             description: "Fact Pembelian from MongoDB to Azure DWH",
             start: startedDate,
@@ -149,7 +150,11 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
         var joinUnitReceiptNotes = data.map((item) => {
             var getUnitReceiptNotes = item.deliveryOrder ? this.unitReceiptNoteManager.collection.find({
                 _deleted: false,
-                deliveryOrderId: item.deliveryOrder._id
+                items: {
+                    "$elemMatch": {
+                        purchaseOrderId: item.purchaseOrder._id
+                    }
+                }
             }).toArray() : Promise.resolve([]);
 
             return getUnitReceiptNotes.then((unitReceiptNotes) => {
@@ -214,7 +219,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
             _updatedDate: {
                 "$gt": timestamp
             }
-        }).sort({no: 1}).toArray()
+        }).toArray()
             .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
             .then((results) => this.joinPurchaseOrderExternal(results))
             .then((results) => this.joinDeliveryOrder(results))
@@ -315,7 +320,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
 
                         purchaseOrderId: purchaseOrder ? `'${purchaseOrder._id}'` : null,
                         purchaseOrderNo: purchaseOrder ? `'${purchaseOrder.no}'` : null,
-                        purchaseOrderDate: purchaseOrder ? `'${moment(purchaseOrder.date).format('L')}'` : null,
+                        purchaseOrderDate: purchaseOrder ? `'${moment(purchaseOrder._createdDate).format('L')}'` : null,
                         purchaseOrderExternalDays: purchaseOrderExternal ? `${poExtDays}` : null,
                         purchaseOrderExternalDaysRange: purchaseOrderExternal ? `'${this.getRangeWeek(poExtDays)}'` : null,
                         purchasingStaffName: purchaseOrder ? `'${purchaseOrder._createdBy}'` : null,
@@ -337,7 +342,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
                         pricePerUnit: purchaseOrderExternal ? `${poItem.pricePerDealUnit}` : null,
                         totalPrice: purchaseOrderExternal ? `${poItem.dealQuantity * poItem.pricePerDealUnit * purchaseOrderExternal.currencyRate}` : null,
                         expectedDeliveryDate: purchaseOrderExternal ? `'${moment(purchaseOrderExternal.expectedDeliveryDate).format('L')}'` : null,
-                        prNoAtPoExt: purchaseOrderExternal ? `'${purchaseOrderExternal.items[0].purchaseRequest.no}'` : null,
+                        prNoAtPoExt: purchaseOrderExternal ? `'${purchaseOrder.purchaseRequest.no}'` : null,
 
                         deliveryOrderId: deliveryOrder ? `'${deliveryOrder._id}'` : null,
                         deliveryOrderNo: deliveryOrder ? `'${deliveryOrder.no}'` : null,
@@ -345,7 +350,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
                         unitReceiptNoteDays: unitReceiptNote ? `${urnDays}` : null,
                         unitReceiptNoteDaysRange: unitReceiptNote ? `'${this.getRangeWeek(urnDays)}'` : null,
                         status: deliveryOrder ? `'${this.getStatus(new Date(purchaseOrderExternal.expectedDeliveryDate), new Date(lastDeliveredDate))}'` : null,
-                        prNoAtDo: deliveryOrder ? `'${deliveryOrder.items[0].purchaseOrderExternal.items[0].purchaseRequest.no}'` : null,
+                        prNoAtDo: deliveryOrder ? `'${purchaseOrder.purchaseRequest.no}'` : null,
 
                         unitReceiptNoteId: unitReceiptNote ? `'${unitReceiptNote._id}'` : null,
                         unitReceiptNoteNo: unitReceiptNote ? `'${unitReceiptNote.no}'` : null,
@@ -490,6 +495,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
                     });
             })
             .catch((err) => {
+                console.log(err);
                 var finishedDate = new Date();
                 var spentTime = moment(finishedDate).diff(moment(startedDate), "minutes");
                 var updateLog = {
@@ -500,7 +506,6 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
                     status: err
                 };
                 this.migrationLog.updateOne({ start: startedDate }, updateLog);
-                console.log(err);
                 return Promise.reject(err);
             });
     }
