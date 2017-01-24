@@ -2,7 +2,7 @@
 var helper = require("../../../helper");
 var MonitoringEventManager = require("../../../../src/managers/production/finishing-printing/monitoring-event-manager");
 
-var productionOrder = require("./production-order-data-util");
+var productionOrder = require("../../sales/production-order-data-util");
 var machine = require("../../master/machine-data-util");
 var monitoringEventType = require("../../master/monitoring-event-type-data-util");
 
