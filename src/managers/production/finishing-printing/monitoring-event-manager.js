@@ -6,6 +6,7 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var MonitoringEvent = DLModels.production.finishingPrinting.MonitoringEvent;
+var generateCode = require("../../../utils/code-generator");
 var MonitoringEventTypeManager = require('../../master/monitoring-event-type-manager');
 var MachineManager = require('../../master/machine-manager');
 var BaseManager = require('module-toolkit').BaseManager;
@@ -63,14 +64,25 @@ module.exports = class MonitoringEventManager extends BaseManager {
         var dateNow = new Date();
         var dateProcess = new Date(valid.date);
 
+        var getMonitoringEventPromise = this.collection.singleOrDefault({
+            _id: {
+                '$ne': new ObjectId(valid._id)
+            },
+            code: valid.code
+        });
+
         valid.items = valid.items instanceof Array ? valid.items : [];
         var getMonitoringEventTypes = valid.items.map((item) => {
             return ObjectId.isValid(item.monitoringEventTypeId) ? this.monitoringEventTypeManager.getSingleByIdOrDefault(new ObjectId(item.monitoringEventTypeId)) : Promise.resolve(null);
         });
 
-        return Promise.all([].concat(getMonitoringEventTypes))
-            .then(result =>{
-                var _monitoringEventTypes = result.slice(0, result.length);
+        return Promise.all([getMonitoringEventPromise].concat(getMonitoringEventTypes))
+            .then(results =>{
+                var _monitoringEvent = results[0];
+                var _monitoringEventTypes = results.slice(1, results.length);
+
+                if (_monitoringEvent)
+                    errors["code"] = i18n.__("MonitoringEvent.code.isExists:%s is exists", i18n.__("MonitoringEvent.code._:Code"));
 
                 if (!valid.date || valid.date == '')
                     errors["date"] = i18n.__("MonitoringEvent.date.isRequired:%s is required", i18n.__("MonitoringEvent.date._:Date")); //"Tanggal tidak boleh kosong";
@@ -146,6 +158,12 @@ module.exports = class MonitoringEventManager extends BaseManager {
             })
     }
 
+    _beforeInsert(monitoringEvent) {
+        monitoringEvent.code = generateCode();
+        monitoringEvent._createdDate = new Date();
+        return Promise.resolve(monitoringEvent);
+    }
+
      _createIndexes() {
         var dateIndex = {
             name: `ix_${map.production.finishingPrinting.collection.MonitoringEvent}__updatedDate`,
@@ -155,6 +173,14 @@ module.exports = class MonitoringEventManager extends BaseManager {
             }
         }
 
-        return this.collection.createIndexes([dateIndex]);
+        var codeIndex = {
+            name: `ix_${map.production.finishingPrinting.collection.MonitoringEvent}_code`,
+            key: {
+                code: 1
+            },
+            unique: true
+        };
+
+        return this.collection.createIndexes([dateIndex, codeIndex]);
     }
 }
