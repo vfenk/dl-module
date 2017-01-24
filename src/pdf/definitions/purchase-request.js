@@ -4,7 +4,7 @@ module.exports = function (purchaseRequest) {
 
     var items = [].concat.apply([], purchaseRequest.items);
 
-    var iso = "FM-6.00-06-004/R1";
+    var iso = "FM-PB-00-06-006";
     var number = purchaseRequest.no;
 
     var locale = global.config.locale; 
@@ -125,19 +125,19 @@ module.exports = function (purchaseRequest) {
     var tbody = items.map(function (item, index) {
         return [{
             text: (index + 1).toString() || '',
-            style: ['size07', 'center']
+            style: ['size08', 'center']
         }, {
                 text: item.product.code,
-                style: ['size07', 'left']
+                style: ['size08', 'left']
             }, {
-                text: item.product.name,
-                style: ['size07', 'left']
+                text: item.product.name+'\n'+item.remark,
+                style: ['size08', 'left']
             }, {
                 text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.product.uom.unit,
-                style: ['size07', 'center']
+                style: ['size08', 'center']
             }, {
                 text: '',
-                style: ['size07', 'left']
+                style: ['size08', 'left']
             }];
     });
 
@@ -168,9 +168,9 @@ module.exports = function (purchaseRequest) {
         '\n', {
             stack: [{
                 columns: [{
-                    width: '60%',
+                    width: '80%',
                     columns: [{
-                        width: '30%',
+                        width: '25%',
                         stack: ['Kategori', 'Diminta Datang', 'Keterangan']
                     }, {
                             width: '3%',
