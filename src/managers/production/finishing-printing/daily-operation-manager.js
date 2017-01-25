@@ -267,7 +267,7 @@ module.exports = class DailyOperationManager extends BaseManager {
                             else{
                                 var dateInput = new Date(valid.dateInput);
                                 if(dateInput > now){
-                                    errors["dateInput"] = i18n.__("DailyOperation.kanban.partitions.dateInput.isMoreThen:%s is not be more than this day", i18n.__("DailyOperation.kanban.partitions.dateInput._:DateInput")); //"Date Input tidak ditemukan";
+                                    errors["dateInput"] = i18n.__("DailyOperation.kanban.partitions.dateInput.isMoreThan:%s is not be more than this day", i18n.__("DailyOperation.kanban.partitions.dateInput._:DateInput")); //"Date Input tidak ditemukan";
                                 }
                             }
 
@@ -277,11 +277,11 @@ module.exports = class DailyOperationManager extends BaseManager {
                                 if(valid.dateOutput != "1900-01-01 00:00:00"){
                                     if(dateOutput > now)
                                     {
-                                        errors["dateOutput"] = i18n.__("DailyOperation.kanban.partitions.dateOutput.isMoreThen:%s is not be more than this day", i18n.__("DailyOperation.kanban.partitions.dateOutput._:DateOutput")); //"Date Input tidak ditemukan";
+                                        errors["dateOutput"] = i18n.__("DailyOperation.kanban.partitions.dateOutput.isMoreThan:%s is not be more than this day", i18n.__("DailyOperation.kanban.partitions.dateOutput._:DateOutput")); //"Date Input tidak ditemukan";
                                     }
                                     else if(dateInput > dateOutput){
-                                        errors["dateInput"] = i18n.__("DailyOperation.kanban.partitions.dateInput.isLessThenOutput:%s is must be less than Date Output", i18n.__("DailyOperation.kanban.partitions.dateInput._:DateInput")); // "tanggal dan jam output harus lebih besar dari tanggal dan jam input";
-                                        errors["dateOutput"] = i18n.__("DailyOperation.kanban.partitions.dateOutput.isMoreThen:%s is must be more than Date Input", i18n.__("DailyOperation.kanban.partitions.dateOutput._:DateOutput")); // "tanggal dan jam output harus lebih besar dari tanggal dan jam input";
+                                        errors["dateInput"] = i18n.__("DailyOperation.kanban.partitions.dateInput.isLessThanOutput:%s is must be less than Date Output", i18n.__("DailyOperation.kanban.partitions.dateInput._:DateInput")); // "tanggal dan jam output harus lebih besar dari tanggal dan jam input";
+                                        errors["dateOutput"] = i18n.__("DailyOperation.kanban.partitions.dateOutput.isMoreThan:%s is must be more than Date Input", i18n.__("DailyOperation.kanban.partitions.dateOutput._:DateOutput")); // "tanggal dan jam output harus lebih besar dari tanggal dan jam input";
                                     }
                                 }
                             }
