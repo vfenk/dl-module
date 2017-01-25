@@ -89,8 +89,8 @@ describe('#dl-module', function (done) {
     // test('@production/production-order', './production/finishing-printing/production-order/create');
      test('@sales/production-order', './sales/production-order/create');
 
-    test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
-    test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
+    // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+    // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
     test('@PRODUCTION/DAILY-OPERATION', './production/finishing-printing/daily-operation');
     
     test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
