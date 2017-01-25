@@ -48,6 +48,7 @@ describe('#dl-module', function (done) {
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
     test('@MASTER/INSTRUCTION', './master/instruction');
+    test('@MASTER/MONITORING-EVENT-TYPE', './master/monitoring-event-type');
     test('@MASTER/STEP', './master/step');
     test('@MASTER/MACHINE-TYPE', './master/machine-type');
 
@@ -84,14 +85,14 @@ describe('#dl-module', function (done) {
 
     // //Production
 
-
     // test('@production/production-order', './production/finishing-printing/production-order/create');
     // test('@sales/production-order', './sales/production-order/create');
 
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
     test('@production/daily-operation', './production/finishing-printing/daily-operation');
-    
+    test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
+
     //Sales
     test('@production/production-order', './sales/production-order/create');
 });
