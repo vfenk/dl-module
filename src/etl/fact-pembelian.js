@@ -220,7 +220,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
             _updatedDate: {
                 "$gt": timestamp
             }
-        }).toArray()
+        }).sort({no: 1}).limit(500).toArray()
             .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
             .then((results) => this.joinPurchaseOrderExternal(results))
             .then((results) => this.joinDeliveryOrder(results))
@@ -288,12 +288,12 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
 
                 var results = purchaseOrder.items.map((poItem) => {
                     var prPoExtDays = purchaseOrderExternal ? moment(purchaseOrderExternal.date).diff(moment(purchaseRequest.date), "days") : null;
-                    var poIntDays = purchaseOrder ? moment(purchaseOrder.date).diff(moment(purchaseRequest.date), "days") : null;
-                    var poExtDays = purchaseOrderExternal ? moment(purchaseOrderExternal.date).diff(moment(purchaseOrder.date), "days") : null;
+                    var poIntDays = purchaseOrder ? moment(purchaseOrder._createdDate).diff(moment(purchaseRequest.date), "days") : null;
+                    var poExtDays = purchaseOrderExternal ? moment(purchaseOrderExternal.date).diff(moment(purchaseOrder._createdDate), "days") : null;
                     var doDays = deliveryOrder ? moment(deliveryOrder.date).diff(moment(purchaseOrderExternal.date), "days") : null;
                     var urnDays = unitReceiptNote ? moment(unitReceiptNote.date).diff(moment(deliveryOrder.date), "days") : null;
                     var upoDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(unitReceiptNote.date), "days") : null;
-                    var poDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(purchaseOrder.date), "days") : null;
+                    var poDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(purchaseOrder._createdDate), "days") : null;
                     var lastDeliveredDate = (poItem.fulfillments.length > 0) ? poItem.fulfillments.slice(-1)[0].deliveryOrderDate : null;
                     var catType = purchaseOrder.purchaseRequest.category.name;
 
