@@ -9,7 +9,6 @@ describe('#dl-module', function (done) {
     this.timeout(2 * 60000);
 
     // Auth
-    test('@auth/account-manager', './auth/account-manager-test');
     test('@AUTH/ACCOUNT', './auth/account');
     test('@AUTH/ROLE', './auth/role');
     test('@AUTH/API-ENDPOINT', './auth/api-endpoint');
@@ -64,29 +63,8 @@ describe('#dl-module', function (done) {
     test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
     
     //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
-
-    // ok
-    // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
-
-    // test('@purchasing/unit-receipt-note', './purchasing/unit-receipt-note-manager-test');
-    // test('@purchasing/unit-payment-price-correction-note', './purchasing/unit-payment-price-correction-note-manager-test');
-    // test('@purchasing/unit-payment-order', './purchasing/unit-payment-order-test');
-    // test('@purchasing/purchase-request/create', './purchasing/purchase-request/create');
-    // test('@purchasing/purchase-request/post', './purchasing/purchase-request/post');
-    // test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
-    // test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
-
-    // ok
-    // test('@purchasing/delivery-order/create', './purchasing/delivery-order/create');
-    // test('@purchasing/unit-receipt-note/create', './purchasing/unit-receipt-note/create');
-
-    // test('@purchasing/unit-payment-order/create', './purchasing/unit-payment-order/create');
-    // test('@purchasing/unit-payment-price-correction-note/create', './purchasing/unit-payment-price-correction-note/create');
-    // test('@purchasing/unit-payment-quantity-correction-note/create', './purchasing/unit-payment-quantity-correction-note/create');
-
     // //Production
 
-    // test('@production/production-order', './production/finishing-printing/production-order/create');
      test('@sales/production-order', './sales/production-order/create');
 
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
