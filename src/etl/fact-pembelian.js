@@ -220,7 +220,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
             _updatedDate: {
                 "$gt": timestamp
             }
-        }).toArray()
+        }).sort({no: 1}).limit(615).toArray()
             .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
             .then((results) => this.joinPurchaseOrderExternal(results))
             .then((results) => this.joinDeliveryOrder(results))
@@ -287,13 +287,13 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
             if (item.purchaseOrder) {
 
                 var results = purchaseOrder.items.map((poItem) => {
-                    var prPoExtDays = purchaseOrderExternal ? moment(purchaseOrderExternal.date).diff(moment(purchaseRequest.date), "days") : null;
-                    var poIntDays = purchaseOrder ? moment(purchaseOrder._createdDate).diff(moment(purchaseRequest.date), "days") : null;
-                    var poExtDays = purchaseOrderExternal ? moment(purchaseOrderExternal.date).diff(moment(purchaseOrder._createdDate), "days") : null;
-                    var doDays = deliveryOrder ? moment(deliveryOrder.date).diff(moment(purchaseOrderExternal.date), "days") : null;
-                    var urnDays = unitReceiptNote ? moment(unitReceiptNote.date).diff(moment(deliveryOrder.date), "days") : null;
-                    var upoDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(unitReceiptNote.date), "days") : null;
-                    var poDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(purchaseOrder._createdDate), "days") : null;
+                    var prPoExtDays = purchaseOrderExternal ? new Date(purchaseOrderExternal.date).getDay() - new Date(purchaseRequest.date).getDay() : null;
+                    var poIntDays = purchaseOrder ? new Date(purchaseOrder._createdDate).getDay() - new Date(purchaseRequest.date).getDay() : null;
+                    var poExtDays = purchaseOrderExternal ? new Date(purchaseOrderExternal.date).getDay() - new Date(purchaseOrder._createdDate).getDay() : null;
+                    var doDays = deliveryOrder ? new Date(deliveryOrder.date).getDay() - new Date(purchaseOrderExternal.date).getDay() : null;
+                    var urnDays = unitReceiptNote ? new Date(unitReceiptNote.date).getDay() - new Date(deliveryOrder.date).getDay() : null;
+                    var upoDays = unitPaymentOrder ? new Date(unitPaymentOrder.date).getDay() - new Date(unitReceiptNote.date).getDay() : null;
+                    var poDays = unitPaymentOrder ? new Date(unitPaymentOrder.date).getDay() - new Date(purchaseOrder._createdDate).getDay() : null;
                     var lastDeliveredDate = (poItem.fulfillments.length > 0) ? poItem.fulfillments.slice(-1)[0].deliveryOrderDate : null;
                     var catType = purchaseOrder.purchaseRequest.category.name;
 
