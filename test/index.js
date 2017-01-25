@@ -50,18 +50,19 @@ describe('#dl-module', function (done) {
     test('@MASTER/INSTRUCTION', './master/instruction');
     test('@MASTER/STEP', './master/step');
     test('@MASTER/MACHINE-TYPE', './master/machine-type');
+    test('@MASTER/MACHINE-SPESIFICATION-STANDARD', './master/machine-spesification-standard');
 
     //Purchasing 
-    test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
-    test('@PURCHASING/PURCHASE ORDER', './purchasing/purchase-order');
-    test('@PURCHASING/PURCHASE ORDER EXTERNAL', './purchasing/purchase-order-external'); 
-    test('@PURCHASING/DELIVERY ORDER', './purchasing/delivery-order'); 
-    test('@PURCHASING/UNIT RECEIPT NOTE', './purchasing/unit-receipt-note'); 
-    test('@PURCHASING/UNIT PAYMENT ORDER', './purchasing/unit-payment-order'); 
-    test('@PURCHASING/UNIT PAYMENT PRICE CORRECTION', './purchasing/unit-payment-price-correction-note');
-    test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
+    // test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
+    // test('@PURCHASING/PURCHASE ORDER', './purchasing/purchase-order');
+    // test('@PURCHASING/PURCHASE ORDER EXTERNAL', './purchasing/purchase-order-external'); 
+    // test('@PURCHASING/DELIVERY ORDER', './purchasing/delivery-order'); 
+    // test('@PURCHASING/UNIT RECEIPT NOTE', './purchasing/unit-receipt-note'); 
+    // test('@PURCHASING/UNIT PAYMENT ORDER', './purchasing/unit-payment-order'); 
+    // test('@PURCHASING/UNIT PAYMENT PRICE CORRECTION', './purchasing/unit-payment-price-correction-note');
+    // test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
     
-     test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
+    //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
 
     // ok
     // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
@@ -93,5 +94,5 @@ describe('#dl-module', function (done) {
     test('@production/daily-operation', './production/finishing-printing/daily-operation');
     
     //Sales
-    test('@production/production-order', './sales/production-order/create');
+    // test('@production/production-order', './sales/production-order/create');
 });
