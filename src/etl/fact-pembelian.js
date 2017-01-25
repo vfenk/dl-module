@@ -150,6 +150,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
         var joinUnitReceiptNotes = data.map((item) => {
             var getUnitReceiptNotes = item.deliveryOrder ? this.unitReceiptNoteManager.collection.find({
                 _deleted: false,
+                deliveryOrderId: item.deliveryOrder._id,
                 items: {
                     "$elemMatch": {
                         purchaseOrderId: item.purchaseOrder._id
@@ -472,16 +473,16 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
 
                 request.multiple = true;
 
-                // var fs = require("fs");
-                // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
+                var fs = require("fs");
+                var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
 
-                // fs.writeFile(path, sqlQuery, function (error) {
-                //     if (error) {
-                //         console.log("write error:  " + error.message);
-                //     } else {
-                //         console.log("Successful Write to " + path);
-                //     }
-                // });
+                fs.writeFile(path, sqlQuery, function (error) {
+                    if (error) {
+                        console.log("write error:  " + error.message);
+                    } else {
+                        console.log("Successful Write to " + path);
+                    }
+                });
 
                 // var deleteTempTable = ('DELETE FROM [dl_fact_pembelian_temp]; ')
                 // var storedProcedure = ('EXEC UPSERT; ')
