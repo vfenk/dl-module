@@ -4,7 +4,6 @@
 var ObjectId = require("mongodb").ObjectId;
 var BaseManager = require('module-toolkit').BaseManager;
 var moment = require("moment");
-var sqlConnect = require('./sqlConnect');
 
 // internal deps 
 require('mongodb-toolkit');
@@ -12,7 +11,8 @@ require('mongodb-toolkit');
 var DivisionManager = require('../managers/master/division-manager');
 
 module.exports = class DimDivisionEtlManager {
-    constructor(db, user) {
+    constructor(db, user, sql) {
+        this.sql = sql;
         this.divisionManager = new DivisionManager(db, user);
     }
     run() {
@@ -44,7 +44,7 @@ module.exports = class DimDivisionEtlManager {
     }
 
     load(data) {
-        return sqlConnect.getConnect()
+        return this.sql.getConnection()
             .then((request) => {
 
                 var sqlQuery = '';
