@@ -220,7 +220,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
             _updatedDate: {
                 "$gt": timestamp
             }
-        }).sort({no: 1}).limit(615).toArray()
+        }).toArray()
             .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
             .then((results) => this.joinPurchaseOrderExternal(results))
             .then((results) => this.joinDeliveryOrder(results))
@@ -267,7 +267,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
     }
 
     getStatus(poDate, doDate) {
-        var result = doDate - poDate;
+        var poDates = moment(poDate).startOf("day");
+        var doDates = moment(doDate).startOf("day");
+        var result = moment(doDates).diff(moment(poDates), "days")
         if (result <= 0) {
             return "Tepat Waktu";
         } else {
@@ -287,14 +289,14 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
             if (item.purchaseOrder) {
 
                 var results = purchaseOrder.items.map((poItem) => {
-                    var prPoExtDays = purchaseOrderExternal ? new Date(purchaseOrderExternal.date).getDay() - new Date(purchaseRequest.date).getDay() : null;
-                    var poIntDays = purchaseOrder ? new Date(purchaseOrder._createdDate).getDay() - new Date(purchaseRequest.date).getDay() : null;
-                    var poExtDays = purchaseOrderExternal ? new Date(purchaseOrderExternal.date).getDay() - new Date(purchaseOrder._createdDate).getDay() : null;
-                    var doDays = deliveryOrder ? new Date(deliveryOrder.date).getDay() - new Date(purchaseOrderExternal.date).getDay() : null;
-                    var urnDays = unitReceiptNote ? new Date(unitReceiptNote.date).getDay() - new Date(deliveryOrder.date).getDay() : null;
-                    var upoDays = unitPaymentOrder ? new Date(unitPaymentOrder.date).getDay() - new Date(unitReceiptNote.date).getDay() : null;
-                    var poDays = unitPaymentOrder ? new Date(unitPaymentOrder.date).getDay() - new Date(purchaseOrder._createdDate).getDay() : null;
-                    var lastDeliveredDate = (poItem.fulfillments.length > 0) ? poItem.fulfillments.slice(-1)[0].deliveryOrderDate : null;
+                    var prPoExtDays = purchaseOrderExternal ? moment(moment(purchaseOrderExternal.date).startOf("day")).diff(moment(moment(purchaseRequest.date).startOf("day")), "days") : null;
+                    var poIntDays = purchaseOrder ? moment(moment(purchaseOrder._createdDate).startOf("day")).diff(moment(moment(purchaseRequest.date).startOf("day")), "days") : null;
+                    var poExtDays = purchaseOrderExternal ? moment(moment(purchaseOrderExternal.date).startOf("day")).diff(moment(moment(purchaseOrder._createdDate).startOf("day")), "days") : null;
+                    var doDays = deliveryOrder ? moment(moment(deliveryOrder.date).startOf("day")).diff(moment(moment(purchaseOrderExternal.date).startOf("day")), "days") : null;
+                    var urnDays = unitReceiptNote ? moment(moment(unitReceiptNote.date).startOf("day")).diff(moment(moment(deliveryOrder.date).startOf("day")), "days") : null;
+                    var upoDays = unitPaymentOrder ? moment(moment(unitPaymentOrder.date).startOf("day")).diff(moment(moment(unitReceiptNote.date).startOf("day")), "days") : null;
+                    var poDays = unitPaymentOrder ? moment(moment(unitPaymentOrder.date).startOf("day")).diff(moment(moment(purchaseOrder._createdDate).startOf("day")), "days") : null;
+                    var lastDeliveredDate = (poItem.fulfillments.length > 0) ? poItem.fulfillments[poItem.fulfillments.length - 1].deliveryOrderDate : null;
                     var catType = purchaseOrder.purchaseRequest.category.name;
 
                     return {
@@ -350,7 +352,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
                         deliveryOrderDate: deliveryOrder ? `'${moment(deliveryOrder.date).format('L')}'` : null,
                         unitReceiptNoteDays: unitReceiptNote ? `${urnDays}` : null,
                         unitReceiptNoteDaysRange: unitReceiptNote ? `'${this.getRangeWeek(urnDays)}'` : null,
-                        status: deliveryOrder ? `'${this.getStatus(new Date(purchaseOrderExternal.expectedDeliveryDate), new Date(lastDeliveredDate))}'` : null,
+                        status: deliveryOrder ? `'${this.getStatus(purchaseOrderExternal.expectedDeliveryDate, lastDeliveredDate)}'` : null,
                         prNoAtDo: deliveryOrder ? `'${purchaseOrder.purchaseRequest.no}'` : null,
 
                         unitReceiptNoteId: unitReceiptNote ? `'${unitReceiptNote._id}'` : null,
