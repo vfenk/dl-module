@@ -26,12 +26,14 @@ module.exports = function (pox) {
                 quantity: 0,
                 prNo: "",
                 uom: value.uom,
-                price: value.price
+                price: value.price,
+                remark: ""
             };
             items.push(res[value.product])
         }
         res[value.product].quantity += value.quantity;
         res[value.product].prNo = `${res[value.product].prNo}\n${value.prNo}`;
+        res[value.product].remark = `${res[value.product].remark}\n${value.remark}`;
         return res;
     }, {});
 
