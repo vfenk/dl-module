@@ -27,7 +27,7 @@ module.exports = function (pox) {
                 prNo: "",
                 uom: value.uom,
                 price: value.price,
-                remark: value.remark
+                remark: ""
             };
             items.push(res[value.product])
         }
