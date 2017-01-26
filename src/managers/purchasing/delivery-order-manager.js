@@ -445,27 +445,41 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         };
         return this.getSingleByQuery(query)
             .then((deliveryOrder) => {
+                var getPOInternals = [];
+                var poInternalId = [];
+                deliveryOrder.items.map((doItem) => {
+                    return doItem.fulfillments.map((fulfillment) => {
+                        if (poInternalId.indexOf(fulfillment.purchaseOrderId) == -1) {
+                            poInternalId.push(fulfillment.purchaseOrderId);
+                            getPOInternals.push(this.purchaseOrderManager.getSingleById(fulfillment.purchaseOrderId));
+                        }
+
+                    })
+                })
                 var getPoExternals = deliveryOrder.items.map((item) => {
                     return this.purchaseOrderExternalManager.getSingleById(item.purchaseOrderExternalId)
                 })
                 return Promise.all(getPoExternals)
                     .then((purchaseOrderExternals) => {
-                        for (var purchaseOrderExternal of purchaseOrderExternals) {
-                            var item = deliveryOrder.items.find(item => item.purchaseOrderExternalId.toString() === purchaseOrderExternal._id.toString())
-                            item.purchaseOrderExternal = purchaseOrderExternal;
+                        return Promise.all(getPOInternals)
+                            .then((purchaseOrderInternals) => {
+                                for (var purchaseOrderExternal of purchaseOrderExternals) {
+                                    var item = deliveryOrder.items.find(item => item.purchaseOrderExternalId.toString() === purchaseOrderExternal._id.toString())
+                                    item.purchaseOrderExternal = purchaseOrderExternal;
 
-                            for (var fulfillment of item.fulfillments) {
-                                var purchaseOrder = purchaseOrderExternal.items.find(item => item._id.toString() === fulfillment.purchaseOrderId.toString());
-                                fulfillment.purchaseOrder = purchaseOrder;
-                            }
-                        }
-                        return this.collection
-                            .updateOne({
-                                _id: deliveryOrder._id
-                            }, {
-                                $set: deliveryOrder
+                                    for (var fulfillment of item.fulfillments) {
+                                        var purchaseOrder = purchaseOrderInternals.find(purchaseOrderInternal => purchaseOrderInternal._id.toString() === fulfillment.purchaseOrderId.toString())
+                                        fulfillment.purchaseOrder = purchaseOrder;
+                                    }
+                                }
+                                return this.collection
+                                    .updateOne({
+                                        _id: deliveryOrder._id
+                                    }, {
+                                        $set: deliveryOrder
+                                    })
+                                    .then((result) => Promise.resolve(deliveryOrder._id));
                             })
-                            .then((result) => Promise.resolve(deliveryOrder._id));
                     })
             })
     }
@@ -542,18 +556,15 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         var productId = realization.productId;
                         var poItem = purchaseOrder.items.find(item => item.product._id.toString() === productId.toString());
                         var deliveryOrder = realization.deliveryOrder;
-                        var fulfillment = {
-                            deliveryOrderNo: deliveryOrder.no,
-                            deliveryOrderDeliveredQuantity: realization.deliveredQuantity,
-                            deliveryOrderDate: deliveryOrder.date,
-                            supplierDoDate: deliveryOrder.supplierDoDate
-                        };
 
                         poItem.fulfillments = poItem.fulfillments || [];
                         if (deliveryOrder._id) {
                             var item = poItem.fulfillments.find(item => item.deliveryOrderNo === deliveryOrder.no);
                             var index = poItem.fulfillments.indexOf(item);
-                            poItem.fulfillments[index] = fulfillment;
+                            poItem.fulfillments[index].deliveryOrderNo = deliveryOrder.no;
+                            poItem.fulfillments[index].deliveryOrderDeliveredQuantity = realization.deliveredQuantity;
+                            poItem.fulfillments[index].deliveryOrderDate = deliveryOrder.date;
+                            poItem.fulfillments[index].supplierDoDate = deliveryOrder.supplierDoDate;
                         }
                         poItem.realizationQuantity = poItem.fulfillments
                             .map(fulfillment => fulfillment.deliveryOrderDeliveredQuantity)
@@ -793,9 +804,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.purchasing.collection.DeliveryOrder}__updatedDate`,
+            name: `ix_${map.purchasing.collection.DeliveryOrder}_date`,
             key: {
-                _updatedDate: -1
+                "date": -1
             }
         }
 
@@ -811,35 +822,34 @@ module.exports = class DeliveryOrderManager extends BaseManager {
     }
 
     getAllData(filter) {
-        return new Promise((resolve, reject) => {
-            var sorting = {
-                "date": -1,
-                "no": 1
-            };
-            var query = Object.assign({});
-            query = Object.assign(query, filter);
-            query = Object.assign(query, {
-                _deleted: false
-            });
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var query = Object.assign({});
+                    query = Object.assign(query, filter);
+                    query = Object.assign(query, {
+                        _deleted: false
+                    });
 
-            var _select = ["no",
-                "date",
-                "supplier",
-                "_createdBy",
-                "items.purchaseOrderExternal",
-                "items.fulfillments.product",
-                "items.fulfillments.purchaseOrderQuantity",
-                "items.fulfillments.purchaseOrderUom",
-                "items.fulfillments.deliveredQuantity"
-            ];
+                    var _select = ["no",
+                        "date",
+                        "supplier",
+                        "_createdBy",
+                        "items.purchaseOrderExternal",
+                        "items.fulfillments.product",
+                        "items.fulfillments.purchaseOrderQuantity",
+                        "items.fulfillments.purchaseOrderUom",
+                        "items.fulfillments.deliveredQuantity"
+                    ];
 
-            this.collection.where(query).select(_select).order(sorting).execute()
-                .then((results) => {
-                    resolve(results.data);
-                })
-                .catch(e => {
-                    reject(e);
+                    this.collection.where(query).select(_select).execute()
+                        .then((results) => {
+                            resolve(results.data);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 });
-        });
+            });
     }
 };
