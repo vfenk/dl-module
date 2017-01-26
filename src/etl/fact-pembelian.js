@@ -56,6 +56,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
         var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
             return this.purchaseOrderManager.collection.find({
                 _deleted: false,
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
                 purchaseRequestId: purchaseRequest._id
             })
                 .toArray()
@@ -85,6 +88,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
         var joinPurchaseOrderExternals = data.map((item) => {
             var getPurchaseOrderExternal = item.purchaseOrder ? this.purchaseOrderExternalManager.collection.find({
                 _deleted: false,
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
                 items: {
                     "$elemMatch": {
                         _id: item.purchaseOrder._id
@@ -118,6 +124,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
         var joinDeliveryOrders = data.map((item) => {
             var getDeliveryOrders = item.purchaseOrderExternal ? this.deliveryOrderManager.collection.find({
                 _deleted: false,
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
                 items: {
                     "$elemMatch": {
                         purchaseOrderExternalId: item.purchaseOrderExternal._id
@@ -150,6 +159,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
         var joinUnitReceiptNotes = data.map((item) => {
             var getUnitReceiptNotes = item.deliveryOrder ? this.unitReceiptNoteManager.collection.find({
                 _deleted: false,
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
                 deliveryOrderId: item.deliveryOrder._id,
                 items: {
                     "$elemMatch": {
@@ -184,6 +196,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
         var joinUnitPaymentOrders = data.map((item) => {
             var getUnitPaymentOrders = item.unitReceiptNote ? this.unitPaymentOrderManager.collection.find({
                 _deleted: false,
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
                 items: {
                     "$elemMatch": {
                         unitReceiptNoteId: item.unitReceiptNote._id
@@ -217,10 +232,13 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
         var timestamp = new Date(1970, 1, 1);
         return this.purchaseRequestManager.collection.find({
             _deleted: false,
+            _createdBy: {
+                "$nin": ["dev", "unit-test"]
+            },
             _updatedDate: {
                 "$gt": timestamp
             }
-        }).toArray()
+        }).sort({no: 1}).limit(900).toArray()
             .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
             .then((results) => this.joinPurchaseOrderExternal(results))
             .then((results) => this.joinDeliveryOrder(results))
