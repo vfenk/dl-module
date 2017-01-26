@@ -3,7 +3,7 @@
 // external deps 
 var ObjectId = require("mongodb").ObjectId;
 var BaseManager = require("module-toolkit").BaseManager;
-var moment = require("moment"); 
+var moment = require("moment");
 
 // internal deps 
 require("mongodb-toolkit");
@@ -14,8 +14,9 @@ var PurchaseOrderExternalManager = require('../managers/purchasing/purchase-orde
 var DeliveryOrderManager = require('../managers/purchasing/delivery-order-manager');
 var UnitReceiptNoteManager = require('../managers/purchasing/unit-receipt-note-manager');
 var UnitPaymentOrderManager = require('../managers/purchasing/unit-payment-order-manager');
+var startedDate = new Date();
 
-module.exports = class FactPurchasingEtlManager extends BaseManager{
+module.exports = class FactPurchasingEtlManager extends BaseManager {
     constructor(db, user, sql) {
         super(db, user);
         this.sql = sql;
@@ -28,8 +29,8 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
         this.migrationLog = this.db.collection("migrationLog");
     }
 
+
     run() {
-        var startedDate = new Date();
         this.migrationLog.insert({
             description: "Fact Pembelian from MongoDB to Azure DWH",
             start: startedDate,
@@ -55,6 +56,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
         var joinPurchaseOrders = purchaseRequests.map((purchaseRequest) => {
             return this.purchaseOrderManager.collection.find({
                 _deleted: false,
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
                 purchaseRequestId: purchaseRequest._id
             })
                 .toArray()
@@ -84,6 +88,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
         var joinPurchaseOrderExternals = data.map((item) => {
             var getPurchaseOrderExternal = item.purchaseOrder ? this.purchaseOrderExternalManager.collection.find({
                 _deleted: false,
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
                 items: {
                     "$elemMatch": {
                         _id: item.purchaseOrder._id
@@ -117,6 +124,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
         var joinDeliveryOrders = data.map((item) => {
             var getDeliveryOrders = item.purchaseOrderExternal ? this.deliveryOrderManager.collection.find({
                 _deleted: false,
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
                 items: {
                     "$elemMatch": {
                         purchaseOrderExternalId: item.purchaseOrderExternal._id
@@ -149,7 +159,15 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
         var joinUnitReceiptNotes = data.map((item) => {
             var getUnitReceiptNotes = item.deliveryOrder ? this.unitReceiptNoteManager.collection.find({
                 _deleted: false,
-                deliveryOrderId: item.deliveryOrder._id
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
+                deliveryOrderId: item.deliveryOrder._id,
+                items: {
+                    "$elemMatch": {
+                        purchaseOrderId: item.purchaseOrder._id
+                    }
+                }
             }).toArray() : Promise.resolve([]);
 
             return getUnitReceiptNotes.then((unitReceiptNotes) => {
@@ -178,6 +196,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
         var joinUnitPaymentOrders = data.map((item) => {
             var getUnitPaymentOrders = item.unitReceiptNote ? this.unitPaymentOrderManager.collection.find({
                 _deleted: false,
+                _createdBy: {
+                    $nin: ["dev", "unit-test"]
+                },
                 items: {
                     "$elemMatch": {
                         unitReceiptNoteId: item.unitReceiptNote._id
@@ -211,6 +232,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
         var timestamp = new Date(1970, 1, 1);
         return this.purchaseRequestManager.collection.find({
             _deleted: false,
+            _createdBy: {
+                "$nin": ["dev", "unit-test"]
+            },
             _updatedDate: {
                 "$gt": timestamp
             }
@@ -223,7 +247,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
     }
 
     getRangeMonth(days) {
-        if (days === 0) {
+        if (days <= 0) {
             return "0 hari";
         } else if (days >= 1 && days <= 30) {
             return "1-30 hari";
@@ -237,7 +261,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
     }
 
     getRangeWeek(days) {
-        if (days === 0) {
+        if (days <= 0) {
             return "0 hari";
         } else if (days >= 1 && days <= 7) {
             return "1-7 hari";
@@ -261,7 +285,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
     }
 
     getStatus(poDate, doDate) {
-        var result = doDate - poDate;
+        var poDates = moment(poDate).startOf("day");
+        var doDates = moment(doDate).startOf("day");
+        var result = moment(doDates).diff(moment(poDates), "days")
         if (result <= 0) {
             return "Tepat Waktu";
         } else {
@@ -281,14 +307,14 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
             if (item.purchaseOrder) {
 
                 var results = purchaseOrder.items.map((poItem) => {
-                    var prPoExtDays = purchaseOrderExternal ? moment(purchaseOrderExternal.date).diff(moment(purchaseRequest.date), "days") : null;
-                    var poIntDays = purchaseOrder ? moment(purchaseOrder.date).diff(moment(purchaseRequest.date), "days") : null;
-                    var poExtDays = purchaseOrderExternal ? moment(purchaseOrderExternal.date).diff(moment(purchaseOrder.date), "days") : null;
-                    var doDays = deliveryOrder ? moment(deliveryOrder.date).diff(moment(purchaseOrderExternal.date), "days") : null;
-                    var urnDays = unitReceiptNote ? moment(unitReceiptNote.date).diff(moment(deliveryOrder.date), "days") : null;
-                    var upoDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(unitReceiptNote.date), "days") : null;
-                    var poDays = unitPaymentOrder ? moment(unitPaymentOrder.date).diff(moment(purchaseOrder.date), "days") : null;
-                    var lastDeliveredDate = (poItem.fulfillments.length > 0) ? poItem.fulfillments.slice(-1)[0].deliveryOrderDate : null;
+                    var prPoExtDays = purchaseOrderExternal ? moment(moment(purchaseOrderExternal.date).startOf("day")).diff(moment(moment(purchaseRequest.date).startOf("day")), "days") : null;
+                    var poIntDays = purchaseOrder ? moment(moment(purchaseOrder._createdDate).startOf("day")).diff(moment(moment(purchaseRequest.date).startOf("day")), "days") : null;
+                    var poExtDays = purchaseOrderExternal ? moment(moment(purchaseOrderExternal.date).startOf("day")).diff(moment(moment(purchaseOrder._createdDate).startOf("day")), "days") : null;
+                    var doDays = deliveryOrder ? moment(moment(deliveryOrder.date).startOf("day")).diff(moment(moment(purchaseOrderExternal.date).startOf("day")), "days") : null;
+                    var urnDays = unitReceiptNote ? moment(moment(unitReceiptNote.date).startOf("day")).diff(moment(moment(deliveryOrder.date).startOf("day")), "days") : null;
+                    var upoDays = unitPaymentOrder ? moment(moment(unitPaymentOrder.date).startOf("day")).diff(moment(moment(unitReceiptNote.date).startOf("day")), "days") : null;
+                    var poDays = unitPaymentOrder ? moment(moment(unitPaymentOrder.date).startOf("day")).diff(moment(moment(purchaseOrder._createdDate).startOf("day")), "days") : null;
+                    var lastDeliveredDate = (poItem.fulfillments.length > 0) ? poItem.fulfillments[poItem.fulfillments.length - 1].deliveryOrderDate : null;
                     var catType = purchaseOrder.purchaseRequest.category.name;
 
                     return {
@@ -307,7 +333,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
                         categoryName: purchaseOrder ? `'${purchaseOrder.purchaseRequest.category.name}'` : null,
                         categoryType: purchaseOrder ? `'${this.getCategoryType(catType)}'` : null,
                         productCode: purchaseOrder ? `'${poItem.product.code}'` : null,
-                        productName: purchaseOrder ? `'${poItem.product.name.replace("'", ".")}'` : null,
+                        productName: purchaseOrder ? `'${poItem.product.name.replace("[", ".").replace("}", ".").replace("\"", ".").replace("]", ".").replace("\"", ".").replace("{", ".").replace("'", ".")}'` : null,
                         purchaseRequestDays: purchaseOrder ? `${poIntDays}` : null,
                         purchaseRequestDaysRange: purchaseOrder ? `'${this.getRangeWeek(poIntDays)}'` : null,
                         prPurchaseOrderExternalDays: purchaseOrderExternal ? `${prPoExtDays}` : null,
@@ -315,7 +341,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
 
                         purchaseOrderId: purchaseOrder ? `'${purchaseOrder._id}'` : null,
                         purchaseOrderNo: purchaseOrder ? `'${purchaseOrder.no}'` : null,
-                        purchaseOrderDate: purchaseOrder ? `'${moment(purchaseOrder.date).format('L')}'` : null,
+                        purchaseOrderDate: purchaseOrder ? `'${moment(purchaseOrder._createdDate).format('L')}'` : null,
                         purchaseOrderExternalDays: purchaseOrderExternal ? `${poExtDays}` : null,
                         purchaseOrderExternalDaysRange: purchaseOrderExternal ? `'${this.getRangeWeek(poExtDays)}'` : null,
                         purchasingStaffName: purchaseOrder ? `'${purchaseOrder._createdBy}'` : null,
@@ -337,15 +363,15 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
                         pricePerUnit: purchaseOrderExternal ? `${poItem.pricePerDealUnit}` : null,
                         totalPrice: purchaseOrderExternal ? `${poItem.dealQuantity * poItem.pricePerDealUnit * purchaseOrderExternal.currencyRate}` : null,
                         expectedDeliveryDate: purchaseOrderExternal ? `'${moment(purchaseOrderExternal.expectedDeliveryDate).format('L')}'` : null,
-                        prNoAtPoExt: purchaseOrderExternal ? `'${purchaseOrderExternal.items[0].purchaseRequest.no}'` : null,
+                        prNoAtPoExt: purchaseOrderExternal ? `'${purchaseOrder.purchaseRequest.no}'` : null,
 
                         deliveryOrderId: deliveryOrder ? `'${deliveryOrder._id}'` : null,
                         deliveryOrderNo: deliveryOrder ? `'${deliveryOrder.no}'` : null,
                         deliveryOrderDate: deliveryOrder ? `'${moment(deliveryOrder.date).format('L')}'` : null,
                         unitReceiptNoteDays: unitReceiptNote ? `${urnDays}` : null,
                         unitReceiptNoteDaysRange: unitReceiptNote ? `'${this.getRangeWeek(urnDays)}'` : null,
-                        status: deliveryOrder ? `'${this.getStatus(new Date(purchaseOrderExternal.expectedDeliveryDate), new Date(lastDeliveredDate))}'` : null,
-                        prNoAtDo: deliveryOrder ? `'${deliveryOrder.items[0].purchaseOrderExternal.items[0].purchaseRequest.no}'` : null,
+                        status: deliveryOrder ? `'${this.getStatus(purchaseOrderExternal.expectedDeliveryDate, lastDeliveredDate)}'` : null,
+                        prNoAtDo: deliveryOrder ? `'${purchaseOrder.purchaseRequest.no}'` : null,
 
                         unitReceiptNoteId: unitReceiptNote ? `'${unitReceiptNote._id}'` : null,
                         unitReceiptNoteNo: unitReceiptNote ? `'${unitReceiptNote.no}'` : null,
@@ -389,7 +415,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
                         categoryName: purchaseRequest ? `'${purchaseRequest.category.name}'` : null,
                         categoryType: purchaseRequest ? `'${this.getCategoryType(catType)}'` : null,
                         productCode: purchaseRequest ? `'${poItem.product.code}'` : null,
-                        productName: purchaseRequest ? `'${poItem.product.name.replace("'", ".")}'` : null,
+                        productName: purchaseRequest ? `'${poItem.product.name.replace("[", ".").replace("}", ".").replace("\"", ".").replace("]", ".").replace("\"", ".").replace("{", ".").replace("'", ".")}'` : null,
                         purchaseRequestDays: null,
                         purchaseRequestDaysRange: null,
                         prPurchaseOrderExternalDays: null,
@@ -467,16 +493,16 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
 
                 request.multiple = true;
 
-                // var fs = require("fs");
-                // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
+                var fs = require("fs");
+                var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
 
-                // fs.writeFile(path, sqlQuery, function (error) {
-                //     if (error) {
-                //         console.log("write error:  " + error.message);
-                //     } else {
-                //         console.log("Successful Write to " + path);
-                //     }
-                // });
+                fs.writeFile(path, sqlQuery, function (error) {
+                    if (error) {
+                        console.log("write error:  " + error.message);
+                    } else {
+                        console.log("Successful Write to " + path);
+                    }
+                });
 
                 // var deleteTempTable = ('DELETE FROM [dl_fact_pembelian_temp]; ')
                 // var storedProcedure = ('EXEC UPSERT; ')
@@ -490,6 +516,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
                     });
             })
             .catch((err) => {
+                console.log(err);
                 var finishedDate = new Date();
                 var spentTime = moment(finishedDate).diff(moment(startedDate), "minutes");
                 var updateLog = {
@@ -500,7 +527,6 @@ module.exports = class FactPurchasingEtlManager extends BaseManager{
                     status: err
                 };
                 this.migrationLog.updateOne({ start: startedDate }, updateLog);
-                console.log(err);
                 return Promise.reject(err);
             });
     }
