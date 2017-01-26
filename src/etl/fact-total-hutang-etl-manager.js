@@ -4,7 +4,6 @@
 var ObjectId = require("mongodb").ObjectId;
 var BaseManager = require('module-toolkit').BaseManager;
 var moment = require("moment");
-var sqlConnect = require('./sqlConnect');
 
 // internal deps 
 require('mongodb-toolkit');
@@ -13,7 +12,8 @@ var UnitReceiptNoteManager = require('../managers/purchasing/unit-receipt-note-m
 var UnitPaymentOrderManager = require('../managers/purchasing/unit-payment-order-manager');
 
 module.exports = class FactTotalHutang {
-    constructor(db, user) {
+    constructor(db, user, sql) {
+        this.sql = sql;
         this.unitReceiptNoteManager = new UnitReceiptNoteManager(db, user);
         this.unitPaymentOrderManager = new UnitPaymentOrderManager(db, user);
     }
@@ -92,7 +92,7 @@ module.exports = class FactTotalHutang {
     }
 
     load(data) {
-        return sqlConnect.getConnect()
+        return this.sql.getConnection()
             .then((request) => {
 
                 var sqlQuery = '';
