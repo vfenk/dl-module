@@ -580,7 +580,8 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             return prev && curr
                         }, true);
                     if (purchaseOrder.status.value <= 5) {
-                        purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;}
+                        purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
+                    }
                     return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
                         .then((purchaseRequest) => {
                             purchaseRequest.status = purchaseOrder.isClosed ? prStatusEnum.COMPLETE : prStatusEnum.ARRIVING;
@@ -670,10 +671,21 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             return prev && curr
                         }, true);
 
-                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
+                    var poStatus = purchaseOrder.items
+                        .map((item) => item.fulfillments.length)
+                        .reduce((prev, curr, index) => {
+                            return prev + curr
+                        }, 0);
+
+                    purchaseOrder.status = poStatus > 0 ? poStatusEnum.ARRIVING : poStatusEnum.ORDERED;
                     return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
                         .then((purchaseRequest) => {
-                            purchaseRequest.status = purchaseOrder.isClosed ? prStatusEnum.COMPLETE : prStatusEnum.ARRIVING;
+                            var prStatus = purchaseRequest.items
+                                .map((item) => item.deliveryOrderNos.length )
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr
+                                }, 0);
+                            purchaseRequest.status = prStatus > 0 ? prStatusEnum.ARRIVING : prStatusEnum.ORDERED;
                             return this.purchaseRequestManager.update(purchaseRequest)
                         })
                         .then(purchaseRequestId => {
@@ -806,7 +818,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.DeliveryOrder}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         }
 
