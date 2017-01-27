@@ -543,7 +543,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.PurchaseOrderExternal}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         }
 
@@ -583,7 +583,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     po.useVat = false;
                                     po.vatRate = 0;
                                     po.useIncomeTax = false;
-                                    po.isPosted = false;
                                     po.status = poStatusEnum.PROCESSING;
 
                                     for (var poItem of po.items) {

@@ -104,9 +104,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
             var getSupplier = valid.supplier && ObjectId.isValid(valid.supplier._id) ? this.supplierManager.getSingleByIdOrDefault(valid.supplier._id) : Promise.resolve(null);
             var getPoExternal = [];
             for (var doItem of valid.items || [])
-                if (ObjectId.isValid(doItem.purchaseOrderExternal._id))
-                    getPoExternal.push(this.purchaseOrderExternalManager.getSingleByIdOrDefault(doItem.purchaseOrderExternal._id));
-
+                if (doItem.hasOwnProperty("purchaseOrderExternal")) {
+                    if (ObjectId.isValid(doItem.purchaseOrderExternal._id))
+                        getPoExternal.push(this.purchaseOrderExternalManager.getSingleByIdOrDefault(doItem.purchaseOrderExternal._id));
+                }
             Promise.all([dbData, getDeliveryderPromise, getSupplier, getDeliveryderByRefNoPromise].concat(getPoExternal))
                 .then(results => {
                     var _original = results[0];
@@ -144,8 +145,12 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             var purchaseOrderExternalItemErrors = [];
                             var purchaseOrderExternalItemHasErrors = false;
                             var purchaseOrderExternalError = {};
-
-                            if (!doItem.purchaseOrderExternal) {
+                            var fulfillmentError = {};
+                            if (Object.getOwnPropertyNames(doItem).length === 0) {
+                                purchaseOrderExternalItemHasErrors = true;
+                                purchaseOrderExternalError["purchaseOrderExternal"] = i18n.__("DeliveryOrder.items.purchaseOrderExternal.isRequired:%s is required", i18n.__("DeliveryOrder.items.purchaseOrderExternal._:PurchaseOrderExternal")); //"Purchase order external tidak boleh kosong";
+                            }
+                            else if (!doItem.purchaseOrderExternal) {
                                 purchaseOrderExternalItemHasErrors = true;
                                 purchaseOrderExternalError["purchaseOrderExternal"] = i18n.__("DeliveryOrder.items.purchaseOrderExternal.isRequired:%s is required", i18n.__("DeliveryOrder.items.purchaseOrderExternal._:PurchaseOrderExternal")); //"Purchase order external tidak boleh kosong";
                             }
@@ -165,26 +170,36 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 }
                             }
 
-                            for (var doFulfillment of doItem.fulfillments || []) {
-                                var fulfillmentError = {};
-                                if (!doFulfillment.deliveredQuantity || doFulfillment.deliveredQuantity === 0) {
-                                    purchaseOrderExternalItemHasErrors = true;
-                                    fulfillmentError["deliveredQuantity"] = i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity.isRequired:%s is required or not 0", i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity._:DeliveredQuantity")); //"Jumlah barang diterima tidak boleh kosong";
-                                }
-                                // else if (doFulfillment.deliveredQuantity > doFulfillment.purchaseOrderQuantity) {
-                                //     purchaseOrderExternalItemHasErrors = true;
-                                //     fulfillmentError["deliveredQuantity"] = i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity.isGreater:%s is greater than purchaseOrderQuantity", i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity._:DeliveredQuantity")); //"Jumlah barang diterima tidak boleh lebih besar dari jumlah barang di po eksternal";
-                                // }
+                            if (doItem.fulfillments.length === 0) {
+                                fulfillmentError = {};
+                                purchaseOrderExternalItemHasErrors = true;
+                                fulfillmentError["purchaseOrder"] = i18n.__("DeliveryOrder.items.fulfillments.purchaseOrder.isRequired:%s is required", i18n.__("DeliveryOrder.items.fulfillments.purchaseOrder._:PurchaseOrderInternal"));
                                 purchaseOrderExternalItemErrors.push(fulfillmentError);
+                            }
+                            else {
+                                for (var doFulfillment of doItem.fulfillments || []) {
+                                    fulfillmentError = {};
+
+                                    if (Object.getOwnPropertyNames(doFulfillment).length === 0) {
+                                        fulfillmentError = {};
+                                        purchaseOrderExternalItemHasErrors = true;
+                                        fulfillmentError["purchaseOrder"] = i18n.__("DeliveryOrder.items.fulfillments.purchaseOrder.isRequired:%s is required", i18n.__("DeliveryOrder.items.fulfillments.purchaseOrder._:PurchaseOrderInternal"));
+                                    }
+                                    if (!doFulfillment.deliveredQuantity || doFulfillment.deliveredQuantity === 0) {
+                                        purchaseOrderExternalItemHasErrors = true;
+                                        fulfillmentError["deliveredQuantity"] = i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity.isRequired:%s is required or not 0", i18n.__("DeliveryOrder.items.fulfillments.deliveredQuantity._:DeliveredQuantity")); //"Jumlah barang diterima tidak boleh kosong";
+                                    }
+                                    purchaseOrderExternalItemErrors.push(fulfillmentError);
+                                }
                             }
                             if (purchaseOrderExternalItemHasErrors) {
                                 deliveryOrderItemHasError = true;
                                 purchaseOrderExternalError["fulfillments"] = purchaseOrderExternalItemErrors;
                             }
                             deliveryOrderItemErrors.push(purchaseOrderExternalError);
+                            if (purchaseOrderExternalItemHasErrors)
+                                errors["items"] = deliveryOrderItemErrors;
                         }
-                        if (purchaseOrderExternalItemHasErrors)
-                            errors["items"] = deliveryOrderItemErrors;
                     }
                     else
                         errors["items"] = i18n.__("DeliveryOrder.items.isRequired:%s is required", i18n.__("DeliveryOrder.items.name._:Items")); //"Harus ada minimal 1 nomor po eksternal";
@@ -579,8 +594,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         .reduce((prev, curr, index) => {
                             return prev && curr
                         }, true);
-
-                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
+                    if (purchaseOrder.status.value < 5) {
+                        purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
+                    }
                     return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
                         .then((purchaseRequest) => {
                             purchaseRequest.status = purchaseOrder.isClosed ? prStatusEnum.COMPLETE : prStatusEnum.ARRIVING;
@@ -670,10 +686,21 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             return prev && curr
                         }, true);
 
-                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
+                    var poStatus = purchaseOrder.items
+                        .map((item) => item.fulfillments.length)
+                        .reduce((prev, curr, index) => {
+                            return prev + curr
+                        }, 0);
+
+                    purchaseOrder.status = poStatus > 0 ? poStatusEnum.ARRIVING : poStatusEnum.ORDERED;
                     return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
                         .then((purchaseRequest) => {
-                            purchaseRequest.status = purchaseOrder.isClosed ? prStatusEnum.COMPLETE : prStatusEnum.ARRIVING;
+                            var prStatus = purchaseRequest.items
+                                .map((item) => item.deliveryOrderNos.length)
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr
+                                }, 0);
+                            purchaseRequest.status = prStatus > 0 ? prStatusEnum.ARRIVING : prStatusEnum.ORDERED;
                             return this.purchaseRequestManager.update(purchaseRequest)
                         })
                         .then(purchaseRequestId => {
@@ -806,7 +833,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.DeliveryOrder}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         }
 

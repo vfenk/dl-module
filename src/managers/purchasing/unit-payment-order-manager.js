@@ -495,7 +495,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.UnitPaymentOrder}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         }
 

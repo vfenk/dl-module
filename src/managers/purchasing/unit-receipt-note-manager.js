@@ -218,441 +218,395 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         return query;
     }
 
-    create(unitReceiptNote) {
-        return new Promise((resolve, reject) => {
-            var tasksUpdatePoInternal = [];
-            var getPurchaseOrderById = [];
-            this._validate(unitReceiptNote)
-                .then(validUnitReceiptNote => {
-                    validUnitReceiptNote.no = generateCode();
-                    validUnitReceiptNote._createdDate = new Date();
-
-                    //Update PO Internal
-                    var poId = new ObjectId();
-                    for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
-                        for (var fulfillment of doItem.fulfillments)
-                            if (!poId.equals(fulfillment.purchaseOrder._id)) {
-                                poId = new ObjectId(fulfillment.purchaseOrder._id);
-                                if (ObjectId.isValid(fulfillment.purchaseOrder._id))
-                                    getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
-                            }
-                    }
-
-                    Promise.all(getPurchaseOrderById)
-                        .then(purchaseOrders => {
-                            for (var purchaseOrder of purchaseOrders) {
-                                for (var poItem of purchaseOrder.items) {
-                                    for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
-                                        if (unitReceiptNoteItem.purchaseOrderId.toString() == purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() == purchaseOrder.unitId.toString()) {
-                                            if (unitReceiptNoteItem.product._id.toString() == poItem.product._id.toString()) {
-                                                for (var fulfillment of poItem.fulfillments) {
-                                                    var fulfillmentNo = fulfillment.deliveryOrderNo || '';
-                                                    var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
-
-                                                    if (fulfillmentNo === deliveryOrderNo && !fulfillment.unitReceiptNoteNo) {
-                                                        fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
-                                                        fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
-                                                        fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
-                                                        fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
-                                                        break;
-                                                    } else if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo) {
-                                                        var _fulfillment = fulfillment;
-                                                        _fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
-                                                        _fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
-                                                        _fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
-                                                        _fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
-                                                        poItem.fulfillments.push(_fulfillment);
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            unitReceiptNoteItem.purchaseOrder = purchaseOrder;
-                                        }
-                                    }
-                                }
-                                var _isClosed = true;
-                                for (var poItem of purchaseOrder.items) {
-                                    var sum = poItem.fulfillments.reduce(function (a, b) { return a + b.unitReceiptNoteDeliveredQuantity; }, 0);
-                                    if (sum !== poItem.realizationQuantity) {
-                                        _isClosed = false;
-                                        break;
-                                    }
-                                }
-                                if (_isClosed) {
-                                    purchaseOrder.status = poStatusEnum.RECEIVED;
-                                } else {
-                                    purchaseOrder.status = poStatusEnum.RECEIVING;
-                                }
-                                tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
-                            }
-                            Promise.all(tasksUpdatePoInternal)
-                                .then(results => {
-                                    this.deliveryOrderManager.getSingleByQueryOrDefault(validUnitReceiptNote.deliveryOrder._id)
-                                        .then(_deliveryOrder => {
-                                            for (var _item of _deliveryOrder.items) {
-                                                for (var _fulfillment of _item.fulfillments) {
-                                                    for (var item of validUnitReceiptNote.items) {
-                                                        if (_fulfillment.purchaseOrder._id.toString() === item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() === item.product._id.toString()) {
-                                                            var _realizationQuantity = {
-                                                                no: validUnitReceiptNote.no,
-                                                                deliveredQuantity: item.deliveredQuantity
-                                                            }
-                                                            _fulfillment.realizationQuantity.push(_realizationQuantity);
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            for (var _item of _deliveryOrder.items) {
-                                                for (var _fulfillment of _item.fulfillments) {
-                                                    var _total = 0
-                                                    for (var _qty of _fulfillment.realizationQuantity) {
-                                                        _total += _qty.deliveredQuantity;
-                                                    }
-                                                    if (_total !== _fulfillment.deliveredQuantity) {
-                                                        _item.isClosed = false;
-                                                        break;
-                                                    }
-                                                    else
-                                                        _item.isClosed = true;
-                                                }
-                                                for (var _fulfillment of _item.fulfillments) {
-                                                    if (_fulfillment.realizationQuantity.length > 0) {
-                                                        _deliveryOrder.isPosted = true;
-                                                        break;
-                                                    } else {
-                                                        _deliveryOrder.isPosted = false;
-                                                    }
-                                                }
-
-                                                if (!_item.isClosed) {
-                                                    _deliveryOrder.isClosed = false;
-                                                    break;
-                                                }
-                                                else
-                                                    _deliveryOrder.isClosed = true;
-                                            }
-                                            validUnitReceiptNote.deliveryOrder = _deliveryOrder;
-                                            this.deliveryOrderManager.update(_deliveryOrder)
-                                                .then(_deliveryOrderId => {
-                                                    this.collection.insert(validUnitReceiptNote)
-                                                        .then(id => {
-                                                            resolve(id);
-                                                        })
-                                                        .catch(e => {
-                                                            reject(e);
-                                                        })
-                                                })
-                                                .catch(e => {
-                                                    reject(e);
-                                                })
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        })
-                                })
-                                .catch(e => {
-                                    reject(e);
-                                })
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
+    _beforeInsert(unitReceiptNote) {
+        unitReceiptNote.no = generateCode();
+        return Promise.resolve(unitReceiptNote);
     }
 
-    update(unitReceiptNote) {
-        var tasksUpdatePoInternal = [];
-        var getPurchaseOrderById = [];
-        return new Promise((resolve, reject) => {
-            this._createIndexes()
-                .then((createIndexResults) => {
-                    this._validate(unitReceiptNote)
-                        .then(validUnitReceiptNote => {
-                            //Update PO Internal
-                            var poId = new ObjectId();
-                            for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
-                                for (var fulfillment of doItem.fulfillments)
-                                    if (!poId.equals(fulfillment.purchaseOrder._id)) {
-                                        poId = new ObjectId(fulfillment.purchaseOrder._id);
-                                        if (ObjectId.isValid(fulfillment.purchaseOrder._id))
-                                            getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
-                                    }
-                            }
+    _afterInsert(id) {
+        return this.getSingleById(id)
+            .then((unitReceiptNote) => this.updatePurchaseOrder(unitReceiptNote))
+            .then((unitReceiptNote) => this.updateDeliveryOrder(unitReceiptNote))
+            .then(() => {
+                return this.syncItems(id);
+            })
+    }
 
-                            Promise.all(getPurchaseOrderById)
-                                .then(results => {
-                                    for (var purchaseOrder of results) {
-                                        for (var poItem of purchaseOrder.items) {
-                                            for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
-                                                if (unitReceiptNoteItem.purchaseOrderId.toString() === purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() === purchaseOrder.unitId.toString()) {
-                                                    if (unitReceiptNoteItem.product._id.toString() === poItem.product._id.toString()) {
-                                                        for (var fulfillment of poItem.fulfillments) {
-                                                            var fulfillmentNo = fulfillment.deliveryOrderNo || '';
-                                                            var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
+    _afterUpdate(id) {
+        return this.getSingleById(id)
+            .then((unitReceiptNote) => this.updatePurchaseOrderUpdateUnitReceiptNote(unitReceiptNote))
+            .then((unitReceiptNote) => this.updateDeliveryOrderUpdateUnitReceiptNote(unitReceiptNote))
+            .then(() => {
+                return this.syncItems(id);
+            })
+    }
 
-                                                            if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo === validUnitReceiptNote.no) {
-                                                                fulfillment.unitReceiptNoteNo = validUnitReceiptNote.no;
-                                                                fulfillment.unitReceiptNoteDate = validUnitReceiptNote.date;
-                                                                fulfillment.unitReceiptNoteDeliveredQuantity = unitReceiptNoteItem.deliveredQuantity;
-                                                                fulfillment.unitReceiptDeliveredUom = unitReceiptNoteItem.deliveredUom;
-                                                            }
-                                                        }
-                                                    }
-                                                    unitReceiptNoteItem.purchaseOrder = purchaseOrder;
-                                                }
-                                            }
-                                        }
-                                        var _isClosed = true;
-                                        for (var poItem of purchaseOrder.items) {
-                                            var sum = poItem.fulfillments.reduce(function (a, b) { return a + b.unitReceiptNoteDeliveredQuantity; }, 0);
-                                            if (sum !== poItem.realizationQuantity) {
-                                                _isClosed = false;
-                                                break;
-                                            }
-                                        }
-                                        if (_isClosed) {
-                                            purchaseOrder.status = poStatusEnum.RECEIVED;
-                                        } else {
-                                            purchaseOrder.status = poStatusEnum.RECEIVING;
-                                        }
-                                        tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
-                                    }
-                                    Promise.all(tasksUpdatePoInternal)
-                                        .then(results => {
-                                            this.deliveryOrderManager.getSingleByQueryOrDefault(validUnitReceiptNote.deliveryOrder._id)
-                                                .then(_deliveryOrder => {
-                                                    for (var _item of _deliveryOrder.items) {
-                                                        for (var _fulfillment of _item.fulfillments) {
-                                                            for (var item of validUnitReceiptNote.items) {
-                                                                if (_fulfillment.purchaseOrder._id.toString() === item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() === item.product._id.toString()) {
-                                                                    for (var realizationQty of _fulfillment.realizationQuantity) {
-                                                                        if (realizationQty.no === validUnitReceiptNote.no) {
-                                                                            realizationQty.deliveredQuantity = item.deliveredQuantity;
-                                                                            break;
-                                                                        }
-                                                                    }
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    for (var _item of _deliveryOrder.items) {
-                                                        for (var _fulfillment of _item.fulfillments) {
-                                                            var _total = 0
-                                                            for (var _qty of _fulfillment.realizationQuantity) {
-                                                                _total += _qty.deliveredQuantity;
-                                                            }
-                                                            if (_total !== _fulfillment.deliveredQuantity) {
-                                                                _item.isClosed = false;
-                                                                break;
-                                                            }
-                                                            else
-                                                                _item.isClosed = true;
-                                                        }
-                                                        for (var _fulfillment of _item.fulfillments) {
-                                                            if (_fulfillment.realizationQuantity.length > 0) {
-                                                                _deliveryOrder.isPosted = true;
-                                                                break;
-                                                            } else {
-                                                                _deliveryOrder.isPosted = false;
-                                                            }
-                                                        }
-                                                        if (!_item.isClosed) {
-                                                            _deliveryOrder.isClosed = false;
-                                                            break;
-                                                        }
-                                                        else
-                                                            _deliveryOrder.isClosed = true;
-                                                    }
-                                                    validUnitReceiptNote.deliveryOrder = _deliveryOrder;
-                                                    this.deliveryOrderManager.update(_deliveryOrder)
-                                                        .then(_deliveryOrderId => {
-                                                            this.collection.update(validUnitReceiptNote)
-                                                                .then(id => {
-                                                                    resolve(id);
-                                                                })
-                                                                .catch(e => {
-                                                                    reject(e);
-                                                                });
-                                                        })
-                                                        .catch(e => {
-                                                            reject(e);
-                                                        })
-                                                })
-                                                .catch(e => {
-                                                    reject(e);
-                                                })
+    updatePurchaseOrder(unitReceiptNote) {
+        var map = new Map();
+        for (var item of unitReceiptNote.items) {
+            var key = item.purchaseOrderId.toString();
+            if (!map.has(key))
+                map.set(key, [])
+            var item = {
+                productId: item.product._id,
+                deliveredQuantity: item.deliveredQuantity,
+                deliveredUom: item.deliveredUom
+            };
+            map.get(key).push(item);
+        }
 
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        })
-                                })
-                                .catch(e => {
-                                    reject(e);
-                                })
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
+        var jobs = [];
+        map.forEach((items, purchaseOrderId) => {
+            var job = this.purchaseOrderManager.getSingleById(purchaseOrderId)
+                .then((purchaseOrder) => {
+                    for (var item of items) {
+                        var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
+
+                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString());
+
+                        if (!fulfillment.hasOwnProperty("unitReceiptNoteNo")) {
+                            fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
+                            fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
+                            fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
+                            fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
+                        } else {
+                            var _fulfillment = Object.assign({},fulfillment);
+                            _fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
+                            _fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
+                            _fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
+                            _fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
+                            poItem.fulfillments.push(_fulfillment);
+                        }
+                    }
+
+                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                    return this.purchaseOrderManager.update(purchaseOrder);
                 })
-                .catch(e => {
-                    reject(e);
-                });
-        });
+            jobs.push(job);
+        })
+
+        return Promise.all(jobs).then((results) => {
+            return Promise.resolve(unitReceiptNote);
+        })
+    }
+
+    updatePurchaseOrderUpdateUnitReceiptNote(unitReceiptNote) {
+        var map = new Map();
+        for (var item of unitReceiptNote.items) {
+            var key = item.purchaseOrderId.toString();
+            if (!map.has(key))
+                map.set(key, [])
+            var item = {
+                productId: item.product._id,
+                deliveredQuantity: item.deliveredQuantity,
+                deliveredUom: item.deliveredUom
+            };
+            map.get(key).push(item);
+        }
+
+        var jobs = [];
+        map.forEach((items, purchaseOrderId) => {
+            var job = this.purchaseOrderManager.getSingleById(purchaseOrderId)
+                .then((purchaseOrder) => {
+                    for (var item of items) {
+                        var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
+
+                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString() && fulfillment.unitReceiptNoteNo === unitReceiptNote.no);
+                        fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
+                        fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
+                        fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
+                        fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
+                    }
+
+                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                    return this.purchaseOrderManager.update(purchaseOrder);
+                })
+            jobs.push(job);
+        })
+
+        return Promise.all(jobs).then((results) => {
+            return Promise.resolve(unitReceiptNote);
+        })
+    }
+
+    updatePurchaseOrderDeleteUnitReceiptNote(unitReceiptNote) {
+        var map = new Map();
+        for (var item of unitReceiptNote.items) {
+            var key = item.purchaseOrderId.toString();
+            if (!map.has(key))
+                map.set(key, [])
+            var item = {
+                productId: item.product._id,
+                deliveredQuantity: item.deliveredQuantity,
+                deliveredUom: item.deliveredUom
+            };
+            map.get(key).push(item);
+        }
+
+        var jobs = [];
+        map.forEach((items, purchaseOrderId) => {
+            var job = this.purchaseOrderManager.getSingleById(purchaseOrderId)
+                .then((purchaseOrder) => {
+                    for (var item of items) {
+                        var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
+
+                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString() && fulfillment.unitReceiptNoteNo === unitReceiptNote.no);
+                        if (fulfillment) {
+                            delete fulfillment.unitReceiptNoteNo;
+                            delete fulfillment.unitReceiptNoteDate;
+                            delete fulfillment.unitReceiptNoteDeliveredQuantity;
+                            delete fulfillment.unitReceiptDeliveredUom;
+                        }
+                    }
+
+                    var poStatus = purchaseOrder.items
+                        .map((item) => {
+                            return item.fulfillments
+                                .map((fulfillment) => fulfillment.hasOwnProperty("unitReceiptNoteNo"))
+                                .reduce((prev, curr, index) => {
+                                    return prev || curr
+                                }, false);
+                        })
+                        .reduce((prev, curr, index) => {
+                            return prev || curr
+                        }, false);
+
+                    purchaseOrder.status = poStatus ? poStatusEnum.RECEIVING : unitReceiptNote.deliveryOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
+                    return this.purchaseOrderManager.update(purchaseOrder);
+                })
+            jobs.push(job);
+        })
+
+        return Promise.all(jobs).then((results) => {
+            return Promise.resolve(unitReceiptNote);
+        })
+    }
+
+    updateDeliveryOrder(unitReceiptNote) {
+        return this.deliveryOrderManager.syncItems(unitReceiptNote.deliveryOrderId)
+            .then((deliveryOrderId) => this.deliveryOrderManager.getSingleByQueryOrDefault({ _id: ObjectId.isValid(deliveryOrderId) ? new ObjectId(deliveryOrderId) : {} }))
+            .then((deliveryOrder) => {
+                var map = new Map();
+                for (var item of unitReceiptNote.items) {
+                    var key = item.purchaseOrderId.toString();
+                    if (!map.has(key))
+                        map.set(key, [])
+                    var item = {
+                        productId: item.product._id,
+                        deliveredQuantity: item.deliveredQuantity,
+                        deliveredUom: item.deliveredUom
+                    };
+                    map.get(key).push(item);
+                }
+
+                map.forEach((items, purchaseOrderId) => {
+                    for (var _item of items) {
+                        for (var item of deliveryOrder.items) {
+                            var fulfillment = item.fulfillments.find(fulfillment => fulfillment.purchaseOrderId.toString() === purchaseOrderId.toString() && fulfillment.product._id.toString() === _item.productId.toString());
+                            var _realizationQuantity = {
+                                no: unitReceiptNote.no,
+                                deliveredQuantity: _item.deliveredQuantity
+                            }
+                            fulfillment.realizationQuantity.push(_realizationQuantity);
+                        }
+                    }
+                })
+
+                for (var item of deliveryOrder.items) {
+                    item.isClosed = item.fulfillments
+                        .map((fulfillment) => {
+                            var total = fulfillment.realizationQuantity
+                                .map(realizationQty => realizationQty.deliveredQuantity)
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr;
+                                }, 0);
+                            return fulfillment.deliveredQuantity === total
+                        })
+                        .reduce((prev, curr, index) => {
+                            return prev && curr
+                        }, true);
+                }
+
+                deliveryOrder.isClosed = deliveryOrder.items
+                    .map((item) => item.isClosed)
+                    .reduce((prev, curr, index) => {
+                        return prev && curr
+                    }, true);
+
+                return this.deliveryOrderManager.update(deliveryOrder)
+                    .then((results) => {
+                        return Promise.resolve(unitReceiptNote);
+                    })
+            })
+    }
+
+    updateDeliveryOrderUpdateUnitReceiptNote(unitReceiptNote) {
+        return this.deliveryOrderManager.syncItems(unitReceiptNote.deliveryOrderId)
+            .then((deliveryOrderId) => this.deliveryOrderManager.getSingleByQueryOrDefault({ _id: ObjectId.isValid(deliveryOrderId) ? new ObjectId(deliveryOrderId) : {} }))
+            .then((deliveryOrder) => {
+                var map = new Map();
+                for (var item of unitReceiptNote.items) {
+                    var key = item.purchaseOrderId.toString();
+                    if (!map.has(key))
+                        map.set(key, [])
+                    var item = {
+                        productId: item.product._id,
+                        deliveredQuantity: item.deliveredQuantity,
+                        deliveredUom: item.deliveredUom
+                    };
+                    map.get(key).push(item);
+                }
+
+                map.forEach((items, purchaseOrderId) => {
+                    for (var _item of items) {
+                        for (var item of deliveryOrder.items) {
+                            var fulfillment = item.fulfillments.find(fulfillment => fulfillment.purchaseOrderId.toString() === purchaseOrderId.toString() && fulfillment.product._id.toString() === _item.productId.toString());
+                            var _realizationQuantity = fulfillment.realizationQuantity.find(realqty => realqty.no === unitReceiptNote.no);
+                            _realizationQuantity.no = unitReceiptNote.no;
+                            _realizationQuantity.deliveredQuantity = _item.deliveredQuantity;
+                        }
+                    }
+                })
+
+                for (var item of deliveryOrder.items) {
+                    item.isClosed = item.fulfillments
+                        .map((fulfillment) => {
+                            var total = fulfillment.realizationQuantity
+                                .map(realizationQty => realizationQty.deliveredQuantity)
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr;
+                                }, 0);
+                            return fulfillment.deliveredQuantity === total
+                        })
+                        .reduce((prev, curr, index) => {
+                            return prev && curr
+                        }, true);
+                }
+
+                deliveryOrder.isClosed = deliveryOrder.items
+                    .map((item) => item.isClosed)
+                    .reduce((prev, curr, index) => {
+                        return prev && curr
+                    }, true);
+
+                return this.deliveryOrderManager.update(deliveryOrder)
+                    .then((results) => {
+                        return Promise.resolve(unitReceiptNote);
+                    })
+            })
+    }
+
+    updateDeliveryOrderDeleteUnitReceiptNote(unitReceiptNote) {
+        return this.deliveryOrderManager.syncItems(unitReceiptNote.deliveryOrderId)
+            .then((deliveryOrderId) => this.deliveryOrderManager.getSingleByQueryOrDefault({ _id: ObjectId.isValid(deliveryOrderId) ? new ObjectId(deliveryOrderId) : {} }))
+            .then((deliveryOrder) => {
+                var map = new Map();
+                for (var item of unitReceiptNote.items) {
+                    var key = item.purchaseOrderId.toString();
+                    if (!map.has(key))
+                        map.set(key, [])
+                    var item = {
+                        productId: item.product._id,
+                        deliveredQuantity: item.deliveredQuantity,
+                        deliveredUom: item.deliveredUom
+                    };
+                    map.get(key).push(item);
+                }
+
+                map.forEach((items, purchaseOrderId) => {
+                    for (var _item of items) {
+                        for (var item of deliveryOrder.items) {
+                            var fulfillment = item.fulfillments.find(fulfillment => fulfillment.purchaseOrderId.toString() === purchaseOrderId.toString() && fulfillment.product._id.toString() === _item.productId.toString());
+                            var _realizationQuantity = fulfillment.realizationQuantity.find(realqty => realqty.no === unitReceiptNote.no);
+                            var _index = fulfillment.realizationQuantity.indexOf(_realizationQuantity);
+                            fulfillment.realizationQuantity.splice(_index, 1);
+                        }
+                    }
+                })
+
+                for (var item of deliveryOrder.items) {
+                    item.isClosed = item.fulfillments
+                        .map((fulfillment) => {
+                            var total = fulfillment.realizationQuantity
+                                .map(realizationQty => realizationQty.deliveredQuantity)
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr;
+                                }, 0);
+                            return fulfillment.deliveredQuantity === total
+                        })
+                        .reduce((prev, curr, index) => {
+                            return prev && curr
+                        }, true);
+                }
+
+                deliveryOrder.isClosed = deliveryOrder.items
+                    .map((item) => item.isClosed)
+                    .reduce((prev, curr, index) => {
+                        return prev && curr
+                    }, true);
+
+                return this.deliveryOrderManager.update(deliveryOrder)
+                    .then((results) => {
+                        return Promise.resolve(unitReceiptNote);
+                    })
+            })
+    }
+
+    syncItems(id) {
+        var query = {
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : {}
+        };
+        return this.getSingleByQuery(query)
+            .then((unitReceiptNote) => {
+                var getPoInternals = unitReceiptNote.items.map((item) => {
+                    return this.purchaseOrderManager.getSingleById(item.purchaseOrderId)
+                })
+                return this.deliveryOrderManager.getSingleById(unitReceiptNote.deliveryOrderId)
+                    .then((deliveryOrder) => {
+                        return Promise.all(getPoInternals)
+                            .then((purchaseOrderInternals) => {
+                                for (var purchaseOrderInternal of purchaseOrderInternals) {
+                                    var item = unitReceiptNote.items.find(item => item.purchaseOrderId.toString() === purchaseOrderInternal._id.toString())
+                                    item.purchaseOrder = purchaseOrderInternal;
+                                }
+                                unitReceiptNote.deliveryOrder = deliveryOrder;
+                                return this.collection
+                                    .updateOne({
+                                        _id: unitReceiptNote._id
+                                    }, {
+                                        $set: unitReceiptNote
+                                    })
+                                    .then((result) => Promise.resolve(unitReceiptNote._id));
+                            })
+                    })
+            })
     }
 
     delete(unitReceiptNote) {
-        var tasksUpdatePoInternal = [];
-        var getPurchaseOrderById = [];
-        return new Promise((resolve, reject) => {
-            this._createIndexes()
-                .then((createIndexResults) => {
-                    this._validate(unitReceiptNote)
-                        .then(validUnitReceiptNote => {
-                            validUnitReceiptNote._deleted = true;
-                            //Update PO Internal
-                            var poId = new ObjectId();
-                            for (var doItem of validUnitReceiptNote.deliveryOrder.items) {
-                                for (var fulfillment of doItem.fulfillments)
-                                    if (!poId.equals(fulfillment.purchaseOrder._id)) {
-                                        poId = new ObjectId(fulfillment.purchaseOrder._id);
-                                        if (ObjectId.isValid(fulfillment.purchaseOrder._id))
-                                            getPurchaseOrderById.push(this.purchaseOrderManager.getSingleByIdOrDefault(fulfillment.purchaseOrder._id));
-                                    }
-                            }
-
-                            Promise.all(getPurchaseOrderById)
-                                .then(results => {
-                                    for (var purchaseOrder of results) {
-                                        for (var poItem of purchaseOrder.items) {
-                                            for (var unitReceiptNoteItem of validUnitReceiptNote.items) {
-                                                if (unitReceiptNoteItem.purchaseOrderId.toString() === purchaseOrder._id.toString() && validUnitReceiptNote.unitId.toString() === purchaseOrder.unitId.toString()) {
-                                                    if (unitReceiptNoteItem.product._id.toString() === poItem.product._id.toString()) {
-                                                        for (var fulfillment of poItem.fulfillments) {
-                                                            var fulfillmentNo = fulfillment.deliveryOrderNo || '';
-                                                            var deliveryOrderNo = validUnitReceiptNote.deliveryOrder.no || '';
-
-                                                            if (fulfillmentNo === deliveryOrderNo && fulfillment.unitReceiptNoteNo === validUnitReceiptNote.no) {
-                                                                delete fulfillment.unitReceiptNoteNo;
-                                                                delete fulfillment.unitReceiptNoteDate;
-                                                                delete fulfillment.unitReceiptNoteDeliveredQuantity;
-                                                                delete fulfillment.unitReceiptDeliveredUom;
-                                                            }
-                                                        }
-                                                    }
-                                                    if (purchaseOrder.isClosed) {
-                                                        purchaseOrder.status = poStatusEnum.ARRIVED;
-                                                    } else {
-                                                        purchaseOrder.status = poStatusEnum.ARRIVING;
-                                                    }
-                                                    unitReceiptNoteItem.purchaseOrder = purchaseOrder;
-                                                }
-                                            }
-                                        }
-                                        tasksUpdatePoInternal.push(this.purchaseOrderManager.update(purchaseOrder));
-                                    }
-                                    Promise.all(tasksUpdatePoInternal)
-                                        .then(results => {
-                                            this.deliveryOrderManager.getSingleByQueryOrDefault(validUnitReceiptNote.deliveryOrder._id)
-                                                .then(_deliveryOrder => {
-                                                    for (var _item of _deliveryOrder.items) {
-                                                        for (var _fulfillment of _item.fulfillments) {
-                                                            for (var item of validUnitReceiptNote.items) {
-                                                                if (_fulfillment.purchaseOrder._id.toString() === item.purchaseOrder._id.toString() && _fulfillment.product._id.toString() === item.product._id.toString()) {
-                                                                    var _index;
-                                                                    for (var realizationQty of _fulfillment.realizationQuantity) {
-                                                                        if (realizationQty.no === validUnitReceiptNote.no) {
-                                                                            _index = _fulfillment.realizationQuantity.indexOf(realizationQty);
-                                                                            break;
-                                                                        }
-                                                                    }
-                                                                    if (_index !== null) {
-                                                                        _fulfillment.realizationQuantity.splice(_index, 1);
-                                                                    }
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    for (var _item of _deliveryOrder.items) {
-                                                        for (var _fulfillment of _item.fulfillments) {
-                                                            var _total = 0
-                                                            for (var _qty of _fulfillment.realizationQuantity) {
-                                                                _total += _qty.deliveredQuantity;
-                                                            }
-                                                            if (_total !== _fulfillment.deliveredQuantity) {
-                                                                _item.isClosed = false;
-                                                                break;
-                                                            }
-                                                            else
-                                                                _item.isClosed = true;
-                                                        }
-                                                        for (var _fulfillment of _item.fulfillments) {
-                                                            if (_fulfillment.realizationQuantity.length > 0) {
-                                                                _deliveryOrder.isPosted = true;
-                                                                break;
-                                                            } else {
-                                                                _deliveryOrder.isPosted = false;
-                                                            }
-                                                        }
-                                                        if (!_item.isClosed) {
-                                                            _deliveryOrder.isClosed = false;
-                                                            break;
-                                                        }
-                                                        else
-                                                            _deliveryOrder.isClosed = true;
-                                                    }
-                                                    validUnitReceiptNote.deliveryOrder = _deliveryOrder;
-                                                    this.deliveryOrderManager.update(_deliveryOrder)
-                                                        .then(_deliveryOrderId => {
-                                                            this.collection.update(validUnitReceiptNote)
-                                                                .then(id => {
-                                                                    resolve(id);
-                                                                })
-                                                                .catch(e => {
-                                                                    reject(e);
-                                                                });
-                                                        })
-                                                        .catch(e => {
-                                                            reject(e);
-                                                        })
-                                                })
-                                                .catch(e => {
-                                                    reject(e);
-                                                })
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        })
-                                })
-                                .catch(e => {
-                                    reject(e);
-                                })
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
+        return this._pre(unitReceiptNote)
+            .then((validData) => {
+                validData._deleted = true;
+                return this.collection.update(validData)
+                    .then((id) => {
+                        var query = {
+                            _id: ObjectId.isValid(id) ? new ObjectId(id) : {}
+                        };
+                        return this.getSingleByQuery(query)
+                            .then((unitReceiptNote) => this.updatePurchaseOrderDeleteUnitReceiptNote(unitReceiptNote))
+                            .then((unitReceiptNote) => this.updateDeliveryOrderDeleteUnitReceiptNote(unitReceiptNote))
+                            .then(() => {
+                                return this.syncItems(id);
+                            })
+                    })
+            });
     }
 
     pdf(id) {
         return new Promise((resolve, reject) => {
-
             this.getSingleById(id)
                 .then(unitReceiptNote => {
                     var getDefinition = require('../../pdf/definitions/unit-receipt-note');
                     var definition = getDefinition(unitReceiptNote);
-
                     var generatePdf = require('../../pdf/pdf-generator');
                     generatePdf(definition)
                         .then(binary => {
@@ -729,7 +683,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.UnitReceiptNote}_date`,
             key: {
-                "_date": -1
+                date: -1
             }
         }
 
@@ -748,10 +702,6 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         return this._createIndexes()
             .then((createIndexResults) => {
                 return new Promise((resolve, reject) => {
-                    var sorting = {
-                        "date": -1,
-                        "no": 1
-                    };
                     var query = Object.assign({});
                     query = Object.assign(query, filter);
                     query = Object.assign(query, {
