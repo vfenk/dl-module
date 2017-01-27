@@ -47,11 +47,19 @@ module.exports = {
                 },
                 DailySpinningProductionReportManager: require('./src/managers/production/spinning/daily-spinning-production-report-manager')
             },
+<<<<<<< HEAD
             finishingPrinting: {
                 MonitoringSpecificationMachineManager: require('./src/managers/production/finishing-printing/monitoring-specification-machine-manager')
             }
         },
         sales: {
+=======
+            finishingPrinting:{
+                DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager') 
+            }
+        },
+        sales:{
+>>>>>>> origin/danliris/dev
             ProductionOrderManager: require('./src/managers/sales/production-order-manager')
         }
     },
