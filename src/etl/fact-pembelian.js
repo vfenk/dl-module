@@ -4,6 +4,7 @@
 var ObjectId = require("mongodb").ObjectId;
 var BaseManager = require("module-toolkit").BaseManager;
 var moment = require("moment");
+var startedDate = new Date();
 
 // internal deps 
 require("mongodb-toolkit");
@@ -26,10 +27,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
         this.deliveryOrderManager = new DeliveryOrderManager(db, user);
         this.unitReceiptNoteManager = new UnitReceiptNoteManager(db, user);
         this.unitPaymentOrderManager = new UnitPaymentOrderManager(db, user);
-        this.migrationLog = this.db.collection("migrationLog");
+        this.migrationLog = this.db.collection("migration-log");
     }
-
-
+    
     run() {
         this.migrationLog.insert({
             description: "Fact Pembelian from MongoDB to Azure DWH",
@@ -333,7 +333,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
                         categoryName: purchaseOrder ? `'${purchaseOrder.purchaseRequest.category.name}'` : null,
                         categoryType: purchaseOrder ? `'${this.getCategoryType(catType)}'` : null,
                         productCode: purchaseOrder ? `'${poItem.product.code}'` : null,
-                        productName: purchaseOrder ? `'${poItem.product.name.replace("[", ".").replace("}", ".").replace("\"", ".").replace("]", ".").replace("\"", ".").replace("{", ".").replace("'", ".")}'` : null,
+                        productName: purchaseOrder ? `'${poItem.product.name.replace("[", ".").replace("}", ".").replace("\"", ".").replace("]", ".").replace("\"", ".").replace("{", ".").replace("\'", ".")}'` : null,
                         purchaseRequestDays: purchaseOrder ? `${poIntDays}` : null,
                         purchaseRequestDaysRange: purchaseOrder ? `'${this.getRangeWeek(poIntDays)}'` : null,
                         prPurchaseOrderExternalDays: purchaseOrderExternal ? `${prPoExtDays}` : null,
@@ -350,10 +350,10 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
                         purchaseOrderExternalId: purchaseOrderExternal ? `'${purchaseOrderExternal._id}'` : null,
                         purchaseOrderExternalNo: purchaseOrderExternal ? `'${purchaseOrderExternal.no}'` : null,
                         purchaseOrderExternalDate: purchaseOrderExternal ? `'${moment(purchaseOrderExternal.date).format('L')}'` : null,
-                        deliveryOrderDays: (poItem.fulfillments.length > 0) ? `${doDays}` : null,
-                        deliveryOrderDaysRange: (poItem.fulfillments.length > 0) ? `'${this.getRangeMonth(doDays)}'` : null,
+                        deliveryOrderDays: (poItem.fulfillments.length > 0 && deliveryOrder) ? `${doDays}` : null,
+                        deliveryOrderDaysRange: (poItem.fulfillments.length > 0 && deliveryOrder) ? `'${this.getRangeMonth(doDays)}'` : null,
                         supplierCode: purchaseOrderExternal ? `'${purchaseOrderExternal.supplier.code}'` : null,
-                        supplierName: purchaseOrderExternal ? `'${purchaseOrderExternal.supplier.name.replace("[", ".").replace("}", ".").replace("\"", ".").replace("]", ".").replace("\"", ".").replace("{", ".").replace("'", ".")}'` : null,
+                        supplierName: purchaseOrderExternal ? `'${purchaseOrderExternal.supplier.name.replace("[", ".").replace("}", ".").replace("\"", ".").replace("]", ".").replace("\"", ".").replace("{", ".").replace("\'", ".")}'` : null,
                         currencyCode: purchaseOrderExternal ? `'${purchaseOrderExternal.currency.code}'` : null,
                         currencyName: purchaseOrderExternal ? `'${purchaseOrderExternal.currency.description}'` : null,
                         paymentMethod: purchaseOrderExternal ? `'${purchaseOrderExternal.paymentMethod}'` : null,
@@ -365,13 +365,13 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
                         expectedDeliveryDate: purchaseOrderExternal ? `'${moment(purchaseOrderExternal.expectedDeliveryDate).format('L')}'` : null,
                         prNoAtPoExt: purchaseOrderExternal ? `'${purchaseOrder.purchaseRequest.no}'` : null,
 
-                        deliveryOrderId: (poItem.fulfillments.length > 0) ? `'${deliveryOrder._id}'` : null,
-                        deliveryOrderNo: (poItem.fulfillments.length > 0) ? `'${deliveryOrder.no}'` : null,
-                        deliveryOrderDate: (poItem.fulfillments.length > 0) ? `'${moment(deliveryOrder.date).format('L')}'` : null,
+                        deliveryOrderId: (poItem.fulfillments.length > 0 && deliveryOrder) ? `'${deliveryOrder._id}'` : null,
+                        deliveryOrderNo: (poItem.fulfillments.length > 0 && deliveryOrder) ? `'${deliveryOrder.no}'` : null,
+                        deliveryOrderDate: (poItem.fulfillments.length > 0 && deliveryOrder) ? `'${moment(deliveryOrder.date).format('L')}'` : null,
                         unitReceiptNoteDays: unitReceiptNote ? `${urnDays}` : null,
                         unitReceiptNoteDaysRange: unitReceiptNote ? `'${this.getRangeWeek(urnDays)}'` : null,
-                        status: (poItem.fulfillments.length > 0) ? `'${this.getStatus(purchaseOrderExternal.expectedDeliveryDate, lastDeliveredDate)}'` : null,
-                        prNoAtDo: (poItem.fulfillments.length > 0) ? `'${purchaseOrder.purchaseRequest.no}'` : null,
+                        status: (poItem.fulfillments.length > 0 && deliveryOrder) ? `'${this.getStatus(purchaseOrderExternal.expectedDeliveryDate, lastDeliveredDate)}'` : null,
+                        prNoAtDo: (poItem.fulfillments.length > 0 && deliveryOrder) ? `'${purchaseOrder.purchaseRequest.no}'` : null,
 
                         unitReceiptNoteId: unitReceiptNote ? `'${unitReceiptNote._id}'` : null,
                         unitReceiptNoteNo: unitReceiptNote ? `'${unitReceiptNote.no}'` : null,
@@ -415,7 +415,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
                         categoryName: purchaseRequest ? `'${purchaseRequest.category.name}'` : null,
                         categoryType: purchaseRequest ? `'${this.getCategoryType(catType)}'` : null,
                         productCode: purchaseRequest ? `'${poItem.product.code}'` : null,
-                        productName: purchaseRequest ? `'${poItem.product.name.replace("[", ".").replace("}", ".").replace("\"", ".").replace("]", ".").replace("\"", ".").replace("{", ".").replace("'", ".")}'` : null,
+                        productName: purchaseRequest ? `'${poItem.product.name.replace("[", ".").replace("}", ".").replace("\"", ".").replace("]", ".").replace("\"", ".").replace("{", ".").replace("\'", ".")}'` : null,
                         purchaseRequestDays: null,
                         purchaseRequestDaysRange: null,
                         prPurchaseOrderExternalDays: null,
