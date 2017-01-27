@@ -259,41 +259,40 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     }
 
     getAllDataPR(filter) {
-        return new Promise((resolve, reject) => {
-            var sorting = {
-                "date": -1,
-                "no": 1
-            };
-            var query = Object.assign({});
-            query = Object.assign(query, filter);
-            query = Object.assign(query, {
-                _deleted: false
-            });
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var query = Object.assign({});
+                    query = Object.assign(query, filter);
+                    query = Object.assign(query, {
+                        _deleted: false
+                    });
 
-            var _select = [
-                "no",
-                "date",
-                "expectedDeliveryDate",
-                "budget.code",
-                "unit",
-                "currency",
-                "category",
-                "remark",
-                "isPosted",
-                "isUsed",
-                "_createdBy",
-                "items.product",
-                "items.quantity",
-                "items.remark"
-            ];
-            this.collection.where(query).select(_select).order(sorting).execute()
-                .then((purchaseRequests) => {
-                    resolve(purchaseRequests.data);
-                })
-                .catch(e => {
-                    reject(e);
+                    var _select = [
+                        "no",
+                        "date",
+                        "expectedDeliveryDate",
+                        "budget.code",
+                        "unit",
+                        "currency",
+                        "category",
+                        "remark",
+                        "isPosted",
+                        "isUsed",
+                        "_createdBy",
+                        "items.product",
+                        "items.quantity",
+                        "items.remark"
+                    ];
+                    this.collection.where(query).select(_select).execute()
+                        .then((purchaseRequests) => {
+                            resolve(purchaseRequests.data);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 });
-        });
+            });
     }
 
     getDataPRMonitoring(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo, state, createdBy) {
@@ -417,9 +416,9 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.purchasing.collection.PurchaseRequest}__updatedDate`,
+            name: `ix_${map.purchasing.collection.PurchaseRequest}_date`,
             key: {
-                _updatedDate: -1
+                date: -1
             }
         };
 
