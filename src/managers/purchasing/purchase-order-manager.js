@@ -252,47 +252,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             });
     }
 
-    // create(purchaseOrder) {
-    //     return new Promise((resolve, reject) => {
-    //         this._createIndexes()
-    //             .then((createIndexResults) => {
-    //                 purchaseOrder.no = generateCode();
-    //                 this._validate(purchaseOrder)
-    //                     .then(validPurchaseOrder => {
-    //                         this.purchaseRequestManager.getSingleById(validPurchaseOrder.purchaseRequest._id)
-    //                             .then(PR => {
-    //                                 validPurchaseOrder.purchaseRequestId = PR._id;
-    //                                 validPurchaseOrder.purchaseRequest = PR;
-
-    //                                 this.collection.insert(validPurchaseOrder)
-    //                                     .then(id => {
-    //                                         PR.isUsed = true;
-    //                                         PR.purchaseOrderIds = PR.purchaseOrderIds || [];
-    //                                         PR.purchaseOrderIds.push(id);
-
-    //                                         this.purchaseRequestManager.update(PR)
-    //                                             .then(results => {
-    //                                                 resolve(id);
-    //                                             })
-    //                                             .catch(e => {
-    //                                                 reject(e);
-    //                                             });
-    //                                     })
-    //                                     .catch(e => {
-    //                                         reject(e);
-    //                                     });
-    //                             })
-    //                     })
-    //                     .catch(e => {
-    //                         reject(e);
-    //                     });
-    //             })
-    //             .catch(e => {
-    //                 reject(e);
-    //             });
-    //     });
-    // }
-
     delete(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._createIndexes()
@@ -403,65 +362,70 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-    getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo, state) {
-        return new Promise((resolve, reject) => {
-            var sorting = {
-                "purchaseRequest.date": -1,
-                "purchaseRequest.no": 1
-            };
-            var query = Object.assign({});
+    getDataPOMonitoringPembelian(unitId, categoryId, PODLNo, PRNo, supplierId, dateFrom, dateTo, state, createdBy) {
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var sorting = {
+                        "purchaseRequest.date": -1,
+                        "purchaseRequest.no": 1
+                    };
+                    var query = Object.assign({});
 
-            if (state !== -1) {
-                Object.assign(query, {
-                    "status.value": state
-                });
-            }
-
-            if (unitId !== "undefined" && unitId !== "") {
-                Object.assign(query, {
-                    unitId: new ObjectId(unitId)
-                });
-            }
-            if (categoryId !== "undefined" && categoryId !== "") {
-                Object.assign(query, {
-                    categoryId: new ObjectId(categoryId)
-                });
-            }
-            if (PODLNo !== "undefined" && PODLNo !== "") {
-                Object.assign(query, {
-                    "purchaseOrderExternal.no": PODLNo
-                });
-            }
-            if (PRNo !== "undefined" && PRNo !== "") {
-                Object.assign(query, {
-                    "purchaseRequest.no": PRNo
-                });
-            }
-            if (supplierId !== "undefined" && supplierId !== "") {
-                Object.assign(query, {
-                    supplierId: new ObjectId(supplierId)
-                });
-            }
-            if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
-                Object.assign(query, {
-                    date: {
-                        $gte: new Date(dateFrom),
-                        $lte: new Date(dateTo)
+                    if (state !== -1) {
+                        Object.assign(query, {
+                            "status.value": state
+                        });
                     }
+
+                    if (unitId !== "undefined" && unitId !== "") {
+                        Object.assign(query, {
+                            unitId: new ObjectId(unitId)
+                        });
+                    }
+                    if (categoryId !== "undefined" && categoryId !== "") {
+                        Object.assign(query, {
+                            categoryId: new ObjectId(categoryId)
+                        });
+                    }
+                    if (PODLNo !== "undefined" && PODLNo !== "") {
+                        Object.assign(query, {
+                            "purchaseOrderExternal.no": PODLNo
+                        });
+                    }
+                    if (PRNo !== "undefined" && PRNo !== "") {
+                        Object.assign(query, {
+                            "purchaseRequest.no": PRNo
+                        });
+                    }
+                    if (supplierId !== "undefined" && supplierId !== "") {
+                        Object.assign(query, {
+                            supplierId: new ObjectId(supplierId)
+                        });
+                    }
+                    if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
+                        Object.assign(query, {
+                            date: {
+                                $gte: new Date(dateFrom),
+                                $lte: new Date(dateTo)
+                            }
+                        });
+                    }
+                    if (createdBy !== undefined && createdBy !== "") {
+                        Object.assign(query, {
+                            _createdBy: createdBy
+                        });
+                    }
+                    query = Object.assign(query, { _deleted: false });
+                    this.collection.find(query).toArray()
+                        .then(purchaseOrders => {
+                            resolve(purchaseOrders);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 });
-            }
-            query = Object.assign(query, {
-                _createdBy: this.user.username,
-                _deleted: false
             });
-            this.collection.find(query).sort(sorting).toArray()
-                .then(purchaseOrders => {
-                    resolve(purchaseOrders);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-        });
     }
 
     getDataPOUnit(startdate, enddate) {
@@ -927,12 +891,11 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         });
     }
 
-
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.purchasing.collection.PurchaseOrder}__updatedDate`,
+            name: `ix_${map.purchasing.collection.PurchaseOrder}_date`,
             key: {
-                _updatedDate: -1
+                "date": -1
             }
         };
 

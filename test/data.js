@@ -17,6 +17,8 @@ module.exports = {
         processType: require('./data-util/master/process-type-data-util'),
         colorType: require('./data-util/master/color-type-data-util'),
         machineType: require('./data-util/master/machine-type-data-util')
+        monitoringEventType: require('./data-util/master/monitoring-event-type-data-util')
+
     },
     purchasing:{
         purchaseRequest: require('./data-util/purchasing/purchase-request-data-util'),
@@ -30,12 +32,15 @@ module.exports = {
         unitPaymentPriceCorrectionNote: require('./data-util/transaction/unit-payment-price-correction-note-data-util'),
         unitPaymentQuantityCorrectionNote: require('./data-util/transaction/unit-payment-quantity-correction-note-data-util')
     },
-    sales: {
-        productionOrder: require('./data-util/sales/production-order-data-util'),
-    },
-    production:{
+    production: {
+        monitoringEvent: require('./data-util/production/finishing-printing/monitoring-event-data-util')
+
         finishingPrinting:{
             monitoringSpecificationMachine: require('./data-util/production/finishing-printing/monitoring-specification-machine-data-util')
         }
-    }
+    },
+    sales: {
+        productionOrder: require('./data-util/sales/production-order-data-util'),
+    },
+
 };

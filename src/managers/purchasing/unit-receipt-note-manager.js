@@ -669,12 +669,11 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         });
     }
 
-    getUnitReceiptNotes(_no, _unitId, _categoryId, _supplierId, _dateFrom, _dateTo, _createdBy) {
+    getUnitReceiptNotes(_no, _unitId, _categoryId, _supplierId, _dateFrom, _dateTo, createdBy) {
         return new Promise((resolve, reject) => {
             var query = Object.assign({});
 
             var deleted = { _deleted: false };
-            var createdBy = { _createdBy: _createdBy };
 
             if (_no !== "undefined" && _no !== "") {
                 var no = { no: _no };
@@ -707,7 +706,12 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 };
                 Object.assign(query, date);
             }
-            Object.assign(query, deleted, createdBy);
+            if (createdBy !== undefined && createdBy !== "") {
+                Object.assign(query, {
+                    _createdBy: createdBy
+                });
+            }
+            Object.assign(query, deleted);
 
             this.collection
                 .where(query)
@@ -723,9 +727,9 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
 
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.purchasing.collection.UnitReceiptNote}__updatedDate`,
+            name: `ix_${map.purchasing.collection.UnitReceiptNote}_date`,
             key: {
-                _updatedDate: -1
+                "_date": -1
             }
         }
 
@@ -741,36 +745,39 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
     }
 
     getAllData(filter) {
-        return new Promise((resolve, reject) => {
-            var sorting = {
-                "date": -1,
-                "no": 1
-            };
-            var query = Object.assign({});
-            query = Object.assign(query, filter);
-            query = Object.assign(query, {
-                _deleted: false
-            });
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var sorting = {
+                        "date": -1,
+                        "no": 1
+                    };
+                    var query = Object.assign({});
+                    query = Object.assign(query, filter);
+                    query = Object.assign(query, {
+                        _deleted: false
+                    });
 
-            var _select = ["no",
-                "date",
-                "unit",
-                "supplier",
-                "deliveryOrder.no",
-                "remark",
-                "_createdBy",
-                "items.product",
-                "items.deliveredQuantity",
-                "items.deliveredUom",
-                "items.remark"];
+                    var _select = ["no",
+                        "date",
+                        "unit",
+                        "supplier",
+                        "deliveryOrder.no",
+                        "remark",
+                        "_createdBy",
+                        "items.product",
+                        "items.deliveredQuantity",
+                        "items.deliveredUom",
+                        "items.remark"];
 
-            this.collection.where(query).select(_select).order(sorting).execute()
-                .then((results) => {
-                    resolve(results.data);
-                })
-                .catch(e => {
-                    reject(e);
+                    this.collection.where(query).select(_select).execute()
+                        .then((results) => {
+                            resolve(results.data);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 });
-        });
+            });
     }
 };

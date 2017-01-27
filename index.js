@@ -25,9 +25,11 @@ module.exports = {
             LampStandardManager: require('./src/managers/master/lamp-standard-manager'),
             AccountBankManager: require('./src/managers/master/account-bank-manager'),
             InstructionManager: require('./src/managers/master/instruction-manager'),
+            MonitoringEventTypeManager: require('./src/managers/master/monitoring-event-type-manager'),
             ProcessTypeManager: require('./src/managers/master/process-type-manager'),
             OrderTypeManager: require('./src/managers/master/order-type-manager'),
-            ColorTypeManager: require('./src/managers/master/color-type-manager')
+            ColorTypeManager: require('./src/managers/master/color-type-manager'),
+            StepManager: require('./src/managers/master/step-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
@@ -55,6 +57,7 @@ module.exports = {
         sales: {
 =======
             finishingPrinting:{
+                MonitoringEventManager: require('./src/managers/production/finishing-printing/monitoring-event-manager'),
                 DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager') 
             }
         },
@@ -89,16 +92,24 @@ module.exports = {
                 vat: require("./test/data-util/master/vat-data-util"),
                 yarnEquivalentConversion: require("./test/data-util/master/yarn-equivalent-conversion-data-util"),
                 orderType: require('./test/data-util/master/order-type-data-util'),
-                processType: require('./test/data-util/master/process-type-data-util')
+                processType: require('./test/data-util/master/process-type-data-util'),
+                monitoringEventType: require('./test/data-util/master/monitoring-event-type-data-util'),
+                step : require('./test/data-util/master/step-data-util'),
+                instruction : require('./test/data-util/master/instruction-data-util')
             },
             purchasing: {
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")
             },
             production: {
+<<<<<<< HEAD
                 finishingPrinting: {
                     MonitoringSpecificationMachine: require('./test/data-util/production/finishing-printing/monitoring-specification-machine-data-util')
                 }
             }
+=======
+                monitoringEvent: require('./test/data-util/production/finishing-printing/monitoring-event-data-util')
+    }
+>>>>>>> upstream/dev
         }
     },
     etl: {

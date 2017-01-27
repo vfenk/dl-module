@@ -10,7 +10,8 @@ module.exports = function (pox) {
                 prNo: po.refNo,
                 quantity: poItem.dealQuantity,
                 uom: poItem.dealUom.unit,
-                price: poItem.pricePerDealUnit
+                price: poItem.pricePerDealUnit,
+                remark: poItem.remark
             };
         });
     });
@@ -25,12 +26,14 @@ module.exports = function (pox) {
                 quantity: 0,
                 prNo: "",
                 uom: value.uom,
-                price: value.price
+                price: value.price,
+                remark: ""
             };
             items.push(res[value.product])
         }
         res[value.product].quantity += value.quantity;
         res[value.product].prNo = `${res[value.product].prNo}\n${value.prNo}`;
+        res[value.product].remark = `${res[value.product].remark}\n${value.remark}`;
         return res;
     }, {});
 
@@ -160,7 +163,7 @@ module.exports = function (pox) {
             stack: [{
                 text: item.product,
                 style: 'bold'
-            }, item.prNo],
+            },item.remark, item.prNo],
             style: ['size08']
         }, {
             text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + ' ' + item.uom,
