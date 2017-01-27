@@ -583,7 +583,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     po.useVat = false;
                                     po.vatRate = 0;
                                     po.useIncomeTax = false;
-                                    po.isPosted = false;
                                     po.status = poStatusEnum.PROCESSING;
 
                                     for (var poItem of po.items) {
