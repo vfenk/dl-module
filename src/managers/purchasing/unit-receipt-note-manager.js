@@ -264,12 +264,12 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
 
                         var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString());
 
-                        if (!fulfillment.unitReceiptNoteNo || fulfillment.unitReceiptNoteNo === unitReceiptNote.no) {
+                        if (!fulfillment.hasOwnProperty("unitReceiptNoteNo")) {
                             fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
                             fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
                             fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
                             fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
-                        } else if (fulfillment.unitReceiptNoteNo) {
+                        } else {
                             var _fulfillment = fulfillment;
                             _fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
                             _fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
@@ -277,20 +277,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                             _fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
                             poItem.fulfillments.push(_fulfillment);
                         }
-
-                        var _unitReceiptNoteDeliveredQuantity = poItem.fulfillments
-                            .map(fulfillment => fulfillment.unitReceiptNoteDeliveredQuantity)
-                            .reduce((prev, curr, index) => {
-                                return prev + curr;
-                            }, 0);
-                        poItem.isClosed = poItem.dealQuantity === _unitReceiptNoteDeliveredQuantity;
                     }
-
-                    purchaseOrder.isClosed = purchaseOrder.items
-                        .map((item) => item.isClosed)
-                        .reduce((prev, curr, index) => {
-                            return prev && curr
-                        }, true);
 
                     purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
                     return this.purchaseOrderManager.update(purchaseOrder);
@@ -329,20 +316,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
                         fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
                         fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
-
-                        var _unitReceiptNoteDeliveredQuantity = poItem.fulfillments
-                            .map(fulfillment => fulfillment.unitReceiptNoteDeliveredQuantity)
-                            .reduce((prev, curr, index) => {
-                                return prev + curr;
-                            }, 0);
-                        poItem.isClosed = poItem.dealQuantity === _unitReceiptNoteDeliveredQuantity;
                     }
-
-                    purchaseOrder.isClosed = purchaseOrder.items
-                        .map((item) => item.isClosed)
-                        .reduce((prev, curr, index) => {
-                            return prev && curr
-                        }, true);
 
                     purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
                     return this.purchaseOrderManager.update(purchaseOrder);
@@ -377,26 +351,27 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
 
                         var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString() && fulfillment.unitReceiptNoteNo === unitReceiptNote.no);
-                        delete fulfillment.unitReceiptNoteNo;
-                        delete fulfillment.unitReceiptNoteDate;
-                        delete fulfillment.unitReceiptNoteDeliveredQuantity;
-                        delete fulfillment.unitReceiptDeliveredUom;
-
-                        var _unitReceiptNoteDeliveredQuantity = poItem.fulfillments
-                            .map(fulfillment => fulfillment.unitReceiptNoteDeliveredQuantity || 0)
-                            .reduce((prev, curr, index) => {
-                                return prev + curr;
-                            }, 0);
-                        poItem.isClosed = poItem.dealQuantity === _unitReceiptNoteDeliveredQuantity;
+                        if (fulfillment) {
+                            delete fulfillment.unitReceiptNoteNo;
+                            delete fulfillment.unitReceiptNoteDate;
+                            delete fulfillment.unitReceiptNoteDeliveredQuantity;
+                            delete fulfillment.unitReceiptDeliveredUom;
+                        }
                     }
 
-                    purchaseOrder.isClosed = purchaseOrder.items
-                        .map((item) => item.isClosed)
+                    var poStatus = purchaseOrder.items
+                        .map((item) => {
+                            return item.fulfillments
+                                .map((fulfillment) => fulfillment.hasOwnProperty("unitReceiptNoteNo"))
+                                .reduce((prev, curr, index) => {
+                                    return prev || curr
+                                }, false);
+                        })
                         .reduce((prev, curr, index) => {
-                            return prev && curr
-                        }, true);
+                            return prev || curr
+                        }, false);
 
-                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
+                    purchaseOrder.status = poStatus ? poStatusEnum.RECEIVING : unitReceiptNote.deliveryOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
                     return this.purchaseOrderManager.update(purchaseOrder);
                 })
             jobs.push(job);
@@ -708,7 +683,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.UnitReceiptNote}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         }
 

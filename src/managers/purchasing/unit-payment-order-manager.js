@@ -237,6 +237,74 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         return query;
     }
 
+    _beforeInsert(unitPaymentOrder) {
+        unitPaymentOrder.no = generateCode();
+        return Promise.resolve(unitPaymentOrder)
+    }
+
+    _afterInsert(id) {
+        return this.getSingleById(id)
+            .then((unitPaymentOrder) => this.updatePurchaseRequest(unitPaymentOrder))
+            .then((unitPaymentOrder) => this.updatePurchaseOrder(unitPaymentOrder))
+            .then((unitPaymentOrder) => this.updatePurchaseOrderExternal(unitPaymentOrder))
+            .then(() => {
+                return this.syncItems(id);
+            })
+    }
+
+    updatePurchaseOrder(unitPaymentOrder) {
+        var map = new Map();
+        for (var unitPaymentOrderItem of unitPaymentOrder.items) {
+            for (var item of unitPaymentOrderItem.unitReceiptNote.items) {
+                var key = item.purchaseOrderId.toString();
+                if (!map.has(key))
+                    map.set(key, [])
+                var item = {
+                    productId: item.product._id,
+                    deliveredQuantity: item.deliveredQuantity,
+                    deliveredUom: item.deliveredUom
+                };
+                map.get(key).push(item);
+            }
+        }
+
+        var jobs = [];
+        map.forEach((items, purchaseOrderId) => {
+            var job = this.purchaseOrderManager.getSingleById(purchaseOrderId)
+                .then((purchaseOrder) => {
+                    for (var item of items) {
+                        var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
+
+                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitPaymentOrder.deliveryOrder.no.toString());
+
+                        if (!fulfillment.unitReceiptNoteNo || fulfillment.unitReceiptNoteNo === unitPaymentOrder.no) {
+                            fulfillment.unitReceiptNoteNo = unitPaymentOrder.no;
+                            fulfillment.unitReceiptNoteDate = unitPaymentOrder.date;
+                            fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
+                            fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
+                        } else if (fulfillment.unitReceiptNoteNo) {
+                            var _fulfillment = fulfillment;
+                            _fulfillment.unitReceiptNoteNo = unitPaymentOrder.no;
+                            _fulfillment.unitReceiptNoteDate = unitPaymentOrder.date;
+                            _fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
+                            _fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
+                            poItem.fulfillments.push(_fulfillment);
+                        }
+                    }
+
+                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                    return this.purchaseOrderManager.update(purchaseOrder);
+                })
+            jobs.push(job);
+        })
+
+        return Promise.all(jobs).then((results) => {
+            return Promise.resolve(unitPaymentOrder);
+        })
+    }
+
+
+
     create(unitPaymentOrder) {
         return new Promise((resolve, reject) => {
             this._createIndexes()
@@ -495,7 +563,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.UnitPaymentOrder}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         }
 
