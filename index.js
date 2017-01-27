@@ -46,10 +46,13 @@ module.exports = {
                     WindingProductionOutput: require('./src/managers/production/spinning/winding/winding-production-output-manager')
                 },
                 DailySpinningProductionReportManager: require('./src/managers/production/spinning/daily-spinning-production-report-manager')
+            },
+            finishingPrinting: {
+                MonitoringSpecificationMachineManager: require('./src/managers/production/finishing-printing/monitoring-specification-machine-manager')
             }
         },
-        sales:{
-            ProductionOrderManager: require('./src/managers/sales/production-order-manager') 
+        sales: {
+            ProductionOrderManager: require('./src/managers/sales/production-order-manager')
         }
     },
     test: {
@@ -80,8 +83,13 @@ module.exports = {
                 orderType: require('./test/data-util/master/order-type-data-util'),
                 processType: require('./test/data-util/master/process-type-data-util')
             },
-            purchasing:{
+            purchasing: {
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")
+            },
+            production: {
+                finishingPrinting: {
+                    MonitoringSpecificationMachine: require('./test/data-util/production/finishing-printing/monitoring-specification-machine-data-util')
+                }
             }
         }
     },
