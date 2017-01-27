@@ -793,9 +793,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.purchasing.collection.DeliveryOrder}__updatedDate`,
+            name: `ix_${map.purchasing.collection.DeliveryOrder}_date`,
             key: {
-                _updatedDate: -1
+                date: -1
             }
         }
 
@@ -811,35 +811,34 @@ module.exports = class DeliveryOrderManager extends BaseManager {
     }
 
     getAllData(filter) {
-        return new Promise((resolve, reject) => {
-            var sorting = {
-                "date": -1,
-                "no": 1
-            };
-            var query = Object.assign({});
-            query = Object.assign(query, filter);
-            query = Object.assign(query, {
-                _deleted: false
-            });
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var query = Object.assign({});
+                    query = Object.assign(query, filter);
+                    query = Object.assign(query, {
+                        _deleted: false
+                    });
 
-            var _select = ["no",
-                "date",
-                "supplier",
-                "_createdBy",
-                "items.purchaseOrderExternal",
-                "items.fulfillments.product",
-                "items.fulfillments.purchaseOrderQuantity",
-                "items.fulfillments.purchaseOrderUom",
-                "items.fulfillments.deliveredQuantity"
-            ];
+                    var _select = ["no",
+                        "date",
+                        "supplier",
+                        "_createdBy",
+                        "items.purchaseOrderExternal",
+                        "items.fulfillments.product",
+                        "items.fulfillments.purchaseOrderQuantity",
+                        "items.fulfillments.purchaseOrderUom",
+                        "items.fulfillments.deliveredQuantity"
+                    ];
 
-            this.collection.where(query).select(_select).order(sorting).execute()
-                .then((results) => {
-                    resolve(results.data);
-                })
-                .catch(e => {
-                    reject(e);
+                    this.collection.where(query).select(_select).execute()
+                        .then((results) => {
+                            resolve(results.data);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 });
-        });
+            });
     }
 };
