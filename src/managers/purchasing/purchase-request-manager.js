@@ -416,7 +416,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.PurchaseRequest}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         };
 

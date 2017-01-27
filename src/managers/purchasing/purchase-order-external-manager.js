@@ -543,7 +543,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.PurchaseOrderExternal}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         }
 

@@ -424,7 +424,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         var dateIndex = {
             name: `ix_${map.purchasing.collection.UnitPaymentCorrectionNote}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         }
 
