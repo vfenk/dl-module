@@ -24,7 +24,9 @@ module.exports = {
             UsterManager: require('./src/managers/master/uster-manager'),
             LampStandardManager: require('./src/managers/master/lamp-standard-manager'),
             AccountBankManager: require('./src/managers/master/account-bank-manager'),
+            MonitoringEventTypeManager: require('./src/managers/master/manitoring-event-type-manager'),
             InstructionManager: require('./src/managers/master/instruction-manager'),
+            StepManager: require('./src/managers/master/step-manager'),
             ProcessTypeManager: require('./src/managers/master/process-type-manager'),
             OrderTypeManager: require('./src/managers/master/order-type-manager'),
             ColorTypeManager: require('./src/managers/master/color-type-manager'),
@@ -51,7 +53,6 @@ module.exports = {
                 },
                 DailySpinningProductionReportManager: require('./src/managers/production/spinning/daily-spinning-production-report-manager')
             },
-
             finishingPrinting: {
                 DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager'),
                 MonitoringSpecificationMachineManager: require('./src/managers/production/finishing-printing/monitoring-specification-machine-manager')
@@ -86,6 +87,9 @@ module.exports = {
                 uster: require("./test/data-util/master/uster-data-util"),
                 vat: require("./test/data-util/master/vat-data-util"),
                 yarnEquivalentConversion: require("./test/data-util/master/yarn-equivalent-conversion-data-util"),
+                step: require("./test/data-util/master/step-data-util"),
+                instruction: require("./test/data-util/master/instruction-data-util"),
+                monitoringEventType: require("./test/data-util/master/monitoring-event-type-data-util"),
                 orderType: require('./test/data-util/master/order-type-data-util'),
                 processType: require('./test/data-util/master/process-type-data-util'),
                 materialConstruction: require('./test/data-util/master/material-construction-data-util'),
