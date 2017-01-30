@@ -518,7 +518,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         .then((purchaseOrders) => {
                             for (var purchaseOrder of purchaseOrders) {
                                 var item = unitReceiptNote.items.find(item => item.purchaseOrderId.toString() === purchaseOrder._id.toString());
-                                var index = purchaseOrderExternal.items.indexOf(item);
+                                var index = unitReceiptNote.items.indexOf(item);
                                 unitReceiptNote.items[index].purchaseOrder = purchaseOrder;
                             }
                             // unitReceiptNote.isPaid = true;
@@ -552,7 +552,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         .then((purchaseOrders) => {
                             for (var purchaseOrder of purchaseOrders) {
                                 var item = unitReceiptNote.items.find(item => item.purchaseOrderId.toString() === purchaseOrder._id.toString());
-                                var index = purchaseOrderExternal.items.indexOf(item);
+                                var index = unitReceiptNote.items.indexOf(item);
                                 unitReceiptNote.items[index].purchaseOrder = purchaseOrder;
                             }
                             // unitReceiptNote.isPaid = false;
