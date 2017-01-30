@@ -87,7 +87,11 @@ module.exports = {
                 vat: require("./test/data-util/master/vat-data-util"),
                 yarnEquivalentConversion: require("./test/data-util/master/yarn-equivalent-conversion-data-util"),
                 orderType: require('./test/data-util/master/order-type-data-util'),
-                processType: require('./test/data-util/master/process-type-data-util')
+                processType: require('./test/data-util/master/process-type-data-util'),
+                materialConstruction: require('./test/data-util/master/material-construction-data-util'),
+                yarnMaterial: require('./test/data-util/master/yarn-material-data-util'),
+                finishType: require('./test/data-util/master/finish-type-data-util'),
+                standardTest: require('./test/data-util/master/standard-test-data-util')
             },
             purchasing: {
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")
