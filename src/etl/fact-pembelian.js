@@ -46,7 +46,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
                     start: startedDate,
                     finish: finishedDate,
                     executionTime: spentTime + " minutes",
-                    status: results
+                    status: "Successful"
                 };
                 this.migrationLog.updateOne({ start: startedDate }, updateLog);
             })
@@ -250,7 +250,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
             _updatedDate: {
                 "$gt": timestamp
             }
-        }).limit(50).toArray()
+        }).toArray()
             .then((purchaseRequests) => this.joinPurchaseOrder(purchaseRequests))
             .then((results) => this.joinPurchaseOrderExternal(results))
             .then((results) => this.joinDeliveryOrder(results))
@@ -497,16 +497,16 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
 
                 request.multiple = true;
 
-                var fs = require("fs");
-                var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
+                // var fs = require("fs");
+                // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
 
-                fs.writeFile(path, sqlQuery, function (error) {
-                    if (error) {
-                        console.log("write error:  " + error.message);
-                    } else {
-                        console.log("Successful Write to " + path);
-                    }
-                });
+                // fs.writeFile(path, sqlQuery, function (error) {
+                //     if (error) {
+                //         console.log("write error:  " + error.message);
+                //     } else {
+                //         console.log("Successful Write to " + path);
+                //     }
+                // });
 
                 // var deleteTempTable = ('DELETE FROM [dl_fact_pembelian_temp]; ')
                 // var storedProcedure = ('EXEC UPSERT; ')
