@@ -600,7 +600,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     .then((unitReceiptNotes) => {
                         for (var unitReceiptNote of unitReceiptNotes) {
                             for (var unitPaymentOrderItem of unitPaymentOrder.items) {
-                                var item = unitPaymentOrderItem.unitReceiptNote.items.find(item => item.unitReceiptNoteId.toString() === unitReceiptNote._id.toString())
+                                var item = unitPaymentOrder.items.find(item => item.unitReceiptNoteId.toString() === unitReceiptNote._id.toString())
                                 item.unitReceiptNote = unitReceiptNote;
                             }
                         }
