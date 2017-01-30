@@ -249,45 +249,55 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 .then(unitPaymentPriceCorrectionNote => {
                     var getDefinition = require('../../pdf/definitions/unit-payment-correction-note');
 
-                    for (var _item of unitPaymentPriceCorrectionNote.items) {
-                        for (var _poItem of _item.purchaseOrder.items) {
-                            if (_poItem.product._id.toString() === _item.product._id.toString()) {
-                                for (var _unitReceiptNote of unitPaymentPriceCorrectionNote.unitPaymentOrder.items) {
-                                    for (var _unitReceiptNoteItem of _unitReceiptNote.unitReceiptNote.items) {
-                                        if (_poItem.product._id.toString() === _unitReceiptNoteItem.product._id.toString() && _item.purchaseOrder._id.toString() === _unitReceiptNoteItem.purchaseOrder._id.toString()) {
-                                            for (var _fulfillment of _poItem.fulfillments) {
-                                                var pricePerUnit = 0, priceTotal = 0;
-                                                if (_item.unitReceiptNoteNo === _fulfillment.unitReceiptNoteNo && unitPaymentPriceCorrectionNote.unitPaymentOrder.no === _fulfillment.interNoteNo) {
-                                                    if (_unitReceiptNoteItem.correction.length > 0) {
-                                                        if (unitPaymentPriceCorrectionNote.correctionType === "Harga Satuan") {
-                                                            pricePerUnit = _unitReceiptNoteItem.correction[_unitReceiptNoteItem.correction.length - 1].correctionPricePerUnit - _item.pricePerUnit;
-                                                            priceTotal = pricePerUnit * _item.quantity;
-                                                        }
-                                                        else if (unitPaymentPriceCorrectionNote.correctionType === "Harga Total") {
-                                                            priceTotal = (_item.quantity * _unitReceiptNoteItem.correction[_unitReceiptNoteItem.correction.length - 1].correctionPricePerUnit) - (_item.priceTotal)
-                                                        }
-                                                    } else {
-                                                        if (unitPaymentPriceCorrectionNote.correctionType === "Harga Satuan") {
-                                                            pricePerUnit = _poItem.pricePerDealUnit - _item.pricePerUnit;
-                                                            priceTotal = pricePerUnit * _item.quantity;
-                                                        }
-                                                        else if (unitPaymentPriceCorrectionNote.correctionType === "Harga Total") {
-                                                            priceTotal = (_item.quantity * _poItem.pricePerDealUnit) - (_item.priceTotal)
-                                                        }
-                                                    }
+                    var _unitReceiptNotes = unitPaymentPriceCorrectionNote.unitPaymentOrder.items.map((upoItem) => {
+                        return upoItem.unitReceiptNote.items.map((item) => {
+                            return {
+                                productId: item.product._id,
+                                purchaseOrderId: item.purchaseOrderId,
+                                correction: item.correction
+                            }
+                        })
+                    });
+                    var pos = unitPaymentPriceCorrectionNote.items.map((_item) => {
+                        return _item.purchaseOrder.items.map((item) => {
+                            return {
+                                productId: item.product._id,
+                                purchaseOrderId: _item.purchaseOrderId,
+                                pricePerDealUnit: item.pricePerDealUnit
+                            }
+                        })
+                    });
 
-                                                    _item.pricePerUnit = pricePerUnit;
-                                                    _item.priceTotal = priceTotal;
-                                                    break;
-                                                }
-                                            }
-                                            break;
-                                        }
-                                    }
-                                }
-                                break;
+                    _unitReceiptNotes = [].concat.apply([], _unitReceiptNotes);
+                    pos = [].concat.apply([], pos);
+                    for (var _item of unitPaymentPriceCorrectionNote.items) {
+                        var pricePerUnit = 0, priceTotal = 0;
+                        var unitReceiptNote = _unitReceiptNotes.find((unitReceiptNote) => unitReceiptNote.productId.toString() === _item.productId.toString() && unitReceiptNote.purchaseOrderId.toString() === _item.purchaseOrderId.toString());
+                        var po = pos.find((unitReceiptNote) => unitReceiptNote.productId.toString() === _item.productId.toString() && unitReceiptNote.purchaseOrderId.toString() === _item.purchaseOrderId.toString());
+
+                        if (unitReceiptNote.correction.length > 1) {
+                            if (unitPaymentPriceCorrectionNote.correctionType === "Harga Satuan") {
+                                pricePerUnit = unitReceiptNote.correction[unitReceiptNote.correction.length - 1].correctionPricePerUnit - _item.pricePerUnit;
+                                priceTotal = pricePerUnit * _item.quantity;
+                            }
+                            else if (unitPaymentPriceCorrectionNote.correctionType === "Harga Total") {
+                                pricePerUnit = _item.pricePerUnit;
+                                priceTotal = (_item.quantity * unitReceiptNote.correction[unitReceiptNote.correction.length - 1].correctionPricePerUnit) - (_item.priceTotal)
+                            }
+                        } else {
+                            if (unitPaymentPriceCorrectionNote.correctionType === "Harga Satuan") {
+                                pricePerUnit = po.pricePerDealUnit - _item.pricePerUnit;
+                                priceTotal = pricePerUnit * _item.quantity;
+                            }
+                            else if (unitPaymentPriceCorrectionNote.correctionType === "Harga Total") {
+                                pricePerUnit = _item.pricePerUnit;
+                                priceTotal = (_item.quantity * po.pricePerDealUnit) - (_item.priceTotal)
                             }
                         }
+
+                        _item.pricePerUnit = pricePerUnit;
+                        _item.priceTotal = priceTotal;
+
                     }
                     var definition = getDefinition(unitPaymentPriceCorrectionNote);
                     var generatePdf = require('../../pdf/pdf-generator');
@@ -422,9 +432,9 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.purchasing.collection.UnitPaymentCorrectionNote}__updatedDate`,
+            name: `ix_${map.purchasing.collection.UnitPaymentCorrectionNote}_date`,
             key: {
-                _updatedDate: -1
+                date: -1
             }
         }
 
@@ -479,52 +489,51 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
     }
 
     getAllData(filter) {
-        return new Promise((resolve, reject) => {
-            var sorting = {
-                "date": -1,
-                "no": 1
-            };
-            var query = Object.assign({});
-            query = Object.assign(query, filter);
-            query = Object.assign(query, {
-                _deleted: false
-            });
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var query = Object.assign({});
+                    query = Object.assign(query, filter);
+                    query = Object.assign(query, {
+                        _deleted: false
+                    });
 
-            var _select = ["no",
-                "date",
-                "correctionType",
-                "unitPaymentOrder.no",
-                "invoiceCorrectionNo",
-                "invoiceCorrectionDate",
-                "incomeTaxCorrectionNo",
-                "incomeTaxCorrectionDate",
-                "vatTaxCorrectionNo",
-                "vatTaxCorrectionDate",
-                "unitPaymentOrder.supplier",
-                "unitPaymentOrder.items.unitReceiptNote.no",
-                "unitPaymentOrder.items.unitReceiptNote.date",
-                "unitPaymentOrder.items.unitReceiptNote.items.purchaseOrder._id",
-                "releaseOrderNoteNo",
-                "remark",
-                "_createdBy",
-                "items.purchaseOrder._id",
-                "items.purchaseOrder.purchaseOrderExternal.no",
-                "items.purchaseOrder.purchaseRequest.no",
-                "items.product",
-                "items.quantity",
-                "items.uom",
-                "items.pricePerUnit",
-                "items.currency",
-                "items.priceTotal"
-            ];
+                    var _select = ["no",
+                        "date",
+                        "correctionType",
+                        "unitPaymentOrder.no",
+                        "invoiceCorrectionNo",
+                        "invoiceCorrectionDate",
+                        "incomeTaxCorrectionNo",
+                        "incomeTaxCorrectionDate",
+                        "vatTaxCorrectionNo",
+                        "vatTaxCorrectionDate",
+                        "unitPaymentOrder.supplier",
+                        "unitPaymentOrder.items.unitReceiptNote.no",
+                        "unitPaymentOrder.items.unitReceiptNote.date",
+                        "unitPaymentOrder.items.unitReceiptNote.items.purchaseOrder._id",
+                        "releaseOrderNoteNo",
+                        "remark",
+                        "_createdBy",
+                        "items.purchaseOrder._id",
+                        "items.purchaseOrder.purchaseOrderExternal.no",
+                        "items.purchaseOrder.purchaseRequest.no",
+                        "items.product",
+                        "items.quantity",
+                        "items.uom",
+                        "items.pricePerUnit",
+                        "items.currency",
+                        "items.priceTotal"
+                    ];
 
-            this.collection.where(query).select(_select).order(sorting).execute()
-                .then((results) => {
-                    resolve(results.data);
-                })
-                .catch(e => {
-                    reject(e);
+                    this.collection.where(query).select(_select).execute()
+                        .then((results) => {
+                            resolve(results.data);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 });
-        });
+            });
     }
 }

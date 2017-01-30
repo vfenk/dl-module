@@ -541,9 +541,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.purchasing.collection.PurchaseOrderExternal}__updatedDate`,
+            name: `ix_${map.purchasing.collection.PurchaseOrderExternal}_date`,
             key: {
-                _updatedDate: -1
+                date: -1
             }
         }
 
@@ -583,7 +583,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     po.useVat = false;
                                     po.vatRate = 0;
                                     po.useIncomeTax = false;
-                                    po.isPosted = false;
                                     po.status = poStatusEnum.PROCESSING;
 
                                     for (var poItem of po.items) {
@@ -796,42 +795,41 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     }
 
     getAllData(filter) {
-        return new Promise((resolve, reject) => {
-            var sorting = {
-                "date": -1,
-                "no": 1
-            };
-            var query = Object.assign({});
-            query = Object.assign(query, filter);
-            query = Object.assign(query, {
-                _deleted: false
-            });
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var query = Object.assign({});
+                    query = Object.assign(query, filter);
+                    query = Object.assign(query, {
+                        _deleted: false
+                    });
 
-            var _select = ["no",
-                "date",
-                "supplier",
-                "expectedDeliveryDate",
-                "freightCostBy",
-                "paymentMethod",
-                "paymentDueDays",
-                "currency",
-                "useIncomeTax",
-                "useVat",
-                "vat.rate",
-                "remark",
-                "isPosted",
-                "_createdBy",
-                "items.no",
-                "items.purchaseRequest.no",
-                "items.items"];
+                    var _select = ["no",
+                        "date",
+                        "supplier",
+                        "expectedDeliveryDate",
+                        "freightCostBy",
+                        "paymentMethod",
+                        "paymentDueDays",
+                        "currency",
+                        "useIncomeTax",
+                        "useVat",
+                        "vat.rate",
+                        "remark",
+                        "isPosted",
+                        "_createdBy",
+                        "items.no",
+                        "items.purchaseRequest.no",
+                        "items.items"];
 
-            this.collection.where(query).select(_select).order(sorting).execute()
-                .then((results) => {
-                    resolve(results.data);
-                })
-                .catch(e => {
-                    reject(e);
+                    this.collection.where(query).select(_select).execute()
+                        .then((results) => {
+                            resolve(results.data);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 });
-        });
+            });
     }
 };
