@@ -14,7 +14,8 @@ class MonitoringEventDataUtil {
                 var machine = results[1];
                 var monitoringEventType01 = results[2];
                 var monitoringEventType02 = results[3];
-
+                var selectedProductionOrderDetail = productionOrder.details.length > 0 ? productionOrder.details[0] : {};
+            
                 var data = {
                     dateStart: new Date(),
                     dateEnd: new Date(),
@@ -23,9 +24,11 @@ class MonitoringEventDataUtil {
                     machineId: machine._id,
                     machine: machine,
                     productionOrder: productionOrder,
+                    selectedProductionOrderDetail: selectedProductionOrderDetail,
+                    cartNumber: "Cart Number for UnitTest",
                     monitoringEventTypeId: monitoringEventType01._id,
                     monitoringEventType: monitoringEventType01,
-                    remark: ""
+                    remark: "Unit Test"
                 };
                 return Promise.resolve(data);
             });
