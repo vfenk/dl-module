@@ -27,7 +27,11 @@ module.exports = {
             InstructionManager: require('./src/managers/master/instruction-manager'),
             ProcessTypeManager: require('./src/managers/master/process-type-manager'),
             OrderTypeManager: require('./src/managers/master/order-type-manager'),
-            ColorTypeManager: require('./src/managers/master/color-type-manager')
+            ColorTypeManager: require('./src/managers/master/color-type-manager'),
+            MaterialConstructionManager: require('./src/managers/master/material-construction-manager'),
+            FinishTypeManager: require('./src/managers/master/finish-type-manager'),
+            StandardTestManager: require('./src/managers/master/standard-test-manager'),
+            YarnMaterialManager: require('./src/managers/master/yarn-material-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
@@ -52,14 +56,7 @@ module.exports = {
                 MonitoringSpecificationMachineManager: require('./src/managers/production/finishing-printing/monitoring-specification-machine-manager')
             }
         },
-        sales: {
-
-            finishingPrinting:{
-                DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager') 
-            }
-        },
         sales:{
-
             ProductionOrderManager: require('./src/managers/sales/production-order-manager')
         }
     },
