@@ -24,7 +24,7 @@ module.exports = {
             UsterManager: require('./src/managers/master/uster-manager'),
             LampStandardManager: require('./src/managers/master/lamp-standard-manager'),
             AccountBankManager: require('./src/managers/master/account-bank-manager'),
-            MonitoringEventTypeManager: require('./src/managers/master/manitoring-event-type-manager'),
+            MonitoringEventTypeManager: require('./src/managers/master/monitoring-event-type-manager'),
             InstructionManager: require('./src/managers/master/instruction-manager'),
             StepManager: require('./src/managers/master/step-manager'),
             ProcessTypeManager: require('./src/managers/master/process-type-manager'),
