@@ -511,7 +511,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         var jobs = [];
         map.forEach((purchaseOrderIds, unitReceiptNoteId) => {
             var job = this.unitReceiptNoteManager.getSingleById(unitReceiptNoteId)
-                .then((unitReceiptNotes) => {
+                .then((unitReceiptNote) => {
                     return Promise.all(purchaseOrderIds.map((purchaseOrderId) => {
                         return this.purchaseOrderManager.getSingleById(purchaseOrderId)
                     }))
@@ -545,7 +545,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         var jobs = [];
         map.forEach((purchaseOrderIds, unitReceiptNoteId) => {
             var job = this.unitReceiptNoteManager.getSingleById(unitReceiptNoteId)
-                .then((unitReceiptNotes) => {
+                .then((unitReceiptNote) => {
                     return Promise.all(purchaseOrderIds.map((purchaseOrderId) => {
                         return this.purchaseOrderManager.getSingleById(purchaseOrderId)
                     }))
