@@ -455,7 +455,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     for (var realization of realizations) {
                         var unitPaymentOrder = realization.unitPaymentOrder;
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === realization.productId.toString());
-                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.unitReceiptNoteNo.toString() === realization.unitReceiptNoteNo.toString() && fulfillment.interNoteNo.toString() === unitPaymentOrder.no.toString());
+                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.unitReceiptNoteNo.toString() === realization.unitReceiptNoteNo.toString() && fulfillment.interNoteNo === unitPaymentOrder.no);
                         if (fulfillment) {
                             delete fulfillment.invoiceDate;
                             delete fulfillment.invoiceNo;
