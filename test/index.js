@@ -51,6 +51,10 @@ describe('#dl-module', function (done) {
     test('@MASTER/STEP', './master/step');
     test('@MASTER/MACHINE-TYPE', './master/machine-type');
     test('@MASTER/MACHINE-SPESIFICATION-STANDARD', './master/machine-spesification-standard');
+    test('@MASTER/MATERIAL-CONSTRUCTION', './master/material-construction');
+    test('@MASTER/YARN-MATERIAL', './master/yarn-material');
+    test('@MASTER/STANDARD-TEST', './master/standard-test');
+    test('@MASTER/FINISH-TYPE', './master/finish-type');
 
     //Purchasing 
     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
@@ -65,7 +69,7 @@ describe('#dl-module', function (done) {
     //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
     // //Production
 
-     test('@sales/production-order', './sales/production-order/create');
+    test('@sales/production-order', './sales/production-order/create');
 
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
