@@ -53,6 +53,7 @@ module.exports = {
             },
 
             finishingPrinting: {
+                DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager'),
                 MonitoringSpecificationMachineManager: require('./src/managers/production/finishing-printing/monitoring-specification-machine-manager')
             }
         },
