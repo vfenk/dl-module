@@ -505,7 +505,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
             var key = realization.unitReceiptNoteId.toString();
             if (!map.has(key))
                 map.set(key, [])
-            map.get(key).push(purchaseOrderId);
+            map.get(key).push(realization.purchaseOrderId);
         }
 
         var jobs = [];
@@ -539,7 +539,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
             var key = realization.unitReceiptNoteId.toString();
             if (!map.has(key))
                 map.set(key, [])
-            map.get(key).push(purchaseOrderId);
+            map.get(key).push(realization.purchaseOrderId);
         }
 
         var jobs = [];
