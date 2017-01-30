@@ -563,7 +563,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
         })
 
         return Promise.all(jobs).then((results) => {
-            return Promise.resolve(unitPaymentOrder);
+            return Promise.resolve(realizations);
         })
     }
 
