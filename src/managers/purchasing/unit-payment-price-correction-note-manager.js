@@ -8,6 +8,7 @@ var i18n = require('dl-i18n');
 var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitPaymentCorrectionNote = DLModels.purchasing.UnitPaymentCorrectionNote;
 var UnitPaymentOrderManager = require('./unit-payment-order-manager');
+var UnitReceiptNoteManager = require('./unit-receipt-note-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 
@@ -17,6 +18,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         this.collection = this.db.use(map.purchasing.collection.UnitPaymentCorrectionNote);
         this.unitPaymentOrderManager = new UnitPaymentOrderManager(db, user);
         this.purchaseOrderManager = new PurchaseOrderManager(db, user);
+        this.unitReceiptNoteManager = new UnitReceiptNoteManager(db, user);
     }
 
     _validate(unitPaymentPriceCorrectionNote) {
