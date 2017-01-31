@@ -9,22 +9,16 @@ describe('#dl-module', function (done) {
     this.timeout(2 * 60000);
 
     // Auth
-    // test('@auth/account-manager', './auth/account-manager-test');
-    // test('@AUTH/ACCOUNT', './auth/account');
-    // test('@AUTH/ROLE', './auth/role');
-    // test('@AUTH/API-ENDPOINT', './auth/api-endpoint');
+    test('@AUTH/ACCOUNT', './auth/account');
+    test('@AUTH/ROLE', './auth/role');
+    test('@AUTH/API-ENDPOINT', './auth/api-endpoint');
 
     // test('@ETL/DIM-CATEGORY', './etl/dim-category');
     // test('@ETL/DIM-DIVISION', './etl/dim-division');
     // test('@ETL/DIM-SUPPLIER', './etl/dim-supplier');
     // test('@ETL/DIM-UNIT', './etl/dim-unit');
-    // test('@ETL/FACT-PURCHASE-DURATION', './etl/fact-purchase-duration');
     // test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
-    // test('@ETL/FACT-TOTAL-NILAI-PEMBELIAN', './etl/fact-total-nilai-pembelian');
-    // test('@ETL/FACT-TOP-TEN-SUPPLIER', './etl/fact-top-ten-supplier');
-    // test('@ETL/FACT-PURCHASE-ORDER-COMPARISON', './etl/fact-purchase-order-comparison');
-    // test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');   
-    // test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
+    test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
@@ -48,8 +42,14 @@ describe('#dl-module', function (done) {
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
     test('@MASTER/INSTRUCTION', './master/instruction');
+    test('@MASTER/MONITORING-EVENT-TYPE', './master/monitoring-event-type');
     test('@MASTER/STEP', './master/step');
     test('@MASTER/MACHINE-TYPE', './master/machine-type');
+    test('@MASTER/MACHINE-SPESIFICATION-STANDARD', './master/machine-spesification-standard');
+    test('@MASTER/MATERIAL-CONSTRUCTION', './master/material-construction');
+    test('@MASTER/YARN-MATERIAL', './master/yarn-material');
+    test('@MASTER/STANDARD-TEST', './master/standard-test');
+    test('@MASTER/FINISH-TYPE', './master/finish-type');
 
     //Purchasing 
     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
@@ -61,37 +61,20 @@ describe('#dl-module', function (done) {
     test('@PURCHASING/UNIT PAYMENT PRICE CORRECTION', './purchasing/unit-payment-price-correction-note');
     test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
     
-     test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
-
-    // ok
-    // test('@purchasing/delivery-order-manager', './purchasing/delivery-order-manager-test');
-
-    // test('@purchasing/unit-receipt-note', './purchasing/unit-receipt-note-manager-test');
-    // test('@purchasing/unit-payment-price-correction-note', './purchasing/unit-payment-price-correction-note-manager-test');
-    // test('@purchasing/unit-payment-order', './purchasing/unit-payment-order-test');
-    // test('@purchasing/purchase-request/create', './purchasing/purchase-request/create');
-    // test('@purchasing/purchase-request/post', './purchasing/purchase-request/post');
-    // test('@purchasing/purchase-order/create', './purchasing/purchase-order/create');
-    // test('@purchasing/purchase-order/update', './purchasing/purchase-order/update');
-
-    // ok
-    // test('@purchasing/delivery-order/create', './purchasing/delivery-order/create');
-    // test('@purchasing/unit-receipt-note/create', './purchasing/unit-receipt-note/create');
-
-    // test('@purchasing/unit-payment-order/create', './purchasing/unit-payment-order/create');
-    // test('@purchasing/unit-payment-price-correction-note/create', './purchasing/unit-payment-price-correction-note/create');
-    // test('@purchasing/unit-payment-quantity-correction-note/create', './purchasing/unit-payment-quantity-correction-note/create');
-
+    //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
     // //Production
 
-
-    // test('@production/production-order', './production/finishing-printing/production-order/create');
-    // test('@sales/production-order', './sales/production-order/create');
+    test('@sales/production-order', './sales/production-order/create');
 
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
+
     test('@production/daily-operation', './production/finishing-printing/daily-operation');
-    
+    test('@production/finishing-printing/monitoring-specification-machine', './production/finishing-printing/monitoring-specification-machine');
+    test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
+    // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+    // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
+
     //Sales
-    test('@production/production-order', './sales/production-order/create');
+    // test('@production/production-order', './sales/production-order/create');
 });
