@@ -282,7 +282,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                             }
                             else if (unitPaymentPriceCorrectionNote.correctionType === "Harga Total") {
                                 pricePerUnit = _item.pricePerUnit;
-                                priceTotal = (_item.priceTotal) - (_item.quantity * unitReceiptNote.correction[unitReceiptNote.correction.length - 1].correctionPricePerUnit)
+                                priceTotal = (_item.priceTotal) - (_item.quantity * unitReceiptNote.correction[unitReceiptNote.correction.length - 1].correctionPricePerUnit);
                             }
                         } else {
                             if (unitPaymentPriceCorrectionNote.correctionType === "Harga Satuan") {
@@ -291,7 +291,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                             }
                             else if (unitPaymentPriceCorrectionNote.correctionType === "Harga Total") {
                                 pricePerUnit = _item.pricePerUnit;
-                                priceTotal = (_item.priceTotal) - (_item.quantity * po.pricePerDealUnit)
+                                priceTotal = (_item.priceTotal) - (_item.quantity * po.pricePerDealUnit);
                             }
                         }
 
@@ -342,7 +342,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 priceTotal: item.priceTotal,
                 currency: item.currency,
                 unitReceiptNoteNo: item.unitReceiptNoteNo
-            }
+            };
         });
         _items = [].concat.apply([], _items);
 
@@ -350,16 +350,16 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         for (var _item of _items) {
             var key = _item.purchaseOrderId.toString();
             if (!map.has(key))
-                map.set(key, [])
-            var _item = {
-                productId: item.productId,
-                quantity: item.quantity,
-                pricePerUnit: item.pricePerUnit,
-                priceTotal: item.priceTotal,
-                currency: item.currency,
-                unitReceiptNoteNo: item.unitReceiptNoteNo
+                map.set(key, []);
+            var item = {
+                productId: _item.productId,
+                quantity: _item.quantity,
+                pricePerUnit: _item.pricePerUnit,
+                priceTotal: _item.priceTotal,
+                currency: _item.currency,
+                unitReceiptNoteNo: _item.unitReceiptNoteNo
             };
-            map.get(key).push(_item);
+            map.get(key).push(item);
         }
 
         var jobs = [];
