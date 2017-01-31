@@ -2,6 +2,6 @@ describe("BASIC CRUD SCENARIOS", function() {
     require("./basic");
 });
 
-describe("CREATE SCENARIOS", function() {
-    require("./create");
+describe("VALIDATE CRUD SCENARIOS", function() {
+    require("./validation");
 });

@@ -17,13 +17,8 @@ describe('#dl-module', function (done) {
     // test('@ETL/DIM-DIVISION', './etl/dim-division');
     // test('@ETL/DIM-SUPPLIER', './etl/dim-supplier');
     // test('@ETL/DIM-UNIT', './etl/dim-unit');
-    // test('@ETL/FACT-PURCHASE-DURATION', './etl/fact-purchase-duration');
     // test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
-    // test('@ETL/FACT-TOTAL-NILAI-PEMBELIAN', './etl/fact-total-nilai-pembelian');
-    // test('@ETL/FACT-TOP-TEN-SUPPLIER', './etl/fact-top-ten-supplier');
-    // test('@ETL/FACT-PURCHASE-ORDER-COMPARISON', './etl/fact-purchase-order-comparison');
-    // test('@ETL/FACT-TIMELINESS-SUPPLIER', './etl/fact-timeliness-supplier');   
-    // test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
+    test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
@@ -76,7 +71,7 @@ describe('#dl-module', function (done) {
 
     test('@production/daily-operation', './production/finishing-printing/daily-operation');
     test('@production/finishing-printing/monitoring-specification-machine', './production/finishing-printing/monitoring-specification-machine');
-    // test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
+    test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
