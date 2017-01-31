@@ -17,7 +17,7 @@ before("#00. connect db", function (done) {
         })
         .catch((e) => {
             done(e);
-        })
+        });
     });
 });
 
