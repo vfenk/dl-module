@@ -317,9 +317,6 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                         _correction.correctionNo = unitPaymentPriceCorrectionNote.no;
                         _correction.correctionRemark = `Koreksi ${unitPaymentPriceCorrectionNote.correctionType}`;
 
-                        _correction.correctionQuantity = item.quantity;
-                        _correction.correctionPriceTotal = (item.priceTotal * item.currency.rate) - (item.quantity * _poItem.pricePerDealUnit * item.currency.rate);
-
                         if (!fulfillment.correction) {
                             fulfillment.correction = [];
                             _correction.correctionQuantity = fulfillment.unitReceiptNoteDeliveredQuantity - item.quantity;
