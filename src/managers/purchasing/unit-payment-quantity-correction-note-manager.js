@@ -307,7 +307,7 @@ module.exports = class UnitPaymentQuantityCorrectionNoteManager extends BaseMana
                     for (var item of items) {
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
 
-                        var fulfillment = poItem.fulfillments.find(fulfillment => item.unitReceiptNoteNo === fulfillmentPoItem.unitReceiptNoteNo && unitPaymentPriceCorrectionNote.unitPaymentOrder.no === fulfillmentPoItem.interNoteNo);
+                        var fulfillment = poItem.fulfillments.find(fulfillment => item.unitReceiptNoteNo === fulfillment.unitReceiptNoteNo && unitPaymentPriceCorrectionNote.unitPaymentOrder.no === fulfillment.interNoteNo);
 
                         if (!fulfillment.correction)
                             fulfillment.correction = [];
