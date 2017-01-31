@@ -407,11 +407,11 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
         _items = [].concat.apply([], _items);
 
         var map = new Map();
-        for (var realization of realizations) {
-            var key = realization.unitReceiptNoteId.toString();
+        for (var _item of _items) {
+            var key = _item.unitReceiptNoteNo.toString();
             if (!map.has(key))
                 map.set(key, [])
-            map.get(key).push(realization.purchaseOrderId);
+            map.get(key).push(_item.purchaseOrderId);
         }
 
         var unitReceiptNoteIds = [];
