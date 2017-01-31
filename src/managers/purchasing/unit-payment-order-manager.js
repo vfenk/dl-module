@@ -521,7 +521,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 var index = unitReceiptNote.items.indexOf(item);
                                 unitReceiptNote.items[index].purchaseOrder = purchaseOrder;
                             }
-                            // unitReceiptNote.isPaid = true;
+                            unitReceiptNote.isPaid = true;
                             return this.unitReceiptNoteManager.update(unitReceiptNote);
                         })
                 })
@@ -555,7 +555,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 var index = unitReceiptNote.items.indexOf(item);
                                 unitReceiptNote.items[index].purchaseOrder = purchaseOrder;
                             }
-                            // unitReceiptNote.isPaid = false;
+                            unitReceiptNote.isPaid = false;
                             return this.unitReceiptNoteManager.update(unitReceiptNote);
                         })
                 })
