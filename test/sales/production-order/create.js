@@ -81,6 +81,18 @@ var dataprodOrder;
             });
     });
 
+    it(`#05. should success when get updated data with id`, function(done) {
+        manager.getSingleById(createdId)
+            .then((data) => {
+                validate(data);
+                data._stamp.should.not.equal(createdData._stamp);
+                done();
+            })
+            .catch((e) => {
+                done(e);
+            });
+    });
+
     it("#05. should success when read data", function(done) {
         manager.read({
                 filter: {
@@ -99,7 +111,9 @@ var dataprodOrder;
             });
     });
 
-    it(`#09. should success when delete data`, function(done) {
+    
+
+    it(`#06. should success when delete data`, function(done) {
         manager.delete(dataprodOrder)
             .then((id) => {
                 id.toString().should.equal(createdId.toString());
