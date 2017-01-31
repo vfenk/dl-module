@@ -2,7 +2,7 @@ var helper = require("../../helper");
 var Manager = require("../../../src/etl/dim-division-etl-manager");
 var instanceManager = null;
 var should = require("should");
-var sqlHelper = require("../../sqlhelper");
+var sqlHelper = require("../../sql-helper");
 
 before("#00. connect db", function (done) {
     Promise.all([helper, sqlHelper])
