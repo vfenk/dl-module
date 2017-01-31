@@ -371,8 +371,13 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
 
                         var fulfillment = poItem.fulfillments.find(fulfillment => item.unitReceiptNoteNo === fulfillment.unitReceiptNoteNo && unitPaymentPriceCorrectionNote.unitPaymentOrder.no === fulfillment.interNoteNo);
 
-                        if (!fulfillment.correction)
+                        if (!fulfillment) {
                             fulfillment.correction = [];
+                        }
+                        else {
+                            if (!fulfillment.correction)
+                                fulfillment.correction = [];
+                        }
                         var _correction = {};
                         _correction.correctionDate = unitPaymentPriceCorrectionNote.date;
                         _correction.correctionNo = unitPaymentPriceCorrectionNote.no;
