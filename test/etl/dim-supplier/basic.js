@@ -22,7 +22,7 @@ before("#00. connect db", function (done) {
 });
 
 it("#01. should success when create etl for dim-supplier", function (done) {
-    instanceManager.getSQLData()
+    instanceManager.run()
         .then(() => {
             done();
         })
