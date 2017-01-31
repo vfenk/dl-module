@@ -18,7 +18,7 @@ describe('#dl-module', function (done) {
     test('@ETL/DIM-DIVISION', './etl/dim-division');
     test('@ETL/DIM-SUPPLIER', './etl/dim-supplier');
     test('@ETL/DIM-UNIT', './etl/dim-unit');
-    test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
+    // test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
     test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
 
     // Master
