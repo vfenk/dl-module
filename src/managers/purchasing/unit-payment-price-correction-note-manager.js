@@ -427,7 +427,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                 .then((unitReceiptNote) => {
                     var _item = map.get(unitReceiptNote.no);
                     return Promise.all(_item.map((item) => {
-                        return this.purchaseOrderManager.getSingleById(item.purchaseOrderId)
+                        return this.purchaseOrderManager.getSingleById(item)
                     }))
                         .then((purchaseOrders) => {
                             for (var item of unitReceiptNote.items) {
