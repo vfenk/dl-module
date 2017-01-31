@@ -390,7 +390,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             return prev && curr
                         }, true);
 
-                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
+                    if (purchaseOrder.status.value <= 5) {
+                        purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
+                    }
                     return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
                         .then((purchaseRequest) => {
                             purchaseRequest.status = purchaseOrder.isClosed ? prStatusEnum.COMPLETE : prStatusEnum.ARRIVING;
@@ -691,8 +693,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         .reduce((prev, curr, index) => {
                             return prev + curr
                         }, 0);
-
-                    purchaseOrder.status = poStatus > 0 ? poStatusEnum.ARRIVING : poStatusEnum.ORDERED;
+                    if (purchaseOrder.status.value <= 5) {
+                        purchaseOrder.status = poStatus > 0 ? poStatusEnum.ARRIVING : poStatusEnum.ORDERED;
+                    }
                     return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
                         .then((purchaseRequest) => {
                             var prStatus = purchaseRequest.items
