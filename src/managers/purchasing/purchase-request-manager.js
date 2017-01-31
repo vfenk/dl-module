@@ -99,7 +99,9 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
                 if (!valid.date || valid.date == "" || valid.date == "undefined")
                     errors["date"] = i18n.__("PurchaseRequest.date.isRequired:%s is required", i18n.__("PurchaseRequest.date._:Date")); //"Tanggal PR tidak boleh kosong";
-
+                else if (valid.date > valid.expectedDeliveryDate)
+                        errors["date"] = i18n.__("PurchaseRequest.date.isGreater:%s is greater than expected delivery date", i18n.__("PurchaseRequest.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
+                    
                 if (!_unit)
                     errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is not exists", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
                 else if (!valid.unitId)
