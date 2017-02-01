@@ -89,97 +89,100 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return query;
     }
 
-    create(purchaseOrderExternal) {
-        return new Promise((resolve, reject) => {
-            this._validate(purchaseOrderExternal)
-                .then(validPurchaseOrderExternal => {
-                    validPurchaseOrderExternal.no = generateCode();
-                    validPurchaseOrderExternal._createdDate = new Date();
-                    validPurchaseOrderExternal.supplierId = new ObjectId(validPurchaseOrderExternal.supplierId);
-                    validPurchaseOrderExternal.supplier._id = new ObjectId(validPurchaseOrderExternal.supplier._id);
-                    this.collection.insert(validPurchaseOrderExternal)
-                        .then(id => {
-                            var tasks = [];
-                            var getPOInternalById = [];
-                            for (var data of validPurchaseOrderExternal.items) {
-                                if (ObjectId.isValid(data._id))
-                                    getPOInternalById.push(this.purchaseOrderManager.getSingleById(data._id));
-                            }
-                            Promise.all(getPOInternalById)
-                                .then(results => {
-                                    for (var poInternal of results) {
-                                        poInternal.isPosted = true;
-                                        poInternal.status = poStatusEnum.PROCESSING;
-                                        tasks.push(this.purchaseOrderManager.update(poInternal));
-                                    }
-                                    Promise.all(tasks)
-                                        .then(results => {
-                                            resolve(id);
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        })
-                                })
-                                .catch(e => {
-                                    reject(e);
-                                })
-                        })
-                        .catch(e => {
-                            reject(e);
-                        })
-                })
-                .catch(e => {
-                    reject(e);
-                })
-        });
+    _beforeInsert(purchaseOrderExternal) {
+        purchaseOrderExternal.refNo = generateCode();
+        return Promise.resolve(purchaseOrderExternal)
     }
 
-    delete(purchaseOrderExternal) {
+    _afterInsert(id) {
+        return this.getSingleById(id)
+            .then((purchaseOrderExternal) => {
+                var getPurchaseOrderIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseOrderManager.getSingleByIdOrDefault(purchaseOrder._id));
+                return Promise.all(getPurchaseRequestIds)
+            })
+            .then((purchaseOrders) => {
+                var jobsUpdatePO = purchaseOrders.map((purchaseOrders) => {
+                    purchaseOrder.isPosted = true;
+                    purchaseOrder.status = poStatusEnum.PROCESSING;
+                    return this.purchaseOrderManager.update(purchaseOrder)
+                        .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                })
+                return Promise.all(jobsUpdatePO)
+            })
+            .then((purchaseOrders) => {
+                for (var purchaseOrder of purchaseOrders) {
+                    var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
+                    var index = purchaseOrderExternal.items.indexOf(item);
+                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                }
+                return this.collection
+                    .updateOne({
+                        _id: purchaseOrderExternal._id
+                    }, {
+                        $set: purchaseOrderExternal
+                    })
+                    .then((result) => Promise.resolve(purchaseOrderExternal._id));
+            });
+    }
+    
+    delete(poExternal) {
         return new Promise((resolve, reject) => {
             this._createIndexes()
                 .then((createIndexResults) => {
-                    this._validate(purchaseOrderExternal)
-                        .then(validData => {
-                            validData._deleted = true;
-                            this.collection.update(validData)
-                                .then(id => {
-                                    var tasks = [];
-                                    var getPOInternalById = [];
-                                    for (var data of validData.items) {
-                                        if (ObjectId.isValid(data._id))
-                                            getPOInternalById.push(this.purchaseOrderManager.getSingleById(data._id));
-                                    }
-                                    Promise.all(getPOInternalById)
-                                        .then(results => {
-                                            for (var poInternal of results) {
-                                                poInternal.isPosted = false;
-                                                poInternal.status = poStatusEnum.CREATED;
-                                                tasks.push(this.purchaseOrderManager.update(poInternal));
-                                            }
-                                            Promise.all(tasks)
-                                                .then(results => {
-                                                    resolve(id);
-                                                })
-                                                .catch(e => {
-                                                    reject(e);
-                                                })
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        })
-
-                                })
-                                .catch(e => {
-                                    reject(e);
-                                });
+                    this._validate(poExternal)
+                        .then((purchaseOrderExternal) => {
+                            purchaseOrderExternal._deleted = true;
+                            return this.update(purchaseOrderExternal);
                         })
-                        .catch(e => {
-                            reject(e);
-                        });
+                        .then((poExId) => {
+                            var query = {
+                                _id: ObjectId.isValid(id) ? new ObjectId(id) : {}
+                            };
+                            return this.getSingleByQuery(query);
+                        })
+                        .then((purchaseOrderExternal) => {
+                            var getPurchaseOrderIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseOrderManager.getSingleByIdOrDefault(purchaseOrder._id));
+                            var getPurchaseRequestIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseRequestManager.getSingleByIdOrDefault(purchaseOrder.purchaseRequest._id));
+
+                            return Promise.all(getPurchaseRequestIds)
+                                .then((purchaseRequests) => {
+                                    var jobsUpdatePR = purchaseRequests.map((purchaseRequest) => {
+                                        purchaseRequest.status = prStatusEnum.PROCESSING;
+                                        return this.purchaseRequestManager.update(purchaseRequest)
+                                            .then((id) => { return this.purchaseRequestManager.getSingleByIdOrDefault(id) });
+                                    })
+                                    return Promise.all(jobsUpdatePR);
+                                })
+                                .then((purchaseRequests) => {
+                                    return Promise.all(getPurchaseOrderIds)
+                                        .then((purchaseOrders) => {
+                                            var jobsUpdatePO = purchaseOrders.map((purchaseOrders) => {
+                                                var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
+                                                purchaseOrder.purchaseRequest = _purchaseRequest;
+                                                purchaseOrder.isPosted = false;
+                                                purchaseOrder.status = poStatusEnum.CREATED;
+                                                return this.purchaseOrderManager.update(purchaseOrder)
+                                                    .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                                            })
+                                            return Promise.all(jobsUpdatePO)
+                                        })
+                                })
+                                .then((purchaseOrders) => {
+                                    for (var purchaseOrder of purchaseOrders) {
+                                        var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
+                                        var index = purchaseOrderExternal.items.indexOf(item);
+                                        purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    }
+                                    return this.collection
+                                        .updateOne({
+                                            _id: purchaseOrderExternal._id
+                                        }, {
+                                            $set: purchaseOrderExternal
+                                        })
+                                        .then((result) => Promise.resolve(purchaseOrderExternal._id));
+                                })
+                        })
                 })
-                .catch(e => {
-                    reject(e);
-                });
         });
     }
 
@@ -518,7 +521,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     pdf(id) {
         return new Promise((resolve, reject) => {
 
-            this.getSingleById(id)
+            this.getSingleByIdOrDefault(id)
                 .then(pox => {
                     var getDefinition = require('../../pdf/definitions/purchase-order-external');
                     var definition = getDefinition(pox);
@@ -562,88 +565,77 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return this.getSingleByIdOrDefault(poExternalId)
             .then((poExternal) => {
                 return this.validateCancelAndUnpost(poExternal)
-                    .then((valid) => {
-                        var getPos = valid.items.map((po) => this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
+                    .then((purchaseOrderExternal) => {
+                        purchaseOrderExternal.isPosted = false;
+                        return this.update(purchaseOrderExternal);
+                    })
+                    .then((poExId) => {
+                        return this.getSingleByIdOrDefault(poExId);
+                    })
+                    .then((purchaseOrderExternal) => {
+                        var getPurchaseOrderIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseOrderManager.getSingleByIdOrDefault(purchaseOrder._id));
+                        var getPurchaseRequestIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseRequestManager.getSingleByIdOrDefault(purchaseOrder.purchaseRequest._id));
 
-                        return Promise.all(getPos)
-                            .then((pos) => {
-
-                                var updatePos = pos.map(po => {
-
-                                    po.purchaseOrderExternalId = {};
-                                    po.purchaseOrderExternal = {};
-                                    po.supplierId = {};
-                                    po.supplier = {};
-                                    po.freightCostBy = '';
-                                    po.currency = {};
-                                    po.currencyRate = 1;
-                                    po.paymentMethod = '';
-                                    po.paymentDueDays = 0;
-                                    po.vat = {};
-                                    po.useVat = false;
-                                    po.vatRate = 0;
-                                    po.useIncomeTax = false;
-                                    po.status = poStatusEnum.PROCESSING;
-
-                                    for (var poItem of po.items) {
-                                        poItem.dealQuantity = 0;
-                                        poItem.dealUom = {};
-                                        poItem.priceBeforeTax = 0;
-                                        poItem.pricePerDealUnit = 0;
-                                        poItem.conversion = 1;
-                                        poItem.currency = {};
-                                        poItem.currencyRate = 1;
-                                    }
-
-                                    return this.purchaseOrderManager.update(po)
-                                        .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
+                        return Promise.all(getPurchaseRequestIds)
+                            .then((purchaseRequests) => {
+                                var jobsUpdatePR = purchaseRequests.map((purchaseRequest) => {
+                                    purchaseRequest.status = prStatusEnum.PROCESSING
+                                    return this.purchaseRequestManager.update(purchaseRequest)
+                                        .then((id) => { return this.purchaseRequestManager.getSingleByIdOrDefault(id) });
                                 })
-
-                                return Promise.all(updatePos);
+                                return Promise.all(jobsUpdatePR);
                             })
-                            .then((updatedPos) => {
+                            .then((purchaseRequests) => {
+                                return Promise.all(getPurchaseOrderIds)
+                                    .then((purchaseOrders) => {
+                                        var jobsUpdatePO = purchaseOrders.map((purchaseOrders) => {
+                                            var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
+                                            purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            purchaseOrder.purchaseOrderExternalId = {};
+                                            purchaseOrder.purchaseOrderExternal = {};
+                                            purchaseOrder.supplierId = {};
+                                            purchaseOrder.supplier = {};
+                                            purchaseOrder.freightCostBy = '';
+                                            purchaseOrder.currency = {};
+                                            purchaseOrder.currencyRate = 1;
+                                            purchaseOrder.paymentMethod = '';
+                                            purchaseOrder.paymentDueDays = 0;
+                                            purchaseOrder.vat = {};
+                                            purchaseOrder.useVat = false;
+                                            purchaseOrder.vatRate = 0;
+                                            purchaseOrder.useIncomeTax = false;
+                                            purchaseOrder.status = poStatusEnum.PROCESSING;
 
-                                var getPrs = updatedPos.map((po) => {
-                                    return this.purchaseRequestManager.getSingleByIdOrDefault(po.purchaseRequest._id);
-                                })
-
-                                return Promise.all(getPrs);
-
+                                            for (var poItem of purchaseOrder.items) {
+                                                poItem.dealQuantity = 0;
+                                                poItem.dealUom = {};
+                                                poItem.priceBeforeTax = 0;
+                                                poItem.pricePerDealUnit = 0;
+                                                poItem.conversion = 1;
+                                                poItem.currency = {};
+                                                poItem.currencyRate = 1;
+                                            }
+                                            return this.purchaseOrderManager.update(purchaseOrder)
+                                                .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                                        })
+                                        return Promise.all(jobsUpdatePO)
+                                    })
                             })
-                            .then((prs) => {
-
-                                var updatePrs = prs.map((pr) => {
-
-                                    pr.status = prStatusEnum.PROCESSING;
-
-                                    return this.purchaseRequestManager.update(pr)
-                                        .then((id) => this.purchaseRequestManager.getSingleByIdOrDefault(id));
-                                })
-
-                                return Promise.all(updatePrs);
+                            .then((purchaseOrders) => {
+                                for (var purchaseOrder of purchaseOrders) {
+                                    var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
+                                    var index = purchaseOrderExternal.items.indexOf(item);
+                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                }
+                                return this.collection
+                                    .updateOne({
+                                        _id: purchaseOrderExternal._id
+                                    }, {
+                                        $set: purchaseOrderExternal
+                                    })
+                                    .then((result) => Promise.resolve(purchaseOrderExternal._id));
                             })
-                            .then((updatedPrs) => {
-
-                                valid.items = valid.items.map((po) => {
-
-                                    po.isPosted = false;
-                                    po.status = poStatusEnum.PROCESSING;
-
-                                    po.purchaseRequest.status = prStatusEnum.PROCESSING;
-
-                                    return po;
-                                })
-
-                                valid.isPosted = false;
-                                valid.status = poStatusEnum.CREATED;
-
-                                return this.update(valid)
-                                    .then((poExId) => {
-
-                                        return Promise.resolve(poExId);
-                                    });
-                            });
-                    });
+                    })
             });
     }
 
@@ -692,83 +684,112 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return this.getSingleByIdOrDefault(poExternalId)
             .then((poExternal) => {
                 return this.validateCancelAndUnpost(poExternal)
-                    .then((valid) => {
-                        var getPos = valid.items.map((po) => this.purchaseOrderManager.getSingleByIdOrDefault(po._id));
+                    .then((purchaseOrderExternal) => {
+                        purchaseOrderExternal.status = poStatusEnum.VOID;
+                        return this.update(purchaseOrderExternal);
+                    })
+                    .then((poExId) => {
+                        return this.getSingleByIdOrDefault(poExId);
+                    })
+                    .then((purchaseOrderExternal) => {
+                        var getPurchaseOrderIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseOrderManager.getSingleByIdOrDefault(purchaseOrder._id));
+                        var getPurchaseRequestIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseRequestManager.getSingleByIdOrDefault(purchaseOrder.purchaseRequest._id));
 
-                        return Promise.all(getPos)
-                            .then((pos) => {
-
-                                var voidPos = pos.map((po) => {
-
-                                    po.status = poStatusEnum.VOID;
-
-                                    return this.purchaseOrderManager.update(po)
-                                        .then((id) => this.purchaseOrderManager.getSingleByIdOrDefault(id));
+                        return Promise.all(getPurchaseRequestIds)
+                            .then((purchaseRequests) => {
+                                var jobsUpdatePR = purchaseRequests.map((purchaseRequest) => {
+                                    purchaseRequest.status = prStatusEnum.VOID;
+                                    return this.purchaseRequestManager.update(purchaseRequest)
+                                        .then((id) => { return this.purchaseRequestManager.getSingleByIdOrDefault(id) });
                                 })
-
-                                return Promise.all(voidPos);
+                                return Promise.all(jobsUpdatePR);
                             })
-                            // .then((voidedPos) => {
-
-                            //     var getPrs = voidedPos.map((po) => {
-                            //         return this.purchaseRequestManager.getSingleByIdOrDefault(po.purchaseRequest._id);
-                            //     })
-
-                            //     return Promise.all(getPrs);
-
-                            // })
-                            // .then((prs) => {
-
-                            //     var voidPrs = prs.map((pr) => {
-
-                            //         pr.status = prStatusEnum.VOID;
-
-                            //         return this.purchaseRequest.update(pr)
-                            //             .then((id) => this.purchaseRequestManager.getSingleByIdOrDefault(id));
-                            //     })
-
-                            //     return Promise.all(voidPrs);
-                            // })
-                            .then((voidedPrs) => {
-
-                                valid.status = poStatusEnum.VOID;
-
-                                valid.items = valid.items.map((po) => {
-
-                                    po.isPosted = false;
-                                    po.status = poStatusEnum.VOID;
-
-                                    // po.purchaseRequest.status = prStatusEnum.VOID;
-
-                                    return po;
-                                })
-
-                                return this.update(valid)
-                                    .then((poExId) => {
-
-                                        return Promise.resolve(poExId);
-                                    });
-                            });
+                            .then((purchaseRequests) => {
+                                return Promise.all(getPurchaseOrderIds)
+                                    .then((purchaseOrders) => {
+                                        var jobsUpdatePO = purchaseOrders.map((purchaseOrders) => {
+                                            var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
+                                            purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            purchaseOrder.status = poStatusEnum.VOID;
+                                            purchaseOrder.isPosted = false;
+                                            return this.purchaseOrderManager.update(purchaseOrder)
+                                                .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                                        })
+                                        return Promise.all(jobsUpdatePO)
+                                    })
+                            })
+                            .then((purchaseOrders) => {
+                                for (var purchaseOrder of purchaseOrders) {
+                                    var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
+                                    var index = purchaseOrderExternal.items.indexOf(item);
+                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                }
+                                return this.collection
+                                    .updateOne({
+                                        _id: purchaseOrderExternal._id
+                                    }, {
+                                        $set: purchaseOrderExternal
+                                    })
+                                    .then((result) => Promise.resolve(purchaseOrderExternal._id));
+                            })
                     });
 
             });
     }
 
     close(poExternalId) {
-
         return this.getSingleByIdOrDefault(poExternalId)
             .then((poExternal) => {
                 return this.validateClose(poExternal)
-                    .then((valid) => {
+                    .then((purchaseOrderExternal) => {
+                        purchaseOrderExternal.isClosed = true;
+                        return this.update(purchaseOrderExternal);
+                    })
+                    .then((poExId) => {
+                        return this.getSingleByIdOrDefault(poExId);
+                    })
+                    .then((purchaseOrderExternal) => {
+                        var getPurchaseOrderIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseOrderManager.getSingleByIdOrDefault(purchaseOrder._id));
+                        var getPurchaseRequestIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseRequestManager.getSingleByIdOrDefault(purchaseOrder.purchaseRequest._id));
 
-                        valid.isClosed = true;
-
-                        return this.update(valid)
-                            .then((poExId) => {
-
-                                return Promise.resolve(poExId);
-                            });
-                    });
+                        return Promise.all(getPurchaseRequestIds)
+                            .then((purchaseRequests) => {
+                                var jobsUpdatePR = purchaseRequests.map((purchaseRequest) => {
+                                    purchaseRequest.status = prStatusEnum.PREMATURE
+                                    return this.purchaseRequestManager.update(purchaseRequest)
+                                        .then((id) => { return this.purchaseRequestManager.getSingleByIdOrDefault(id) });
+                                })
+                                return Promise.all(jobsUpdatePR);
+                            })
+                            .then((purchaseRequests) => {
+                                return Promise.all(getPurchaseOrderIds)
+                                    .then((purchaseOrders) => {
+                                        var jobsUpdatePO = purchaseOrders.map((purchaseOrders) => {
+                                            var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
+                                            purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            purchaseOrder.items.map((item) => item.isClosed = true);
+                                            purchaseOrder.isClosed = true;
+                                            return this.purchaseOrderManager.update(purchaseOrder)
+                                                .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                                        })
+                                        return Promise.all(jobsUpdatePO)
+                                    })
+                            })
+                            .then((purchaseOrders) => {
+                                for (var purchaseOrder of purchaseOrders) {
+                                    var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
+                                    var index = purchaseOrderExternal.items.indexOf(item);
+                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                }
+                                return this.collection
+                                    .updateOne({
+                                        _id: purchaseOrderExternal._id
+                                    }, {
+                                        $set: purchaseOrderExternal
+                                    })
+                                    .then((result) => Promise.resolve(purchaseOrderExternal._id));
+                            })
+                    })
             });
     }
 
