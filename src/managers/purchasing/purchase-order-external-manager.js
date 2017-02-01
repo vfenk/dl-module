@@ -98,7 +98,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
         return this.getSingleById(id)
             .then((purchaseOrderExternal) => {
                 var getPurchaseOrderIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseOrderManager.getSingleByIdOrDefault(purchaseOrder._id));
-                return Promise.all(getPurchaseRequestIds)
+                return Promise.all(getPurchaseOrderIds)
             })
             .then((purchaseOrders) => {
                 var jobsUpdatePO = purchaseOrders.map((purchaseOrders) => {
@@ -124,7 +124,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     .then((result) => Promise.resolve(purchaseOrderExternal._id));
             });
     }
-    
+
     delete(poExternal) {
         return new Promise((resolve, reject) => {
             this._createIndexes()
