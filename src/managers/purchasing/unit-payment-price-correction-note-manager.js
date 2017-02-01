@@ -85,7 +85,7 @@ module.exports = class UnitPaymentPriceCorrectionNoteManager extends BaseManager
                         errors["date"] = i18n.__("UnitPaymentPriceCorrectionNote.date.isRequired:%s is required", i18n.__("UnitPaymentPriceCorrectionNote.date._:Correction Date"));
 
                     if (valid.items) {
-                        if (valid.items.length > 0) {
+                        if (!ObjectId.isValid(valid._id) && valid.items.length > 0) {
                             var itemErrors = [];
                             for (var item of valid.items) {
                                 var itemError = {};
