@@ -270,7 +270,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                             fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
                             fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
                         } else {
-                            var _fulfillment = Object.assign({},fulfillment);
+                            var _fulfillment = Object.assign({}, fulfillment);
                             _fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
                             _fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
                             _fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
@@ -278,9 +278,10 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                             poItem.fulfillments.push(_fulfillment);
                         }
                     }
-
-                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
-                    return this.purchaseOrderManager.update(purchaseOrder);
+                    if (purchaseOrder.status.value <= 7) {
+                        purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                        purchaseOrder.status = fulfillment.unitReceiptNoteDeliveredQuantity < fulfillment.deliveryOrderDeliveredQuantity ? poStatusEnum.RECEIVING : purchaseOrder.status;
+                    } return this.purchaseOrderManager.update(purchaseOrder);
                 })
             jobs.push(job);
         })
@@ -318,7 +319,10 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
                     }
 
-                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                    if (purchaseOrder.status.value <= 7) {
+                        purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                        purchaseOrder.status = fulfillment.unitReceiptNoteDeliveredQuantity < fulfillment.deliveryOrderDeliveredQuantity ? poStatusEnum.RECEIVING : purchaseOrder.status;
+                    }
                     return this.purchaseOrderManager.update(purchaseOrder);
                 })
             jobs.push(job);
@@ -370,9 +374,9 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         .reduce((prev, curr, index) => {
                             return prev || curr
                         }, false);
-
-                    purchaseOrder.status = poStatus ? poStatusEnum.RECEIVING : unitReceiptNote.deliveryOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
-                    return this.purchaseOrderManager.update(purchaseOrder);
+                    if (purchaseOrder.status.value <= 7) {
+                        purchaseOrder.status = poStatus ? poStatusEnum.RECEIVING : (unitReceiptNote.deliveryOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING);
+                    } return this.purchaseOrderManager.update(purchaseOrder);
                 })
             jobs.push(job);
         })
