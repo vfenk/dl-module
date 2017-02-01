@@ -366,10 +366,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return this._createIndexes()
             .then((createIndexResults) => {
                 return new Promise((resolve, reject) => {
-                    var sorting = {
-                        "purchaseRequest.date": -1,
-                        "purchaseRequest.no": 1
-                    };
                     var query = Object.assign({});
 
                     if (state !== -1) {
