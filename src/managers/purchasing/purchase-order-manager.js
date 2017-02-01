@@ -242,7 +242,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         purchaseRequest.isUsed = true;
                         purchaseRequest.purchaseOrderIds = purchaseRequest.purchaseOrderIds || [];
                         purchaseRequest.status = prStatusEnum.PROCESSING;
-                        purchaseRequest.purchaseOrderIds.push(poId);
+                        purchaseRequest.purchaseOrderIds.push(id);
                         return this.purchaseRequestManager.update(purchaseRequest)
                             .then(() => {
                                 purchaseOrder.purchaseRequest = purchaseRequest
