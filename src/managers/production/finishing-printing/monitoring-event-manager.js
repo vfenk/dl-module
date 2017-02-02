@@ -7,8 +7,8 @@ var DLModels = require('dl-models');
 var map = DLModels.map;
 var MonitoringEvent = DLModels.production.finishingPrinting.MonitoringEvent;
 var generateCode = require("../../../utils/code-generator");
-var MonitoringEventTypeManager = require('../../master/monitoring-event-type-manager');
 var MachineManager = require('../../master/machine-manager');
+var ProductionOrderManager = require('../../sales/production-order-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var moment = require('moment');
@@ -19,8 +19,8 @@ module.exports = class MonitoringEventManager extends BaseManager {
         super(db, user);
         this.collection = this.db.collection(map.production.finishingPrinting.collection.MonitoringEvent);
         
-        this.monitoringEventTypeManager = new MonitoringEventTypeManager(db, user);
         this.machineManager = new MachineManager(db, user);
+        this.productionOrderManager = new ProductionOrderManager(db, user);
     }
 
     _getQuery(paging) {
@@ -44,14 +44,14 @@ module.exports = class MonitoringEventManager extends BaseManager {
                 }
             };
 
-            var filterMonitoringEventType = {
-                "monitoringEventType": {
+            var filterMachineEvent = {
+                "machineEvent": {
                     '$regex': regex
                 }
             };
 
             keywordFilter = {
-                '$or': [filterMachineName, filterProductionOrder, filterMonitoringEventType]
+                '$or': [filterMachineName, filterProductionOrder, filterMachineEvent]
             };
         }
         query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
@@ -75,13 +75,15 @@ module.exports = class MonitoringEventManager extends BaseManager {
         });
 
         var getMachine = ObjectId.isValid(valid.machineId) ? this.machineManager.getSingleByIdOrDefault(new ObjectId(valid.machineId)) : Promise.resolve(null);
-        var getMonitoringEventType = ObjectId.isValid(valid.monitoringEventTypeId) ? this.monitoringEventTypeManager.getSingleByIdOrDefault(new ObjectId(valid.monitoringEventTypeId)) : Promise.resolve(null);
+        var getProductionOrder = (valid.productionOrder && valid.productionOrder.orderNo) ? this.productionOrderManager.getSingleProductionOrder(valid.productionOrder.orderNo) : Promise.resolve(null);
+        var getProductionOrderDetail = (valid.selectedProductionOrderDetail && valid.selectedProductionOrderDetail.code) ? this.productionOrderManager.getSingleProductionOrderDetail(valid.selectedProductionOrderDetail.code) : Promise.resolve(null);
 
-        return Promise.all([getMonitoringEventPromise, getMachine, getMonitoringEventType])
+        return Promise.all([getMonitoringEventPromise, getMachine, getProductionOrder, getProductionOrderDetail])
             .then(results =>{
                 var _monitoringEvent = results[0];
                 var _machine = results[1];
-                var _monitoringEventType = results[2];
+                var _productionOrder = results[2];
+                var _productionOrderDetail = results[3];
 
                 if (_monitoringEvent)
                     errors["code"] = i18n.__("MonitoringEvent.code.isExists:%s is exists", i18n.__("MonitoringEvent.code._:Code"));
@@ -134,9 +136,6 @@ module.exports = class MonitoringEventManager extends BaseManager {
                 if (!valid.cartNumber || valid.cartNumber == '')
                     errors["cartNumber"] = i18n.__("MonitoringEvent.cartNumber.isRequired:%s is required", i18n.__("MonitoringEvent.cartNumber._:Cart Number")); //"Nomor Kereta tidak boleh kosong";
 
-                if (!_monitoringEventType)
-                    errors["monitoringEventType"] = i18n.__("MonitoringEvent.monitoringEventType.isRequired:%s is required", i18n.__("MonitoringEvent.monitoringEventType._:Monitoring Event Type")); //"MonitoringEventType tidak boleh kosong";
-
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require("module-toolkit").ValidationError;
                     return Promise.reject(new ValidationError("data does not pass validation", errors));
@@ -153,9 +152,12 @@ module.exports = class MonitoringEventManager extends BaseManager {
                     valid.machine = _machine;
                 }
 
-                if (_monitoringEventType){
-                    valid.monitoringEventTypeId = _monitoringEventType._id;
-                    valid.monitoringEventType = _monitoringEventType;
+                if (_productionOrder){
+                    valid.productionOrder = _productionOrder;
+                }
+
+                if (_productionOrderDetail){
+                    valid.selectedProductionOrderDetail = _productionOrderDetail;
                 }
 
                 if (!valid.stamp)
