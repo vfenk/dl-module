@@ -90,7 +90,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     }
 
     _beforeInsert(purchaseOrderExternal) {
-        purchaseOrderExternal.refNo = generateCode();
+        purchaseOrderExternal.no = generateCode();
         purchaseOrderExternal.status = poStatusEnum.CREATED;
         return Promise.resolve(purchaseOrderExternal)
     }
@@ -409,7 +409,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     return this._validate(_purchaseOrderExternal)
                         .then((purchaseOrderExternal) => {
                             purchaseOrderExternal.isPosted = true;
-                            purchaseOrderExternal.status = poStatusEnum.PROCESSING;
+                            purchaseOrderExternal.status = poStatusEnum.ORDERED;
                             return this.update(purchaseOrderExternal);
                         })
                         .then((poExId) => {
@@ -422,7 +422,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                             return Promise.all(getPurchaseRequestIds)
                                 .then((purchaseRequests) => {
                                     var jobsUpdatePR = purchaseRequests.map((purchaseRequest) => {
-                                        purchaseRequest.status = prStatusEnum.PROCESSING;
+                                        purchaseRequest.status = prStatusEnum.ORDERED;
                                         return this.purchaseRequestManager.update(purchaseRequest)
                                             .then((id) => { return this.purchaseRequestManager.getSingleByIdOrDefault(id) });
                                     })
@@ -488,7 +488,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 })
                 return Promise.all(jobs)
             })
-            .then((purchaseOrderExternalIds)=>{
+            .then((purchaseOrderExternalIds) => {
                 return Promise.resolve(purchaseOrderExternalIds);
             });
     }
@@ -598,11 +598,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     })
                             })
                             .then((purchaseOrders) => {
-                                for (var purchaseOrder of purchaseOrders) {
-                                    var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
-                                    var index = purchaseOrderExternal.items.indexOf(item);
-                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
-                                }
                                 return this.collection
                                     .updateOne({
                                         _id: purchaseOrderExternal._id
@@ -687,7 +682,6 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                             var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
                                             purchaseOrder.purchaseRequest = _purchaseRequest;
                                             purchaseOrder.status = poStatusEnum.VOID;
-                                            purchaseOrder.isPosted = false;
                                             return this.purchaseOrderManager.update(purchaseOrder)
                                                 .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
                                         })
@@ -726,45 +720,31 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     })
                     .then((purchaseOrderExternal) => {
                         var getPurchaseOrderIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseOrderManager.getSingleByIdOrDefault(purchaseOrder._id));
-                        var getPurchaseRequestIds = purchaseOrderExternal.items.map((purchaseOrder) => this.purchaseRequestManager.getSingleByIdOrDefault(purchaseOrder.purchaseRequest._id));
 
-                        return Promise.all(getPurchaseRequestIds)
-                            .then((purchaseRequests) => {
-                                var jobsUpdatePR = purchaseRequests.map((purchaseRequest) => {
-                                    purchaseRequest.status = prStatusEnum.PREMATURE
-                                    return this.purchaseRequestManager.update(purchaseRequest)
-                                        .then((id) => { return this.purchaseRequestManager.getSingleByIdOrDefault(id) });
-                                })
-                                return Promise.all(jobsUpdatePR);
-                            })
-                            .then((purchaseRequests) => {
-                                return Promise.all(getPurchaseOrderIds)
-                                    .then((purchaseOrders) => {
-                                        var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
-                                            var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
-                                            purchaseOrder.purchaseRequest = _purchaseRequest;
-                                            purchaseOrder.items.map((item) => item.isClosed = true);
-                                            purchaseOrder.isClosed = true;
-                                            return this.purchaseOrderManager.update(purchaseOrder)
-                                                .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
-                                        })
-                                        return Promise.all(jobsUpdatePO)
-                                    })
-                            })
+                        return Promise.all(getPurchaseOrderIds)
                             .then((purchaseOrders) => {
-                                for (var purchaseOrder of purchaseOrders) {
-                                    var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
-                                    var index = purchaseOrderExternal.items.indexOf(item);
-                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
-                                }
-                                return this.collection
-                                    .updateOne({
-                                        _id: purchaseOrderExternal._id
-                                    }, {
-                                        $set: purchaseOrderExternal
-                                    })
-                                    .then((result) => Promise.resolve(purchaseOrderExternal._id));
+                                var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
+                                    purchaseOrder.items.map((item) => item.isClosed = true);
+                                    purchaseOrder.isClosed = true;
+                                    return this.purchaseOrderManager.update(purchaseOrder)
+                                        .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                                })
+                                return Promise.all(jobsUpdatePO)
                             })
+                    })
+                    .then((purchaseOrders) => {
+                        for (var purchaseOrder of purchaseOrders) {
+                            var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
+                            var index = purchaseOrderExternal.items.indexOf(item);
+                            purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                        }
+                        return this.collection
+                            .updateOne({
+                                _id: purchaseOrderExternal._id
+                            }, {
+                                $set: purchaseOrderExternal
+                            })
+                            .then((result) => Promise.resolve(purchaseOrderExternal._id));
                     })
             });
     }
