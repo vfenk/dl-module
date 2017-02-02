@@ -86,11 +86,12 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
-                    },
-                    _deleted: false
-                }, {
-                        "no": valid.no
-                    }]
+                    }
+                },
+                    { _deleted: false },
+                    { no: valid.no },
+                    { supplierId: new ObjectId(valid.supplierId) }
+                ]
             });
             var getDeliveryderByRefNoPromise = this.collection.singleOrDefault({
                 "$and": [{
@@ -376,20 +377,31 @@ module.exports = class DeliveryOrderManager extends BaseManager {
 
                         poItem.fulfillments = poItem.fulfillments || [];
                         poItem.fulfillments.push(fulfillment);
-                        poItem.realizationQuantity = poItem.fulfillments
-                            .map(fulfillment => fulfillment.deliveryOrderDeliveredQuantity)
+
+                        var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
+                        var _listDOUnique = _listDO.filter(function (elem, index, self) {
+                            return index == self.indexOf(elem);
+                        })
+
+                        poItem.realizationQuantity = _listDOUnique
+                            .map(deliveryOrderNo => {
+                                var _fulfillment = poItem.fulfillments.find((fulfillment) => fulfillment.deliveryOrderNo === deliveryOrderNo);
+                                return _fulfillment.deliveryOrderDeliveredQuantity;
+                            })
                             .reduce((prev, curr, index) => {
                                 return prev + curr;
                             }, 0);
-                        poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+                        if (purchaseOrder.status.value <= 5 && !purchaseOrder.isClosed) {
+                            poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+                        }
                     }
-
-                    purchaseOrder.isClosed = purchaseOrder.items
-                        .map((item) => item.isClosed)
-                        .reduce((prev, curr, index) => {
-                            return prev && curr
-                        }, true);
-
+                    if (purchaseOrder.status.value <= 5 && !purchaseOrder.isClosed) {
+                        purchaseOrder.isClosed = purchaseOrder.items
+                            .map((item) => item.isClosed)
+                            .reduce((prev, curr, index) => {
+                                return prev && curr
+                            }, true);
+                    }
                     if (purchaseOrder.status.value <= 5) {
                         purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
                     }
@@ -446,7 +458,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 .reduce((prev, curr, index) => {
                                     return prev && curr
                                 }, true);
-
+                            purchaseOrderExternal.status = poStatusEnum.ARRIVING;
                             return this.purchaseOrderExternalManager.update(purchaseOrderExternal);
                         })
                 })
@@ -480,10 +492,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     .then((purchaseOrderExternals) => {
                         return Promise.all(getPOInternals)
                             .then((purchaseOrderInternals) => {
-                                for (var purchaseOrderExternal of purchaseOrderExternals) {
-                                    var item = deliveryOrder.items.find(item => item.purchaseOrderExternalId.toString() === purchaseOrderExternal._id.toString())
+                                for (var item of deliveryOrder.items) {
+                                    var purchaseOrderExternal = purchaseOrderExternals.find(purchaseOrderExternal => item.purchaseOrderExternalId.toString() === purchaseOrderExternal._id.toString())
                                     item.purchaseOrderExternal = purchaseOrderExternal;
-
                                     for (var fulfillment of item.fulfillments) {
                                         var purchaseOrder = purchaseOrderInternals.find(purchaseOrderInternal => purchaseOrderInternal._id.toString() === fulfillment.purchaseOrderId.toString())
                                         fulfillment.purchaseOrder = purchaseOrder;
@@ -577,25 +588,38 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         poItem.fulfillments = poItem.fulfillments || [];
                         if (deliveryOrder._id) {
                             var item = poItem.fulfillments.find(item => item.deliveryOrderNo === deliveryOrder.no);
-                            var index = poItem.fulfillments.indexOf(item);
-                            poItem.fulfillments[index].deliveryOrderNo = deliveryOrder.no;
-                            poItem.fulfillments[index].deliveryOrderDeliveredQuantity = realization.deliveredQuantity;
-                            poItem.fulfillments[index].deliveryOrderDate = deliveryOrder.date;
-                            poItem.fulfillments[index].supplierDoDate = deliveryOrder.supplierDoDate;
+                            if (item) {
+                                var index = poItem.fulfillments.indexOf(item);
+                                poItem.fulfillments[index].deliveryOrderNo = deliveryOrder.no;
+                                poItem.fulfillments[index].deliveryOrderDeliveredQuantity = realization.deliveredQuantity;
+                                poItem.fulfillments[index].deliveryOrderDate = deliveryOrder.date;
+                                poItem.fulfillments[index].supplierDoDate = deliveryOrder.supplierDoDate;
+                            }
                         }
-                        poItem.realizationQuantity = poItem.fulfillments
-                            .map(fulfillment => fulfillment.deliveryOrderDeliveredQuantity)
+                        var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
+                        var _listDOUnique = _listDO.filter(function (elem, index, self) {
+                            return index == self.indexOf(elem);
+                        })
+
+                        poItem.realizationQuantity = _listDOUnique
+                            .map(deliveryOrderNo => {
+                                var _fulfillment = poItem.fulfillments.find((fulfillment) => fulfillment.deliveryOrderNo === deliveryOrderNo);
+                                return _fulfillment.deliveryOrderDeliveredQuantity;
+                            })
                             .reduce((prev, curr, index) => {
                                 return prev + curr;
                             }, 0);
-                        poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+                        if (purchaseOrder.status.value <= 5 && !purchaseOrder.isClosed) {
+                            poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+                        }
                     }
-
-                    purchaseOrder.isClosed = purchaseOrder.items
-                        .map((item) => item.isClosed)
-                        .reduce((prev, curr, index) => {
-                            return prev && curr
-                        }, true);
+                    if (purchaseOrder.status.value <= 5 && !purchaseOrder.isClosed) {
+                        purchaseOrder.isClosed = purchaseOrder.items
+                            .map((item) => item.isClosed)
+                            .reduce((prev, curr, index) => {
+                                return prev && curr
+                            }, true);
+                    }
                     if (purchaseOrder.status.value < 5) {
                         purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
                     }
@@ -674,20 +698,30 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         var _index = poItem.fulfillments.indexOf(item);
                         poItem.fulfillments.splice(_index, 1);
 
-                        poItem.realizationQuantity = poItem.fulfillments
-                            .map(fulfillment => fulfillment.deliveryOrderDeliveredQuantity)
+                        var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
+                        var _listDOUnique = _listDO.filter(function (elem, index, self) {
+                            return index == self.indexOf(elem);
+                        })
+
+                        poItem.realizationQuantity = _listDOUnique
+                            .map(deliveryOrderNo => {
+                                var _fulfillment = poItem.fulfillments.find((fulfillment) => fulfillment.deliveryOrderNo === deliveryOrderNo);
+                                return _fulfillment.deliveryOrderDeliveredQuantity;
+                            })
                             .reduce((prev, curr, index) => {
                                 return prev + curr;
                             }, 0);
-                        poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+                        if (purchaseOrder.purchaseRequest.status.value !== 9) {
+                            poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+                        }
                     }
-
-                    purchaseOrder.isClosed = purchaseOrder.items
-                        .map((item) => item.isClosed)
-                        .reduce((prev, curr, index) => {
-                            return prev && curr
-                        }, true);
-
+                    if (purchaseOrder.purchaseRequest.status.value !== 9) {
+                        purchaseOrder.isClosed = purchaseOrder.items
+                            .map((item) => item.isClosed)
+                            .reduce((prev, curr, index) => {
+                                return prev && curr
+                            }, true);
+                    }
                     var poStatus = purchaseOrder.items
                         .map((item) => item.fulfillments.length)
                         .reduce((prev, curr, index) => {
@@ -722,7 +756,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
         })
     }
 
-    updatePurchaseOrderExternal(realizations) {
+    updatePurchaseOrderExternalDeleteDO(realizations) {
         var map = new Map();
         for (var purchaseOrderId of realizations) {
             var key = purchaseOrderId.purchaseOrderExternalId.toString();
@@ -754,7 +788,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                                 .reduce((prev, curr, index) => {
                                     return prev && curr
                                 }, true);
-
+                            purchaseOrderExternal.status = poStatusEnum.ORDERED;
                             return this.purchaseOrderExternalManager.update(purchaseOrderExternal);
                         })
                 })
@@ -777,7 +811,7 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             .then((deliveryOrder) => this.getRealization(deliveryOrder))
                             .then((realizations) => this.updatePurchaseRequestDeleteDO(realizations))
                             .then((realizations) => this.updatePurchaseOrderDeleteDO(realizations))
-                            .then((realizations) => this.updatePurchaseOrderExternal(realizations))
+                            .then((realizations) => this.updatePurchaseOrderExternalDeleteDO(realizations))
                             .then(() => {
                                 return this.syncItems(id);
                             })
