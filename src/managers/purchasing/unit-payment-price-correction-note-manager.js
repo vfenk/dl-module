@@ -78,7 +78,7 @@ module.exports = class unitPaymentQuantityCorrectionNoteManager extends BaseMana
                     if (valid.items) {
                         if (valid.items.length > 0) {
                             var itemErrors = [];
-                            if (ObjectId.isValid(valid._id)) {
+                            if (!ObjectId.isValid(valid._id)) {
                                 for (var item of valid.items) {
                                     var itemError = {};
                                     if (item.pricePerUnit <= 0) {

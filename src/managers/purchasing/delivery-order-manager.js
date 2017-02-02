@@ -588,11 +588,13 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                         poItem.fulfillments = poItem.fulfillments || [];
                         if (deliveryOrder._id) {
                             var item = poItem.fulfillments.find(item => item.deliveryOrderNo === deliveryOrder.no);
-                            var index = poItem.fulfillments.indexOf(item);
-                            poItem.fulfillments[index].deliveryOrderNo = deliveryOrder.no;
-                            poItem.fulfillments[index].deliveryOrderDeliveredQuantity = realization.deliveredQuantity;
-                            poItem.fulfillments[index].deliveryOrderDate = deliveryOrder.date;
-                            poItem.fulfillments[index].supplierDoDate = deliveryOrder.supplierDoDate;
+                            if (item) {
+                                var index = poItem.fulfillments.indexOf(item);
+                                poItem.fulfillments[index].deliveryOrderNo = deliveryOrder.no;
+                                poItem.fulfillments[index].deliveryOrderDeliveredQuantity = realization.deliveredQuantity;
+                                poItem.fulfillments[index].deliveryOrderDate = deliveryOrder.date;
+                                poItem.fulfillments[index].supplierDoDate = deliveryOrder.supplierDoDate;
+                            }
                         }
                         var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
                         var _listDOUnique = _listDO.filter(function (elem, index, self) {
