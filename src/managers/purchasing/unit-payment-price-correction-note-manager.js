@@ -78,34 +78,36 @@ module.exports = class unitPaymentQuantityCorrectionNoteManager extends BaseMana
                     if (valid.items) {
                         if (valid.items.length > 0) {
                             var itemErrors = [];
-                            for (var item of valid.items) {
-                                var itemError = {};
-                                if (item.pricePerUnit <= 0) {
-                                    itemError["pricePerUnit"] = i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit.isRequired:%s is required", i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit._:Price Per Unit"));
-                                }
-                                if (item.priceTotal <= 0) {
-                                    itemError["priceTotal"] = i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal.isRequired:%s is required", i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal._:Total Price"));
-                                }
-                                for (var _unitReceiptNote of _unitPaymentOrder.items) {
-                                    for (var _unitReceiptNoteItem of _unitReceiptNote.unitReceiptNote.items) {
-                                        if (_unitReceiptNoteItem.product._id.toString() === item.product._id.toString()) {
-                                            if (_unitReceiptNoteItem.correction.length > 0) {
-                                                if (valid.correctionType === "Harga Satuan") {
-                                                    if (item.pricePerUnit === _unitReceiptNoteItem.correction[_unitReceiptNoteItem.correction.length - 1].correctionPricePerUnit) {
-                                                        itemError["pricePerUnit"] = i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit.noChanges:%s doesn't change", i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit._:Price Per Unit"));
+                            if (ObjectId.isValid(valid._id)) {
+                                for (var item of valid.items) {
+                                    var itemError = {};
+                                    if (item.pricePerUnit <= 0) {
+                                        itemError["pricePerUnit"] = i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit.isRequired:%s is required", i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit._:Price Per Unit"));
+                                    }
+                                    if (item.priceTotal <= 0) {
+                                        itemError["priceTotal"] = i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal.isRequired:%s is required", i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal._:Total Price"));
+                                    }
+                                    for (var _unitReceiptNote of _unitPaymentOrder.items) {
+                                        for (var _unitReceiptNoteItem of _unitReceiptNote.unitReceiptNote.items) {
+                                            if (_unitReceiptNoteItem.product._id.toString() === item.product._id.toString()) {
+                                                if (_unitReceiptNoteItem.correction.length > 0) {
+                                                    if (valid.correctionType === "Harga Satuan") {
+                                                        if (item.pricePerUnit === _unitReceiptNoteItem.correction[_unitReceiptNoteItem.correction.length - 1].correctionPricePerUnit) {
+                                                            itemError["pricePerUnit"] = i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit.noChanges:%s doesn't change", i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit._:Price Per Unit"));
+                                                        }
+                                                    }
+                                                    else if (valid.correctionType === "Harga Total") {
+                                                        if (item.priceTotal === _unitReceiptNoteItem.correction[_unitReceiptNoteItem.correction.length - 1].correctionPriceTotal) {
+                                                            itemError["priceTotal"] = i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal.noChanges:%s doesn't change", i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal._:Total Price"));
+                                                        }
                                                     }
                                                 }
-                                                else if (valid.correctionType === "Harga Total") {
-                                                    if (item.priceTotal === _unitReceiptNoteItem.correction[_unitReceiptNoteItem.correction.length - 1].correctionPriceTotal) {
-                                                        itemError["priceTotal"] = i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal.noChanges:%s doesn't change", i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal._:Total Price"));
-                                                    }
-                                                }
+                                                break;
                                             }
-                                            break;
                                         }
                                     }
+                                    itemErrors.push(itemError);
                                 }
-                                itemErrors.push(itemError);
                             }
                             for (var itemError of itemErrors) {
                                 for (var prop in itemError) {
@@ -357,7 +359,7 @@ module.exports = class unitPaymentQuantityCorrectionNoteManager extends BaseMana
                             if (!fulfillment.correction) {
                                 fulfillment.correction = [];
                             }
-                            
+
                             var correctionPriceTotal = 0;
                             if (fulfillment.correction.length > 0) {
                                 var lastPriceTotal = fulfillment.correction[fulfillment.correction.length - 1].correctionPriceTotal;
@@ -365,7 +367,7 @@ module.exports = class unitPaymentQuantityCorrectionNoteManager extends BaseMana
                             } else {
                                 correctionPriceTotal = (correction.priceTotal * correction.currency.rate) - (correction.quantity * poItem.pricePerDealUnit * correction.currency.rate);
                             }
-                            
+
                             var _correction = {};
                             _correction.correctionDate = unitPaymentQuantityCorrectionNote.date;
                             _correction.correctionNo = unitPaymentQuantityCorrectionNote.no;

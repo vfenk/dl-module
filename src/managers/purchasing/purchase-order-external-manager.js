@@ -731,20 +731,20 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 })
                                 return Promise.all(jobsUpdatePO)
                             })
-                    })
-                    .then((purchaseOrders) => {
-                        for (var purchaseOrder of purchaseOrders) {
-                            var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
-                            var index = purchaseOrderExternal.items.indexOf(item);
-                            purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
-                        }
-                        return this.collection
-                            .updateOne({
-                                _id: purchaseOrderExternal._id
-                            }, {
-                                $set: purchaseOrderExternal
+                            .then((purchaseOrders) => {
+                                for (var purchaseOrder of purchaseOrders) {
+                                    var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
+                                    var index = purchaseOrderExternal.items.indexOf(item);
+                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                }
+                                return this.collection
+                                    .updateOne({
+                                        _id: purchaseOrderExternal._id
+                                    }, {
+                                        $set: purchaseOrderExternal
+                                    })
+                                    .then((result) => Promise.resolve(purchaseOrderExternal._id));
                             })
-                            .then((result) => Promise.resolve(purchaseOrderExternal._id));
                     })
             });
     }
