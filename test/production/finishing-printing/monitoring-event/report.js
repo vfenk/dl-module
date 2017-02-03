@@ -123,6 +123,7 @@ it('#06. should success when get Monitoring Event Per Date End', function (done)
         });
 });
 
+var resultForExcelTest = {};
 it('#07. should success when get Monitoring Event using all filters', function (done) {
     var info = {};
     info.machineId = createdData.machineId;
@@ -133,6 +134,7 @@ it('#07. should success when get Monitoring Event using all filters', function (
 
     monitoringEventManager.getMonitoringEventReport(info)
         .then(result => {             
+            resultForExcelTest = result; 
             var monitoringEvent = result.data;
             monitoringEvent.should.instanceof(Array);
             monitoringEvent.length.should.not.equal(0);
@@ -158,7 +160,21 @@ it('#08. should have NO result when dateFrom greater than dateTo', function (don
         });
 });
 
-it("#9. should success when destroy all unit test data", function(done) {
+it('#09. should success when get data for Excel Report', function (done) {
+    var query = {};
+
+    monitoringEventManager.getXls(resultForExcelTest, query)
+        .then(xlsData => {             
+            xlsData.should.have.property('data');
+            xlsData.should.have.property('options');
+            xlsData.should.have.property('name');
+            done();
+        }).catch(e => {
+            done(e);
+        });
+});
+
+it("#10. should success when destroy all unit test data", function(done) {
     monitoringEventManager.destroy(createdData._id)
         .then((result) => {
             result.should.be.Boolean();
