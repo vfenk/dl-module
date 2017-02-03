@@ -391,11 +391,29 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 .then((purchaseOrder) => {
                     for (var item of items) {
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
+                        var listDo = poItem.fulfillments
+                            .map((fulfillment) => {
+                                if (fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString()) {
+                                    return 1;
+                                } else {
+                                    return 0;
+                                }
+                            })
+                            .reduce((prev, curr, index) => {
+                                return prev + curr;
+                            }, 0);
 
                         var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString() && fulfillment.unitReceiptNoteNo === unitReceiptNote.no);
                         if (fulfillment) {
-                            var index = poItem.fulfillments.indexOf(fulfillment);
-                            poItem.fulfillments.splice(index, 1);
+                            if (listDo > 1) {
+                                var index = poItem.fulfillments.indexOf(fulfillment);
+                                poItem.fulfillments.splice(index, 1);
+                            } else {
+                                delete fulfillment.unitReceiptNoteNo;
+                                delete fulfillment.unitReceiptNoteDate;
+                                delete fulfillment.unitReceiptNoteDeliveredQuantity;
+                                delete fulfillment.unitReceiptDeliveredUom;
+                            }
                         }
                     }
 
@@ -605,7 +623,7 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     .then((deliveryOrder) => {
                         return Promise.all(getPoInternals)
                             .then((purchaseOrderInternals) => {
-                                for(var item of unitReceiptNote.items){
+                                for (var item of unitReceiptNote.items) {
                                     var purchaseOrderInternal = purchaseOrderInternals.find(purchaseOrderInternal => item.purchaseOrderId.toString() === purchaseOrderInternal._id.toString())
                                     item.purchaseOrder = purchaseOrderInternal;
                                 }
