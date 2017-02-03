@@ -34,10 +34,7 @@ module.exports = {
     },
     production: {
         monitoringEvent: require('./data-util/production/finishing-printing/monitoring-event-data-util'),
-
-        finishingPrinting:{
-            monitoringSpecificationMachine: require('./data-util/production/finishing-printing/monitoring-specification-machine-data-util')
-        }
+        monitoringSpecificationMachine: require('./data-util/production/finishing-printing/monitoring-specification-machine-data-util')
     },
     sales: {
         productionOrder: require('./data-util/sales/production-order-data-util'),
