@@ -203,3 +203,18 @@ it('#07. should error when create new data with timeStart greater than timeEnd i
         });
 });
 
+it('#08. should success when get Query', function (done) {
+    var paging = {};
+    paging.keyword = '123';
+    var query = monitoringEventManager._getQuery(paging)
+    try {
+        query.should.have.property('$and');
+        query['$and'].should.instanceof(Array)
+        query['$and'].length.should.not.equal(0);
+        done();
+    }
+    catch (ex) {
+        done(ex);
+    }
+});
+

@@ -39,7 +39,9 @@ class MonitoringEventDataUtil {
             .then((manager) => {
                 return this.getNewData().then((data) => {
                     return manager.create(data)
-                        .then((id) => manager.getSingleById(id));
+                        .then((id) => {
+                            manager.getSingleById(id)
+                            });
                 });
             });
     }

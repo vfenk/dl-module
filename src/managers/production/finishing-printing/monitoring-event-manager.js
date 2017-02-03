@@ -168,13 +168,112 @@ module.exports = class MonitoringEventManager extends BaseManager {
             })
     }
 
+    getMonitoringEventReport(info){
+        var _defaultFilter = {
+            _deleted: false
+        }, machineFilter = {},
+        machineEventFilter = {},
+        productionOrderFilter = {},
+        dateFromFilter = {},
+        dateToFilter = {},
+        query = {};
+
+        var dateFrom = info.dateFrom ? (new Date(info.dateFrom)) : (new Date(1900, 1, 1));
+        var dateTo = info.dateTo ? (new Date(info.dateTo)) : (new Date());
+
+        if (info.machineId && info.machineId != ''){
+            var machineId = ObjectId.isValid(info.machineId) ? new ObjectId(info.machineId) : {};
+            machineFilter = {'machine._id': machineId};
+        }
+        if (info.machineEventCode && info.machineEventCode != ''){
+            machineEventFilter = {'machineEvent.code': info.machineEventCode};
+        }
+        if (info.productionOrderNumber && info.productionOrderNumber != ''){
+            productionOrderFilter = {'productionOrder.orderNo': info.productionOrderNumber};
+        }
+        dateFromFilter = {
+            '$or': [
+                { 'dateStart': {$gte : dateFrom}}, 
+                { 'dateEnd': {$gte : dateFrom}}]
+        };
+        
+        dateToFilter = {
+            '$or': [
+                { 'dateStart': {$lte : dateTo}}, 
+                { 'dateEnd': {$lte : dateTo}}]
+        };
+
+        query = { '$and': [_defaultFilter, machineFilter, machineEventFilter, productionOrderFilter, dateFromFilter, dateToFilter] };
+
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return this.collection
+                    .where(query)
+                    .execute();
+            });
+    }
+
+    getXls(result, query){
+        var xls = {};
+        xls.data = [];
+        xls.options = [];
+        xls.name = '';
+
+        var index = 0;
+        var dateFormat = "DD MMM YYYY";
+
+        for(var monitoringEvent of result.data){
+            index++;
+            var item = {};
+            item["No"] = index;
+            item["Machine"] = monitoringEvent.machine ? monitoringEvent.machine.name : '';
+            item["Production Order Number"] = monitoringEvent.productionOrder ? monitoringEvent.productionOrder.orderNo : '';
+            item["Color"] = monitoringEvent.selectedProductionOrderDetail && monitoringEvent.selectedProductionOrderDetail.colorType ? monitoringEvent.selectedProductionOrderDetail.colorType.name : '';
+            item["Date Start"] = monitoringEvent.dateStart ? moment(new Date(monitoringEvent.dateStart)).format(dateFormat) : '';
+            item["Time Start"] = monitoringEvent.timeInMillisStart ? moment(monitoringEvent.timeInMillisStart).format('HH:mm') : '';
+            item["Date End"] = monitoringEvent.dateEnd ? moment(new Date(monitoringEvent.dateEnd)).format(dateFormat) : '';
+            item["Time End"] = monitoringEvent.timeInMillisEnd ? moment(monitoringEvent.timeInMillisEnd).format('HH:mm') : '';
+            item["Cart Number"] = monitoringEvent.cartNumber;
+            item["Machine Event"] = monitoringEvent.machineEvent ? monitoringEvent.machineEvent.name : '';
+            item["Remark"] = monitoringEvent.remark;
+            
+            xls.data.push(item);
+        }
+
+        xls.options["No"] = "number";
+        xls.options["Machine"] = "string";
+        xls.options["Production Order Number"] = "string";
+        xls.options["Color"] = "string";
+        xls.options["Date Start"] = "string";
+        xls.options["Time Start"] = "string";
+        xls.options["Date End"] = "string";
+        xls.options["Time End"] = "string";
+        xls.options["Cart Number"] = "string";
+        xls.options["Machine Event"] = "string";
+        xls.options["Remark"] = "string";
+
+        if(query.dateFrom && query.dateTo){
+            xls.name = `Monitoring Event Report ${moment(new Date(query.dateFrom)).format(dateFormat)} - ${moment(new Date(query.dateTo)).format(dateFormat)}.xlsx`;
+        }
+        else if(!query.dateFrom && query.dateTo){
+            xls.name = `Monitoring Event Report ${moment(new Date(query.dateTo)).format(dateFormat)}.xlsx`;
+        }
+        else if(query.dateFrom && !query.dateTo){
+            xls.name = `Monitoring Event Report ${moment(new Date(query.dateFrom)).format(dateFormat)}.xlsx`;
+        }
+        else
+            xls.name = `Monitoring Event Report.xlsx`;
+
+        return Promise.resolve(xls);
+    }
+
     _beforeInsert(monitoringEvent) {
         monitoringEvent.code = generateCode();
         monitoringEvent._createdDate = new Date();
         return Promise.resolve(monitoringEvent);
     }
 
-     _createIndexes() {
+    _createIndexes() {
         var dateIndex = {
             name: `ix_${map.production.finishingPrinting.collection.MonitoringEvent}__updatedDate`,
 
