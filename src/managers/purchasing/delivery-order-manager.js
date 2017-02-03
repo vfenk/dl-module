@@ -338,8 +338,10 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 .then((purchaseRequest) => {
                     for (var productId of productIds) {
                         var prItem = purchaseRequest.items.find(item => item.productId.toString() === productId.toString());
-                        prItem.deliveryOrderNos = prItem.deliveryOrderNos || [];
-                        prItem.deliveryOrderNos.push(deliveryOrder.no);
+                        if (prItem) {
+                            prItem.deliveryOrderNos = prItem.deliveryOrderNos || [];
+                            prItem.deliveryOrderNos.push(deliveryOrder.no);
+                        }
                     }
                     return this.purchaseRequestManager.update(purchaseRequest);
                 })
@@ -367,32 +369,34 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     for (var realization of realizations) {
                         var productId = realization.productId;
                         var poItem = purchaseOrder.items.find(item => item.product._id.toString() === productId.toString());
-                        var deliveryOrder = realization.deliveryOrder;
-                        var fulfillment = {
-                            deliveryOrderNo: deliveryOrder.no,
-                            deliveryOrderDeliveredQuantity: realization.deliveredQuantity,
-                            deliveryOrderDate: deliveryOrder.date,
-                            supplierDoDate: deliveryOrder.supplierDoDate
-                        };
+                        if (poItem) {
+                            var deliveryOrder = realization.deliveryOrder;
+                            var fulfillment = {
+                                deliveryOrderNo: deliveryOrder.no,
+                                deliveryOrderDeliveredQuantity: realization.deliveredQuantity,
+                                deliveryOrderDate: deliveryOrder.date,
+                                supplierDoDate: deliveryOrder.supplierDoDate
+                            };
 
-                        poItem.fulfillments = poItem.fulfillments || [];
-                        poItem.fulfillments.push(fulfillment);
+                            poItem.fulfillments = poItem.fulfillments || [];
+                            poItem.fulfillments.push(fulfillment);
 
-                        var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
-                        var _listDOUnique = _listDO.filter(function (elem, index, self) {
-                            return index == self.indexOf(elem);
-                        })
-
-                        poItem.realizationQuantity = _listDOUnique
-                            .map(deliveryOrderNo => {
-                                var _fulfillment = poItem.fulfillments.find((fulfillment) => fulfillment.deliveryOrderNo === deliveryOrderNo);
-                                return _fulfillment.deliveryOrderDeliveredQuantity;
+                            var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
+                            var _listDOUnique = _listDO.filter(function (elem, index, self) {
+                                return index == self.indexOf(elem);
                             })
-                            .reduce((prev, curr, index) => {
-                                return prev + curr;
-                            }, 0);
-                        if (purchaseOrder.status.value <= 5 && !purchaseOrder.isClosed) {
-                            poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+
+                            poItem.realizationQuantity = _listDOUnique
+                                .map(deliveryOrderNo => {
+                                    var _fulfillment = poItem.fulfillments.find((fulfillment) => fulfillment.deliveryOrderNo === deliveryOrderNo);
+                                    return _fulfillment ? _fulfillment.deliveryOrderDeliveredQuantity : 0;
+                                })
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr;
+                                }, 0);
+                            if (purchaseOrder.status.value <= 5 && !purchaseOrder.isClosed) {
+                                poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+                            }
                         }
                     }
                     if (purchaseOrder.status.value <= 5 && !purchaseOrder.isClosed) {
@@ -450,7 +454,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             for (var purchaseOrder of purchaseOrders) {
                                 var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                 var index = purchaseOrderExternal.items.indexOf(item);
-                                purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                if (index !== -1) {
+                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                }
                             }
 
                             purchaseOrderExternal.isClosed = purchaseOrderExternal.items
@@ -494,10 +500,14 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             .then((purchaseOrderInternals) => {
                                 for (var item of deliveryOrder.items) {
                                     var purchaseOrderExternal = purchaseOrderExternals.find(purchaseOrderExternal => item.purchaseOrderExternalId.toString() === purchaseOrderExternal._id.toString())
-                                    item.purchaseOrderExternal = purchaseOrderExternal;
-                                    for (var fulfillment of item.fulfillments) {
-                                        var purchaseOrder = purchaseOrderInternals.find(purchaseOrderInternal => purchaseOrderInternal._id.toString() === fulfillment.purchaseOrderId.toString())
-                                        fulfillment.purchaseOrder = purchaseOrder;
+                                    if (purchaseOrderExternal) {
+                                        item.purchaseOrderExternal = purchaseOrderExternal;
+                                        for (var fulfillment of item.fulfillments) {
+                                            var purchaseOrder = purchaseOrderInternals.find(purchaseOrderInternal => purchaseOrderInternal._id.toString() === fulfillment.purchaseOrderId.toString())
+                                            if (purchaseOrder) {
+                                                fulfillment.purchaseOrder = purchaseOrder;
+                                            }
+                                        }
                                     }
                                 }
                                 return this.collection
@@ -551,10 +561,12 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 .then((purchaseRequest) => {
                     for (var productId of productIds) {
                         var prItem = purchaseRequest.items.find(item => item.productId.toString() === productId.toString());
-                        prItem.deliveryOrderNos = prItem.deliveryOrderNos || [];
-                        var _index = prItem.deliveryOrderNos.indexOf(deliveryOrder.no);
-                        if (_index === -1) {
-                            prItem.deliveryOrderNos.push(deliveryOrder.no);
+                        if (prItem) {
+                            prItem.deliveryOrderNos = prItem.deliveryOrderNos || [];
+                            var _index = prItem.deliveryOrderNos.indexOf(deliveryOrder.no);
+                            if (_index === -1) {
+                                prItem.deliveryOrderNos.push(deliveryOrder.no);
+                            }
                         }
                     }
                     return this.purchaseRequestManager.update(purchaseRequest);
@@ -583,34 +595,45 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                     for (var realization of realizations) {
                         var productId = realization.productId;
                         var poItem = purchaseOrder.items.find(item => item.product._id.toString() === productId.toString());
-                        var deliveryOrder = realization.deliveryOrder;
+                        if (poItem) {
+                            var deliveryOrder = realization.deliveryOrder;
+                            poItem.fulfillments = poItem.fulfillments || [];
+                            if (deliveryOrder._id) {
+                                var item = poItem.fulfillments.find(item => item.deliveryOrderNo === deliveryOrder.no);
+                                if (item) {
+                                    var index = poItem.fulfillments.indexOf(item);
+                                    poItem.fulfillments[index].deliveryOrderNo = deliveryOrder.no;
+                                    poItem.fulfillments[index].deliveryOrderDeliveredQuantity = realization.deliveredQuantity;
+                                    poItem.fulfillments[index].deliveryOrderDate = deliveryOrder.date;
+                                    poItem.fulfillments[index].supplierDoDate = deliveryOrder.supplierDoDate;
+                                } else {
+                                    var fulfillment = {
+                                        deliveryOrderNo: deliveryOrder.no,
+                                        deliveryOrderDeliveredQuantity: realization.deliveredQuantity,
+                                        deliveryOrderDate: deliveryOrder.date,
+                                        supplierDoDate: deliveryOrder.supplierDoDate
+                                    };
 
-                        poItem.fulfillments = poItem.fulfillments || [];
-                        if (deliveryOrder._id) {
-                            var item = poItem.fulfillments.find(item => item.deliveryOrderNo === deliveryOrder.no);
-                            if (item) {
-                                var index = poItem.fulfillments.indexOf(item);
-                                poItem.fulfillments[index].deliveryOrderNo = deliveryOrder.no;
-                                poItem.fulfillments[index].deliveryOrderDeliveredQuantity = realization.deliveredQuantity;
-                                poItem.fulfillments[index].deliveryOrderDate = deliveryOrder.date;
-                                poItem.fulfillments[index].supplierDoDate = deliveryOrder.supplierDoDate;
+                                    poItem.fulfillments = poItem.fulfillments || [];
+                                    poItem.fulfillments.push(fulfillment);
+                                }
                             }
-                        }
-                        var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
-                        var _listDOUnique = _listDO.filter(function (elem, index, self) {
-                            return index == self.indexOf(elem);
-                        })
-
-                        poItem.realizationQuantity = _listDOUnique
-                            .map(deliveryOrderNo => {
-                                var _fulfillment = poItem.fulfillments.find((fulfillment) => fulfillment.deliveryOrderNo === deliveryOrderNo);
-                                return _fulfillment.deliveryOrderDeliveredQuantity;
+                            var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
+                            var _listDOUnique = _listDO.filter(function (elem, index, self) {
+                                return index == self.indexOf(elem);
                             })
-                            .reduce((prev, curr, index) => {
-                                return prev + curr;
-                            }, 0);
-                        if (purchaseOrder.status.value <= 5 || !purchaseOrder.isClosed) {
-                            poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+
+                            poItem.realizationQuantity = _listDOUnique
+                                .map(deliveryOrderNo => {
+                                    var _fulfillment = poItem.fulfillments.find((fulfillment) => fulfillment.deliveryOrderNo === deliveryOrderNo);
+                                    return _fulfillment ? _fulfillment.deliveryOrderDeliveredQuantity : 0;
+                                })
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr;
+                                }, 0);
+                            if (purchaseOrder.status.value <= 5 || !purchaseOrder.isClosed) {
+                                poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+                            }
                         }
                     }
                     if (purchaseOrder.status.value <= 5 || !purchaseOrder.isClosed) {
@@ -661,9 +684,13 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 .then((purchaseRequest) => {
                     for (var productId of productIds) {
                         var prItem = purchaseRequest.items.find(item => item.productId.toString() === productId.toString());
-                        prItem.deliveryOrderNos = prItem.deliveryOrderNos || [];
-                        var _index = prItem.deliveryOrderNos.indexOf(deliveryOrder.no);
-                        prItem.deliveryOrderNos.splice(_index, 1);
+                        if (prItem) {
+                            prItem.deliveryOrderNos = prItem.deliveryOrderNos || [];
+                            var _index = prItem.deliveryOrderNos.indexOf(deliveryOrder.no);
+                            if (_index !== -1) {
+                                prItem.deliveryOrderNos.splice(_index, 1);
+                            }
+                        }
                     }
                     var prStatus = purchaseRequest.items
                         .map((item) => item.deliveryOrderNos.length)
@@ -704,27 +731,29 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             for (var realization of realizations) {
                                 var productId = realization.productId;
                                 var poItem = purchaseOrder.items.find(item => item.product._id.toString() === productId.toString());
-
-                                poItem.fulfillments = poItem.fulfillments || [];
-                                var item = poItem.fulfillments.find(item => item.deliveryOrderNo === deliveryOrder.no);
-                                var _index = poItem.fulfillments.indexOf(item);
-                                poItem.fulfillments.splice(_index, 1);
-
-                                var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
-                                var _listDOUnique = _listDO.filter(function (elem, index, self) {
-                                    return index == self.indexOf(elem);
-                                })
-
-                                poItem.realizationQuantity = _listDOUnique
-                                    .map(deliveryOrderNo => {
-                                        var _fulfillment = poItem.fulfillments.find((fulfillment) => fulfillment.deliveryOrderNo === deliveryOrderNo);
-                                        return _fulfillment.deliveryOrderDeliveredQuantity;
+                                if (poItem) {
+                                    poItem.fulfillments = poItem.fulfillments || [];
+                                    var item = poItem.fulfillments.find(item => item.deliveryOrderNo === deliveryOrder.no);
+                                    var _index = poItem.fulfillments.indexOf(item);
+                                    if (_index !== -1) {
+                                        poItem.fulfillments.splice(_index, 1);
+                                    }
+                                    var _listDO = poItem.fulfillments.map((fulfillment) => fulfillment.deliveryOrderNo);
+                                    var _listDOUnique = _listDO.filter(function (elem, index, self) {
+                                        return index == self.indexOf(elem);
                                     })
-                                    .reduce((prev, curr, index) => {
-                                        return prev + curr;
-                                    }, 0);
-                                if (purchaseOrder.purchaseRequest.status.value !== 9) {
-                                    poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+
+                                    poItem.realizationQuantity = _listDOUnique
+                                        .map(deliveryOrderNo => {
+                                            var _fulfillment = poItem.fulfillments.find((fulfillment) => fulfillment.deliveryOrderNo === deliveryOrderNo);
+                                            return _fulfillment ? _fulfillment.deliveryOrderDeliveredQuantity : 0;
+                                        })
+                                        .reduce((prev, curr, index) => {
+                                            return prev + curr;
+                                        }, 0);
+                                    if (purchaseOrder.purchaseRequest.status.value !== 9) {
+                                        poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
+                                    }
                                 }
                             }
                             if (purchaseOrder.purchaseRequest.status.value !== 9) {
@@ -777,7 +806,9 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             for (var purchaseOrder of purchaseOrders) {
                                 var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                 var index = purchaseOrderExternal.items.indexOf(item);
-                                purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                if (index !== -1) {
+                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                }
                             }
 
                             purchaseOrderExternal.isClosed = purchaseOrderExternal.items
