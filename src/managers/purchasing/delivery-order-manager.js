@@ -609,18 +609,18 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                             .reduce((prev, curr, index) => {
                                 return prev + curr;
                             }, 0);
-                        if (purchaseOrder.status.value <= 5 && !purchaseOrder.isClosed) {
+                        if (purchaseOrder.status.value <= 5 || !purchaseOrder.isClosed) {
                             poItem.isClosed = poItem.realizationQuantity === poItem.dealQuantity;
                         }
                     }
-                    if (purchaseOrder.status.value <= 5 && !purchaseOrder.isClosed) {
+                    if (purchaseOrder.status.value <= 5 || !purchaseOrder.isClosed) {
                         purchaseOrder.isClosed = purchaseOrder.items
                             .map((item) => item.isClosed)
                             .reduce((prev, curr, index) => {
                                 return prev && curr
                             }, true);
                     }
-                    if (purchaseOrder.status.value < 5) {
+                    if (purchaseOrder.status.value <= 5) {
                         purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
                     }
                     return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
