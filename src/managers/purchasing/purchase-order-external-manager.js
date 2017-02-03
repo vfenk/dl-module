@@ -154,7 +154,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     .then((purchaseOrders) => {
                                         var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
                                             var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
-                                            purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            if (_purchaseRequest) {
+                                                purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            }
                                             purchaseOrder.isPosted = false;
                                             purchaseOrder.status = poStatusEnum.CREATED;
                                             return this.purchaseOrderManager.update(purchaseOrder)
@@ -167,7 +169,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 for (var purchaseOrder of purchaseOrders) {
                                     var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                     var index = purchaseOrderExternal.items.indexOf(item);
-                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    if (index !== -1) {
+                                        purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    }
                                 }
                                 return this.collection
                                     .updateOne({
@@ -433,7 +437,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         .then((purchaseOrders) => {
                                             var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
                                                 var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
-                                                purchaseOrder.purchaseRequest = _purchaseRequest;
+                                                if (_purchaseRequest) {
+                                                    purchaseOrder.purchaseRequest = _purchaseRequest;
+                                                }
                                                 purchaseOrder.purchaseOrderExternalId = new ObjectId(purchaseOrderExternal._id);
                                                 purchaseOrder.purchaseOrderExternal = purchaseOrderExternal;
                                                 purchaseOrder.purchaseOrderExternal._id = new ObjectId(purchaseOrderExternal._id);
@@ -455,14 +461,15 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                                 for (var poItem of purchaseOrder.items) {
                                                     var _purchaseOrder = purchaseOrderExternal.items.find((_purchaseOrder) => _purchaseOrder._id.toString() === purchaseOrder._id.toString());
                                                     var itemExternal = _purchaseOrder.items.find((_item) => _item.product._id.toString() === poItem.product._id.toString());
-
-                                                    poItem.dealQuantity = itemExternal.dealQuantity;
-                                                    poItem.dealUom = itemExternal.dealUom;
-                                                    poItem.priceBeforeTax = itemExternal.priceBeforeTax;
-                                                    poItem.pricePerDealUnit = itemExternal.useIncomeTax ? (100 * itemExternal.priceBeforeTax) / 110 : itemExternal.priceBeforeTax;
-                                                    poItem.conversion = itemExternal.conversion;
-                                                    poItem.currency = purchaseOrderExternal.currency;
-                                                    poItem.currencyRate = purchaseOrderExternal.currencyRate;
+                                                    if (itemExternal) {
+                                                        poItem.dealQuantity = itemExternal.dealQuantity;
+                                                        poItem.dealUom = itemExternal.dealUom;
+                                                        poItem.priceBeforeTax = itemExternal.priceBeforeTax;
+                                                        poItem.pricePerDealUnit = itemExternal.useIncomeTax ? (100 * itemExternal.priceBeforeTax) / 110 : itemExternal.priceBeforeTax;
+                                                        poItem.conversion = itemExternal.conversion;
+                                                        poItem.currency = purchaseOrderExternal.currency;
+                                                        poItem.currencyRate = purchaseOrderExternal.currencyRate;
+                                                    }
                                                 }
                                                 return this.purchaseOrderManager.update(purchaseOrder)
                                                     .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
@@ -474,7 +481,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     for (var purchaseOrder of purchaseOrders) {
                                         var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                         var index = purchaseOrderExternal.items.indexOf(item);
-                                        purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                        if (index !== -1) {
+                                            purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                        }
                                     }
                                     return this.collection
                                         .updateOne({
@@ -566,7 +575,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     .then((purchaseOrders) => {
                                         var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
                                             var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
-                                            purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            if (_purchaseRequest) {
+                                                purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            }
                                             purchaseOrder.purchaseOrderExternalId = {};
                                             purchaseOrder.purchaseOrderExternal = {};
                                             purchaseOrder.supplierId = {};
@@ -680,7 +691,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     .then((purchaseOrders) => {
                                         var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
                                             var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
-                                            purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            if (_purchaseRequest) {
+                                                purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            }
                                             purchaseOrder.status = poStatusEnum.VOID;
                                             return this.purchaseOrderManager.update(purchaseOrder)
                                                 .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
@@ -692,7 +705,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 for (var purchaseOrder of purchaseOrders) {
                                     var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                     var index = purchaseOrderExternal.items.indexOf(item);
-                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    if (index !== -1) {
+                                        purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    }
                                 }
                                 return this.collection
                                     .updateOne({
@@ -735,7 +750,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 for (var purchaseOrder of purchaseOrders) {
                                     var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                     var index = purchaseOrderExternal.items.indexOf(item);
-                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    if (index !== -1) {
+                                        purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    }
                                 }
                                 return this.collection
                                     .updateOne({
