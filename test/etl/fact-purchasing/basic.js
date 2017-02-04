@@ -106,57 +106,57 @@ it("#08. should success when joining data to Unit Payment Order", function (done
         });
 });
 
-var arr = [{no: {}}, {no: {}}];
-it("#09. should success when remove duplicate data", function (done) {
-    instanceManager.removeDuplicates(arr)
-        .then(() => {
-            done();
-        })
-        .catch((e) => {
-            done(e);
-        });
-});
+// var arr = [{no: {}}, {no: {}}];
+// it("#09. should success when remove duplicate data", function (done) {
+//     instanceManager.removeDuplicates(arr)
+//         .then((a) => {
+//             done(a);
+//         })
+//         .catch((e) => {
+//             done(e);
+//         });
+// });
 
-var days = 0;
-it("#10. should success when get days range by month", function (done) {
-    instanceManager.getRangeMonth(days)
-        .then(() => {
-            done();
-        })
-        .catch((e) => {
-            done(e);
-        });
-});
+// var days = 0;
+// it("#10. should success when get days range by month", function (done) {
+//     instanceManager.getRangeMonth(days)
+//         .then((a) => {
+//             done(a);
+//         })
+//         .catch((e) => {
+//             done(e);
+//         });
+// });
 
-it("#11. should success when get days range by week", function (done) {
-    instanceManager.getRangeWeek(days)
-        .then(() => {
-            done();
-        })
-        .catch((e) => {
-            done(e);
-        });
-});
+// it("#11. should success when get days range by week", function (done) {
+//     instanceManager.getRangeWeek(days)
+//         .then((a) => {
+//             done(a);
+//         })
+//         .catch((e) => {
+//             done(e);
+//         });
+// });
 
-var catType = "";
-it("#12. should success when get category type", function (done) {
-    instanceManager.getCategoryType(days)
-        .then(() => {
-            done();
-        })
-        .catch((e) => {
-            done(e);
-        });
-});
+// var catType = "";
+// it("#12. should success when get category type", function (done) {
+//     instanceManager.getCategoryType(days)
+//         .then((a) => {
+//             done(a);
+//         })
+//         .catch((e) => {
+//             done(e);
+//         });
+// });
 
-var poDate = new Date();
-var doDate = new Date();
-it("#10. should success when get status", function (done) {
-    instanceManager.getStatus(poDate, doDate)
-        .then(() => {
-            done();
-        })
-        .catch((e) => {
-            done(e);
-        });
-});
+// var poDate = new Date();
+// var doDate = new Date();
+// it("#10. should success when get status", function (done) {
+//     instanceManager.getStatus(poDate, doDate)
+//         .then((a) => {
+//             done();
+//         })
+//         .catch((e) => {
+//             done(e);
+//         });
+// });
