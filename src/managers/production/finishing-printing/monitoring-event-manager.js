@@ -127,14 +127,17 @@ module.exports = class MonitoringEventManager extends BaseManager {
                 if (!_machine)
                     errors["machine"] = i18n.__("MonitoringEvent.machine.name.isRequired:%s is required", i18n.__("MonitoringEvent.machine.name._:Machine")); //"Nama Mesin tidak boleh kosong";
 
-                if (!valid.productionOrder)
+                if (!_productionOrder)
                     errors["productionOrder"] = i18n.__("MonitoringEvent.productionOrder.isRequired:%s is required", i18n.__("MonitoringEvent.productionOrder._:Production Order Number")); //"ProductionOrder tidak boleh kosong";
 
-                if (!valid.selectedProductionOrderDetail)
+                if (!_productionOrderDetail)
                     errors["selectedProductionOrderDetail"] = i18n.__("MonitoringEvent.selectedProductionOrderDetail.isRequired:%s is required", i18n.__("MonitoringEvent.selectedProductionOrderDetail._:Color")); //"selectedProductionOrderDetail / Color tidak boleh kosong";
 
                 if (!valid.cartNumber || valid.cartNumber == '')
                     errors["cartNumber"] = i18n.__("MonitoringEvent.cartNumber.isRequired:%s is required", i18n.__("MonitoringEvent.cartNumber._:Cart Number")); //"Nomor Kereta tidak boleh kosong";
+
+                if (!valid.machineEvent)
+                    errors["machineEvent"] = i18n.__("MonitoringEvent.machineEvent.isRequired:%s is required", i18n.__("MonitoringEvent.machineEvent._:Machine Event")); //"Event Mesin tidak boleh kosong";
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require("module-toolkit").ValidationError;

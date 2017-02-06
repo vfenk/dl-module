@@ -35,6 +35,7 @@ it('#01. should error when create with empty data ', function (done) {
                 e.errors.should.have.property('productionOrder');
                 e.errors.should.have.property('selectedProductionOrderDetail');
                 e.errors.should.have.property('cartNumber');
+                e.errors.should.have.property('machineEvent');
                 done();
             }
             catch (ex) {
