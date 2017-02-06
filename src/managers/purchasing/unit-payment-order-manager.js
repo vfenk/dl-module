@@ -300,7 +300,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                             var realization = newRealizations.find(item => item.unitReceiptNoteId.toString() === oldRealization.unitReceiptNoteId.toString());
 
                             if (!realization) {
-                                _oldRealizations.push(newRealization);
+                                _oldRealizations.push(oldRealization);
                             }
                         }
 
@@ -336,23 +336,26 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     for (var realization of realizations) {
                         var unitPaymentOrder = realization.unitPaymentOrder;
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === realization.productId.toString());
-                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.unitReceiptNoteNo === realization.unitReceiptNoteNo);
-
-                        fulfillment.invoiceDate = unitPaymentOrder.invoceDate;
-                        fulfillment.invoiceNo = unitPaymentOrder.invoceNo;
-                        fulfillment.interNoteDate = unitPaymentOrder.date;
-                        fulfillment.interNoteNo = unitPaymentOrder.no;
-                        fulfillment.interNoteValue = realization.pricePerDealUnit * realization.currency.rate;
-                        fulfillment.interNoteDueDate = unitPaymentOrder.dueDate;
-                        if (unitPaymentOrder.useIncomeTax) {
-                            fulfillment.ppnNo = unitPaymentOrder.incomeTaxNo;
-                            fulfillment.ppnDate = unitPaymentOrder.incomeTaxDate
-                            fulfillment.ppnValue = 0.1 * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
-                        }
-                        if (unitPaymentOrder.useVat) {
-                            fulfillment.pphNo = unitPaymentOrder.vatNo;
-                            fulfillment.pphValue = unitPaymentOrder.vatRate * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
-                            fulfillment.pphDate = unitPaymentOrder.vatDate;
+                        if (poItem) {
+                            var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.unitReceiptNoteNo === realization.unitReceiptNoteNo);
+                            if (fulfillment) {
+                                fulfillment.invoiceDate = unitPaymentOrder.invoceDate;
+                                fulfillment.invoiceNo = unitPaymentOrder.invoceNo;
+                                fulfillment.interNoteDate = unitPaymentOrder.date;
+                                fulfillment.interNoteNo = unitPaymentOrder.no;
+                                fulfillment.interNoteValue = realization.pricePerDealUnit * realization.currency.rate;
+                                fulfillment.interNoteDueDate = unitPaymentOrder.dueDate;
+                                if (unitPaymentOrder.useIncomeTax) {
+                                    fulfillment.ppnNo = unitPaymentOrder.incomeTaxNo;
+                                    fulfillment.ppnDate = unitPaymentOrder.incomeTaxDate
+                                    fulfillment.ppnValue = 0.1 * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
+                                }
+                                if (unitPaymentOrder.useVat) {
+                                    fulfillment.pphNo = unitPaymentOrder.vatNo;
+                                    fulfillment.pphValue = unitPaymentOrder.vatRate * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
+                                    fulfillment.pphDate = unitPaymentOrder.vatDate;
+                                }
+                            }
                         }
                     }
 
@@ -427,22 +430,25 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                         var unitPaymentOrder = realization.unitPaymentOrder;
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === realization.productId.toString());
                         var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.unitReceiptNoteNo === realization.unitReceiptNoteNo && fulfillment.interNoteNo === unitPaymentOrder.no);
-
-                        fulfillment.invoiceDate = unitPaymentOrder.invoceDate;
-                        fulfillment.invoiceNo = unitPaymentOrder.invoceNo;
-                        fulfillment.interNoteDate = unitPaymentOrder.date;
-                        fulfillment.interNoteNo = unitPaymentOrder.no;
-                        fulfillment.interNoteValue = realization.pricePerDealUnit * realization.currency.rate;
-                        fulfillment.interNoteDueDate = unitPaymentOrder.dueDate;
-                        if (unitPaymentOrder.useIncomeTax) {
-                            fulfillment.ppnNo = unitPaymentOrder.incomeTaxNo;
-                            fulfillment.ppnDate = unitPaymentOrder.incomeTaxDate
-                            fulfillment.ppnValue = 0.1 * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
-                        }
-                        if (unitPaymentOrder.useVat) {
-                            fulfillment.pphNo = unitPaymentOrder.vatNo;
-                            fulfillment.pphValue = unitPaymentOrder.vatRate * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
-                            fulfillment.pphDate = unitPaymentOrder.vatDate;
+                        if (poItem) {
+                            if (fulfillment) {
+                                fulfillment.invoiceDate = unitPaymentOrder.invoceDate;
+                                fulfillment.invoiceNo = unitPaymentOrder.invoceNo;
+                                fulfillment.interNoteDate = unitPaymentOrder.date;
+                                fulfillment.interNoteNo = unitPaymentOrder.no;
+                                fulfillment.interNoteValue = realization.pricePerDealUnit * realization.currency.rate;
+                                fulfillment.interNoteDueDate = unitPaymentOrder.dueDate;
+                                if (unitPaymentOrder.useIncomeTax) {
+                                    fulfillment.ppnNo = unitPaymentOrder.incomeTaxNo;
+                                    fulfillment.ppnDate = unitPaymentOrder.incomeTaxDate
+                                    fulfillment.ppnValue = 0.1 * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
+                                }
+                                if (unitPaymentOrder.useVat) {
+                                    fulfillment.pphNo = unitPaymentOrder.vatNo;
+                                    fulfillment.pphValue = unitPaymentOrder.vatRate * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
+                                    fulfillment.pphDate = unitPaymentOrder.vatDate;
+                                }
+                            }
                         }
                     }
 
@@ -516,25 +522,27 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     for (var realization of realizations) {
                         var unitPaymentOrder = realization.unitPaymentOrder;
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === realization.productId.toString());
-                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.unitReceiptNoteNo === realization.unitReceiptNoteNo && fulfillment.interNoteNo === unitPaymentOrder.no);
-                        if (fulfillment) {
-                            delete fulfillment.invoiceDate;
-                            delete fulfillment.invoiceNo;
-                            delete fulfillment.interNoteDate;
-                            delete fulfillment.interNoteNo;
-                            delete fulfillment.interNoteValue;
-                            delete fulfillment.interNoteDueDate;
-                            if (unitPaymentOrder.useIncomeTax) {
-                                delete fulfillment.ppnNo;
-                                delete fulfillment.ppnDate;
-                                delete fulfillment.ppnValue;
-                            }
-                            if (unitPaymentOrder.useVat) {
-                                delete fulfillment.pphNo;
-                                delete fulfillment.pphValue;
-                                delete fulfillment.pphDate;
-                            }
+                        if (poItem) {
+                            var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.unitReceiptNoteNo === realization.unitReceiptNoteNo && fulfillment.interNoteNo === unitPaymentOrder.no);
+                            if (fulfillment) {
+                                delete fulfillment.invoiceDate;
+                                delete fulfillment.invoiceNo;
+                                delete fulfillment.interNoteDate;
+                                delete fulfillment.interNoteNo;
+                                delete fulfillment.interNoteValue;
+                                delete fulfillment.interNoteDueDate;
+                                if (unitPaymentOrder.useIncomeTax) {
+                                    delete fulfillment.ppnNo;
+                                    delete fulfillment.ppnDate;
+                                    delete fulfillment.ppnValue;
+                                }
+                                if (unitPaymentOrder.useVat) {
+                                    delete fulfillment.pphNo;
+                                    delete fulfillment.pphValue;
+                                    delete fulfillment.pphDate;
+                                }
 
+                            }
                         }
                     }
                     var isPaid = purchaseOrder.items
@@ -581,7 +589,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                             for (var purchaseOrder of purchaseOrders) {
                                 var item = unitReceiptNote.items.find(item => item.purchaseOrderId.toString() === purchaseOrder._id.toString());
                                 var index = unitReceiptNote.items.indexOf(item);
-                                unitReceiptNote.items[index].purchaseOrder = purchaseOrder;
+                                if (index !== -1) {
+                                    unitReceiptNote.items[index].purchaseOrder = purchaseOrder;
+                                }
                             }
                             unitReceiptNote.isPaid = true;
                             return this.unitReceiptNoteManager.update(unitReceiptNote);
@@ -615,7 +625,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                             for (var purchaseOrder of purchaseOrders) {
                                 var item = unitReceiptNote.items.find(item => item.purchaseOrderId.toString() === purchaseOrder._id.toString());
                                 var index = unitReceiptNote.items.indexOf(item);
-                                unitReceiptNote.items[index].purchaseOrder = purchaseOrder;
+                                if (index !== -1) {
+                                    unitReceiptNote.items[index].purchaseOrder = purchaseOrder;
+                                }
                             }
                             unitReceiptNote.isPaid = false;
                             return this.unitReceiptNoteManager.update(unitReceiptNote);
@@ -662,7 +674,9 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     .then((unitReceiptNotes) => {
                         for (var unitPaymentOrderItem of unitPaymentOrder.items) {
                             var item = unitReceiptNotes.find(unitReceiptNote => unitPaymentOrderItem.unitReceiptNoteId.toString() === unitReceiptNote._id.toString())
-                            unitPaymentOrderItem.unitReceiptNote = item;
+                            if (item) {
+                                unitPaymentOrderItem.unitReceiptNote = item;
+                            }
                         }
                         return this.collection
                             .updateOne({

@@ -96,12 +96,45 @@ module.exports = class AccountManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deleted = {
+        // var deleted = {
+        //     _deleted: false
+        // };
+        // var query = paging.keyword ? {
+        //     '$and': [deleted]
+        // } : deleted;
+
+        // if (paging.keyword) {
+        //     var regex = new RegExp(paging.keyword, "i");
+        //     var filterUsername = {
+        //         'username': {
+        //             '$regex': regex
+        //         }
+        //     };
+        //     var filterName = {
+        //         '$or': [{
+        //             'profile.firstname': {
+        //                 '$regex': regex
+        //             }
+        //         }, {
+        //             'profile.lastname': {
+        //                 '$regex': regex
+        //             }
+        //         }]
+        //     };
+        //     var $or = {
+        //         '$or': [filterUsername, filterName]
+        //     };
+
+        //     query['$and'].push($or);
+        // }
+        // return query;
+
+        var _default = {
             _deleted: false
-        };
-        var query = paging.keyword ? {
-            '$and': [deleted]
-        } : deleted;
+        },
+        pagingFilter = paging.filter || {},
+        keywordFilter = {},
+        query = {};
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
@@ -121,12 +154,9 @@ module.exports = class AccountManager extends BaseManager {
                     }
                 }]
             };
-            var $or = {
-                '$or': [filterUsername, filterName]
-            };
-
-            query['$and'].push($or);
+            keywordFilter["$or"] = [filterUsername, filterName]
         }
+        query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
     }
 
