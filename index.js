@@ -54,14 +54,12 @@ module.exports = {
         },
         sales: {
 
-            finishingPrinting:{
-                DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager') 
+            finishingPrinting: {
+                DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager'),
+                ProductionOrderManager: require('./src/managers/sales/production-order-manager')
             }
         },
-        sales:{
 
-            ProductionOrderManager: require('./src/managers/sales/production-order-manager')
-        }
     },
     test: {
         data: {
