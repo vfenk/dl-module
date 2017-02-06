@@ -100,8 +100,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 if (!valid.date || valid.date == "" || valid.date == "undefined")
                     errors["date"] = i18n.__("PurchaseRequest.date.isRequired:%s is required", i18n.__("PurchaseRequest.date._:Date")); //"Tanggal PR tidak boleh kosong";
                 else if (valid.date > valid.expectedDeliveryDate)
-                        errors["date"] = i18n.__("PurchaseRequest.date.isGreater:%s is greater than expected delivery date", i18n.__("PurchaseRequest.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
-                    
+                    errors["date"] = i18n.__("PurchaseRequest.date.isGreater:%s is greater than expected delivery date", i18n.__("PurchaseRequest.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
+
                 if (!_unit)
                     errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is not exists", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
                 else if (!valid.unitId)
@@ -125,6 +125,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 }
                 else {
                     var itemErrors = [];
+                    var itemDuplicateErrors = [];
                     var valueArr = valid.items.map(function (item) { return item.productId.toString() });
                     var isDuplicate = valueArr.some(function (item, idx) {
                         var itemError = {};
@@ -132,22 +133,27 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                             itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isDuplicate:%s is duplicate", i18n.__("PurchaseRequest.items.product.name._:Product")); //"Nama barang tidak boleh kosong";
                         }
                         if (Object.getOwnPropertyNames(itemError).length > 0) {
-                            itemErrors[valueArr.indexOf(item)] = itemError;
-                            itemErrors[idx] = itemError;
+                            itemDuplicateErrors[valueArr.indexOf(item)] = itemError;
+                            itemDuplicateErrors[idx] = itemError;
+                        } else {
+                            itemDuplicateErrors[idx] = itemError;
                         }
                         return valueArr.indexOf(item) != idx
                     });
-                    if (!isDuplicate) {
-                        for (var item of valid.items) {
-                            var itemError = {};
-                            if (!item.product || !item.product._id) {
-                                itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isRequired:%s is required", i18n.__("PurchaseRequest.items.product.name._:Product")); //"Nama barang tidak boleh kosong";
+                    for (var item of valid.items) {
+                        var itemError = {};
+                        var _index = valid.items.indexOf(item);
+                        if (!item.product || !item.product._id) {
+                            itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isRequired:%s is required", i18n.__("PurchaseRequest.items.product.name._:Product")); //"Nama barang tidak boleh kosong";
+                        } else if (isDuplicate) {
+                            if (Object.getOwnPropertyNames(itemDuplicateErrors[_index]).length > 0) {
+                                Object.assign(itemError, itemDuplicateErrors[_index]);
                             }
-                            if (item.quantity <= 0) {
-                                itemError["quantity"] = i18n.__("PurchaseRequest.items.quantity.isRequired:%s is required", i18n.__("PurchaseRequest.items.quantity._:Quantity")); //Jumlah barang tidak boleh kosong";
-                            }
-                            itemErrors.push(itemError);
                         }
+                        if (item.quantity <= 0) {
+                            itemError["quantity"] = i18n.__("PurchaseRequest.items.quantity.isRequired:%s is required", i18n.__("PurchaseRequest.items.quantity._:Quantity")); //Jumlah barang tidak boleh kosong";
+                        }
+                        itemErrors.push(itemError);
                     }
                     for (var itemError of itemErrors) {
                         if (Object.getOwnPropertyNames(itemError).length > 0) {
