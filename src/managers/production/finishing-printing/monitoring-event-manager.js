@@ -223,7 +223,7 @@ module.exports = class MonitoringEventManager extends BaseManager {
         xls.name = '';
 
         var index = 0;
-        var dateFormat = "DD MMM YYYY";
+        var dateFormat = "DD/MM/YYYY";
 
         for(var monitoringEvent of result.data){
             index++;
