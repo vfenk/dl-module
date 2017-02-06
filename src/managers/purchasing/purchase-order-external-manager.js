@@ -154,7 +154,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     .then((purchaseOrders) => {
                                         var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
                                             var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
-                                            purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            if (_purchaseRequest) {
+                                                purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            }
                                             purchaseOrder.isPosted = false;
                                             purchaseOrder.status = poStatusEnum.CREATED;
                                             return this.purchaseOrderManager.update(purchaseOrder)
@@ -167,7 +169,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 for (var purchaseOrder of purchaseOrders) {
                                     var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                     var index = purchaseOrderExternal.items.indexOf(item);
-                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    if (index !== -1) {
+                                        purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    }
                                 }
                                 return this.collection
                                     .updateOne({
@@ -255,9 +259,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     purchaseOrderExternalError["currency"] = i18n.__("PurchaseOrderExternal.currency.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currency._:Currency")); //"Currency tidak boleh kosong";
                 }
 
-                if (!valid.currencyRate || valid.currencyRate === 0) {
-                    purchaseOrderExternalError["currencyRate"] = i18n.__("PurchaseOrderExternal.currencyRate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currencyRate._:Currency Rate")); //"Rate tidak boleh kosong";
-                }
+                // if (!valid.currencyRate || valid.currencyRate === 0) {
+                //     purchaseOrderExternalError["currencyRate"] = i18n.__("PurchaseOrderExternal.currencyRate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currencyRate._:Currency Rate")); //"Rate tidak boleh kosong";
+                // }
 
                 if (!valid.paymentMethod || valid.paymentMethod.toUpperCase() != "CASH") {
                     if (!valid.paymentDueDays || valid.paymentDueDays === "" || valid.paymentDueDays === 0) {
@@ -302,7 +306,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         }
                                         else if (dealUomId.equals(defaultUomId) && poItem.dealQuantity > poItem.defaultQuantity) {
                                             poItemHasError = true;
-                                            poItemError["dealQuantity"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isRequired:%s must not be greater than defaultQuantity", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:Deal Quantity")); //"Jumlah kesepakatan tidak boleh kosong";
+                                            poItemError["dealQuantity"] = i18n.__("PurchaseOrderExternal.items.items.dealQuantity.isGreater:%s must not be greater than defaultQuantity", i18n.__("PurchaseOrderExternal.items.items.dealQuantity._:Deal Quantity")); //"Jumlah kesepakatan tidak boleh kosong";
                                         }
                                         if (!poItem.dealUom || !poItem.dealUom.unit || poItem.dealUom.unit === "") {
                                             poItemHasError = true;
@@ -311,6 +315,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         if (!poItem.priceBeforeTax || poItem.priceBeforeTax === 0) {
                                             poItemHasError = true;
                                             poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
+                                        }else if (poItem.priceBeforeTax > poItem.product.price) {
+                                            poItemHasError = true;
+                                            poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isGreater:%s must not be greater than default price", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
                                         }
                                         var price = (poItem.priceBeforeTax.toString()).split(",");
                                         if (price[1] != undefined || price[1] !== "" || price[1] !== " ") {
@@ -433,7 +440,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         .then((purchaseOrders) => {
                                             var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
                                                 var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
-                                                purchaseOrder.purchaseRequest = _purchaseRequest;
+                                                if (_purchaseRequest) {
+                                                    purchaseOrder.purchaseRequest = _purchaseRequest;
+                                                }
                                                 purchaseOrder.purchaseOrderExternalId = new ObjectId(purchaseOrderExternal._id);
                                                 purchaseOrder.purchaseOrderExternal = purchaseOrderExternal;
                                                 purchaseOrder.purchaseOrderExternal._id = new ObjectId(purchaseOrderExternal._id);
@@ -455,14 +464,15 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                                 for (var poItem of purchaseOrder.items) {
                                                     var _purchaseOrder = purchaseOrderExternal.items.find((_purchaseOrder) => _purchaseOrder._id.toString() === purchaseOrder._id.toString());
                                                     var itemExternal = _purchaseOrder.items.find((_item) => _item.product._id.toString() === poItem.product._id.toString());
-
-                                                    poItem.dealQuantity = itemExternal.dealQuantity;
-                                                    poItem.dealUom = itemExternal.dealUom;
-                                                    poItem.priceBeforeTax = itemExternal.priceBeforeTax;
-                                                    poItem.pricePerDealUnit = itemExternal.useIncomeTax ? (100 * itemExternal.priceBeforeTax) / 110 : itemExternal.priceBeforeTax;
-                                                    poItem.conversion = itemExternal.conversion;
-                                                    poItem.currency = purchaseOrderExternal.currency;
-                                                    poItem.currencyRate = purchaseOrderExternal.currencyRate;
+                                                    if (itemExternal) {
+                                                        poItem.dealQuantity = itemExternal.dealQuantity;
+                                                        poItem.dealUom = itemExternal.dealUom;
+                                                        poItem.priceBeforeTax = itemExternal.priceBeforeTax;
+                                                        poItem.pricePerDealUnit = itemExternal.useIncomeTax ? (100 * itemExternal.priceBeforeTax) / 110 : itemExternal.priceBeforeTax;
+                                                        poItem.conversion = itemExternal.conversion;
+                                                        poItem.currency = purchaseOrderExternal.currency;
+                                                        poItem.currencyRate = purchaseOrderExternal.currencyRate;
+                                                    }
                                                 }
                                                 return this.purchaseOrderManager.update(purchaseOrder)
                                                     .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
@@ -474,7 +484,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     for (var purchaseOrder of purchaseOrders) {
                                         var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                         var index = purchaseOrderExternal.items.indexOf(item);
-                                        purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                        if (index !== -1) {
+                                            purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                        }
                                     }
                                     return this.collection
                                         .updateOne({
@@ -566,7 +578,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     .then((purchaseOrders) => {
                                         var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
                                             var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
-                                            purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            if (_purchaseRequest) {
+                                                purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            }
                                             purchaseOrder.purchaseOrderExternalId = {};
                                             purchaseOrder.purchaseOrderExternal = {};
                                             purchaseOrder.supplierId = {};
@@ -680,7 +694,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                     .then((purchaseOrders) => {
                                         var jobsUpdatePO = purchaseOrders.map((purchaseOrder) => {
                                             var _purchaseRequest = purchaseRequests.find((purchaseRequest) => purchaseRequest._id.toString() === purchaseOrder.purchaseRequest._id.toString());
-                                            purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            if (_purchaseRequest) {
+                                                purchaseOrder.purchaseRequest = _purchaseRequest;
+                                            }
                                             purchaseOrder.status = poStatusEnum.VOID;
                                             return this.purchaseOrderManager.update(purchaseOrder)
                                                 .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
@@ -692,7 +708,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 for (var purchaseOrder of purchaseOrders) {
                                     var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                     var index = purchaseOrderExternal.items.indexOf(item);
-                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    if (index !== -1) {
+                                        purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    }
                                 }
                                 return this.collection
                                     .updateOne({
@@ -735,7 +753,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                 for (var purchaseOrder of purchaseOrders) {
                                     var item = purchaseOrderExternal.items.find(item => item._id.toString() === purchaseOrder._id.toString());
                                     var index = purchaseOrderExternal.items.indexOf(item);
-                                    purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    if (index !== -1) {
+                                        purchaseOrderExternal.items.splice(index, 1, purchaseOrder);
+                                    }
                                 }
                                 return this.collection
                                     .updateOne({
