@@ -259,9 +259,9 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                     purchaseOrderExternalError["currency"] = i18n.__("PurchaseOrderExternal.currency.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currency._:Currency")); //"Currency tidak boleh kosong";
                 }
 
-                if (!valid.currencyRate || valid.currencyRate === 0) {
-                    purchaseOrderExternalError["currencyRate"] = i18n.__("PurchaseOrderExternal.currencyRate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currencyRate._:Currency Rate")); //"Rate tidak boleh kosong";
-                }
+                // if (!valid.currencyRate || valid.currencyRate === 0) {
+                //     purchaseOrderExternalError["currencyRate"] = i18n.__("PurchaseOrderExternal.currencyRate.isRequired:%s is required", i18n.__("PurchaseOrderExternal.currencyRate._:Currency Rate")); //"Rate tidak boleh kosong";
+                // }
 
                 if (!valid.paymentMethod || valid.paymentMethod.toUpperCase() != "CASH") {
                     if (!valid.paymentDueDays || valid.paymentDueDays === "" || valid.paymentDueDays === 0) {
