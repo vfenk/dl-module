@@ -235,23 +235,29 @@ module.exports = class PurchaseOrderManager extends BaseManager {
     }
 
     _afterInsert(id) {
-        var poId = id;
-        return this.getSingleById(poId)
+        return this.getSingleById(id)
             .then((purchaseOrder) => {
-                return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId);
+                return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
+                    .then((purchaseRequest) => {
+                        purchaseRequest.isUsed = true;
+                        purchaseRequest.purchaseOrderIds = purchaseRequest.purchaseOrderIds || [];
+                        purchaseRequest.status = prStatusEnum.PROCESSING;
+                        purchaseRequest.purchaseOrderIds.push(id);
+                        return this.purchaseRequestManager.update(purchaseRequest)
+                            .then(() => {
+                                purchaseOrder.purchaseRequest = purchaseRequest
+                                return this.collection
+                                    .updateOne({
+                                        _id: purchaseOrder._id
+                                    }, {
+                                        $set: purchaseOrder
+                                    })
+                                    .then((result) => Promise.resolve(purchaseOrder._id));
+                            });
+                    })
             })
-            .then((purchaseRequest) => {
-                purchaseRequest.isUsed = true;
-                purchaseRequest.purchaseOrderIds = purchaseRequest.purchaseOrderIds || [];
-                purchaseRequest.status = prStatusEnum.PROCESSING;
-                purchaseRequest.purchaseOrderIds.push(poId);
-                return this.purchaseRequestManager.update(purchaseRequest);
-            })
-            .then(() => {
-                return Promise.resolve(poId);
-            });
     }
-
+    
     delete(purchaseOrder) {
         return new Promise((resolve, reject) => {
             this._createIndexes()
@@ -366,10 +372,6 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         return this._createIndexes()
             .then((createIndexResults) => {
                 return new Promise((resolve, reject) => {
-                    var sorting = {
-                        "purchaseRequest.date": -1,
-                        "purchaseRequest.no": 1
-                    };
                     var query = Object.assign({});
 
                     if (state !== -1) {
@@ -895,7 +897,7 @@ module.exports = class PurchaseOrderManager extends BaseManager {
         var dateIndex = {
             name: `ix_${map.purchasing.collection.PurchaseOrder}_date`,
             key: {
-                "date": -1
+                date: -1
             }
         };
 
