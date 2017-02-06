@@ -352,7 +352,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 }
                                 if (unitPaymentOrder.useVat) {
                                     fulfillment.pphNo = unitPaymentOrder.vatNo;
-                                    fulfillment.pphValue = unitPaymentOrder.vatRate * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
+                                    fulfillment.pphValue = (unitPaymentOrder.vatRate/100) * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
                                     fulfillment.pphDate = unitPaymentOrder.vatDate;
                                 }
                             }
@@ -445,7 +445,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 }
                                 if (unitPaymentOrder.useVat) {
                                     fulfillment.pphNo = unitPaymentOrder.vatNo;
-                                    fulfillment.pphValue = unitPaymentOrder.vatRate * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
+                                    fulfillment.pphValue = (unitPaymentOrder.vatRate/100) * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
                                     fulfillment.pphDate = unitPaymentOrder.vatDate;
                                 }
                             }
