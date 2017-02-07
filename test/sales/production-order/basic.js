@@ -124,22 +124,8 @@ var dataprodOrder;
             });
     });
 
-    it(`#08. should _deleted=true`, function(done) {
-        manager.getSingleByQuery({
-                _id: createdId
-            })
-            .then((data) => {
-                validate(data);
-                data._deleted.should.be.Boolean();
-                data._deleted.should.equal(true);
-                done();
-            })
-            .catch((e) => {
-                done(e);
-            });
-    });
-
-    it("#09. should success when destroy data with id", function(done) {
+    
+    it("#08. should success when destroy data with id", function(done) {
         manager.destroy(createdId)
             .then((result) => {
                 result.should.be.Boolean();
@@ -151,7 +137,7 @@ var dataprodOrder;
             });
     });
 
-    it(`#10. should null when get destroyed data`, function(done) {
+    it(`#09. should null when get destroyed data`, function(done) {
         manager.getSingleByIdOrDefault(createdId)
             .then((data) => {
                 if(!data)
