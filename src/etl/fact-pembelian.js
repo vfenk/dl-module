@@ -81,7 +81,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
             _updatedDate: {
                 "$gt": timestamp
             }
-        }).limit(5).toArray()
+        }).toArray()
     }
 
     extractPO(time) {
@@ -94,7 +94,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
             _updatedDate: {
                 "$gt": timestamp
             }
-        }).limit(5).toArray()
+        }).toArray()
     }
 
     getPRFromPO(datas) {
