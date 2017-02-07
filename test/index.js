@@ -43,8 +43,10 @@ describe('#dl-module', function (done) {
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
     test('@MASTER/INSTRUCTION', './master/instruction');
+
+    // test('@MASTER/MONITORING-EVENT-TYPE', './master/monitoring-event-type');
     test('@MASTER/STEP', './master/step');
-    test('@MASTER/MACHINE-TYPE', './master/machine-type');
+    // test('@MASTER/MACHINE-TYPE', './master/machine-type');
     test('@MASTER/MACHINE-SPESIFICATION-STANDARD', './master/machine-spesification-standard');
     test('@MASTER/MATERIAL-CONSTRUCTION', './master/material-construction');
     test('@MASTER/YARN-MATERIAL', './master/yarn-material');
@@ -64,9 +66,13 @@ describe('#dl-module', function (done) {
     test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
     //Production
 
-    test('@PRODUCTION/DAILY OPERATION', './production/finishing-printing/daily-operation');
-    test('@production/finishing-printing/monitoring-specification-machine', './production/finishing-printing/monitoring-specification-machine');
-    test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
+
+    test('@sales/production-order', './sales/production-order/create');
+
+    // test('@production/daily-operation', './production/finishing-printing/daily-operation');
+    // test('@production/finishing-printing/monitoring-specification-machine', './production/finishing-printing/monitoring-specification-machine');
+    // test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
+
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
