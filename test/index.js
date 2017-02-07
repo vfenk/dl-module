@@ -76,5 +76,5 @@ describe('#dl-module', function (done) {
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
     //Sales
-     test('@production/production-order', './sales/production-order');
+     test('@sales/production-order', './sales/production-order');
 });
