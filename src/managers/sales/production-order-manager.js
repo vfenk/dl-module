@@ -308,7 +308,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                             detailError["colorTemplate"] = i18n.__("ProductionOrder.details.colorTemplate.isRequired:%s is required", i18n.__("PurchaseRequest.details.colorTemplate._:ColorTemplate")); //"colorTemplate tidak boleh kosong";
                         
                         if(_order){
-                            if(_order.name.trim().toLowerCase()=="yarndyed" || _order.name.trim().toLowerCase()=="printing" ){
+                            if(_order.name.toLowerCase()=="yarn dyed" || _order.name.toLowerCase()=="printing" ){
                                 _colors={};
                             }
                             else{
@@ -356,7 +356,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 if(_order){
                     valid.orderTypeId=new ObjectId(_order._id);
 
-                    if(_order.name.trim().toLowerCase()=="yarndyed" || _order.name.trim().toLowerCase()=="printing" ){
+                    if(_order.name.toLowerCase()=="yarn dyed" || _order.name.toLowerCase()=="printing" ){
                         for (var detail of valid.details) {
                             detail.colorTypeId = null;
                             detail.colorType = null;
@@ -465,7 +465,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                                 newDailyOperation.yarnMaterialId = new ObjectId(validproductionOrder.yarnMaterialId);
                                 newDailyOperation.yarnMaterial = validproductionOrder.yarnMaterial;
                                 newDailyOperation.color = a.colorRequest;
-                                if(validproductionOrder.orderType.name.trim().toLowerCase()=="yarndyed" || validproductionOrder.orderType.name.trim().toLowerCase()=="printing"){
+                                if(validproductionOrder.orderType.name.toLowerCase()=="yarn dyed" || validproductionOrder.orderType.name.toLowerCase()=="printing"){
                                     newDailyOperation.colorTypeId = null;
                                     newDailyOperation.colorType = null;
                                 }
@@ -513,7 +513,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                                 newDailyOperation.yarnMaterialId = new ObjectId(validproductionOrder.yarnMaterialId);
                                 newDailyOperation.yarnMaterial = validproductionOrder.yarnMaterial;
                                 newDailyOperation.color = a.colorRequest;
-                                if(validproductionOrder.orderType.name.trim().toLowerCase()=="yarndyed" || validproductionOrder.orderType.name.trim().toLowerCase()=="printing"){
+                                if(validproductionOrder.orderType.name.toLowerCase()=="yarn dyed" || validproductionOrder.orderType.name.toLowerCase()=="printing"){
                                     newDailyOperation.colorTypeId = null;
                                     newDailyOperation.colorType = null;
                                 }
@@ -584,7 +584,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                                 newDailyOperation.yarnMaterialId = new ObjectId(i.yarnMaterialId);
                                 newDailyOperation.yarnMaterial = i.yarnMaterial;
                                 newDailyOperation.color = a.colorRequest;
-                                if(validproductionOrder.orderType.name.trim().toLowerCase()=="yarndyed" || validproductionOrder.orderType.name.trim().toLowerCase()=="printing"){
+                                if(validproductionOrder.orderType.name.toLowerCase()=="yarn dyed" || validproductionOrder.orderType.name.toLowerCase()=="printing"){
                                     newDailyOperation.colorTypeId = null;
                                     newDailyOperation.colorType = null;
                                 }
