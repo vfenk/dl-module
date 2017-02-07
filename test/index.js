@@ -64,8 +64,6 @@ describe('#dl-module', function (done) {
     //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
     // //Production
 
-    test('@sales/production-order', './sales/production-order/create');
-
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
