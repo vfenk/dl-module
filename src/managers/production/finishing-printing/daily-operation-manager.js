@@ -16,6 +16,7 @@ var Partition = DLModels.production.finishingPrinting.Partition;
 var BaseManager = require("module-toolkit").BaseManager;
 var i18n = require("dl-i18n");
 var codeGenerator = require('../../../utils/code-generator');
+var moment = require('moment');
 
 module.exports = class DailyOperationManager extends BaseManager {
     constructor(db, user) {
@@ -130,7 +131,9 @@ module.exports = class DailyOperationManager extends BaseManager {
                                         },{
                                             'materialId' : valid.materialId && ObjectId.isValid(valid.materialId) ? (new ObjectId(valid.materialId)) : ""
                                         },{
-                                            'construction' : valid.productionOrder ? valid.productionOrder.construction : ""
+                                            'materialConstructionId' : valid.productionOrder ? (new ObjectId(valid.productionOrder.materialConstructionId)) : ""
+                                        },{
+                                            'yarnMaterialId' : valid.productionOrder ? (new ObjectId(valid.productionOrder.yarnMaterialId)) : ""
                                         },{
                                             'color' : valid.color
                                         },{
@@ -145,7 +148,9 @@ module.exports = class DailyOperationManager extends BaseManager {
                                         },{
                                             'materialId' : valid.materialId && ObjectId.isValid(valid.materialId) ? (new ObjectId(valid.materialId)) : ""
                                         },{
-                                            'construction' : valid.productionOrder ? valid.productionOrder.construction : ""
+                                            'materialConstructionId' : valid.productionOrder ? (new ObjectId(valid.productionOrder.materialConstructionId)) : ""
+                                        },{
+                                            'yarnMaterialId' : valid.productionOrder ? (new ObjectId(valid.productionOrder.yarnMaterialId)) : ""
                                         },{
                                             'color' : valid.color
                                         },{
@@ -167,7 +172,9 @@ module.exports = class DailyOperationManager extends BaseManager {
                                         },{
                                             'materialId' : valid.materialId && ObjectId.isValid(valid.materialId) ? (new ObjectId(valid.materialId)) : ""
                                         },{
-                                            'construction' : valid.productionOrder ? valid.productionOrder.construction : ""
+                                            'materialConstructionId' : valid.productionOrder ? (new ObjectId(valid.productionOrder.materialConstructionId)) : ""
+                                        },{
+                                            'yarnMaterialId' : valid.productionOrder ? (new ObjectId(valid.productionOrder.yarnMaterialId)) : ""
                                         },{
                                             'color' : valid.color
                                         }]
@@ -180,7 +187,9 @@ module.exports = class DailyOperationManager extends BaseManager {
                                         },{
                                             'materialId' : valid.materialId && ObjectId.isValid(valid.materialId) ? (new ObjectId(valid.materialId)) : ""
                                         },{
-                                            'construction' : valid.productionOrder ? valid.productionOrder.construction : ""
+                                            'materialConstructionId' : valid.productionOrder ? (new ObjectId(valid.productionOrder.materialConstructionId)) : ""
+                                        },{
+                                            'yarnMaterialId' : valid.productionOrder ? (new ObjectId(valid.productionOrder.yarnMaterialId)) : ""
                                         },{
                                             'color' : valid.color
                                         },{
@@ -272,14 +281,17 @@ module.exports = class DailyOperationManager extends BaseManager {
                             }
 
                             if (valid.dateOutput && valid.dateOutput != '' && valid.dateInput && valid.dateInput != ''){
+                                var timeInMoment = moment(valid.timeInput);
+                                var timeOutMoment = moment(valid.timeOutput);
                                 var dateOutput = new Date(valid.dateOutput);
-                                var dateInput = new Date(valid.dateInput);
+                                var dateTimeOutput = new Date(`${valid.dateOutput} ${timeOutMoment}:00`);
+                                var dateTimeInput = new Date(`${valid.dateInput} ${timeInMoment}:00`);
                                 if(valid.dateOutput != "1900-01-01 00:00:00"){
                                     if(dateOutput > now)
                                     {
                                         errors["dateOutput"] = i18n.__("DailyOperation.kanban.partitions.dateOutput.isMoreThan:%s is not be more than this day", i18n.__("DailyOperation.kanban.partitions.dateOutput._:DateOutput")); //"Date Input tidak ditemukan";
                                     }
-                                    else if(dateInput > dateOutput){
+                                    else if(dateTimeInput > dateTimeOutput){
                                         errors["dateInput"] = i18n.__("DailyOperation.kanban.partitions.dateInput.isLessThanOutput:%s is must be less than Date Output", i18n.__("DailyOperation.kanban.partitions.dateInput._:DateInput")); // "tanggal dan jam output harus lebih besar dari tanggal dan jam input";
                                         errors["dateOutput"] = i18n.__("DailyOperation.kanban.partitions.dateOutput.isMoreThan:%s is must be more than Date Input", i18n.__("DailyOperation.kanban.partitions.dateOutput._:DateOutput")); // "tanggal dan jam output harus lebih besar dari tanggal dan jam input";
                                     }
@@ -343,8 +355,10 @@ module.exports = class DailyOperationManager extends BaseManager {
                                     machineId : new ObjectId(_machine._id),
                                     machine : _machine,
                                     dateInput : new Date(valid.dateInput),
+                                    timeInput : valid.timeInput,
                                     input : valid.input,
-                                    dateOutput : !valid.dateOutput || valid.dateOutput == "" ? (new Date("1900-01-01 00:00:00")) : (new Date(valid.dateOutput)),
+                                    dateOutput : !valid.dateOutput || valid.dateOutput == "" ? (new Date(valid.dateInput)) : (new Date(valid.dateOutput)),
+                                    timeOutput : valid.timeOutput,
                                     badOutput : valid.badOutput,
                                     goodOutput : valid.goodOutput,
                                     badOutputDescription : valid.badOutputDescription
@@ -356,9 +370,11 @@ module.exports = class DailyOperationManager extends BaseManager {
                                     if(a.no === valid.no && a.machineId.toString() === _machine._id.toString() && a.code === valid.code){
                                         a.input = valid.input;
                                         a.dateInput = new Date(valid.dateInput);
+                                        a.timeInput = valid.timeInput;
                                         a.badOutput = valid.badOutput;
                                         a.goodOutput = valid.goodOutput;
-                                        a.dateOutput = !valid.dateOutput || valid.dateOutput == "" ? (new Date("1900-01-01 00:00:00")) : (new Date(valid.dateOutput));
+                                        a.dateOutput = !valid.dateOutput || valid.dateOutput == "" ? (new Date(valid.dateInput)) : (new Date(valid.dateOutput));
+                                        a.timeOutput = valid.timeOutput;
                                         a.badOutputDescription = valid.badOutputDescription;
                                         a.steps = valid.steps;
                                         a = new Partition(a);
@@ -580,8 +596,10 @@ module.exports = class DailyOperationManager extends BaseManager {
         	                        machineId : a.kanban.partitions.machineId,
         	                        machine : a.kanban.partitions.machine,
         	                        dateInput : (new Date(a.kanban.partitions.dateInput)),
+                                    timeInput : a.kanban.partitions.timeInput,
         	                        input : a.kanban.partitions.input,
         	                        dateOutput : (new Date(a.kanban.partitions.dateOutput)),
+                                    timeOutput : a.kanban.partitions.timeOutput,
         	                        goodOutput : a.kanban.partitions.goodOutput,
         	                        badOutput : a.kanban.partitions.badOutput,
         	                        badOutputDescription : a.kanban.partitions.badOutputDescription,
@@ -624,8 +642,10 @@ module.exports = class DailyOperationManager extends BaseManager {
                     "processType" : "$productionOrder.processType.name",
                     "steps" : "$kanban.partitions.steps",
                     "dateInput" : "$kanban.partitions.dateInput",
+                    "timeInput" : "$kanban.partitions.timeInput",
                     "input" : "$kanban.partitions.input",
                     "dateOutput" : "$kanban.partitions.dateOutput",
+                    "timeOutput" : "$kanban.partitions.timeOutput",
                     "badOutput" : "$kanban.partitions.badOutput",
                     "goodOutput" : "$kanban.partitions.goodOutput",
                     "badOutputDescription" : "$kanban.partitions.badOutputDescription"

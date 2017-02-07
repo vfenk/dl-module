@@ -4,7 +4,7 @@ var helper = require("../../helper");
 var validate = require("dl-models").validator.sales.salesContract;
 
 var ProductionOrderManager = require("../../../src/managers/sales/production-order-manager");
-var productionOrderManager = null;
+var manager = null;
 
 before('#00. connect db', function(done) {
     helper.getDb()
@@ -110,6 +110,7 @@ var dataprodOrder;
                 done(e);
             });
     });
+
 
     
 
