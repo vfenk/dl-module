@@ -13,13 +13,13 @@ describe('#dl-module', function (done) {
     test('@AUTH/ROLE', './auth/role');
     test('@AUTH/API-ENDPOINT', './auth/api-endpoint');
 
-    test('@ETL/DIM-CATEGORY', './etl/dim-category');
-    // test('@ETL/DIM-DIVISION', './etl/dim-division');
-    test('@ETL/DIM-SUPPLIER', './etl/dim-supplier');
-    // test('@ETL/DIM-UNIT', './etl/dim-unit');
-    // test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
-    test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
-    test('@ETL/FACT-MONITORING-EVENT', './etl/fact-monitoring-event');    
+    // test('@ETL/DIM-CATEGORY', './etl/dim-category');
+    // // test('@ETL/DIM-DIVISION', './etl/dim-division');
+    // test('@ETL/DIM-SUPPLIER', './etl/dim-supplier');
+    // // test('@ETL/DIM-UNIT', './etl/dim-unit');
+    // // test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
+    // test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
+    // test('@ETL/FACT-MONITORING-EVENT', './etl/fact-monitoring-event');    
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
@@ -52,24 +52,24 @@ describe('#dl-module', function (done) {
     test('@MASTER/FINISH-TYPE', './master/finish-type');
 
     //Purchasing 
-    test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
-    test('@PURCHASING/PURCHASE ORDER', './purchasing/purchase-order');
-    test('@PURCHASING/PURCHASE ORDER EXTERNAL', './purchasing/purchase-order-external'); 
-    test('@PURCHASING/DELIVERY ORDER', './purchasing/delivery-order'); 
-    test('@PURCHASING/UNIT RECEIPT NOTE', './purchasing/unit-receipt-note'); 
-    test('@PURCHASING/UNIT PAYMENT ORDER', './purchasing/unit-payment-order'); 
-    test('@PURCHASING/UNIT PAYMENT PRICE CORRECTION', './purchasing/unit-payment-price-correction-note');
-    test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
+    // test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
+    // test('@PURCHASING/PURCHASE ORDER', './purchasing/purchase-order');
+    // test('@PURCHASING/PURCHASE ORDER EXTERNAL', './purchasing/purchase-order-external'); 
+    // test('@PURCHASING/DELIVERY ORDER', './purchasing/delivery-order'); 
+    // test('@PURCHASING/UNIT RECEIPT NOTE', './purchasing/unit-receipt-note'); 
+    // test('@PURCHASING/UNIT PAYMENT ORDER', './purchasing/unit-payment-order'); 
+    // test('@PURCHASING/UNIT PAYMENT PRICE CORRECTION', './purchasing/unit-payment-price-correction-note');
+    // test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
     
-    //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
-    // //Production
+    // //  test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
+    // // //Production
 
-    // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
-    // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
+    // // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
+    // // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
-    test('@production/daily-operation', './production/finishing-printing/daily-operation');
-    test('@production/finishing-printing/monitoring-specification-machine', './production/finishing-printing/monitoring-specification-machine');
-    test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
+    // test('@production/daily-operation', './production/finishing-printing/daily-operation');
+    // test('@production/finishing-printing/monitoring-specification-machine', './production/finishing-printing/monitoring-specification-machine');
+    // test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
