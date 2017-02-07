@@ -16,14 +16,17 @@ var materialConstruction = require('../master/material-construction-data-util');
 var account = require('../auth/account-data-util');
 
 class ProductionOrderDataUtil {
-    getNewData() {
-        return Promise.all([uom.getTestData(), buyer.getTestData(), lampStandard.getTestData(), lampStandard.getTestData2(), processType.getTestData(), material.getTestData(), colorType.getTestData(), colorType.getTestData2(), standardTest.getTestData(), finishType.getTestData(), yarnMaterial.getTestData(), materialConstruction.getTestData(),account.getTestData()])
+    getNewData(dataSupport) {
+        var buyerTestData = !dataSupport ? buyer.getTestData() : dataSupport.buyer ? Promise.resolve(null) : buyer.getTestData();
+        var processTestData = !dataSupport ? processType.getTestData() : dataSupport.process ? Promise.resolve(null) : processType.getTestData();
+        var accountTestData = !dataSupport ? account.getTestData() : dataSupport.account ? Promise.resolve(null) : account.getTestData();
+        return Promise.all([uom.getTestData(), buyerTestData, lampStandard.getTestData(), lampStandard.getTestData2(), processTestData, material.getTestData(), colorType.getTestData(), colorType.getTestData2(), standardTest.getTestData(), finishType.getTestData(), yarnMaterial.getTestData(), materialConstruction.getTestData(), accountTestData])
             .then((results) => {
                 var _uom = results[0];
-                var _buyer = results[1];
+                var _buyer = !dataSupport ? results[1] : dataSupport.buyer ? dataSupport.buyer : results[1];
                 var _lampStandard1 = results[2];
                 var _lampStandard2 = results[3];
-                var _processType = results[4];
+                var _processType = !dataSupport ? results[4] : dataSupport.process ? dataSupport.process : results[4];
                 var _material = results[5];
                 var color1=results[6];
                 var color2=results[7];
@@ -31,10 +34,43 @@ class ProductionOrderDataUtil {
                 var _finish= results[9];
                 var _yarn=results[10];
                 var _construction=results[11];
-                var _account= results[12];
+                var _account= !dataSupport ? results[12] : dataSupport.account ? dataSupport.account : results[12];
+                var detail = [{
+                        code:`code1/${codeGenerator()}`,
+                        colorTypeId:color1._id,
+                        colorType:color1,
+                        colorRequest:`reddish`,
+                        colorTemplate:`template1`,
+                        quantity:10,
+                        uomId: _uom._id,
+                        uom:_uom,
+                    }, {
+                        code:`code2/${codeGenerator()}`,
+                        colorTypeId:color2._id,
+                        colorType:color2,
+                        colorRequest:`gray`,
+                        colorTemplate:`template2`,
+                        quantity:20,
+                        uomId: _uom._id,
+                        uom:_uom,
+                    }];
+                if(dataSupport){
+                    if(dataSupport.isSinggle){
+                        detail = [{
+                            code:`code1/${codeGenerator()}`,
+                            colorTypeId:color1._id,
+                            colorType:color1,
+                            colorRequest:`reddish`,
+                            colorTemplate:`template1`,
+                            quantity:30,
+                            uomId: _uom._id,
+                            uom:_uom,
+                        }]
+                    }
+                }
 
                 var data = {
-                    salesContractNo: `Sales Contract 01`,
+                    salesContractNo: `UT/Prod/1KQ3VP57`,
                     orderNo: `orderNo/${codeGenerator()}`,
                     uomId: _uom._id,
                     uom: _uom,
@@ -77,25 +113,7 @@ class ProductionOrderDataUtil {
                         lampStandardId: _lampStandard2._id,
                         lampStandard: _lampStandard2,
                     }],
-                    details: [{
-                        code:`code1/${codeGenerator()}`,
-                        colorTypeId:color1._id,
-                        colorType:color1,
-                        colorRequest:`reddish`,
-                        colorTemplate:`template1`,
-                        quantity:10,
-                        uomId: _uom._id,
-                        uom:_uom,
-                    }, {
-                        code:`code2/${codeGenerator()}`,
-                        colorTypeId:color2._id,
-                        colorType:color2,
-                        colorRequest:`gray`,
-                        colorTemplate:`template2`,
-                        quantity:20,
-                        uomId: _uom._id,
-                        uom:_uom,
-                    }]
+                    details:  detail 
                 };
                 return Promise.resolve(data);
             });
@@ -105,7 +123,8 @@ class ProductionOrderDataUtil {
         return helper
             .getManager(ProductionOrderManager)
             .then((manager) => {
-                return this.getNewData().then((data) => {
+                var detail = isSingleDetail ? { isSinggle : true } : {};
+                return this.getNewData(detail).then((data) => {
                     return manager.create(data)
                         .then((id) => manager.getSingleById(id));
                 });

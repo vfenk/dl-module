@@ -102,6 +102,7 @@ module.exports = {
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")
             },
             production: {
+                dailyOperation: require('./test/data-util/production/finishing-printing/daily-operation-data-util'),
                 monitoringEvent: require('./test/data-util/production/finishing-printing/monitoring-event-data-util'),
                 monitoringSpecificationMachine: require('./test/data-util/production/finishing-printing/monitoring-specification-machine-data-util')
             },
