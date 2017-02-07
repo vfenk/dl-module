@@ -31,5 +31,13 @@ class LampStandardDataUtil {
         };
         return this.getSert(data);
     }
+
+    getTestData2() {
+        var data = {
+            name: 'LS02',
+            description: 'Lampu 2'
+        };
+        return this.getSert(data);
+    }
 }
 module.exports = new LampStandardDataUtil();

@@ -316,13 +316,14 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
         var lookup = {};
 
         for (var i in arr) {
-            if (lookup) {
+
+            if (arr) {
                 lookup[arr[i].no] = arr[i];
             }
         }
 
         for (i in lookup) {
-            if (new_arr) {
+            if (lookup) {
                 new_arr.push(lookup[i]);
             }
         }
@@ -593,7 +594,9 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
                             }
                         }
 
+
                         if (sqlQuery !== "")
+
                             command.push(this.insertQuery(request, `${sqlQuery}`));
 
                         this.sql.multiple = true;
