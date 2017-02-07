@@ -104,6 +104,9 @@ module.exports = {
             production: {
                 monitoringEvent: require('./test/data-util/production/finishing-printing/monitoring-event-data-util'),
                 monitoringSpecificationMachine: require('./test/data-util/production/finishing-printing/monitoring-specification-machine-data-util')
+            },
+            sales:{
+                productionOrder: require('./test/data-util/sales/production-order-data-util')
             }
         }
     },
