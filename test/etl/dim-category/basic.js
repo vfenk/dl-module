@@ -30,3 +30,25 @@ it("#01. should success when create etl for dim-category", function(done) {
             done(e);
         });
 });
+
+it("#02. should success when transforming data for dim-category", function(done) {
+    var data = [{}, {}];
+    instanceManager.transform(data)
+        .then(() => {
+            done();
+        })
+        .catch((e) => {
+            done(e);
+        });
+});
+
+it("#03. should success when load data for dim-category", function(done) {
+    var data = [[], []];
+    instanceManager.load(data)
+        .then(() => {
+            done();
+        })
+        .catch((e) => {
+            done(e);
+        });
+});
