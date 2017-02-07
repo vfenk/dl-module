@@ -19,6 +19,7 @@ describe('#dl-module', function (done) {
     // test('@ETL/DIM-UNIT', './etl/dim-unit');
     // test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
     test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
+    test('@ETL/FACT-MONITORING-EVENT', './etl/fact-monitoring-event');    
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
@@ -42,7 +43,6 @@ describe('#dl-module', function (done) {
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
     test('@MASTER/INSTRUCTION', './master/instruction');
-    test('@MASTER/MONITORING-EVENT-TYPE', './master/monitoring-event-type');
     test('@MASTER/STEP', './master/step');
     test('@MASTER/MACHINE-TYPE', './master/machine-type');
     test('@MASTER/MACHINE-SPESIFICATION-STANDARD', './master/machine-spesification-standard');
