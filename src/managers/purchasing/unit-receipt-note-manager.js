@@ -84,9 +84,11 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     else if (!_supplier)
                         errors["supplier"] = i18n.__("UnitReceiptNote.supplier.isRequired:%s name  is required", i18n.__("UnitReceiptNote.supplier._:Supplier")); //"Nama supplier tidak boleh kosong";
 
-
+                    var doDate = valid.deliveryOrder.date;
                     if (!valid.date || valid.date == '')
                         errors["date"] = i18n.__("UnitReceiptNote.date.isRequired:%s is required", i18n.__("UnitReceiptNote.date._:Date")); //"Tanggal tidak boleh kosong";
+                    else if (valid.date < doDate)
+                        errors["date"] = i18n.__("DeliveryOrder.date.isGreater:%s is greater than delivery order date", i18n.__("DeliveryOrder.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
 
                     if (valid.deliveryOrder) {
                         if (!valid.deliveryOrder._id)
