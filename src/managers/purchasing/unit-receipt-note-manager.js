@@ -261,25 +261,48 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 .then((purchaseOrder) => {
                     for (var item of items) {
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
-
-                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString());
-
-                        if (!fulfillment.hasOwnProperty("unitReceiptNoteNo")) {
-                            fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
-                            fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
-                            fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
-                            fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
-                        } else {
-                            var _fulfillment = Object.assign({},fulfillment);
-                            _fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
-                            _fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
-                            _fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
-                            _fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
-                            poItem.fulfillments.push(_fulfillment);
+                        if (poItem) {
+                            var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString());
+                            if (fulfillment) {
+                                if (!fulfillment.hasOwnProperty("unitReceiptNoteNo")) {
+                                    fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
+                                    fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
+                                    fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
+                                    fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
+                                } else {
+                                    var _fulfillment = Object.assign({}, fulfillment);
+                                    _fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
+                                    _fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
+                                    _fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
+                                    _fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
+                                    poItem.fulfillments.push(_fulfillment);
+                                }
+                            }
                         }
                     }
+                    var totalReceived = purchaseOrder.items
+                        .map(poItem => {
+                            var total = poItem.fulfillments
+                                .map(fulfillment => fulfillment.unitReceiptNoteDeliveredQuantity)
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr;
+                                }, 0);
+                            return total;
+                        })
+                        .reduce((prev, curr, index) => {
+                            return prev + curr;
+                        }, 0);
 
-                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                    var totalDealQuantity = purchaseOrder.items
+                        .map(poItem => poItem.dealQuantity)
+                        .reduce((prev, curr, index) => {
+                            return prev + curr;
+                        }, 0);
+
+                    if (purchaseOrder.status.value <= 7) {
+                        purchaseOrder.status = totalReceived === totalDealQuantity ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                        // purchaseOrder.status = fulfillment.unitReceiptNoteDeliveredQuantity < fulfillment.deliveryOrderDeliveredQuantity ? poStatusEnum.RECEIVING : purchaseOrder.status;
+                    }
                     return this.purchaseOrderManager.update(purchaseOrder);
                 })
             jobs.push(job);
@@ -310,15 +333,39 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 .then((purchaseOrder) => {
                     for (var item of items) {
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
-
-                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString() && fulfillment.unitReceiptNoteNo === unitReceiptNote.no);
-                        fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
-                        fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
-                        fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
-                        fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
+                        if (poItem) {
+                            var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString() && fulfillment.unitReceiptNoteNo === unitReceiptNote.no);
+                            if (fulfillment) {
+                                fulfillment.unitReceiptNoteNo = unitReceiptNote.no;
+                                fulfillment.unitReceiptNoteDate = unitReceiptNote.date;
+                                fulfillment.unitReceiptNoteDeliveredQuantity = item.deliveredQuantity;
+                                fulfillment.unitReceiptDeliveredUom = item.deliveredUom;
+                            }
+                        }
                     }
+                    var totalReceived = purchaseOrder.items
+                        .map(poItem => {
+                            var total = poItem.fulfillments
+                                .map(fulfillment => fulfillment.unitReceiptNoteDeliveredQuantity)
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr;
+                                }, 0);
+                            return total;
+                        })
+                        .reduce((prev, curr, index) => {
+                            return prev + curr;
+                        }, 0);
 
-                    purchaseOrder.status = purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                    var totalDealQuantity = purchaseOrder.items
+                        .map(poItem => poItem.dealQuantity)
+                        .reduce((prev, curr, index) => {
+                            return prev + curr;
+                        }, 0);
+
+                    if (purchaseOrder.status.value <= 7) {
+                        purchaseOrder.status = totalReceived === totalDealQuantity ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING;
+                        // purchaseOrder.status = fulfillment.unitReceiptNoteDeliveredQuantity < fulfillment.deliveryOrderDeliveredQuantity ? poStatusEnum.RECEIVING : purchaseOrder.status;
+                    }
                     return this.purchaseOrderManager.update(purchaseOrder);
                 })
             jobs.push(job);
@@ -349,13 +396,31 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 .then((purchaseOrder) => {
                     for (var item of items) {
                         var poItem = purchaseOrder.items.find(_item => _item.product._id.toString() === item.productId.toString());
+                        if (poItem) {
+                            var listDo = poItem.fulfillments
+                                .map((fulfillment) => {
+                                    if (fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString()) {
+                                        return 1;
+                                    } else {
+                                        return 0;
+                                    }
+                                })
+                                .reduce((prev, curr, index) => {
+                                    return prev + curr;
+                                }, 0);
 
-                        var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString() && fulfillment.unitReceiptNoteNo === unitReceiptNote.no);
-                        if (fulfillment) {
-                            delete fulfillment.unitReceiptNoteNo;
-                            delete fulfillment.unitReceiptNoteDate;
-                            delete fulfillment.unitReceiptNoteDeliveredQuantity;
-                            delete fulfillment.unitReceiptDeliveredUom;
+                            var fulfillment = poItem.fulfillments.find(fulfillment => fulfillment.deliveryOrderNo.toString() === unitReceiptNote.deliveryOrder.no.toString() && fulfillment.unitReceiptNoteNo === unitReceiptNote.no);
+                            if (fulfillment) {
+                                if (listDo > 1) {
+                                    var index = poItem.fulfillments.indexOf(fulfillment);
+                                    poItem.fulfillments.splice(index, 1);
+                                } else {
+                                    delete fulfillment.unitReceiptNoteNo;
+                                    delete fulfillment.unitReceiptNoteDate;
+                                    delete fulfillment.unitReceiptNoteDeliveredQuantity;
+                                    delete fulfillment.unitReceiptDeliveredUom;
+                                }
+                            }
                         }
                     }
 
@@ -370,9 +435,9 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                         .reduce((prev, curr, index) => {
                             return prev || curr
                         }, false);
-
-                    purchaseOrder.status = poStatus ? poStatusEnum.RECEIVING : unitReceiptNote.deliveryOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING;
-                    return this.purchaseOrderManager.update(purchaseOrder);
+                    if (purchaseOrder.status.value <= 7) {
+                        purchaseOrder.status = poStatus ? poStatusEnum.RECEIVING : (unitReceiptNote.deliveryOrder.isClosed ? poStatusEnum.ARRIVED : poStatusEnum.ARRIVING);
+                    } return this.purchaseOrderManager.update(purchaseOrder);
                 })
             jobs.push(job);
         })
@@ -403,11 +468,13 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     for (var _item of items) {
                         for (var item of deliveryOrder.items) {
                             var fulfillment = item.fulfillments.find(fulfillment => fulfillment.purchaseOrderId.toString() === purchaseOrderId.toString() && fulfillment.product._id.toString() === _item.productId.toString());
-                            var _realizationQuantity = {
-                                no: unitReceiptNote.no,
-                                deliveredQuantity: _item.deliveredQuantity
+                            if (fulfillment) {
+                                var _realizationQuantity = {
+                                    no: unitReceiptNote.no,
+                                    deliveredQuantity: _item.deliveredQuantity
+                                }
+                                fulfillment.realizationQuantity.push(_realizationQuantity);
                             }
-                            fulfillment.realizationQuantity.push(_realizationQuantity);
                         }
                     }
                 })
@@ -461,9 +528,19 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     for (var _item of items) {
                         for (var item of deliveryOrder.items) {
                             var fulfillment = item.fulfillments.find(fulfillment => fulfillment.purchaseOrderId.toString() === purchaseOrderId.toString() && fulfillment.product._id.toString() === _item.productId.toString());
-                            var _realizationQuantity = fulfillment.realizationQuantity.find(realqty => realqty.no === unitReceiptNote.no);
-                            _realizationQuantity.no = unitReceiptNote.no;
-                            _realizationQuantity.deliveredQuantity = _item.deliveredQuantity;
+                            if (fulfillment) {
+                                var _realizationQuantity = fulfillment.realizationQuantity.find(realqty => realqty.no === unitReceiptNote.no);
+                                if (_realizationQuantity) {
+                                    _realizationQuantity.no = unitReceiptNote.no;
+                                    _realizationQuantity.deliveredQuantity = _item.deliveredQuantity;
+                                } else {
+                                    var _realizationQuantity = {
+                                        no: unitReceiptNote.no,
+                                        deliveredQuantity: _item.deliveredQuantity
+                                    }
+                                    fulfillment.realizationQuantity.push(_realizationQuantity);
+                                }
+                            }
                         }
                     }
                 })
@@ -517,9 +594,11 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     for (var _item of items) {
                         for (var item of deliveryOrder.items) {
                             var fulfillment = item.fulfillments.find(fulfillment => fulfillment.purchaseOrderId.toString() === purchaseOrderId.toString() && fulfillment.product._id.toString() === _item.productId.toString());
-                            var _realizationQuantity = fulfillment.realizationQuantity.find(realqty => realqty.no === unitReceiptNote.no);
-                            var _index = fulfillment.realizationQuantity.indexOf(_realizationQuantity);
-                            fulfillment.realizationQuantity.splice(_index, 1);
+                            if (fulfillment) {
+                                var _realizationQuantity = fulfillment.realizationQuantity.find(realqty => realqty.no === unitReceiptNote.no);
+                                var _index = fulfillment.realizationQuantity.indexOf(_realizationQuantity);
+                                fulfillment.realizationQuantity.splice(_index, 1);
+                            }
                         }
                     }
                 })
@@ -565,8 +644,8 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                     .then((deliveryOrder) => {
                         return Promise.all(getPoInternals)
                             .then((purchaseOrderInternals) => {
-                                for (var purchaseOrderInternal of purchaseOrderInternals) {
-                                    var item = unitReceiptNote.items.find(item => item.purchaseOrderId.toString() === purchaseOrderInternal._id.toString())
+                                for (var item of unitReceiptNote.items) {
+                                    var purchaseOrderInternal = purchaseOrderInternals.find(purchaseOrderInternal => item.purchaseOrderId.toString() === purchaseOrderInternal._id.toString())
                                     item.purchaseOrder = purchaseOrderInternal;
                                 }
                                 unitReceiptNote.deliveryOrder = deliveryOrder;

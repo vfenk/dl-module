@@ -1,7 +1,8 @@
 describe("BASIC CRUD SCENARIOS", function() {
-    require("./create");
+    require("./basic");
 });
 
 describe("REPORT SCENARIOS", function() {
     require("./report");
 });
+

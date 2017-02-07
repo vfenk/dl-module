@@ -203,15 +203,30 @@ module.exports = class ProductionOrderManager extends BaseManager {
                      errors["deliveryDate"] = i18n.__("ProductionOrder.deliveryDate.isRequired:%s is required", i18n.__("ProductionOrder.deliveryDate._:deliveryDate")); //"Buyer tidak boleh kosong";
                 }
 
-                if(_order.name.trim().toLowerCase()=="printing"){
-                    if(!valid.RUN || valid.RUN==""){
-                        errors["RUN"]=i18n.__("ProductionOrder.RUN.isRequired:%s is required", i18n.__("ProductionOrder.RUN._:RUN")); //"RUN tidak boleh kosong";
-                    }
-                    if(!valid.designNumber || valid.designNumber==""){
-                        errors["designNumber"]=i18n.__("ProductionOrder.designNumber.isRequired:%s is required", i18n.__("ProductionOrder.designNumber._:DesignNumber")); //"designNumber tidak boleh kosong";
-                    }
-                    if(!valid.designCode || valid.designCode==""){
-                        errors["designCode"]=i18n.__("ProductionOrder.designCode.isRequired:%s is required", i18n.__("ProductionOrder.designCode._:DesignCode")); //"designCode tidak boleh kosong";
+                if(_order){
+                    if(_order.name.trim().toLowerCase()=="printing"){
+                        if(!valid.RUN || valid.RUN==""){
+                            errors["RUN"]=i18n.__("ProductionOrder.RUN.isRequired:%s is required", i18n.__("ProductionOrder.RUN._:RUN")); //"RUN tidak boleh kosong";
+                        }
+                        if(valid.RUN && valid.RUN!="Tanpa RUN"){
+                            if(!valid.RUNWidth || valid.RUNWidth.length<=0){
+                                errors["RUNWidth"]=i18n.__("ProductionOrder.RUNWidth.isRequired:%s is required", i18n.__("ProductionOrder.RUNWidth._:RUNWidth")); //"RUNWidth tidak boleh kosong";
+                            }
+                            if(valid.RUNWidth.length>0){
+                                for(var r=0; r<valid.RUNWidth.length; r++){
+                                    if(valid.RUNWidth[r]<=0){
+                                        errors["RUNWidth"]=i18n.__("ProductionOrder.RUNWidth.shouldNot:%s should not be less than or equal zero", i18n.__("ProductionOrder.RUNWidth._:RUNWidth")); //"RUNWidth tidak boleh nol";
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if(!valid.designNumber || valid.designNumber==""){
+                            errors["designNumber"]=i18n.__("ProductionOrder.designNumber.isRequired:%s is required", i18n.__("ProductionOrder.designNumber._:DesignNumber")); //"designNumber tidak boleh kosong";
+                        }
+                        if(!valid.designCode || valid.designCode==""){
+                            errors["designCode"]=i18n.__("ProductionOrder.designCode.isRequired:%s is required", i18n.__("ProductionOrder.designCode._:DesignCode")); //"designCode tidak boleh kosong";
+                        }
                     }
                 }
 
@@ -317,15 +332,17 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 if(_buyer){
                     valid.buyerId=new ObjectId(_buyer._id);
                 }
-                if(_lampStandard){
-                    valid.lampStandardId=new ObjectId(_lampStandard._id);
-                }
                 if(_uom){
                     valid.uomId=new ObjectId(_uom._id);
                 }
                 if(_process){
                     valid.processTypeId=new ObjectId(_process._id);
                 }
+
+                if(_account){
+                    valid.accountId=new ObjectId(_account._id);
+                }
+                
                 if(valid.lampStandards.length>0){
                     for(var lamp of valid.lampStandards){
                         for (var _lampStandard of _lampStandards) {
@@ -422,6 +439,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 .then(validproductionOrder => {
                     var prodOrd=[];
                     prodOrd.push(validproductionOrder);
+                    validproductionOrder.account.password="";
                    this.collection.singleOrDefault({
                         "$and": [{
                         salesContractNo: validproductionOrder.salesContractNo},
@@ -539,6 +557,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
        return new Promise((resolve, reject) => {
             this._validate(data)
             .then(validproductionOrder => {
+                validproductionOrder.account.password="";
                 this.collection.singleOrDefault({
                     "$and": [{
                         salesContractNo: validproductionOrder.salesContractNo},
@@ -712,6 +731,24 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 for(var a of result.productionOrders){
                     if(data === a.orderNo)
                         dataReturn = new ProductionOrder(a);
+                }
+                resolve(dataReturn);
+            });
+        });
+    }
+
+    getSingleProductionOrderDetail(detailCode){
+        return new Promise((resolve, reject) => {
+            var query = {"productionOrders.details": { "$elemMatch": { "code": detailCode}}};
+            this.collection.singleOrDefault(query).then((result) => {
+                var dataReturn = {};
+                if (result){
+                    for(var productionOrder of result.productionOrders){
+                        for (var detail of productionOrder.details){
+                            if (detailCode === detail.code)
+                                dataReturn = new ProductionOrderDetail(detail);
+                        }
+                    }
                 }
                 resolve(dataReturn);
             });
