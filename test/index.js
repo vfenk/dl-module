@@ -67,7 +67,7 @@ describe('#dl-module', function (done) {
     //Production
 
 
-    test('@sales/production-order', './sales/production-order/create');
+    //test('@sales/production-order', './sales/production-order/create');
 
     // test('@production/daily-operation', './production/finishing-printing/daily-operation');
     // test('@production/finishing-printing/monitoring-specification-machine', './production/finishing-printing/monitoring-specification-machine');
