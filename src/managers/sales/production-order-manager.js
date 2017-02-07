@@ -330,9 +330,6 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 if(_buyer){
                     valid.buyerId=new ObjectId(_buyer._id);
                 }
-                if(_lampStandard){
-                    valid.lampStandardId=new ObjectId(_lampStandard._id);
-                }
                 if(_uom){
                     valid.uomId=new ObjectId(_uom._id);
                 }
