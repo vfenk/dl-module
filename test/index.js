@@ -19,6 +19,7 @@ describe('#dl-module', function (done) {
     // test('@ETL/DIM-UNIT', './etl/dim-unit');
     // test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
     test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
+    test('@ETL/FACT-MONITORING-EVENT', './etl/fact-monitoring-event');    
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
