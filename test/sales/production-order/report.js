@@ -97,7 +97,9 @@ it("#02. should success when create new 10 data Production Order with 2 detail c
             .then(dataResults => {
                 var createData = [];
                 for(var a of dataResults){
-                    a.salesContractNo = codeGenerator();
+                    var code = codeGenerator();
+                    a.salesContractNo = code;
+                    a.orderNo = code;
                     var dataProdOrder = manager.create(a);
                     createData.push(dataProdOrder);
                     salesContractNo = a.salesContractNo;
