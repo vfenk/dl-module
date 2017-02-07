@@ -95,7 +95,8 @@ module.exports = {
                 materialConstruction: require('./test/data-util/master/material-construction-data-util'),
                 yarnMaterial: require('./test/data-util/master/yarn-material-data-util'),
                 finishType: require('./test/data-util/master/finish-type-data-util'),
-                standardTest: require('./test/data-util/master/standard-test-data-util')
+                standardTest: require('./test/data-util/master/standard-test-data-util'),
+                colorType: require('./test/data-util/master/color-type-data-util')
             },
             purchasing: {
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")

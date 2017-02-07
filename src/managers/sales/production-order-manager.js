@@ -8,6 +8,7 @@ var map = DLModels.map;
 var SalesContract=DLModels.sales.SalesContract;
 var ProductionOrder=DLModels.sales.ProductionOrder;
 var ProductionOrderDetail=DLModels.sales.ProductionOrderDetail;
+var ProductionOrderLampStandard=DLModels.sales.ProductionOrderLampStandard;
 var DailyOperation=DLModels.production.finishingPrinting.DailyOperation;
 var LampStandardManager=require('../master/lamp-standard-manager');
 var BuyerManager=require('../master/buyer-manager');
@@ -16,7 +17,11 @@ var ProductManager = require('../master/product-manager');
 var ProcessTypeManager = require('../master/process-type-manager');
 var OrderTypeManager = require('../master/order-type-manager');
 var ColorTypeManager = require('../master/color-type-manager');
-var InstructionManager = require('../master/instruction-manager');
+var FinishTypeManager = require('../master/finish-type-manager');
+var StandardTestManager = require('../master/standard-test-manager');
+var MaterialConstructionManager = require ('../master/material-construction-manager');
+var YarnMaterialManager = require ('../master/yarn-material-manager');
+var AccountManager = require ('../auth/account-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var generateCode = require("../../utils/code-generator");
@@ -33,10 +38,14 @@ module.exports = class ProductionOrderManager extends BaseManager {
         this.BuyerManager= new BuyerManager(db,user);
         this.UomManager = new UomManager(db, user);
         this.ProductManager = new ProductManager(db, user);
-        this.InstructionManager = new InstructionManager(db, user);
         this.ProcessTypeManager = new ProcessTypeManager(db, user);
         this.ColorTypeManager = new ColorTypeManager(db, user);
         this.OrderTypeManager = new OrderTypeManager(db, user);
+        this.MaterialConstructionManager= new MaterialConstructionManager(db, user);
+        this.YarnMaterialManager = new YarnMaterialManager(db,user);
+        this.FinishTypeManager= new FinishTypeManager(db, user);
+        this.StandardTestManager= new StandardTestManager(db, user);
+        this.AccountManager=new AccountManager(db, user);
     }
 
     _getQuery(paging) {
@@ -73,15 +82,17 @@ module.exports = class ProductionOrderManager extends BaseManager {
         var errors = {};
 
         var valid=productionOrder;
-        if(valid.constructionId){
-            valid.construction=valid.construction._id;}
 
         var getBuyer = ObjectId.isValid(valid.buyerId) ? this.BuyerManager.getSingleByIdOrDefault(valid.buyerId) : Promise.resolve(null);
-        var getLampStandard = ObjectId.isValid(valid.lampStandardId) ? this.LampStandardManager.getSingleByIdOrDefault(valid.lampStandardId) : Promise.resolve(null);
         var getUom = valid.uom && ObjectId.isValid(valid.uomId) ? this.UomManager.getSingleByIdOrDefault(valid.uomId) : Promise.resolve(null);
         var getProduct = ObjectId.isValid(valid.materialId) ? this.ProductManager.getSingleByIdOrDefault(valid.materialId) : Promise.resolve(null);
         var getProcessType = ObjectId.isValid(valid.processTypeId) ? this.ProcessTypeManager.getSingleByIdOrDefault(valid.processTypeId) : Promise.resolve(null);
         var getOrderType = ObjectId.isValid(valid.orderTypeId) ? this.OrderTypeManager.getSingleByIdOrDefault(valid.orderTypeId) : Promise.resolve(null);
+        var getFinishType = ObjectId.isValid(valid.finishTypeId) ? this.FinishTypeManager.getSingleByIdOrDefault(valid.finishTypeId) : Promise.resolve(null);
+        var getYarnMaterial= ObjectId.isValid(valid.yarnMaterialId) ? this.YarnMaterialManager.getSingleByIdOrDefault(valid.yarnMaterialId) : Promise.resolve(null);
+        var getStandardTest= ObjectId.isValid(valid.standardTestId) ? this.StandardTestManager.getSingleByIdOrDefault(valid.standardTestId) : Promise.resolve(null);
+        var getMaterialConstruction = ObjectId.isValid(valid.materialConstructionId) ? this.MaterialConstructionManager.getSingleByIdOrDefault(valid.materialConstructionId) : Promise.resolve(null);
+        var getAccount= ObjectId.isValid(valid.accountId) ? this.AccountManager.getSingleByIdOrDefault(valid.accountId) : Promise.resolve(null);
 
         valid.details = valid.details || [];
         var getColorTypes = [];
@@ -92,15 +103,29 @@ module.exports = class ProductionOrderManager extends BaseManager {
             }
         }
 
-        return Promise.all([getBuyer, getLampStandard, getUom,  getProduct, getProcessType, getOrderType].concat(getColorTypes))
+        valid.lampStandards= valid.lampStandards || [];
+        var getLampStandards=[];
+        for (var lamp of valid.lampStandards) {
+            if (ObjectId.isValid(lamp.lampStandardId)) {
+                var lamps=ObjectId.isValid(lamp.lampStandardId) ? this.LampStandardManager.getSingleByIdOrDefault(lamp.lampStandardId) : Promise.resolve(null);
+                getLampStandards.push(lamps);
+            }
+        }
+
+        return Promise.all([getBuyer, getUom,  getProduct, getProcessType, getOrderType, getFinishType, getYarnMaterial, getStandardTest, getMaterialConstruction, getAccount].concat(getColorTypes,getLampStandards))
             .then(results => {
                 var _buyer = results[0];
-                var _lampStandard = results[1];
-                var _uom = results[2];
-                var _material = results[3];
-                var _process = results[4];
-                var _order = results[5];
-                var _colors = results.slice(6, results.length);
+                var _uom = results[1];
+                var _material = results[2];
+                var _process = results[3];
+                var _order = results[4];
+                var _finish= results[5];
+                var _yarn = results[6];
+                var _standard = results[7];
+                var _construction = results[8];
+                var _account = results[9];
+                var _colors = results.slice(10, 10+ valid.details.length);
+                var _lampStandards= results.slice(10+ valid.details.length, results.length);
 
 
                 if (valid.uom) {
@@ -114,15 +139,11 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     errors["salesContractNo"]=i18n.__("ProductionOrder.salesContractNo.isRequired:%s is required", i18n.__("ProductionOrder.salesContractNo._:SalesContractNo")); //"salesContractNo tidak boleh kosong";
                 }
 
-                if(!valid.construction || valid.construction===''){
-                    errors["construction"]=i18n.__("ProductionOrder.construction.isRequired:%s is required", i18n.__("ProductionOrder.construction._:Construction")); //"construction tidak boleh kosong";
-                }
-
                 if (!_material)
                     errors["material"] = i18n.__("ProductionOrder.material.isRequired:%s is not exists", i18n.__("ProductionOrder.material._:Material")); //"material tidak boleh kosong";
                 else if (!valid.materialId)
                     errors["material"] = i18n.__("ProductionOrder.material.isRequired:%s is required", i18n.__("ProductionOrder.material._:Material")); //"material tidak boleh kosong";
-
+                
                 if (!_process)
                     errors["processType"] = i18n.__("ProductionOrder.processType.isRequired:%s is not exists", i18n.__("ProductionOrder.processType._:ProcessType")); //"processType tidak boleh kosong";
                 else if (!valid.processTypeId)
@@ -133,12 +154,33 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 else if (!valid.processTypeId)
                     errors["orderType"] = i18n.__("ProductionOrder.orderType.isRequired:%s is required", i18n.__("ProductionOrder.orderType._:OrderType")); //"orderType tidak boleh kosong";
                 
-                if(!valid.rollLength || valid.rollLength===''){
-                    errors["rollLength"]=i18n.__("ProductionOrder.rollLength.isRequired:%s is required", i18n.__("ProductionOrder.rollLength._:RollLength")); //"rollLength tidak boleh kosong";
+                if (!_yarn)
+                    errors["yarnMaterial"] = i18n.__("ProductionOrder.yarnMaterial.isRequired:%s is not exists", i18n.__("ProductionOrder.yarnMaterial._:YarnMaterial")); //"yarnMaterial tidak boleh kosong";
+                else if (!valid.yarnMaterialId)
+                    errors["yarnMaterial"] = i18n.__("ProductionOrder.yarnMaterial.isRequired:%s is required", i18n.__("ProductionOrder.yarnMaterial._:YarnMaterial")); //"yarnMaterial tidak boleh kosong";
+                
+                if (!_finish)
+                    errors["finishType"] = i18n.__("ProductionOrder.finishType.isRequired:%s is not exists", i18n.__("ProductionOrder.finishType._:FinishType")); //"finishType tidak boleh kosong";
+                else if (!valid.finishTypeId)
+                    errors["finishType"] = i18n.__("ProductionOrder.finishType.isRequired:%s is required", i18n.__("ProductionOrder.finishType._:FinishType")); //"finishType tidak boleh kosong";
+                
+                if (!_standard)
+                    errors["standardTest"] = i18n.__("ProductionOrder.standardTest.isRequired:%s is not exists", i18n.__("ProductionOrder.standardTest._:StandardTest")); //"standardTest tidak boleh kosong";
+                else if (!valid.standardTestId)
+                    errors["standardTest"] = i18n.__("ProductionOrder.standardTest.isRequired:%s is required", i18n.__("ProductionOrder.standardTest._:StandardTest")); //"standardTest tidak boleh kosong";
+                
+                if(!_account){
+                    errors["account"] = i18n.__("ProductionOrder.account.isRequired:%s is not exists", i18n.__("ProductionOrder.account._:Account")); //"account tidak boleh kosong";
+                }
+                else if (!valid.accountId)
+                    errors["account"] = i18n.__("ProductionOrder.account.isRequired:%s is required", i18n.__("ProductionOrder.account._:Account")); //"account tidak boleh kosong";
+                
+                if(!valid.packingInstruction || valid.packingInstruction===''){
+                    errors["packingInstruction"]=i18n.__("ProductionOrder.packingInstruction.isRequired:%s is required", i18n.__("ProductionOrder.packingInstruction._:PackingInstruction")); //"PackingInstruction tidak boleh kosong";
                 }
 
-                if(!valid.originGreigeFabric || valid.originGreigeFabric===''){
-                    errors["originGreigeFabric"]=i18n.__("ProductionOrder.originGreigeFabric.isRequired:%s is required", i18n.__("ProductionOrder.originGreigeFabric._:OriginGreigeFabric")); //"originGreigeFabric tidak boleh kosong";
+                if(!valid.materialOrigin || valid.materialOrigin===''){
+                    errors["materialOrigin"]=i18n.__("ProductionOrder.materialOrigin.isRequired:%s is required", i18n.__("ProductionOrder.materialOrigin._:MaterialOrigin")); //"materialOrigin tidak boleh kosong";
                 }
 
                 if(!valid.finishWidth || valid.finishWidth===''){
@@ -160,16 +202,36 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 if (!valid.deliveryDate || valid.deliveryDate === "") {
                      errors["deliveryDate"] = i18n.__("ProductionOrder.deliveryDate.isRequired:%s is required", i18n.__("ProductionOrder.deliveryDate._:deliveryDate")); //"Buyer tidak boleh kosong";
                 }
-
+                if(_order){
+                    if(_order.name.trim().toLowerCase()=="printing"){
+                        if(!valid.RUN || valid.RUN==""){
+                            errors["RUN"]=i18n.__("ProductionOrder.RUN.isRequired:%s is required", i18n.__("ProductionOrder.RUN._:RUN")); //"RUN tidak boleh kosong";
+                        }
+                        if(valid.RUN && valid.RUN!="Tanpa RUN"){
+                            if(!valid.RUNWidth || valid.RUNWidth.length<=0){
+                                errors["RUNWidth"]=i18n.__("ProductionOrder.RUNWidth.isRequired:%s is required", i18n.__("ProductionOrder.RUNWidth._:RUNWidth")); //"RUNWidth tidak boleh kosong";
+                            }
+                            if(valid.RUNWidth.length>0){
+                                for(var r=0; r<valid.RUNWidth.length; r++){
+                                    if(valid.RUNWidth[r]<=0){
+                                        errors["RUNWidth"]=i18n.__("ProductionOrder.RUNWidth.shouldNot:%s should not be less than or equal zero", i18n.__("ProductionOrder.RUNWidth._:RUNWidth")); //"RUNWidth tidak boleh nol";
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if(!valid.designNumber || valid.designNumber==""){
+                            errors["designNumber"]=i18n.__("ProductionOrder.designNumber.isRequired:%s is required", i18n.__("ProductionOrder.designNumber._:DesignNumber")); //"designNumber tidak boleh kosong";
+                        }
+                        if(!valid.designCode || valid.designCode==""){
+                            errors["designCode"]=i18n.__("ProductionOrder.designCode.isRequired:%s is required", i18n.__("ProductionOrder.designCode._:DesignCode")); //"designCode tidak boleh kosong";
+                        }
+                    }
+                }
                 if (!_buyer)
                     errors["buyer"] = i18n.__("ProductionOrder.buyer.isRequired:%s is not exists", i18n.__("ProductionOrder.buyer._:Buyer")); //"Buyer tidak boleh kosong";
                 else if (!valid.buyerId)
                     errors["buyer"] = i18n.__("ProductionOrder.buyer.isRequired:%s is required", i18n.__("ProductionOrder.buyer._:Buyer")); //"Buyer tidak boleh kosong";
-
-                if(!_lampStandard)
-                    errors["lampStandard"] = i18n.__("ProductionOrder.lampStandard.isRequired:%s is not exists", i18n.__("ProductionOrder.lampStandard._:LampStandard")); //"lampStandard tidak boleh kosong";
-                else if (!valid.lampStandardId)
-                    errors["lampStandard"] = i18n.__("ProductionOrder.lampStandard.isRequired:%s is required", i18n.__("ProductionOrder.lampStandard._:LampStandard")); //"lampStandard tidak boleh kosong";
                 
                  if (!valid.orderQuantity || valid.orderQuantity === 0)
                     errors["orderQuantity"] = i18n.__("ProductionOrder.orderQuantity.isRequired:%s is required", i18n.__("ProductionOrder.orderQuantity._:OrderQuantity")); //"orderQuantity tidak boleh kosong";
@@ -187,9 +249,34 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         }
                     }
                 
-                if (!valid.spelling || valid.spelling === 0)
-                    errors["spelling"] = i18n.__("ProductionOrder.spelling.isRequired:%s is required", i18n.__("ProductionOrder.spelling._:Spelling")); //"spelling tidak boleh kosong";
+                if (!valid.shippingQuantityTolerance || valid.shippingQuantityTolerance === 0)
+                    errors["shippingQuantityTolerance"] = i18n.__("ProductionOrder.shippingQuantityTolerance.isRequired:%s is required", i18n.__("ProductionOrder.shippingQuantityTolerance._:ShippingQuantityTolerance")); //"shippingQuantityTolerance tidak boleh kosong";
+                else if(valid.shippingQuantityTolerance>100){
+                    errors["shippingQuantityTolerance"] =i18n.__("ProductionOrder.shippingQuantityTolerance.shouldNot:%s should not more than 100", i18n.__("ProductionOrder.shippingQuantityTolerance._:ShippingQuantityTolerance")); //"shippingQuantityTolerance tidak boleh lebih dari 100";
+                }
+
+                if (!valid.materialWidth || valid.materialWidth === "")
+                    errors["materialWidth"] = i18n.__("ProductionOrder.materialWidth.isRequired:%s is required", i18n.__("ProductionOrder.materialWidth._:MaterialWidth")); //"materialWidth tidak boleh kosong";
                 
+                valid.lampStandards=valid.lampStandards || [];
+                if(valid.lampStandards && valid.lampStandards.length<=0){
+                    errors["lampStandards"]= i18n.__("ProductionOrder.lampStandards.isRequired:%s is required", i18n.__("ProductionOrder.lampStandards._:LampStandards")); //"Harus ada minimal 1 lampStandard";
+                }
+                else if(valid.lampStandards.length>0) {
+                    var lampErrors = [];
+                    for (var lamp of valid.lampStandards) {
+                        var lampError = {};
+                        if(!_lampStandards){
+                            lampError["lampStandard"] = i18n.__("ProductionOrder.lampStandards.lampStandard.isRequired:%s is not exists", i18n.__("ProductionOrder.lampStandards.lampStandard._:LampStandard")); //"lampStandard tidak boleh kosong";
+                        
+                        }
+                    if (Object.getOwnPropertyNames(lampError).length > 0)
+                            lampErrors.push(lampError);
+                    }
+                    if (lampErrors.length > 0)
+                        errors.lampStandards = lampErrors;
+                }
+
                 valid.details = valid.details || [];
                 if (valid.details && valid.details.length <= 0) {
                     errors["details"] = i18n.__("ProductionOrder.details.isRequired:%s is required", i18n.__("ProductionOrder.details._:Details")); //"Harus ada minimal 1 detail";
@@ -243,14 +330,26 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 if(_buyer){
                     valid.buyerId=new ObjectId(_buyer._id);
                 }
-                if(_lampStandard){
-                    valid.lampStandardId=new ObjectId(_lampStandard._id);
-                }
                 if(_uom){
                     valid.uomId=new ObjectId(_uom._id);
                 }
                 if(_process){
                     valid.processTypeId=new ObjectId(_process._id);
+                }
+
+                if(_account){
+                    valid.accountId=new ObjectId(_account._id);
+                }
+
+                if(valid.lampStandards.length>0){
+                    for(var lamp of valid.lampStandards){
+                        for (var _lampStandard of _lampStandards) {
+                            if (lamp.lampStandardId.toString() === _lampStandard._id.toString()) {
+                                lamp.lampStandardId = _lampStandard._id;
+                                lamp.lampStandard = _lampStandard;
+                            }
+                        }
+                    }
                 }
                 if(_order){
                     valid.orderTypeId=new ObjectId(_order._id);
@@ -267,7 +366,6 @@ module.exports = class ProductionOrderManager extends BaseManager {
                                 if (detail.colorTypeId.toString() === _color._id.toString()) {
                                     detail.colorTypeId = _color._id;
                                     detail.colorType = _color;
-                                    break;
                                 }
                             }
                         }
@@ -278,6 +376,25 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     valid.materialId=new ObjectId(_material._id);
                 }
                 
+                if(_finish){
+                    valid.finishType=_finish;
+                    valid.finishTypeId=new ObjectId(_finish._id);
+                }
+
+                if(_yarn){
+                    valid.yarnMaterial=_yarn;
+                    valid.yarnMaterialId=new ObjectId(_yarn._id);
+                }
+
+                if(_standard){
+                    valid.standardTest=_standard;
+                    valid.standardTestId=_standard._id;
+                }
+
+                if(_construction){
+                    valid.materialConstruction=_construction;
+                    valid.materialConstructionId=_construction._id;
+                }
 
                 valid.deliveryDate=new Date(valid.deliveryDate);
 
@@ -320,6 +437,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 .then(validproductionOrder => {
                     var prodOrd=[];
                     prodOrd.push(validproductionOrder);
+                    validproductionOrder.account.password="";
                    this.collection.singleOrDefault({
                         "$and": [{
                         salesContractNo: validproductionOrder.salesContractNo},
@@ -431,6 +549,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
        return new Promise((resolve, reject) => {
             this._validate(data)
             .then(validproductionOrder => {
+                validproductionOrder.account.password="";
                 this.collection.singleOrDefault({
                     "$and": [{
                         salesContractNo: validproductionOrder.salesContractNo},
