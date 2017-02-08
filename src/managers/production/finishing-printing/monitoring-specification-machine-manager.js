@@ -118,6 +118,10 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                     }
                 }
 
+                if (_machine) {
+                    valid.machine = _machine;
+                    valid.machineId = new ObjectId(_machine._id);
+                }
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require("module-toolkit").ValidationError;
