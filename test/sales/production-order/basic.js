@@ -4,7 +4,7 @@ var helper = require("../../helper");
 var validate = require("dl-models").validator.sales.salesContract;
 
 var ProductionOrderManager = require("../../../src/managers/sales/production-order-manager");
-var productionOrderManager = null;
+var manager = null;
 
 before('#00. connect db', function(done) {
     helper.getDb()
@@ -81,7 +81,19 @@ var dataprodOrder;
             });
     });
 
-    it("#05. should success when read data", function(done) {
+    it(`#05. should success when get updated data with id`, function(done) {
+        manager.getSingleById(createdId)
+            .then((data) => {
+                validate(data);
+                data._stamp.should.not.equal(createdData._stamp);
+                done();
+            })
+            .catch((e) => {
+                done(e);
+            });
+    });
+
+    it("#06. should success when read data", function(done) {
         manager.read({
                 filter: {
                     _id: createdId
@@ -99,10 +111,37 @@ var dataprodOrder;
             });
     });
 
-    it(`#09. should success when delete data`, function(done) {
+
+    
+
+    it(`#07. should success when delete data`, function(done) {
         manager.delete(dataprodOrder)
             .then((id) => {
                 id.toString().should.equal(createdId.toString());
+                done();
+            })
+            .catch((e) => {
+                done(e);
+            });
+    });
+
+    
+    it("#08. should success when destroy data with id", function(done) {
+        manager.destroy(createdId)
+            .then((result) => {
+                result.should.be.Boolean();
+                result.should.equal(true);
+                done();
+            })
+            .catch((e) => {
+                done(e);
+            });
+    });
+
+    it(`#09. should null when get destroyed data`, function(done) {
+        manager.getSingleByIdOrDefault(createdId)
+            .then((data) => {
+                if(!data)
                 done();
             })
             .catch((e) => {

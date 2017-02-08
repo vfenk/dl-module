@@ -106,7 +106,6 @@ it('#02. should success when get data report PO Per Unit Per Category', function
     purchaseOrderManager.getDataPOUnitCategory()
     .then(po => {
         po.should.instanceof(Array);
-        po.length.should
         done();
     }).catch(e => {
             done(e);

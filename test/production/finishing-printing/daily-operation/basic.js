@@ -53,9 +53,11 @@ it("#02. should success create data daily operation when create new data product
                 },{
                     "productionOrder.orderNo" : data && data.productionOrder ? data.productionOrder.orderNo : ""
                 },{
-                    "material" : data && data.productionOrder ? data.productionOrder.material : ""
+                    "materialId" : data && data.productionOrder ? data.productionOrder.materialId : ""
                 },{
-                    "construction" : data && data.productionOrder ? data.productionOrder.construction : ""
+                    'materialConstructionId' : data && data.productionOrder ? data.productionOrder.materialConstructionId : ""
+                },{
+                    'yarnMaterialId' : data && data.productionOrder ? data.productionOrder.yarnMaterialId : ""
                 },{
                     "color" : data && data.color ? data.color : ''
                 },{
@@ -65,7 +67,6 @@ it("#02. should success create data daily operation when create new data product
             .then(daily => {
                 validate(daily);
                 daily.productionOrder.orderNo.should.equal(DailyOperation.productionOrder.orderNo);
-                daily.construction.should.equal(DailyOperation.construction);
                 daily.color.should.equal(DailyOperation.color);
                 daily.salesContract.should.equal(DailyOperation.salesContract);
                 DailyOperationId = daily._id;
@@ -262,7 +263,7 @@ it("#12. should success get no data partition when search with no parameter", fu
         });
 });
 
-it("#13. should success get 1 data partition when search with parameter", function(done) {
+it(`#13. should success get 1 data partition when search with parameter`, function(done) {
     var data;
     for(var a of DailyOperation.kanban.partitions){
         data = a;
@@ -285,7 +286,7 @@ it("#13. should success get 1 data partition when search with parameter", functi
         });
 });
 
-it("#14. should success get 0 data report when search report with no parameter", function(done) {
+it(`#14. should success get 0 data report when search report with no parameter`, function(done) {
     manager.getDailyOperationReport()
         .then((result) => {
             result.should.be.instanceof(Array);
@@ -297,7 +298,7 @@ it("#14. should success get 0 data report when search report with no parameter",
         });
 });
 
-it("#15. should success get data report when search report with machine parameter", function(done) {
+it(`#15. should success get data report when search report with machine parameter`, function(done) {
     var data;
     for(var a of DailyOperation.kanban.partitions){
         data = a;
@@ -339,7 +340,7 @@ it(`#17. should _deleted=true`, function(done) {
         });
 });
 
-it("#18. should success when destroy data with id", function(done) {
+it(`#18. should success when destroy data with id`, function(done) {
     manager.destroy(DailyOperationId)
         .then((result) => {
             result.should.be.Boolean();
