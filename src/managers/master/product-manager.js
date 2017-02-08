@@ -5,6 +5,7 @@ var ObjectId = require("mongodb").ObjectId;
 var UomManager = require('./uom-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
+var assert = require('assert');
 
 // internal deps
 require('mongodb-toolkit');
@@ -262,5 +263,33 @@ module.exports = class ProductManager extends BaseManager {
         };
 
         return this.collection.createIndexes([dateIndex, codeIndex]);
+    }
+
+    getProductByTags(key,tag){
+        return new Promise((resolve, reject) => {
+            var regex=new RegExp(key,"i");
+            var regex2= new RegExp(tag,"i");
+            this.collection.aggregate(
+                    [{
+                        $match: {
+                            $and:[{
+                                    $and:[{
+                                        "tags": regex2
+                                    },{
+                                    "_deleted": false
+                                }]
+                        },{
+                                "name": {
+                                    "$regex": regex
+                                }
+                            }]
+                        }
+                    }]
+                )
+                .toArray(function(err, result) {
+                    assert.equal(err, null);
+                    resolve(result);
+                });
+            });
     }
 };
