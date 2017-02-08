@@ -440,6 +440,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     var prodOrd=[];
                     prodOrd.push(validproductionOrder);
                     validproductionOrder.account.password="";
+                    validproductionOrder._createdDate=new Date();
                    this.collection.singleOrDefault({
                         "$and": [{
                         salesContractNo: validproductionOrder.salesContractNo},
@@ -501,6 +502,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                             if (!SalesContractData.stamp){
                                 SalesContractData = new SalesContract(SalesContractData);
                             }
+                            
                             var dailyOperation = [];
                             for(var a of validproductionOrder.details){
                                 var newDailyOperation = new DailyOperation();
@@ -526,6 +528,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                             }
 
                             SalesContractData.stamp(this.user.username, "manager");
+                            SalesContractData._createdDate=new Date();
                             this.collection.insert(SalesContractData)
                                 .then(id => {
                                     DailyOperationCollection.insertMany(dailyOperation)
