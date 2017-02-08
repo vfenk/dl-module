@@ -99,6 +99,8 @@ module.exports = class PurchaseRequestManager extends BaseManager {
 
                 if (!valid.date || valid.date == "" || valid.date == "undefined")
                     errors["date"] = i18n.__("PurchaseRequest.date.isRequired:%s is required", i18n.__("PurchaseRequest.date._:Date")); //"Tanggal PR tidak boleh kosong";
+                else if (valid.date > valid.expectedDeliveryDate)
+                    errors["date"] = i18n.__("PurchaseRequest.date.isGreater:%s is greater than expected delivery date", i18n.__("PurchaseRequest.date._:Date"));//"Tanggal surat jalan tidak boleh lebih besar dari tanggal hari ini";
 
                 if (!_unit)
                     errors["unit"] = i18n.__("PurchaseRequest.unit.isRequired:%s is not exists", i18n.__("PurchaseRequest.unit._:Unit")); //"Unit tidak boleh kosong";
@@ -123,18 +125,42 @@ module.exports = class PurchaseRequestManager extends BaseManager {
                 }
                 else {
                     var itemErrors = [];
+                    var itemDuplicateErrors = [];
+                    var valueArr = valid.items.map(function (item) { return item.productId.toString() });
+                    var isDuplicate = valueArr.some(function (item, idx) {
+                        var itemError = {};
+                        if (valueArr.indexOf(item) != idx) {
+                            itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isDuplicate:%s is duplicate", i18n.__("PurchaseRequest.items.product.name._:Product")); //"Nama barang tidak boleh kosong";
+                        }
+                        if (Object.getOwnPropertyNames(itemError).length > 0) {
+                            itemDuplicateErrors[valueArr.indexOf(item)] = itemError;
+                            itemDuplicateErrors[idx] = itemError;
+                        } else {
+                            itemDuplicateErrors[idx] = itemError;
+                        }
+                        return valueArr.indexOf(item) != idx
+                    });
                     for (var item of valid.items) {
                         var itemError = {};
-                        if (!item.product || !item.product._id)
-                            itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isRequired:%s is required", i18n.__("PurchaseRequest.items.product.name._:Name")); //"Nama barang tidak boleh kosong";
-                        if (item.quantity <= 0)
+                        var _index = valid.items.indexOf(item);
+                        if (!item.product || !item.product._id) {
+                            itemError["product"] = i18n.__("PurchaseRequest.items.product.name.isRequired:%s is required", i18n.__("PurchaseRequest.items.product.name._:Product")); //"Nama barang tidak boleh kosong";
+                        } else if (isDuplicate) {
+                            if (Object.getOwnPropertyNames(itemDuplicateErrors[_index]).length > 0) {
+                                Object.assign(itemError, itemDuplicateErrors[_index]);
+                            }
+                        }
+                        if (item.quantity <= 0) {
                             itemError["quantity"] = i18n.__("PurchaseRequest.items.quantity.isRequired:%s is required", i18n.__("PurchaseRequest.items.quantity._:Quantity")); //Jumlah barang tidak boleh kosong";
-
-                        if (Object.getOwnPropertyNames(itemError).length > 0)
-                            itemErrors.push(itemError);
+                        }
+                        itemErrors.push(itemError);
                     }
-                    if (itemErrors.length > 0)
-                        errors.items = itemErrors;
+                    for (var itemError of itemErrors) {
+                        if (Object.getOwnPropertyNames(itemError).length > 0) {
+                            errors.items = itemErrors;
+                            break;
+                        }
+                    }
                 }
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
@@ -176,6 +202,7 @@ module.exports = class PurchaseRequestManager extends BaseManager {
     _beforeInsert(purchaseRequest) {
         purchaseRequest.no = generateCode();
         purchaseRequest.status = prStatusEnum.CREATED;
+        PurchaseRequest._createdDate = new Date();
         return Promise.resolve(purchaseRequest);
     }
 
@@ -239,69 +266,165 @@ module.exports = class PurchaseRequestManager extends BaseManager {
         });
     }
 
-    getDataPRMonitoring(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo, state) {
-        return new Promise((resolve, reject) => {
-            var sorting = {
-                "date": -1,
-                "no": 1
-            };
-            var query = Object.assign({});
+    getAllDataPR(filter) {
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var query = Object.assign({});
+                    query = Object.assign(query, filter);
+                    query = Object.assign(query, {
+                        _deleted: false
+                    });
 
-            if (state !== -1) {
-                Object.assign(query, {
-                    "status.value": state
+                    var _select = [
+                        "no",
+                        "date",
+                        "expectedDeliveryDate",
+                        "budget.code",
+                        "unit",
+                        "currency",
+                        "category",
+                        "remark",
+                        "isPosted",
+                        "isUsed",
+                        "_createdBy",
+                        "items.product",
+                        "items.quantity",
+                        "items.remark"
+                    ];
+                    this.collection.where(query).select(_select).execute()
+                        .then((purchaseRequests) => {
+                            resolve(purchaseRequests.data);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 });
-            }
-
-            if (unitId !== "undefined" && unitId !== "") {
-                Object.assign(query, {
-                    unitId: new ObjectId(unitId)
-                });
-            }
-            if (categoryId !== "undefined" && categoryId !== "") {
-                Object.assign(query, {
-                    categoryId: new ObjectId(categoryId)
-                });
-            }
-            if (budgetId !== "undefined" && budgetId !== "") {
-                Object.assign(query, {
-                    budgetId: new ObjectId(budgetId)
-                });
-            }
-            if (PRNo !== "undefined" && PRNo !== "") {
-                Object.assign(query, {
-                    "no": PRNo
-                });
-            }
-            if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
-                Object.assign(query, {
-                    date: {
-                        $gte: new Date(dateFrom),
-                        $lte: new Date(dateTo)
-                    }
-                });
-            }
-            query = Object.assign(query, {
-                _createdBy: this.user.username,
-                _deleted: false,
-                isPosted: true
             });
+    }
 
-            this.collection.find(query).sort(sorting).toArray()
-                .then((purchaseRequests) => {
-                    resolve(purchaseRequests);
-                })
-                .catch(e => {
-                    reject(e);
+    getDataPRMonitoring(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo, state, createdBy) {
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var query = Object.assign({});
+
+                    if (state !== -1) {
+                        Object.assign(query, {
+                            "status.value": state
+                        });
+                    }
+
+                    if (unitId !== "undefined" && unitId !== "") {
+                        Object.assign(query, {
+                            unitId: new ObjectId(unitId)
+                        });
+                    }
+                    if (categoryId !== "undefined" && categoryId !== "") {
+                        Object.assign(query, {
+                            categoryId: new ObjectId(categoryId)
+                        });
+                    }
+                    if (budgetId !== "undefined" && budgetId !== "") {
+                        Object.assign(query, {
+                            budgetId: new ObjectId(budgetId)
+                        });
+                    }
+                    if (PRNo !== "undefined" && PRNo !== "") {
+                        Object.assign(query, {
+                            "no": PRNo
+                        });
+                    }
+                    if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
+                        Object.assign(query, {
+                            date: {
+                                $gte: new Date(dateFrom),
+                                $lte: new Date(dateTo)
+                            }
+                        });
+                    }
+                    if (createdBy !== undefined && createdBy !== "") {
+                        Object.assign(query, {
+                            _createdBy: createdBy
+                        });
+                    }
+                    query = Object.assign(query, {
+                        _deleted: false,
+                        isPosted: true
+                    });
+
+                    this.collection.find(query).toArray()
+                        .then((purchaseRequests) => {
+                            resolve(purchaseRequests);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
                 });
-        });
+            });
+    }
+
+    getDataPRMonitoringAllUser(unitId, categoryId, budgetId, PRNo, dateFrom, dateTo, state) {
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return new Promise((resolve, reject) => {
+                    var query = Object.assign({});
+
+                    if (state !== -1) {
+                        Object.assign(query, {
+                            "status.value": state
+                        });
+                    }
+
+                    if (unitId !== "undefined" && unitId !== "") {
+                        Object.assign(query, {
+                            unitId: new ObjectId(unitId)
+                        });
+                    }
+                    if (categoryId !== "undefined" && categoryId !== "") {
+                        Object.assign(query, {
+                            categoryId: new ObjectId(categoryId)
+                        });
+                    }
+                    if (budgetId !== "undefined" && budgetId !== "") {
+                        Object.assign(query, {
+                            budgetId: new ObjectId(budgetId)
+                        });
+                    }
+                    if (PRNo !== "undefined" && PRNo !== "") {
+                        Object.assign(query, {
+                            "no": PRNo
+                        });
+                    }
+                    if (dateFrom !== "undefined" && dateFrom !== "" && dateFrom !== "null" && dateTo !== "undefined" && dateTo !== "" && dateTo !== "null") {
+                        Object.assign(query, {
+                            date: {
+                                $gte: new Date(dateFrom),
+                                $lte: new Date(dateTo)
+                            }
+                        });
+                    }
+                    query = Object.assign(query, {
+                        _deleted: false,
+                        isPosted: true
+                    });
+
+                    this.collection.find(query).toArray()
+                        .then((purchaseRequests) => {
+                            resolve(purchaseRequests);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                });
+            });
     }
 
     _createIndexes() {
         var dateIndex = {
-            name: `ix_${map.purchasing.collection.PurchaseRequest}__updatedDate`,
+            name: `ix_${map.purchasing.collection.PurchaseRequest}_date`,
             key: {
-                _updatedDate: -1
+                date: -1
             }
         };
 

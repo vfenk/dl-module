@@ -4,15 +4,17 @@
 var ObjectId = require("mongodb").ObjectId;
 var BaseManager = require('module-toolkit').BaseManager;
 var moment = require("moment");
-var sqlConnect = require('./sqlConnect');
+
 
 // internal deps 
 require('mongodb-toolkit');
 
 var UnitManager = require('../managers/master/unit-manager');
 
-module.exports = class DimUnitEtlManager {
-    constructor(db, user) {
+module.exports = class DimUnitEtlManager extends BaseManager {
+    constructor(db, user, sql) {
+        super(db, user);
+        this.sql = sql;
         this.unitManager = new UnitManager(db, user);
     }
     run() {
@@ -45,23 +47,23 @@ module.exports = class DimUnitEtlManager {
     }
 
     load(data) {
-        return sqlConnect.getConnect()
+        return this.sql.getConnection()
             .then((request) => {
 
                 var sqlQuery = '';
 
                 var count = 1;
                 for (var item of data) {
-                    sqlQuery = sqlQuery.concat("insert into Dimunit([ID dim unit], [Kode unit], [Nama Divisi], [Nama unit]) values(" + count + ", '" + item.unitCode + "', '"+ item.divisionName +"', '" + item.unitName + "'); ");
+                    sqlQuery = sqlQuery.concat("insert into DL_Dim_Unit(ID_dim_unit, Kode_unit, Nama_Divisi, Nama_unit) values(" + count + ", '" + item.unitCode + "', '" + item.divisionName + "', '" + item.unitName + "'); ");
 
                     count = count + 1;
                 }
 
                 request.multiple = true;
 
-                // return request.query(sqlQuery)
-                // return request.query('select count(*) from Dimunit')
-                return request.query('select top 1 * from Dimunit')
+                return request.query(sqlQuery)
+                    // return request.query('select count(*) from Dimunit')
+                    // return request.query('select top 1 * from Dimunit')
                     .then((results) => {
                         console.log(results);
                         return Promise.resolve();

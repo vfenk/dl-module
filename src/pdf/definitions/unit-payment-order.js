@@ -23,7 +23,7 @@ module.exports = function (unitPaymentOrder) {
     })
     var maxReceiptNoteDate = Math.max.apply(null, receiptNoteDates);
 
-    var iso = "FM-6.00-06-012/R2";
+    var iso = "FM-PB-00-06-014";
     var number = unitPaymentOrder.no;
     var currency = unitPaymentOrder.currency.code;
     var locale = global.config.locale;
@@ -98,10 +98,10 @@ module.exports = function (unitPaymentOrder) {
     var subHeader = [{
         columns: [
             {
-                width: '40%',
+                width: '60%',
                 stack: [{
                     columns: [{
-                        width: '35%',
+                        width: '25%',
                         text: "Nota Pembelian"
                     }, {
                             width: '5%',
@@ -113,7 +113,7 @@ module.exports = function (unitPaymentOrder) {
                     style: ['size08']
                 }, {
                         columns: [{
-                            width: '35%',
+                            width: '25%',
                             text: "Untuk"
                         }, {
                                 width: '5%',
@@ -127,7 +127,7 @@ module.exports = function (unitPaymentOrder) {
                 ]
             },
             {
-                width: '30%',
+                width: '10%',
                 text: ''
             },
             {
@@ -189,13 +189,13 @@ module.exports = function (unitPaymentOrder) {
     var tbody = items.map(function (item, index) {
         return [{
             text: (index + 1).toString() || '',
-            style: ['size07', 'center']
+            style: ['size08', 'center']
         }, {
                 text: item.product,
-                style: ['size07', 'left']
+                style: ['size08', 'left']
             }, {
                 text: item.quantity + ' ' + item.uom,
-                style: ['size07', 'right']
+                style: ['size08', 'right']
             }, {
                 columns: [{
                     width: '10%',
@@ -205,7 +205,7 @@ module.exports = function (unitPaymentOrder) {
                         text: parseFloat(item.price).toLocaleString(locale, locale.currencyNotaItern),
                         style: ['right']
                     }],
-                style: ['size07']
+                style: ['size08']
             }, {
                 columns: [{
                     width: '10%',
@@ -215,13 +215,13 @@ module.exports = function (unitPaymentOrder) {
                         text: parseFloat(item.price * item.quantity).toLocaleString(locale, locale.currencyNotaItern),
                         style: ['right']
                     }],
-                style: ['size07']
+                style: ['size08']
             }, {
                 text: item.prNo,
-                style: ['size07', 'center']
+                style: ['size08', 'center']
             }, {
                 text: item.unitReceiptNoteNo,
-                style: ['size07', 'center']
+                style: ['size08', 'center']
             }];
     });
 
@@ -347,11 +347,11 @@ module.exports = function (unitPaymentOrder) {
         {
             columns: [
                 {
-                    width: '40%',
+                    width: '50%',
                     stack: [
                         {
                             columns: [{
-                                width: '50%',
+                                width: '40%',
                                 text: "Perjanjian Pembayaran"
                             },
                                 {
@@ -364,7 +364,7 @@ module.exports = function (unitPaymentOrder) {
                                 }]
                         }, {
                             columns: [{
-                                width: '50%',
+                                width: '40%',
                                 text: "Invoice"
                             },
                                 {
@@ -373,11 +373,11 @@ module.exports = function (unitPaymentOrder) {
                                 },
                                 {
                                     width: '*',
-                                    text: unitPaymentOrder.invoceNo || '-'
+                                    text: unitPaymentOrder.invoceNo + ', ' + moment(unitPaymentOrder.invoceDate).format(locale.date.format) || '-'
                                 }]
                         }, {
                             columns: [{
-                                width: '50%',
+                                width: '40%',
                                 text: "Ket."
                             },
                                 {
@@ -391,7 +391,7 @@ module.exports = function (unitPaymentOrder) {
                         }]
                 },
                 {
-                    width: '20%',
+                    width: '10%',
                     text: ''
                 },
                 {
