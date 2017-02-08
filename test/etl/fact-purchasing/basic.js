@@ -47,13 +47,6 @@ it("#02. should success when transforming data", function (done) {
 });
 
 
-it("#01. should success when create etl fact-purchasing", function (done) {
-    instanceManager.run()
-        .then((a) => {
-            console.log(a);
-            // var fs = require("fs");
-            // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
-
 it("#03. should success when extracting PR from PO", function (done) {
     instanceManager.getPRFromPO(data)
         .then(() => {
