@@ -824,7 +824,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     "productionOrders.accountId" : (new ObjectId(query.accountId))
                 };
             }
-            var Query = {"$and" : [date, salesQuery,orderQuery,orderTypeQuery, processTypeQuery, buyerQuery, accountQuery]};
+            var Query = {"$and" : [{_deleted: false}, date, salesQuery,orderQuery,orderTypeQuery, processTypeQuery, buyerQuery, accountQuery]};
             this.collection
                 .aggregate([
                     {$unwind : "$productionOrders"}, 
