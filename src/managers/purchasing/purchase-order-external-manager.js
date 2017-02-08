@@ -315,10 +315,10 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                         if (!poItem.priceBeforeTax || poItem.priceBeforeTax === 0) {
                                             poItemHasError = true;
                                             poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
-                                        }else if (poItem.priceBeforeTax > poItem.product.price) {
+                                        }/*else if (poItem.priceBeforeTax > poItem.product.price) {
                                             poItemHasError = true;
                                             poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isGreater:%s must not be greater than default price", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
-                                        }
+                                        }*/
                                         var price = (poItem.priceBeforeTax.toString()).split(",");
                                         if (price[1] != undefined || price[1] !== "" || price[1] !== " ") {
                                             {
