@@ -95,14 +95,19 @@ module.exports = {
                 materialConstruction: require('./test/data-util/master/material-construction-data-util'),
                 yarnMaterial: require('./test/data-util/master/yarn-material-data-util'),
                 finishType: require('./test/data-util/master/finish-type-data-util'),
-                standardTest: require('./test/data-util/master/standard-test-data-util')
+                standardTest: require('./test/data-util/master/standard-test-data-util'),
+                colorType: require('./test/data-util/master/color-type-data-util')
             },
             purchasing: {
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")
             },
             production: {
+                dailyOperation: require('./test/data-util/production/finishing-printing/daily-operation-data-util'),
                 monitoringEvent: require('./test/data-util/production/finishing-printing/monitoring-event-data-util'),
                 monitoringSpecificationMachine: require('./test/data-util/production/finishing-printing/monitoring-specification-machine-data-util')
+            },
+            sales:{
+                productionOrder: require('./test/data-util/sales/production-order-data-util')
             }
         }
     },
