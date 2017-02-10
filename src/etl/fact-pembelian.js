@@ -634,11 +634,17 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
                                         reject(error);
                                 });
                             });
-                    });
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    })
                 })
                 .catch((err) => {
                     reject(err);
                 })
-        });
+        })
+        .catch((err) => {
+            reject(err);
+        })
     }
 }

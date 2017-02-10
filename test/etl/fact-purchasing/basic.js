@@ -34,6 +34,8 @@ it("#01. should success when create etl fact-purchasing", function (done) {
         });
 });
 
+
+
 var data = [{}, {}];
 
 it("#02. should success when transforming data", function (done) {
@@ -119,16 +121,20 @@ it("#09. should success when remove duplicate data", function (done) {
         });
 });
 
-// var days = 0;
-// it("#10. should success when get days range by month", function (done) {
-//     instanceManager.getRangeMonth(days)
-//         .then((a) => {
-//             done(a);
-//         })
-//         .catch((e) => {
-//             done(e);
-//         });
-// });
+it("#10. should error when load empty data", function (done) {
+    instanceManager.load({})
+        .then(id => {
+            done("should error when create with empty data");
+        })
+        .catch(e => {
+            try {                
+                done();
+            }
+            catch (ex) {
+                done(ex);
+            }
+        });
+});
 
 // it("#11. should success when get days range by week", function (done) {
 //     instanceManager.getRangeWeek(days)
