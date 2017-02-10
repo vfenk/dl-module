@@ -322,7 +322,7 @@ module.exports = class FactPurchasingEtlManager extends BaseManager {
             new_arr.push(lookup[i]);
         }
 
-        return new_arr;
+        return Promise.resolve(new_arr);
     }
 
     getRangeMonth(days) {
