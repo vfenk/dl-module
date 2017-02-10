@@ -831,7 +831,8 @@ module.exports = class ProductionOrderManager extends BaseManager {
             this.collection
                 .aggregate([
                     {$unwind : "$productionOrders"}, 
-                    {$unwind: "$productionOrders.details"}, 
+                    {$unwind: "$productionOrders.details"},
+                    {$sort : {"productionOrders._createdDate" : -1}}, 
                     {$match : Query},
                     {$project :{
                         "salesContractNo" : "$productionOrders.salesContractNo",
@@ -851,8 +852,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         "deliveryDate" : "$productionOrders.deliveryDate",
                         "firstname" : "$productionOrders.account.profile.firstname",
                         "lastname" : "$productionOrders.account.profile.lastname"
-                    }},
-                    {$sort : {"productionOrders._createdDate" : -1}}
+                    }}
                 ])
                 .toArray(function(err, result) {
                     resolve(result);
