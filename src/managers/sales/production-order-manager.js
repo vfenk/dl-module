@@ -282,7 +282,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     var lampErrors = [];
                     for (var lamp of valid.lampStandards) {
                         var lampError = {};
-                        if(!_lampStandards || _lampStandards<=0 ){
+                        if(!_lampStandards || _lampStandards.length<=0 ){
                             lampError["lampStandard"] = i18n.__("ProductionOrder.lampStandards.lampStandard.isRequired:%s is not exists", i18n.__("ProductionOrder.lampStandards.lampStandard._:LampStandard")); //"lampStandard tidak boleh kosong";
                         
                         }
