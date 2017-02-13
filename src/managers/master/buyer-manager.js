@@ -118,9 +118,10 @@ module.exports = class BuyerManager extends BaseManager {
                                 "address": dataFile[i][2],
                                 "city": dataFile[i][3],
                                 "country": dataFile[i][4],
-                                "type": dataFile[i][5],
-                                "contact": dataFile[i][6],
-                                "tempo": dataFile[i][7]
+                                "NPWP": dataFile[i][5],
+                                "type": dataFile[i][6],
+                                "contact": dataFile[i][7],
+                                "tempo": dataFile[i][8]
                             });
                         }
                     }
@@ -164,6 +165,7 @@ module.exports = class BuyerManager extends BaseManager {
                                 "address": data[i]["address"],
                                 "city": data[i]["city"],
                                 "country": data[i]["country"],
+                                "NPWP": data[i]["NPWP"],
                                 "type": data[i]["type"],
                                 "contact": data[i]["contact"],
                                 "tempo": data[i]["tempo"],
