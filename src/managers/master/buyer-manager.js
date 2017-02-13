@@ -112,7 +112,16 @@ module.exports = class BuyerManager extends BaseManager {
                     var data = [];
                     if (dataFile != "") {
                         for (var i = 1; i < dataFile.length; i++) {
-                            data.push({ "code": dataFile[i][0], "name": dataFile[i][1], "address": dataFile[i][2], "country": dataFile[i][3], "type": dataFile[i][4], "contact": dataFile[i][5], "tempo": dataFile[i][6] });
+                            data.push({
+                                "code": dataFile[i][0],
+                                "name": dataFile[i][1],
+                                "address": dataFile[i][2],
+                                "city": dataFile[i][3],
+                                "country": dataFile[i][4],
+                                "type": dataFile[i][5],
+                                "contact": dataFile[i][6],
+                                "tempo": dataFile[i][7]
+                            });
                         }
                     }
                     var dataError = [], errorMessage;
@@ -149,7 +158,17 @@ module.exports = class BuyerManager extends BaseManager {
                         }
 
                         if (errorMessage !== "") {
-                            dataError.push({ "code": data[i]["code"], "name": data[i]["name"], "address": data[i]["address"], "country": data[i]["country"], "type":data[i]["type"], "contact": data[i]["contact"], "tempo": data[i]["tempo"], "Error": errorMessage });
+                            dataError.push({
+                                "code": data[i]["code"],
+                                "name": data[i]["name"],
+                                "address": data[i]["address"],
+                                "city": data[i]["city"],
+                                "country": data[i]["country"],
+                                "type": data[i]["type"],
+                                "contact": data[i]["contact"],
+                                "tempo": data[i]["tempo"],
+                                "Error": errorMessage
+                            });
                         }
                     }
                     if (dataError.length === 0) {
