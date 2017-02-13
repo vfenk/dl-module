@@ -6,7 +6,6 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var MonitoringSpecificationMachine = DLModels.production.finishingPrinting.MonitoringSpecificationMachine;
-// var MachineTypeManager = require('../../master/machine-type-manager');
 var MachineManager = require('../../master/machine-manager');
 var CodeGenerator = require('../../../utils/code-generator');
 var BaseManager = require('module-toolkit').BaseManager;
@@ -19,7 +18,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
         super(db, user);
         this.collection = this.db.collection(map.production.finishingPrinting.collection.MonitoringSpecificationMachine);
 
-        // this.machineTypeManager = new MachineTypeManager(db, user);
+       
         this.machineManager = new MachineManager(db, user);
 
     }
@@ -66,7 +65,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
 
     _validate(monitoringSpecificationMachine) {
         var errors = {};
-        // return new Promise((resolve, reject) => {
+        
         var valid = monitoringSpecificationMachine;
         // 1. begin: Declare promises.
         var getMonitoringSpecificationMachinePromise = this.collection.singleOrDefault({
@@ -77,7 +76,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
             code: valid.code,
         });
 
-        // var getMachineType = ObjectId.isValid(valid.machineTypeId) ? this.machineTypeManager.getSingleByIdOrDefault(new ObjectId(valid.machineTypeId)) : Promise.resolve(null);
+        
         var getMachine = ObjectId.isValid(valid.machineId) ? this.machineManager.getSingleByIdOrDefault(new ObjectId(valid.machineId)) : Promise.resolve(null);
 
 
@@ -100,8 +99,8 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
 
                 if (!_machine)
                     errors["machine"] = i18n.__("MonitoringSpecificationMachine.machine.name.isRequired:%s is not exists", i18n.__("MonitoringSpecificationMachine.machine.name._:Machine")); //"machine tidak boleh kosong";
-                else if (!valid.machine._id)
-                    errors["machine"] = i18n.__("MonitoringSpecificationMachine.machine.name.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.machine.name._:Machine")); //"machine tidak boleh kosong";
+                // else if (!valid.machine._id)
+                //     errors["machine"] = i18n.__("MonitoringSpecificationMachine.machine.name.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.machine.name._:Machine")); //"machine tidak boleh kosong";
 
                 if (valid.items) {
                     var itemErrors = [];
