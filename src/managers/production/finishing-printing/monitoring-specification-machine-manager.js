@@ -12,6 +12,7 @@ var CodeGenerator = require('../../../utils/code-generator');
 var BaseManager = require('module-toolkit').BaseManager;
 
 var i18n = require('dl-i18n');
+var moment = require('moment');
 
 module.exports = class MonitoringSpecificationMachineManager extends BaseManager {
     constructor(db, user) {
@@ -26,9 +27,8 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
     _getQuery(paging) {
         var _default = {
             _deleted: false
-        },
-            pagingFilter = paging.filter || {},
-            keywordFilter = {},
+        }, keywordFilter = {}, pagingFilter = paging.filter || {},
+
             query = {};
 
         if (paging.keyword) {
@@ -44,7 +44,14 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                 }
             };
 
-            keywordFilter['$or'] = [codeFilter, dateFilter];
+            var filterMachineName = {
+                'machine.name': {
+                    '$regex': regex
+                }
+            };
+
+
+            keywordFilter['$or'] = [codeFilter, dateFilter, filterMachineName];
         }
         query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
@@ -123,6 +130,8 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                     valid.machineId = new ObjectId(_machine._id);
                 }
 
+                valid.date = new Date(valid.date);
+
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require("module-toolkit").ValidationError;
                     return Promise.reject(new ValidationError("data does not pass validation", errors));
@@ -138,6 +147,88 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
 
     }
 
+    getMonitoringSpecificationMachineReport(info) {
+        var _defaultFilter = {
+            _deleted: false
+        }, machineFilter = {},
+            monitoringSpecificationMachineFilter = {},
+            dateFromFilter = {},
+            dateToFilter = {},
+            query = {};
+
+        var dateFrom = info.dateFrom ? (new Date(info.dateFrom)) : (new Date(1900, 1, 1));
+        var dateTo = info.dateTo ? (new Date(info.dateTo)) : (new Date());
+        var now = new Date();
+
+        if (info.machineId && info.machineId != '') {
+            var machineId = ObjectId.isValid(info.machineId) ? new ObjectId(info.machineId) : {};
+            machineFilter = { 'machine._id': machineId };
+        }
+
+        var filterDate = {
+            "date": {
+                $gte: new Date(dateFrom),
+                $lte: new Date(dateTo)
+            }
+        };
+
+        query = { '$and': [_defaultFilter, machineFilter, filterDate] };
+
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return this.collection
+                    .where(query)
+                    .execute();
+            });
+    }
+
+    getXls(result, query) {
+        var xls = {};
+        xls.data = [];
+        xls.options = [];
+        xls.name = '';
+
+        var index = 0;
+        var dateFormat = "DD/MM/YYYY";
+        var timeFormat = "HH : mm";
+
+        for (var monitoringSpecificationMachine of result.data) {
+            index++;
+            var item = {};
+            item["No"] = index;
+            item["Machine"] = monitoringSpecificationMachine.machine ? monitoringSpecificationMachine.machine.name : '';
+            item["Tanggal"] = monitoringSpecificationMachine.date ? moment(new Date(monitoringSpecificationMachine.date)).format(dateFormat) : '';
+            item["Jam"] = monitoringSpecificationMachine.time ? moment(new Date(monitoringSpecificationMachine.time)).format(timeFormat) : '';
+
+            //dinamic items
+            for (var indicator of monitoringSpecificationMachine.items) {
+                item[indicator.indicator] = indicator ? indicator.value : '';
+                xls.options[indicator.indicator] = "string";
+            }
+
+            xls.data.push(item);
+        }
+
+        xls.options["No"] = "number";
+        xls.options["Machine"] = "string";
+        xls.options["Tanggal"] = "string";
+        xls.options["Jam"] = "string";
+
+
+        if (query.dateFrom && query.dateTo) {
+            xls.name = `Monitoring Specification Machine Report ${moment(new Date(query.dateFrom)).format(dateFormat)} - ${moment(new Date(query.dateTo)).format(dateFormat)}.xlsx`;
+        }
+        else if (!query.dateFrom && query.dateTo) {
+            xls.name = `Monitoring Specification Machine Report ${moment(new Date(query.dateTo)).format(dateFormat)}.xlsx`;
+        }
+        else if (query.dateFrom && !query.dateTo) {
+            xls.name = `Monitoring Specification Machine Report ${moment(new Date(query.dateFrom)).format(dateFormat)}.xlsx`;
+        }
+        else
+            xls.name = `Monitoring Specification Machine Report.xlsx`;
+
+        return Promise.resolve(xls);
+    }
 
     _createIndexes() {
         var dateIndex = {
