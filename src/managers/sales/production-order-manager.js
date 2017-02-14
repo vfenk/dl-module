@@ -80,14 +80,14 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 }
             };
 
-            var filterOrderType = {
-               'orderType.name': {
+            var filterProcessType = {
+               'processType.name': {
                     '$regex': regex
                 }
             };
 
             keywordFilter = {
-                '$or': [filterSalesContract, filterOrderNo,filterBuyerName,filterBuyerType,filterOrderType]
+                '$or': [filterSalesContract, filterOrderNo,filterBuyerName,filterBuyerType,filterProcessType]
             };
         }
         query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
@@ -153,8 +153,8 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 var _standard = results[8];
                 var _construction = results[9];
                 var _account = results[10];
-                var _colors = results.slice(11, 11+ valid.details.length);
-                var _lampStandards= results.slice(11+ valid.details.length, results.length);
+                var _colors = results.slice(11, 11+ getColorTypes.length);
+                var _lampStandards= results.slice(11+ getColorTypes.length, results.length);
 
                 if(_productionOrder){
                     errors["orderNo"] = i18n.__("ProductionOrder.orderNo.isExist:%s is Exist", i18n.__("Product.orderNo._:orderNo")); //"orderNo sudah ada";
@@ -190,6 +190,12 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 else if (!valid.yarnMaterialId)
                     errors["yarnMaterial"] = i18n.__("ProductionOrder.yarnMaterial.isRequired:%s is required", i18n.__("ProductionOrder.yarnMaterial._:YarnMaterial")); //"yarnMaterial tidak boleh kosong";
                 
+                if (!_construction)
+                    errors["materialConstruction"] = i18n.__("ProductionOrder.materialConstruction.isRequired:%s is not exists", i18n.__("ProductionOrder.materialConstruction._:MaterialConstruction")); //"materialConstruction tidak boleh kosong";
+                else if (!valid.materialConstructionId)
+                    errors["materialConstructionId"] = i18n.__("ProductionOrder.materialConstruction.isRequired:%s is required", i18n.__("ProductionOrder.materialConstruction._:MaterialConstruction")); //"materialConstruction tidak boleh kosong";
+                
+
                 if (!_finish)
                     errors["finishType"] = i18n.__("ProductionOrder.finishType.isRequired:%s is not exists", i18n.__("ProductionOrder.finishType._:FinishType")); //"finishType tidak boleh kosong";
                 else if (!valid.finishTypeId)
@@ -231,7 +237,15 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 }
 
                 if (!valid.deliveryDate || valid.deliveryDate === "") {
-                     errors["deliveryDate"] = i18n.__("ProductionOrder.deliveryDate.isRequired:%s is required", i18n.__("ProductionOrder.deliveryDate._:deliveryDate")); //"Buyer tidak boleh kosong";
+                     errors["deliveryDate"] = i18n.__("ProductionOrder.deliveryDate.isRequired:%s is required", i18n.__("ProductionOrder.deliveryDate._:deliveryDate")); //"deliveryDate tidak boleh kosong";
+                }
+                else{
+                    valid.deliveryDate=new Date(valid.deliveryDate);
+                    var today=new Date();
+                    today.setHours(0,0,0,0);
+                    if(today>valid.deliveryDate){
+                        errors["deliveryDate"] = i18n.__("ProductionOrder.deliveryDate.shouldNot:%s should not be less than today's date", i18n.__("ProductionOrder.deliveryDate._:deliveryDate")); //"deliveryDate tidak boleh kurang dari tanggal hari ini";
+                    }
                 }
 
                 if(_order){
@@ -299,8 +313,12 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     var lampErrors = [];
                     for (var lamp of valid.lampStandards) {
                         var lampError = {};
-                        if(!_lampStandards){
-                            lampError["lampStandard"] = i18n.__("ProductionOrder.lampStandards.lampStandard.isRequired:%s is not exists", i18n.__("ProductionOrder.lampStandards.lampStandard._:LampStandard")); //"lampStandard tidak boleh kosong";
+                        if(!_lampStandards || _lampStandards.length<=0 ){
+                            lampError["lampStandards"] = i18n.__("ProductionOrder.lampStandards.lampStandard.isRequired:%s is not exists", i18n.__("ProductionOrder.lampStandards.lampStandard._:LampStandard")); //"lampStandard tidak boleh kosong";
+                        
+                        }
+                        if(!lamp.lampStandard._id){
+                            lampError["lampStandards"] = i18n.__("ProductionOrder.lampStandards.lampStandard.isRequired:%s is not exists", i18n.__("ProductionOrder.lampStandards.lampStandard._:LampStandard")); //"lampStandard tidak boleh kosong";
                         
                         }
                     if (Object.getOwnPropertyNames(lampError).length > 0)
@@ -327,8 +345,9 @@ module.exports = class ProductionOrderManager extends BaseManager {
                             detailError["colorRequest"] = i18n.__("ProductionOrder.details.colorRequest.isRequired:%s is required", i18n.__("PurchaseRequest.details.colorRequest._:ColorRequest")); //"colorRequest tidak boleh kosong";
                         if (detail.quantity <= 0)
                             detailError["quantity"] = i18n.__("ProductionOrder.details.quantity.isRequired:%s is required", i18n.__("PurchaseRequest.details.quantity._:Quantity")); //Jumlah barang tidak boleh kosong";
-                        else if(valid.orderQuantity!=totalqty)
+                        if(valid.orderQuantity!=totalqty)
                             detailError["total"] = i18n.__("ProductionOrder.details.quantity.shouldNot:%s Total should equal Order Quantity", i18n.__("PurchaseRequest.details.quantity._:Quantity")); //Jumlah barang tidak boleh berbeda dari jumlah order";
+                    
                         if(!_uom)
                             detailError["uom"] = i18n.__("ProductionOrder.details.uom.isRequired:%s is not exists", i18n.__("ProductionOrder.details.uom._:Uom")); //"satuan tidak boleh kosong";
                         
@@ -338,6 +357,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         if (!detail.colorTemplate || detail.colorTemplate=="")
                             detailError["colorTemplate"] = i18n.__("ProductionOrder.details.colorTemplate.isRequired:%s is required", i18n.__("PurchaseRequest.details.colorTemplate._:ColorTemplate")); //"colorTemplate tidak boleh kosong";
                         
+                        }
                         if(_order){
                             if(_order.name.toLowerCase()=="yarn dyed" || _order.name.toLowerCase()=="printing" ){
                                 _colors={};
@@ -345,8 +365,11 @@ module.exports = class ProductionOrderManager extends BaseManager {
                             else{
                                 if (!_colors)
                                     detailError["colorType"] = i18n.__("ProductionOrder.details.colorType.isRequired:%s is required", i18n.__("PurchaseRequest.details.colorType._:ColorType")); //"colorType tidak boleh kosong";
+                                else if(!detail.colorType){
+                                    detailError["colorType"] = i18n.__("ProductionOrder.details.colorType.isRequired:%s is required", i18n.__("PurchaseRequest.details.colorType._:ColorType")); //"colorType tidak boleh kosong";
                         
                             }
+                            
                         }
                         
                         if (Object.getOwnPropertyNames(detailError).length > 0)
@@ -384,9 +407,16 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         }
                     }
                 }
+                
                 if(_order){
                     valid.orderTypeId=new ObjectId(_order._id);
-
+                    if(_order.name.toLowerCase()!="printing"){
+                        valid.RUN="";
+                        valid.RUNWidth=[];
+                        valid.designCode="";
+                        valid.designNumber="";
+                        valid.articleFabricEdge="";
+                    }
                     if(_order.name.toLowerCase()=="yarn dyed" || _order.name.toLowerCase()=="printing" ){
                         for (var detail of valid.details) {
                             detail.colorTypeId = null;
@@ -395,10 +425,12 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     }
                     else{
                         for (var detail of valid.details) {
-                            for (var _color of _colors) {
-                                if (detail.colorTypeId.toString() === _color._id.toString()) {
-                                    detail.colorTypeId = _color._id;
-                                    detail.colorType = _color;
+                            if(detail.colorType){
+                                for (var _color of _colors) {
+                                    if (detail.colorTypeId.toString() === _color._id.toString()) {
+                                        detail.colorTypeId = _color._id;
+                                        detail.colorType = _color;
+                                    }
                                 }
                             }
                         }
@@ -465,164 +497,6 @@ module.exports = class ProductionOrderManager extends BaseManager {
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
     
-    _afterInsert(id) {
-        return new Promise((resolve, reject) => {
-                this.getSingleById(id)
-                    .then(data => {
-                        var dailyOperation = [];
-                        for(var a of data.details){
-                            var newDailyOperation = new DailyOperation();
-                            newDailyOperation.salesContract = data.salesContractNo;
-                            newDailyOperation.productionOrderId = new ObjectId(data._id);
-                            newDailyOperation.productionOrder = data;
-                            newDailyOperation.materialId = new ObjectId(data.materialId);
-                            newDailyOperation.material = data.material;
-                            newDailyOperation.materialConstructionId = new ObjectId(data.materialConstructionId);
-                            newDailyOperation.materialConstruction = data.materialConstruction;
-                            newDailyOperation.yarnMaterialId = new ObjectId(data.yarnMaterialId);
-                            newDailyOperation.yarnMaterial = data.yarnMaterial;
-                            newDailyOperation.color = a.colorRequest;
-                            if(data.orderType.name.toLowerCase()=="yarn dyed" || data.orderType.name.toLowerCase()=="printing"){
-                                newDailyOperation.colorTypeId = null;
-                                newDailyOperation.colorType = null;
-                            }
-                            else{
-                                newDailyOperation.colorTypeId = new ObjectId(a.colorTypeId);
-                                newDailyOperation.colorType = a.colorType;
-                            }
-                            newDailyOperation.stamp(this.user.username, "manager");
-                            dailyOperation.push(newDailyOperation);
-                        }
-                        DailyOperationCollection.insertMany(dailyOperation)
-                        .then(dOperation => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                    })
-                    .catch(e => {
-                        reject(e);
-                    });
-        });
-    }
-    
-    _beforeUpdate(data) {
-        return new Promise((resolve, reject) => {
-                var query={
-                    "productionOrder.orderNo":data.orderNo
-                }
-                DailyOperationCollection.deleteMany(query)
-                                        .then(deletedData =>{
-                                            resolve(data)
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        });
-        });
-    }
-    
-    _afterUpdate(id) {
-        return new Promise((resolve, reject) => {
-                this.getSingleById(id)
-                    .then(data => {
-                        var dailyOperation = [];
-                        for(var a of data.details){
-                            var newDailyOperation = new DailyOperation();
-                            newDailyOperation.salesContract = data.salesContractNo;
-                            newDailyOperation.productionOrderId = new ObjectId(data._id);
-                            newDailyOperation.productionOrder = data;
-                            newDailyOperation.materialId = new ObjectId(data.materialId);
-                            newDailyOperation.material = data.material;
-                            newDailyOperation.materialConstructionId = new ObjectId(data.materialConstructionId);
-                            newDailyOperation.materialConstruction = data.materialConstruction;
-                            newDailyOperation.yarnMaterialId = new ObjectId(data.yarnMaterialId);
-                            newDailyOperation.yarnMaterial = data.yarnMaterial;
-                            newDailyOperation.color = a.colorRequest;
-                            if(data.orderType.name.toLowerCase()=="yarn dyed" || data.orderType.name.toLowerCase()=="printing"){
-                                newDailyOperation.colorTypeId = null;
-                                newDailyOperation.colorType = null;
-                            }
-                            else{
-                                newDailyOperation.colorTypeId = new ObjectId(a.colorTypeId);
-                                newDailyOperation.colorType = a.colorType;
-                            }
-                            newDailyOperation.stamp(this.user.username, "manager");
-                            dailyOperation.push(newDailyOperation);
-                        }
-                        DailyOperationCollection.insertMany(dailyOperation)
-                        .then(dOperation => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                    })
-                    .catch(e => {
-                        reject(e);
-                    });
-        });
-    }
-
-    delete(data) {
-        return new Promise((resolve, reject) => {
-        	this._pre(data)
-            .then((validData) => {
-                validData._deleted = true;
-                this.collection.update(validData)
-                    .then(id => {
-                        DailyOperationCollection.updateMany(
-                            {productionOrderId : (new ObjectId(id))},
-                            { $set : {"_deleted" : true}}
-                        ).then(dataDaily => {
-                            resolve(id)
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                    })
-                    .catch(e => {
-                        reject(e);
-                    });
-            })
-            .catch(e => {
-                reject(e);
-            });
-            
-        });
-    }
-
-    
-
-    destroy(id) {
-        return new Promise((resolve, reject) => {
-        	this.collection.deleteOne({
-                _id: ObjectId.isValid(id) ? new ObjectId(id) : {}
-            })
-            .then((result) => {
-                DailyOperationCollection.deleteMany(
-                    {productionOrderId : ObjectId.isValid(id) ? new ObjectId(id) : {}}
-                )
-                .then(data => {
-                    resolve(result.deletedCount === 1);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-            })
-            .catch(e => {
-                reject(e);
-            });
-        });
-    }
-
-    updateIsUse(data, value){
-        return this._pre(data)
-            .then((validData) => {
-                validData.isUsed = value;
-                return this.collection.update(validData);
-            });
-    }
 
    pdf(id) {
         return new Promise((resolve, reject) => {
@@ -666,6 +540,9 @@ module.exports = class ProductionOrderManager extends BaseManager {
     
     getReport(query){
         return new Promise((resolve, reject) => {
+            var deletedQuery = {
+                _deleted: false
+            };
             var salesQuery = {};
             if(query.salesContractNo != ''){
                 salesQuery = {
@@ -709,10 +586,10 @@ module.exports = class ProductionOrderManager extends BaseManager {
             var date = {
                 "_createdDate" : {
                     "$gte" : (!query || !query.sdate ? (new Date("1900-01-01")) : (new Date(`${query.sdate} 00:00:00`))),
-                    "$lte" : (!query || !query.edate ? (new Date()) : (new Date(`${query.edate} 24:00:00`)))
+                    "$lte" : (!query || !query.edate ? (new Date()) : (new Date(`${query.edate} 23:59:59`)))
                 }
             };
-            var Query = {"$and" : [date, salesQuery,orderQuery,orderTypeQuery, processTypeQuery, buyerQuery, accountQuery]};
+            var Query = {"$and" : [date, salesQuery,orderQuery,orderTypeQuery, processTypeQuery, buyerQuery, accountQuery,deletedQuery]};
             this.collection
                 .aggregate([ 
                     {$unwind: "$details"}, 
@@ -736,7 +613,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         "firstname" : "$account.profile.firstname",
                         "lastname" : "$account.profile.lastname"
                     }},
-                    {$sort : {"productionOrders._createdDate" : -1}}
+                    {$sort : {"_createdDate" : -1}}
                 ])
                 .toArray(function(err, result) {
                     resolve(result);
