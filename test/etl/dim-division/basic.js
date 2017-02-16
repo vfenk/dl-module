@@ -21,9 +21,22 @@ before("#00. connect db", function (done) {
         });
 });
 
-it("#01. should success when create etl for dim-division", function (done) {
-    instanceManager.run()
-        .then((a) => {
+// it("#01. should success when create etl for dim-division", function (done) {
+//     instanceManager.run()
+//         .then((a) => {
+//             done();
+//         })
+//         .catch((e) => {
+//             done(e);
+//         });
+// });
+
+
+var data = [{}, {}];
+
+it("#02. should success when transforming data", function (done) {
+    instanceManager.transform(data)
+        .then(() => {
             done();
         })
         .catch((e) => {
