@@ -27,7 +27,7 @@ module.exports = class DimMachineEtlManager extends BaseManager {
         var timestamp = new Date(1970, 1, 1);
         return this.machineManager.collection.find({
             _deleted: false
-            
+
         }).toArray();
     }
 
@@ -41,7 +41,38 @@ module.exports = class DimMachineEtlManager extends BaseManager {
                 machineProcess: `'${item.process}'`,
                 machineCondition: `'${item.condition}'`
             }
-        })
+        });
+        return Promise.resolve([].concat.apply([], result));
+    }
+
+    load(data) {
+        return this.sql.getConnection()
+            .then((request) => {
+
+                var sqlQuery = '';
+
+                var count = 1;
+                for (var item of data) {
+                    sqlQuery = sqlQuery.concat(`insert into [DL_Dim_Mesin]([Kode Mesin], [Nama Mesin], [Manufaktur Mesin], [Tahun Mesin], [Proses Mesin], [Kondisi Mesin]) values(${item.machineCode}, ${item.machineName}, ${item.machineManufacture}, ${item.machineYear}, ${item.machineProcess}, ${item.machineCondition});\n`);
+
+                    count = count + 1;
+                }
+
+                request.multiple = true;
+
+                return request.query(sqlQuery)
+                    // return request.query('select count(*) from dimdivisi')
+                    // return request.query('select top 1 * from dimdivisi')
+
+                    .then((results) => {
+                        console.log(results);
+                        return Promise.resolve();
+                    })
+            })
+            .catch((err) => {
+                console.log(err);
+                return Promise.reject(err);
+            });
     }
 }
 
