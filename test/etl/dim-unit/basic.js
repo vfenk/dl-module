@@ -31,17 +31,17 @@ before("#00. connect db", function (done) {
 //         });
 // });
 
-var data = [{}, {}];
+// var data = [{}, {}];
 
-it("#01. should success when transforming data", function (done) {
-    instanceManager.transform(data)
-        .then(() => {
-            done();
-        })
-        .catch((e) => {
-            done(e);
-        });
-});
+// it("#01. should success when transforming data", function (done) {
+//     instanceManager.transform(data)
+//         .then(() => {
+//             done();
+//         })
+//         .catch((e) => {
+//             done(e);
+//         });
+// });
 
 it("#02. should error when load empty data", function (done) {
     instanceManager.load({})
