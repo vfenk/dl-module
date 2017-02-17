@@ -101,7 +101,7 @@ module.exports = class unitPaymentQuantityCorrectionNoteManager extends BaseMana
                                                             itemError["priceTotal"] = i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal.noChanges:%s doesn't change", i18n.__("unitPaymentQuantityCorrectionNote.items.priceTotal._:Total Price"));
                                                         }
                                                     }
-                                                }else {
+                                                } else {
                                                     if (valid.correctionType === "Harga Satuan") {
                                                         if (item.pricePerUnit === _unitReceiptNoteItem.pricePerDealUnit) {
                                                             itemError["pricePerUnit"] = i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit.noChanges:%s doesn't change", i18n.__("unitPaymentQuantityCorrectionNote.items.pricePerUnit._:Price Per Unit"));
