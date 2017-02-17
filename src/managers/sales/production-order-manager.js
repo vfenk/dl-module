@@ -332,7 +332,10 @@ module.exports = class ProductionOrderManager extends BaseManager {
                             else{
                                 if (!_colors)
                                     detailError["colorType"] = i18n.__("ProductionOrder.details.colorType.isRequired:%s is required", i18n.__("PurchaseRequest.details.colorType._:ColorType")); //"colorType tidak boleh kosong";
+                                else if(!detail.colorType){
+                                    detailError["colorType"] = i18n.__("ProductionOrder.details.colorType.isRequired:%s is required", i18n.__("PurchaseRequest.details.colorType._:ColorType")); //"colorType tidak boleh kosong";
                         
+                                }
                             }
                         }
                         
@@ -389,10 +392,12 @@ module.exports = class ProductionOrderManager extends BaseManager {
                     }
                     else{
                         for (var detail of valid.details) {
-                            for (var _color of _colors) {
-                                if (detail.colorTypeId.toString() === _color._id.toString()) {
-                                    detail.colorTypeId = _color._id;
-                                    detail.colorType = _color;
+                            if(detail.colorType){
+                                for (var _color of _colors) {
+                                    if (detail.colorTypeId.toString() === _color._id.toString()) {
+                                        detail.colorTypeId = _color._id;
+                                        detail.colorType = _color;
+                                    }
                                 }
                             }
                         }
