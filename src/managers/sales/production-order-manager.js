@@ -367,6 +367,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                                 else if(!detail.colorType){
                                     detailError["colorType"] = i18n.__("ProductionOrder.details.colorType.isRequired:%s is required", i18n.__("PurchaseRequest.details.colorType._:ColorType")); //"colorType tidak boleh kosong";
                         
+                                }
                             }
                             
                         }
