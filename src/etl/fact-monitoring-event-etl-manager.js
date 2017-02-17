@@ -196,7 +196,7 @@ module.exports = class FactMonitoringEventEtlManager extends BaseManager {
                         return Promise.all(command)
                             .then((results) => {
                                 request.execute("DL_UPSERT_FACT_MONITORING_EVENT").then((execResult) => {
-                                    request.execute("BTQ_INSERT_DIMTIME").then((execResult) => {
+                                    request.execute("DL_INSERT_DIMTIME").then((execResult) => {
                                         transaction.commit((err) => {
                                             if (err)
                                                 reject(err);
