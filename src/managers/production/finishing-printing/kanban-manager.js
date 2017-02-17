@@ -12,7 +12,7 @@ var Partition = DLModels.production.finishingPrinting.Partition;
 var BaseManager = require("module-toolkit").BaseManager;
 var i18n = require("dl-i18n");
 
-module.exports = class DailyOperationManager extends BaseManager {
+module.exports = class KanbanManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.production.finishingPrinting.collection.Kanban);
