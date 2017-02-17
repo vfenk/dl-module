@@ -118,25 +118,34 @@ module.exports = class FactSalesContractEtlManager extends BaseManager {
 
                         this.sql.multiple = true;
 
-                        // var fs = require("fs");
-                        // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
-
-                        // fs.writeFile(path, sqlQuery, function (error) {
-                        //     if (error) {
-                        //         console.log("write error:  " + error.message);
-                        //     } else {
-                        //         console.log("Successful Write to " + path);
-                        //     }
-                        // });
-
                         return Promise.all(command)
                             .then((results) => {
-                                transaction.commit((err) => {
-                                    if (err)
-                                        reject(err);
-                                    else
-                                        resolve(results);
-                                });
+                                request.execute("DL_UPSERT_FACT_MONITORING_EVENT").then((execResult) => {
+                                    request.execute("DL_INSERT_DIMTIME").then((execResult) => {
+                                        transaction.commit((err) => {
+                                            if (err)
+                                                reject(err);
+                                            else
+                                                resolve(results);
+                                        });
+                                    }).catch((error) => {
+                                        transaction.rollback((err) => {
+                                            console.log("rollback")
+                                            if (err)
+                                                reject(err)
+                                            else
+                                                reject(error);
+                                        });
+                                    })
+                                }).catch((error) => {
+                                    transaction.rollback((err) => {
+                                        console.log("rollback")
+                                        if (err)
+                                            reject(err)
+                                        else
+                                            reject(error);
+                                    });
+                                })
                             })
                             .catch((error) => {
                                 transaction.rollback((err) => {
@@ -147,11 +156,14 @@ module.exports = class FactSalesContractEtlManager extends BaseManager {
                                         reject(error);
                                 });
                             });
-                    });
+                    })
                 })
                 .catch((err) => {
                     reject(err);
                 })
-        });
+        })
+            .catch((err) => {
+                reject(err);
+            })
     }
 }
