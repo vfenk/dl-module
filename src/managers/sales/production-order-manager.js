@@ -465,156 +465,156 @@ module.exports = class ProductionOrderManager extends BaseManager {
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
     
-    _afterInsert(id) {
-        return new Promise((resolve, reject) => {
-                this.getSingleById(id)
-                    .then(data => {
-                        var dailyOperation = [];
-                        for(var a of data.details){
-                            var newDailyOperation = new DailyOperation();
-                            newDailyOperation.salesContract = data.salesContractNo;
-                            newDailyOperation.productionOrderId = new ObjectId(data._id);
-                            newDailyOperation.productionOrder = data;
-                            newDailyOperation.materialId = new ObjectId(data.materialId);
-                            newDailyOperation.material = data.material;
-                            newDailyOperation.materialConstructionId = new ObjectId(data.materialConstructionId);
-                            newDailyOperation.materialConstruction = data.materialConstruction;
-                            newDailyOperation.yarnMaterialId = new ObjectId(data.yarnMaterialId);
-                            newDailyOperation.yarnMaterial = data.yarnMaterial;
-                            newDailyOperation.color = a.colorRequest;
-                            if(data.orderType.name.toLowerCase()=="yarn dyed" || data.orderType.name.toLowerCase()=="printing"){
-                                newDailyOperation.colorTypeId = null;
-                                newDailyOperation.colorType = null;
-                            }
-                            else{
-                                newDailyOperation.colorTypeId = new ObjectId(a.colorTypeId);
-                                newDailyOperation.colorType = a.colorType;
-                            }
-                            newDailyOperation.stamp(this.user.username, "manager");
-                            dailyOperation.push(newDailyOperation);
-                        }
-                        DailyOperationCollection.insertMany(dailyOperation)
-                        .then(dOperation => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                    })
-                    .catch(e => {
-                        reject(e);
-                    });
-        });
-    }
+    // _afterInsert(id) {
+    //     return new Promise((resolve, reject) => {
+    //             this.getSingleById(id)
+    //                 .then(data => {
+    //                     var dailyOperation = [];
+    //                     for(var a of data.details){
+    //                         var newDailyOperation = new DailyOperation();
+    //                         newDailyOperation.salesContract = data.salesContractNo;
+    //                         newDailyOperation.productionOrderId = new ObjectId(data._id);
+    //                         newDailyOperation.productionOrder = data;
+    //                         newDailyOperation.materialId = new ObjectId(data.materialId);
+    //                         newDailyOperation.material = data.material;
+    //                         newDailyOperation.materialConstructionId = new ObjectId(data.materialConstructionId);
+    //                         newDailyOperation.materialConstruction = data.materialConstruction;
+    //                         newDailyOperation.yarnMaterialId = new ObjectId(data.yarnMaterialId);
+    //                         newDailyOperation.yarnMaterial = data.yarnMaterial;
+    //                         newDailyOperation.color = a.colorRequest;
+    //                         if(data.orderType.name.toLowerCase()=="yarn dyed" || data.orderType.name.toLowerCase()=="printing"){
+    //                             newDailyOperation.colorTypeId = null;
+    //                             newDailyOperation.colorType = null;
+    //                         }
+    //                         else{
+    //                             newDailyOperation.colorTypeId = new ObjectId(a.colorTypeId);
+    //                             newDailyOperation.colorType = a.colorType;
+    //                         }
+    //                         newDailyOperation.stamp(this.user.username, "manager");
+    //                         dailyOperation.push(newDailyOperation);
+    //                     }
+    //                     DailyOperationCollection.insertMany(dailyOperation)
+    //                     .then(dOperation => {
+    //                         resolve(id);
+    //                     })
+    //                     .catch(e => {
+    //                         reject(e);
+    //                     });
+    //                 })
+    //                 .catch(e => {
+    //                     reject(e);
+    //                 });
+    //     });
+    // }
     
-    _beforeUpdate(data) {
-        return new Promise((resolve, reject) => {
-                var query={
-                    "productionOrder.orderNo":data.orderNo
-                }
-                DailyOperationCollection.deleteMany(query)
-                                        .then(deletedData =>{
-                                            resolve(data)
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        });
-        });
-    }
+    // _beforeUpdate(data) {
+    //     return new Promise((resolve, reject) => {
+    //             var query={
+    //                 "productionOrder.orderNo":data.orderNo
+    //             }
+    //             DailyOperationCollection.deleteMany(query)
+    //                                     .then(deletedData =>{
+    //                                         resolve(data)
+    //                                     })
+    //                                     .catch(e => {
+    //                                         reject(e);
+    //                                     });
+    //     });
+    // }
     
-    _afterUpdate(id) {
-        return new Promise((resolve, reject) => {
-                this.getSingleById(id)
-                    .then(data => {
-                        var dailyOperation = [];
-                        for(var a of data.details){
-                            var newDailyOperation = new DailyOperation();
-                            newDailyOperation.salesContract = data.salesContractNo;
-                            newDailyOperation.productionOrderId = new ObjectId(data._id);
-                            newDailyOperation.productionOrder = data;
-                            newDailyOperation.materialId = new ObjectId(data.materialId);
-                            newDailyOperation.material = data.material;
-                            newDailyOperation.materialConstructionId = new ObjectId(data.materialConstructionId);
-                            newDailyOperation.materialConstruction = data.materialConstruction;
-                            newDailyOperation.yarnMaterialId = new ObjectId(data.yarnMaterialId);
-                            newDailyOperation.yarnMaterial = data.yarnMaterial;
-                            newDailyOperation.color = a.colorRequest;
-                            if(data.orderType.name.toLowerCase()=="yarn dyed" || data.orderType.name.toLowerCase()=="printing"){
-                                newDailyOperation.colorTypeId = null;
-                                newDailyOperation.colorType = null;
-                            }
-                            else{
-                                newDailyOperation.colorTypeId = new ObjectId(a.colorTypeId);
-                                newDailyOperation.colorType = a.colorType;
-                            }
-                            newDailyOperation.stamp(this.user.username, "manager");
-                            dailyOperation.push(newDailyOperation);
-                        }
-                        DailyOperationCollection.insertMany(dailyOperation)
-                        .then(dOperation => {
-                            resolve(id);
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                    })
-                    .catch(e => {
-                        reject(e);
-                    });
-        });
-    }
+    // _afterUpdate(id) {
+    //     return new Promise((resolve, reject) => {
+    //             this.getSingleById(id)
+    //                 .then(data => {
+    //                     var dailyOperation = [];
+    //                     for(var a of data.details){
+    //                         var newDailyOperation = new DailyOperation();
+    //                         newDailyOperation.salesContract = data.salesContractNo;
+    //                         newDailyOperation.productionOrderId = new ObjectId(data._id);
+    //                         newDailyOperation.productionOrder = data;
+    //                         newDailyOperation.materialId = new ObjectId(data.materialId);
+    //                         newDailyOperation.material = data.material;
+    //                         newDailyOperation.materialConstructionId = new ObjectId(data.materialConstructionId);
+    //                         newDailyOperation.materialConstruction = data.materialConstruction;
+    //                         newDailyOperation.yarnMaterialId = new ObjectId(data.yarnMaterialId);
+    //                         newDailyOperation.yarnMaterial = data.yarnMaterial;
+    //                         newDailyOperation.color = a.colorRequest;
+    //                         if(data.orderType.name.toLowerCase()=="yarn dyed" || data.orderType.name.toLowerCase()=="printing"){
+    //                             newDailyOperation.colorTypeId = null;
+    //                             newDailyOperation.colorType = null;
+    //                         }
+    //                         else{
+    //                             newDailyOperation.colorTypeId = new ObjectId(a.colorTypeId);
+    //                             newDailyOperation.colorType = a.colorType;
+    //                         }
+    //                         newDailyOperation.stamp(this.user.username, "manager");
+    //                         dailyOperation.push(newDailyOperation);
+    //                     }
+    //                     DailyOperationCollection.insertMany(dailyOperation)
+    //                     .then(dOperation => {
+    //                         resolve(id);
+    //                     })
+    //                     .catch(e => {
+    //                         reject(e);
+    //                     });
+    //                 })
+    //                 .catch(e => {
+    //                     reject(e);
+    //                 });
+    //     });
+    // }
 
-    delete(data) {
-        return new Promise((resolve, reject) => {
-        	this._pre(data)
-            .then((validData) => {
-                validData._deleted = true;
-                this.collection.update(validData)
-                    .then(id => {
-                        DailyOperationCollection.updateMany(
-                            {productionOrderId : (new ObjectId(id))},
-                            { $set : {"_deleted" : true}}
-                        ).then(dataDaily => {
-                            resolve(id)
-                        })
-                        .catch(e => {
-                            reject(e);
-                        });
-                    })
-                    .catch(e => {
-                        reject(e);
-                    });
-            })
-            .catch(e => {
-                reject(e);
-            });
+    // delete(data) {
+    //     return new Promise((resolve, reject) => {
+    //     	this._pre(data)
+    //         .then((validData) => {
+    //             validData._deleted = true;
+    //             this.collection.update(validData)
+    //                 .then(id => {
+    //                     DailyOperationCollection.updateMany(
+    //                         {productionOrderId : (new ObjectId(id))},
+    //                         { $set : {"_deleted" : true}}
+    //                     ).then(dataDaily => {
+    //                         resolve(id)
+    //                     })
+    //                     .catch(e => {
+    //                         reject(e);
+    //                     });
+    //                 })
+    //                 .catch(e => {
+    //                     reject(e);
+    //                 });
+    //         })
+    //         .catch(e => {
+    //             reject(e);
+    //         });
             
-        });
-    }
+    //     });
+    // }
 
     
 
-    destroy(id) {
-        return new Promise((resolve, reject) => {
-        	this.collection.deleteOne({
-                _id: ObjectId.isValid(id) ? new ObjectId(id) : {}
-            })
-            .then((result) => {
-                DailyOperationCollection.deleteMany(
-                    {productionOrderId : ObjectId.isValid(id) ? new ObjectId(id) : {}}
-                )
-                .then(data => {
-                    resolve(result.deletedCount === 1);
-                })
-                .catch(e => {
-                    reject(e);
-                });
-            })
-            .catch(e => {
-                reject(e);
-            });
-        });
-    }
+    // destroy(id) {
+    //     return new Promise((resolve, reject) => {
+    //     	this.collection.deleteOne({
+    //             _id: ObjectId.isValid(id) ? new ObjectId(id) : {}
+    //         })
+    //         .then((result) => {
+    //             DailyOperationCollection.deleteMany(
+    //                 {productionOrderId : ObjectId.isValid(id) ? new ObjectId(id) : {}}
+    //             )
+    //             .then(data => {
+    //                 resolve(result.deletedCount === 1);
+    //             })
+    //             .catch(e => {
+    //                 reject(e);
+    //             });
+    //         })
+    //         .catch(e => {
+    //             reject(e);
+    //         });
+    //     });
+    // }
 
     updateIsUse(data, value){
         return this._pre(data)
