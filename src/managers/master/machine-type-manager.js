@@ -148,6 +148,7 @@ module.exports = class MachineTypeManager extends BaseManager {
                             itemErrors.push(itemError);
 
                         }
+
                         for (var itemError of itemErrors) {
                             if (Object.getOwnPropertyNames(itemError).length > 0) {
                                 errors.indicators = itemErrors;
