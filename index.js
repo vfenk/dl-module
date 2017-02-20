@@ -55,7 +55,8 @@ module.exports = {
             finishingPrinting: {
                 DailyOperationManager: require('./src/managers/production/finishing-printing/daily-operation-manager'),
                 MonitoringEventManager: require('./src/managers/production/finishing-printing/monitoring-event-manager'),
-                MonitoringSpecificationMachineManager: require('./src/managers/production/finishing-printing/monitoring-specification-machine-manager')
+                MonitoringSpecificationMachineManager: require('./src/managers/production/finishing-printing/monitoring-specification-machine-manager'),
+                KanbanManager: require('./src/managers/production/finishing-printing/kanban-manager')
             }
         },
         sales:{
@@ -104,7 +105,8 @@ module.exports = {
             production: {
                 dailyOperation: require('./test/data-util/production/finishing-printing/daily-operation-data-util'),
                 monitoringEvent: require('./test/data-util/production/finishing-printing/monitoring-event-data-util'),
-                monitoringSpecificationMachine: require('./test/data-util/production/finishing-printing/monitoring-specification-machine-data-util')
+                monitoringSpecificationMachine: require('./test/data-util/production/finishing-printing/monitoring-specification-machine-data-util'),
+                kanban: require('./test/data-util/production/finishing-printing/kanban-data-util')
             },
             sales:{
                 productionOrder: require('./test/data-util/sales/production-order-data-util')
