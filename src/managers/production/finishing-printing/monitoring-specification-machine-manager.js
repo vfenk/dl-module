@@ -6,29 +6,28 @@ require("mongodb-toolkit");
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var MonitoringSpecificationMachine = DLModels.production.finishingPrinting.MonitoringSpecificationMachine;
-var MachineTypeManager = require('../../master/machine-type-manager');
 var MachineManager = require('../../master/machine-manager');
 var CodeGenerator = require('../../../utils/code-generator');
 var BaseManager = require('module-toolkit').BaseManager;
 
 var i18n = require('dl-i18n');
+var moment = require('moment');
 
 module.exports = class MonitoringSpecificationMachineManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.collection(map.production.finishingPrinting.collection.MonitoringSpecificationMachine);
 
-        this.machineTypeManager = new MachineTypeManager(db, user);
-        // this.machineManager= new MachineManager(db,user);
+       
+        this.machineManager = new MachineManager(db, user);
 
     }
 
     _getQuery(paging) {
         var _default = {
             _deleted: false
-        },
-            pagingFilter = paging.filter || {},
-            keywordFilter = {},
+        }, keywordFilter = {}, pagingFilter = paging.filter || {},
+
             query = {};
 
         if (paging.keyword) {
@@ -44,22 +43,29 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                 }
             };
 
-            keywordFilter['$or'] = [codeFilter, dateFilter];
+            var filterMachineName = {
+                'machine.name': {
+                    '$regex': regex
+                }
+            };
+
+
+            keywordFilter['$or'] = [codeFilter, dateFilter, filterMachineName];
         }
         query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
     }
 
     _beforeInsert(data) {
+        data._active = true;
         data.code = CodeGenerator();
-        // data._active = true;
         return Promise.resolve(data);
     }
 
 
     _validate(monitoringSpecificationMachine) {
         var errors = {};
-        // return new Promise((resolve, reject) => {
+        
         var valid = monitoringSpecificationMachine;
         // 1. begin: Declare promises.
         var getMonitoringSpecificationMachinePromise = this.collection.singleOrDefault({
@@ -70,17 +76,15 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
             code: valid.code,
         });
 
-        var getMachineType = ObjectId.isValid(valid.machineTypeId) ? this.machineTypeManager.getSingleByIdOrDefault(new ObjectId(valid.machineTypeId)) : Promise.resolve(null);
-        // var getMachine = ObjectId.isValid(valid.machineTypeId) ? this.machineManager.getSingleByIdOrDefault(new ObjectId(valid.machineTypeId)) : Promise.resolve(null);
+        
+        var getMachine = ObjectId.isValid(valid.machineId) ? this.machineManager.getSingleByIdOrDefault(new ObjectId(valid.machineId)) : Promise.resolve(null);
 
 
-
-        return Promise.all([getMonitoringSpecificationMachinePromise, getMachineType])
-            // return Promise.all([getMonitoringSpecificationMachinePromise, getMachine])
+        return Promise.all([getMonitoringSpecificationMachinePromise, getMachine])
             .then(results => {
 
                 var _monitoringSpecificationMachine = results[0];
-                var _machineType = results[1];
+                var _machine = results[1];
 
 
 
@@ -93,34 +97,39 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                 if (!valid.time || valid.time == "" || valid.time == "undefined")
                     errors["time"] = i18n.__("MonitoringSpecificationMachine.time.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.time._:Time")); //"Time monitoring tidak boleh kosong";
 
-                if (!_machineType)
-                    errors["machineType"] = i18n.__("MonitoringSpecificationMachine.machineType.name.isRequired:%s is not exists", i18n.__("MonitoringSpecificationMachine.machineType.name._:MachineType")); //"machineType tidak boleh kosong";
-                else if (!valid.machineType._id)
-                    errors["machineType"] = i18n.__("MonitoringSpecificationMachine.machineType.name.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.machineType.name._:MachineType")); //"machineType tidak boleh kosong";
-                // else {
-                //     var errorIndicators = [];
+                if (!_machine)
+                    errors["machine"] = i18n.__("MonitoringSpecificationMachine.machine.name.isRequired:%s is not exists", i18n.__("MonitoringSpecificationMachine.machine.name._:Machine")); //"machine tidak boleh kosong";
+                // else if (!valid.machine._id)
+                //     errors["machine"] = i18n.__("MonitoringSpecificationMachine.machine.name.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.machine.name._:Machine")); //"machine tidak boleh kosong";
 
-                //     for (var indicator of valid.machineType.indicators) {
-                //         var errorIndicator = {};
-                //         if (indicator.dataType == "range (use '-' as delimiter)") {
-                //             var rangeValues = indicator.value.split("-");
-                //             if (rangeValues.length == 0) {
-                //                 errorIndicator["value"] = i18n.__("MonitoringSpecificationMachine.machineType.indicators.value.isIncorrect:%s delimiter is incorrect", i18n.__("MonitoringSpecificationMachine.machineType.indicators.value._:value")); //"value tidak boleh kosong";
+                if (valid.items) {
+                    var itemErrors = [];
+                    for (var item of valid.items) {
+                        var itemError = {}
+                        if (item.dataType == "range (use '-' as delimiter)") {
+                            var range = item.defaultValue.split("-");
+                            if (item.value < parseInt(range[0]) || item.value > parseInt(range[1])) {
+                                itemError["value"] = i18n.__("MonitoringSpecificationMachine.items.value.isIncorrect:%s range is incorrect", i18n.__("MonitoringSpecificationMachine.items.value._:value")); //"range incorrect";                       
+                            }
+                        }
+                        itemErrors.push(itemError);
 
-                //             } else if (rangeValues.length == 2) {
-                //                 if (!parseInt(rangeValues[0]) || !parseInt(rangeValues[1])) {
-                //                     errorIndicator["value"] = i18n.__("MonitoringSpecificationMachine.machineType.indicators.value.isIncorrect:%s is incorrect", i18n.__("MonitoringSpecificationMachine.machineType.indicators.value._:value")); //"value tidak boleh kosong";
-                //                 } else if (parseInt(rangeValues[0]) >= parseInt(rangeValues[1])) {
-                //                     errorIndicator["value"] = i18n.__("MonitoringSpecificationMachine.machineType.indicators.value.isIncorrect:%s 1st value must less than 2nd value", i18n.__("MonitoringSpecificationMachine.machineType.indicators.value._:value")); //"value tidak boleh kosong";
-                //                 }
+                    }
 
-                //             } else {
-                //                 errorIndicator["value"] = i18n.__("MonitoringSpecificationMachine.machineType.indicators.value.isIncorrect:%s range is incorrect", i18n.__("MonitoringSpecificationMachine.machineType.indicators.value._:value")); //"value tidak boleh kosong";
-                //             }
+                    for (var itemError of itemErrors) {
+                        if (Object.getOwnPropertyNames(itemError).length > 0) {
+                            errors.items = itemErrors;
+                            break;
+                        }
+                    }
+                }
 
-                //         }
-                //     }
-                // }
+                if (_machine) {
+                    valid.machine = _machine;
+                    valid.machineId = new ObjectId(_machine._id);
+                }
+
+                valid.date = new Date(valid.date);
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require("module-toolkit").ValidationError;
@@ -137,6 +146,88 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
 
     }
 
+    getMonitoringSpecificationMachineReport(info) {
+        var _defaultFilter = {
+            _deleted: false
+        }, machineFilter = {},
+            monitoringSpecificationMachineFilter = {},
+            dateFromFilter = {},
+            dateToFilter = {},
+            query = {};
+
+        var dateFrom = info.dateFrom ? (new Date(info.dateFrom)) : (new Date(1900, 1, 1));
+        var dateTo = info.dateTo ? (new Date(info.dateTo)) : (new Date());
+        var now = new Date();
+
+        if (info.machineId && info.machineId != '') {
+            var machineId = ObjectId.isValid(info.machineId) ? new ObjectId(info.machineId) : {};
+            machineFilter = { 'machine._id': machineId };
+        }
+
+        var filterDate = {
+            "date": {
+                $gte: new Date(dateFrom),
+                $lte: new Date(dateTo)
+            }
+        };
+
+        query = { '$and': [_defaultFilter, machineFilter, filterDate] };
+
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return this.collection
+                    .where(query)
+                    .execute();
+            });
+    }
+
+    getXls(result, query) {
+        var xls = {};
+        xls.data = [];
+        xls.options = [];
+        xls.name = '';
+
+        var index = 0;
+        var dateFormat = "DD/MM/YYYY";
+        var timeFormat = "HH : mm";
+
+        for (var monitoringSpecificationMachine of result.data) {
+            index++;
+            var item = {};
+            item["No"] = index;
+            item["Machine"] = monitoringSpecificationMachine.machine ? monitoringSpecificationMachine.machine.name : '';
+            item["Tanggal"] = monitoringSpecificationMachine.date ? moment(new Date(monitoringSpecificationMachine.date)).format(dateFormat) : '';
+            item["Jam"] = monitoringSpecificationMachine.time ? moment(new Date(monitoringSpecificationMachine.time)).format(timeFormat) : '';
+
+            //dinamic items
+            for (var indicator of monitoringSpecificationMachine.items) {
+                item[indicator.indicator] = indicator ? indicator.value : '';
+                xls.options[indicator.indicator] = "string";
+            }
+
+            xls.data.push(item);
+        }
+
+        xls.options["No"] = "number";
+        xls.options["Machine"] = "string";
+        xls.options["Tanggal"] = "string";
+        xls.options["Jam"] = "string";
+
+
+        if (query.dateFrom && query.dateTo) {
+            xls.name = `Monitoring Specification Machine Report ${moment(new Date(query.dateFrom)).format(dateFormat)} - ${moment(new Date(query.dateTo)).format(dateFormat)}.xlsx`;
+        }
+        else if (!query.dateFrom && query.dateTo) {
+            xls.name = `Monitoring Specification Machine Report ${moment(new Date(query.dateTo)).format(dateFormat)}.xlsx`;
+        }
+        else if (query.dateFrom && !query.dateTo) {
+            xls.name = `Monitoring Specification Machine Report ${moment(new Date(query.dateFrom)).format(dateFormat)}.xlsx`;
+        }
+        else
+            xls.name = `Monitoring Specification Machine Report.xlsx`;
+
+        return Promise.resolve(xls);
+    }
 
     _createIndexes() {
         var dateIndex = {
