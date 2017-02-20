@@ -10,7 +10,6 @@ var moment = require("moment");
 require("mongodb-toolkit");
 
 var MonitoringEventManager = require("../managers/production/finishing-printing/monitoring-event-manager");
-var startedDate = new Date();
 
 module.exports = class FactMonitoringEventEtlManager extends BaseManager {
     constructor(db, user, sql) {
@@ -21,11 +20,13 @@ module.exports = class FactMonitoringEventEtlManager extends BaseManager {
     };
 
     run() {
+        var startedDate = new Date()
         this.migrationLog.insert({
             description: "Fact Monitoring Event from MongoDB to Azure DWH",
             start: startedDate,
         })
-        return this.extract()
+        return this.timestamp()
+            .then((time) => this.extract(time))
             .then((data) => this.transform(data))
             .then((data) => this.load(data))
             .then((results) => {
@@ -54,10 +55,20 @@ module.exports = class FactMonitoringEventEtlManager extends BaseManager {
             });
     };
 
-    extract() {
-        var timestamp = new Date(1970, 1, 1);
+    timestamp() {
+        return this.migrationLog.find({
+            description: "Fact Pembelian from MongoDB to Azure DWH",
+            status: "Successful"
+        }).sort({ finish: -1 }).limit(1).toArray()
+    }
+
+    extract(time) {
+        var timestamp = new Date(time[0].finish);
         return this.monitoringEventManager.collection.find({
             _deleted: false,
+            _createdBy: {
+                "$nin": ["dev", "unit-test"]
+            },
             _updatedDate: {
                 "$gt": timestamp
             }
@@ -65,7 +76,7 @@ module.exports = class FactMonitoringEventEtlManager extends BaseManager {
     };
 
     getOperationRange(hours) {
-       return hours / 60;
+        return hours / 60;
     }
 
     transform(data) {
