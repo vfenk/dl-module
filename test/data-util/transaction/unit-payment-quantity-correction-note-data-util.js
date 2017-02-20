@@ -47,7 +47,7 @@ class UnitPaymentQuantityCorrectionNoteDataUtil {
                                 vatTaxCorrectionNo: `UT/UPPCN/PPH/${codeGenerator()}`,
                                 vatTaxCorrectionDate: new Date(),
                                 unitCoverLetterNo: `UT/UPPCN/Letter/${codeGenerator()}`,
-                                priceCorrectionType: 'Jumlah',
+                                correctionType: 'Jumlah',
                                 remark: 'Unit Test Unit payment quantity correction',
                                 items:  itemsUnitPaymentQuantityCorrectionNote
                             };

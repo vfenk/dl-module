@@ -3,13 +3,13 @@ var validator = require('dl-models').validator.master;
 var validatorPurchasing = require('dl-models').validator.purchasing;
 var UnitPaymentOrderManager = require("../../../src/managers/purchasing/unit-payment-order-manager");
 var unitPaymentOrderManager = null;
-var unitPaymentOrder = require('../../data').transaction.unitPaymentOrder;
+var unitPaymentOrder = require("../../data-util/purchasing/unit-payment-order-data-util");
 
 require("should");
 
 before('#00. connect db', function (done) {
     helper.getDb()
-        .then(db => {
+        .then((db) => {
             unitPaymentOrderManager = new UnitPaymentOrderManager(db, {
                 username: 'unit-test'
             });
@@ -22,28 +22,30 @@ before('#00. connect db', function (done) {
 
 var createdId;
 it('#01. should success when create new data', function (done) {
-    unitPaymentOrder.getNew()
-        .then(data => {
-            data._id.should.be.Object();
-            createdId = data._id;
+    unitPaymentOrder.getNewData()
+        .then((data) => unitPaymentOrderManager.create(data))
+        .then((id) => {
+            id.should.be.Object();
+            createdId = id;
             done();
         })
-        .catch(e => {
+        .catch((e) => {
             done(e);
-        })
+        });
 });
 
 it('#02. should error when create new blank data', function (done) {
     unitPaymentOrderManager.create({})
-        .then(id => {
+        .then((id) => {
             id.should.be.Object();
             done();
         })
         .catch(e => {
-            e.errors.should.have.property('no');
-            e.errors.should.have.property('unit');
-            e.errors.should.have.property('supplier');
-            done();
+            try {
+                done();
+            }
+            catch (ex) {
+                done(ex);
+            }
         })
 });
-

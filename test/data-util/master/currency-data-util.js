@@ -1,27 +1,39 @@
-'use strict';
-var _getSert = require('./getsert');
+"use strict";
+var _getSert = require("../getsert");
+var generateCode = require("../../../src/utils/code-generator");
 
 class CurrencyDataUtil {
-    getSert(currency) {
-        var CurrencyManager = require('../../../src/managers/master/currency-manager');
-        return Promise.resolve(_getSert(currency, CurrencyManager, data => {
+    getSert(input) {
+        var ManagerType = require("../../../src/managers/master/currency-manager");
+        return _getSert(input, ManagerType, (data) => {
             return {
                 code: data.code
             };
-        }));
+        });
     }
+
+    getNewData() {
+        var Model = require("dl-models").master.Currency;
+        var data = new Model();
+
+        var code = generateCode();
+
+        data.code = code;
+        data.symbol = `symbol[${code}]`;
+        data.rate = 1;
+
+        return Promise.resolve(data);
+    }
+
     getTestData() {
-        var testData = { 
-            code: 'UT/Currency/01',
-            symbol:'Rp',
+        var data = {
+            code: "UTT",
+            symbol: "Ut",
             rate: 1,
-            description:''
+            description: "Unit test currency"
         };
-        return Promise.resolve(this.getSert(testData));
+        return this.getSert(data);
     }
-} 
+}
 
 module.exports = new CurrencyDataUtil();
-
-
-

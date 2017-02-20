@@ -2,16 +2,18 @@
 
 var ObjectId = require("mongodb").ObjectId;
 require("mongodb-toolkit");
+var i18n = require('dl-i18n');
 var DLModels = require('dl-models');
 var map = DLModels.map;
 var Account = DLModels.auth.Account;
-var BaseManager = require('../base-manager');
+var BaseManager = require('module-toolkit').BaseManager;
 var sha1 = require("sha1");
 
 module.exports = class AccountManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.auth.collection.Account);
+        this.roleCollection = this.db.use(map.auth.collection.Role);
     }
 
     create(account) {
@@ -94,12 +96,45 @@ module.exports = class AccountManager extends BaseManager {
     }
 
     _getQuery(paging) {
-        var deleted = {
+        // var deleted = {
+        //     _deleted: false
+        // };
+        // var query = paging.keyword ? {
+        //     '$and': [deleted]
+        // } : deleted;
+
+        // if (paging.keyword) {
+        //     var regex = new RegExp(paging.keyword, "i");
+        //     var filterUsername = {
+        //         'username': {
+        //             '$regex': regex
+        //         }
+        //     };
+        //     var filterName = {
+        //         '$or': [{
+        //             'profile.firstname': {
+        //                 '$regex': regex
+        //             }
+        //         }, {
+        //             'profile.lastname': {
+        //                 '$regex': regex
+        //             }
+        //         }]
+        //     };
+        //     var $or = {
+        //         '$or': [filterUsername, filterName]
+        //     };
+
+        //     query['$and'].push($or);
+        // }
+        // return query;
+
+        var _default = {
             _deleted: false
-        };
-        var query = paging.keyword ? {
-            '$and': [deleted]
-        } : deleted;
+        },
+        pagingFilter = paging.filter || {},
+        keywordFilter = {},
+        query = {};
 
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
@@ -119,12 +154,9 @@ module.exports = class AccountManager extends BaseManager {
                     }
                 }]
             };
-            var $or = {
-                '$or': [filterUsername, filterName]
-            };
-
-            query['$and'].push($or);
+            keywordFilter["$or"] = [filterUsername, filterName]
         }
+        query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
     }
 
@@ -133,7 +165,7 @@ module.exports = class AccountManager extends BaseManager {
         return new Promise((resolve, reject) => {
             var valid = account;
             // 1. begin: Declare promises.
-            var getAccountPromise = this.collection.singleOrDefault({
+            var getAccountPromise = this.collection.firstOrDefault({
                 "$and": [{
                     _id: {
                         '$ne': new ObjectId(valid._id)
@@ -144,10 +176,19 @@ module.exports = class AccountManager extends BaseManager {
                     }
                 }]
             });
+            valid.roles = valid.roles instanceof Array ? valid.roles : [];
+            var roleIds = valid.roles.map((r) => new ObjectId(r._id));
+            var getRoles = this.roleCollection.find({
+                _id: {
+                    "$in": roleIds
+                }
+            }).toArray();
+
             // 2. begin: Validation.
-            Promise.all([getAccountPromise])
+            Promise.all([getAccountPromise, getRoles])
                 .then(results => {
                     var _module = results[0];
+                    var _roles = results[1];
 
                     if (!valid.username || valid.username == '')
                         errors["username"] = "Username harus diisi";
@@ -172,13 +213,33 @@ module.exports = class AccountManager extends BaseManager {
                             errors["profile"] = profileError;
                     }
 
+                    var roleErrors = [];
+                    for (var role of valid.roles) {
+                        var roleError = {};
+                        var _role = _roles.find((r) => {
+                            return r._id.toString() === role._id.toString();
+                        });
+
+                        if (!_role) {
+                            roleError["role"] = i18n.__("Role.isRequired:%s is required", i18n.__("Role._:Role")); //"Nama barang tidak boleh kosong";
+                            roleError["roleId"] = i18n.__("Role.isRequired:%s is required", i18n.__("Role._:Role")); //"Nama barang tidak boleh kosong";
+                        }
+                        if (Object.getOwnPropertyNames(roleError).length > 0)
+                            roleErrors.push(roleError);
+                        else {
+                            role = _role;
+                        }
+                    }
+                    if (roleErrors.length > 0)
+                        errors.roles = roleErrors;
 
                     // 2c. begin: check if data has any error, reject if it has.
                     if (Object.getOwnPropertyNames(errors).length > 0) {
-                        var ValidationError = require('../../validation-error');
+                        var ValidationError = require('module-toolkit').ValidationError;
                         reject(new ValidationError('data does not pass validation', errors));
                     }
-
+                    
+                    account.roles = _roles;
                     valid = new Account(account);
                     valid.stamp(this.user.username, 'manager');
                     resolve(valid);

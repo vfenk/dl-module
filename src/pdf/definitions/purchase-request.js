@@ -4,7 +4,7 @@ module.exports = function (purchaseRequest) {
 
     var items = [].concat.apply([], purchaseRequest.items);
 
-    var iso = "FM-6.00-06-004/R1";
+    var iso = "FM-PB-00-06-006";
     var number = purchaseRequest.no;
 
     var locale = global.config.locale; 
@@ -21,12 +21,7 @@ module.exports = function (purchaseRequest) {
                     style: ['size15'],
                     alignment: "center"
                 }, {
-                        text: 'BANARAN, GROGOL, SUKOHARJO 57193',
-                        style: ['size09'],
-                        alignment: "center"
-                    },
-                    {
-                        text: 'No. Telp : (0271) 716888   Fax : (0271) 717818',
+                        text: 'BANARAN, GROGOL, SUKOHARJO',
                         style: ['size09'],
                         alignment: "center"
                     }]
@@ -93,7 +88,7 @@ module.exports = function (purchaseRequest) {
                 columns: [{
                     width: '*',
                     stack: [`Sukoharjo, ${moment(purchaseRequest.date).format(locale.date.format)} `],
-                    alignment: "right",
+                    alignment: "right"
                 }],
                 style: ['size08']
             }
@@ -130,19 +125,19 @@ module.exports = function (purchaseRequest) {
     var tbody = items.map(function (item, index) {
         return [{
             text: (index + 1).toString() || '',
-            style: ['size07', 'center']
+            style: ['size08', 'center']
         }, {
                 text: item.product.code,
-                style: ['size07', 'left']
+                style: ['size08', 'left']
             }, {
-                text: item.product.name,
-                style: ['size07', 'center']
+                text: item.product.name+'\n'+item.remark,
+                style: ['size08', 'left']
             }, {
                 text: parseFloat(item.quantity).toLocaleString(locale, locale.decimal) + " " + item.product.uom.unit,
-                style: ['size07', 'center']
+                style: ['size08', 'center']
             }, {
                 text: '',
-                style: ['size07', 'left']
+                style: ['size08', 'left']
             }];
     });
 
@@ -161,7 +156,7 @@ module.exports = function (purchaseRequest) {
 
     var table = [{
         table: {
-            widths: ['5%', '20%', '40%', '10%', '25%'],
+            widths: ['5%', '13%', '40%', '17%', '25%'],
             headerRows: 1,
             body: [].concat([thead], tbody, tfoot)
         }
@@ -173,9 +168,9 @@ module.exports = function (purchaseRequest) {
         '\n', {
             stack: [{
                 columns: [{
-                    width: '60%',
+                    width: '80%',
                     columns: [{
-                        width: '50%',
+                        width: '25%',
                         stack: ['Kategori', 'Diminta Datang', 'Keterangan']
                     }, {
                             width: '3%',
@@ -183,7 +178,7 @@ module.exports = function (purchaseRequest) {
                         }, {
                             width: '*',
                             stack: [purchaseRequest.category.name, `${getDateexpected}`, purchaseRequest.remark]
-                        },]
+                        }]
                 }]
             }
             ],

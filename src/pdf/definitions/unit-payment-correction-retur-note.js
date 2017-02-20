@@ -15,7 +15,7 @@ module.exports = function (unitPaymentCorrection) {
 
     items = [].concat.apply([], items);
 
-    var currency = unitPaymentCorrection.items.find(r => true).currency.symbol;
+    var currency = unitPaymentCorrection.items.find(r => true).currency.code;
 
     var locale = global.config.locale;
 
@@ -24,7 +24,7 @@ module.exports = function (unitPaymentCorrection) {
 
     var numberLocaleOptions = {
         style: 'decimal',
-        maximumFractionDigits: 4,
+        maximumFractionDigits: 4
 
     };
     var header = [
@@ -182,13 +182,13 @@ module.exports = function (unitPaymentCorrection) {
     var tbody = items.map(function (item, index) {
         return [{
             text: (index + 1).toString() || '',
-            style: ['size07', 'center']
+            style: ['size08', 'center']
         }, {
             text: item.product.name,
-            style: ['size07', 'left']
+            style: ['size08', 'left']
         }, {
             text: `${item.quantity} ${item.uom.unit}`,
-            style: ['size07', 'right']
+            style: ['size08', 'right']
         }, {
             columns: [{
                 width: '5%',
@@ -197,7 +197,7 @@ module.exports = function (unitPaymentCorrection) {
             }, {
                 width: '*',
                 text: parseFloat(item.pricePerUnit).toLocaleString(locale, locale.currency),
-                style: ['size07', 'right']
+                style: ['size08', 'right']
             }]
         }, {
             columns: [{
@@ -207,7 +207,7 @@ module.exports = function (unitPaymentCorrection) {
             }, {
                 width: '*',
                 text: parseFloat(item.priceTotal).toLocaleString(locale, locale.currency),
-                style: ['size07', 'right']
+                style: ['size08', 'right']
             }]
         }];
     });
@@ -265,10 +265,9 @@ module.exports = function (unitPaymentCorrection) {
         [{
             stack: [
                 '\n',
-                'Sukoharjo, 24 Agustus 2016',
+                `Sukoharjo, ${moment(unitPaymentCorrection.date).format(locale.date.format)}`,
                 '\n\n\n\n',
-                'Gunawan Adi Nugroho',
-                'Pimp. Pembelian D',
+                '_____________________________',
                 '\n'
             ],
             colSpan: 5,

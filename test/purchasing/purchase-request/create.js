@@ -1,12 +1,12 @@
 require("should");
-var dataUtil = require('../../data').transaction.purchaseRequest;
+var PurchaseRequest = require('../../data-util/purchasing/purchase-request-data-util');
 var helper = require("../../helper");
-var validatePR = require("dl-models").validator.purchasing.purchaseRequest;
+var validate = require("dl-models").validator.purchasing.purchaseRequest;
 
 var PurchaseRequestManager = require("../../../src/managers/purchasing/purchase-request-manager");
 var purchaseRequestManager = null;
 
-before('#00. connect db', function(done) {
+before('#00. connect db', function (done) {
     helper.getDb()
         .then(db => {
             purchaseRequestManager = new PurchaseRequestManager(db, {
@@ -19,15 +19,18 @@ before('#00. connect db', function(done) {
         });
 });
 
-it('#01. should error when create with empty data ', function(done) {
+it('#01. should error when create with empty data ', function (done) {
     purchaseRequestManager.create({})
         .then(id => {
             done("should error when create with empty data");
         })
         .catch(e => {
             try {
-                // e.errors.should.have.property('code');
-                // e.errors.should.have.property('name');
+                e.errors.should.have.property('date');
+                e.errors.should.have.property('unit');
+                e.errors.should.have.property('category');
+                e.errors.should.have.property('budget');
+                e.errors.should.have.property('items');
                 done();
             }
             catch (ex) {
@@ -37,14 +40,37 @@ it('#01. should error when create with empty data ', function(done) {
 });
 
 var purchaseRequest;
-it('#02. should success when create new data', function(done) {
-    dataUtil.getNew()
+it('#02. should success when create new data', function (done) {
+    PurchaseRequest.getNewTestData()
         .then(pr => {
             purchaseRequest = pr;
-            validatePR(purchaseRequest);
+            validate(purchaseRequest);
             done();
         })
         .catch(e => {
             done(e);
         });
-}); 
+});
+
+it('#02. should error when create new data using duplicate item', function (done) {
+    PurchaseRequest.getNewData()
+        .then(pr => {
+            pr.items[1] = pr.items[0];
+            purchaseRequestManager.create(pr)
+                .then(id => {
+                    done("should error when create with empty data");
+                })
+                .catch(e => {
+                    try {
+                        e.errors.should.have.property('items');
+                        done();
+                    }
+                    catch (ex) {
+                        done(ex);
+                    }
+                });
+        })
+        .catch(e => {
+            done(e);
+        });
+});

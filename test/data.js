@@ -8,16 +8,36 @@ module.exports = {
         budget: require('./data-util/master/budget-data-util'),
         supplier: require('./data-util/master/supplier-data-util'),
         unit: require('./data-util/master/unit-data-util'),
-        category: require('./data-util/master/category-data-util')
+        machine: require('./data-util/master/machine-data-util'),
+        lotMachine: require('./data-util/master/lot-machine-data-util'),
+        category: require('./data-util/master/category-data-util'),
+        lampStandard: require('./data-util/master/lamp-standard-data-util'),
+        instruction: require('./data-util/master/instruction-data-util'),
+        orderType: require('./data-util/master/order-type-data-util'),
+        processType: require('./data-util/master/process-type-data-util'),
+        colorType: require('./data-util/master/color-type-data-util'),
+        machineType: require('./data-util/master/machine-type-data-util'),
+        machineEvent: require('./data-util/master/machine-event-data-util')
+
+    },
+    purchasing:{
+        purchaseRequest: require('./data-util/purchasing/purchase-request-data-util'),
+        purchaseOrder: require('./data-util/purchasing/purchase-order-data-util'),
+        purchaseOrderExternal: require('./data-util/purchasing/purchase-order-external-data-util'),
     },
     transaction: {
-        purchaseRequest: require('./data-util/transaction/purchase-request-data-util'),
-        purchaseOrder: require('./data-util/transaction/purchase-order-data-util'),
-        purchaseOrderExternal: require('./data-util/transaction/purchase-order-external-data-util'),
         deliveryOrder: require('./data-util/transaction/delivery-order-data-util'),
         unitReceiptNote: require('./data-util/transaction/unit-receipt-note-data-util'),
         unitPaymentOrder: require('./data-util/transaction/unit-payment-order-data-util'),
         unitPaymentPriceCorrectionNote: require('./data-util/transaction/unit-payment-price-correction-note-data-util'),
         unitPaymentQuantityCorrectionNote: require('./data-util/transaction/unit-payment-quantity-correction-note-data-util')
-    }
+    },
+    production: {
+        monitoringEvent: require('./data-util/production/finishing-printing/monitoring-event-data-util'),
+        monitoringSpecificationMachine: require('./data-util/production/finishing-printing/monitoring-specification-machine-data-util')
+    },
+    sales: {
+        productionOrder: require('./data-util/sales/production-order-data-util'),
+    },
+
 };
