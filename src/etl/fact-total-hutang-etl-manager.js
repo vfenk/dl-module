@@ -192,16 +192,16 @@ module.exports = class FactTotalHutang extends BaseManager {
 
                         this.sql.multiple = true;
 
-                        var fs = require("fs");
-                        var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
+                        // var fs = require("fs");
+                        // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
 
-                        fs.writeFile(path, sqlQuery, function (error) {
-                            if (error) {
-                                console.log("write error:  " + error.message);
-                            } else {
-                                console.log("Successful Write to " + path);
-                            }
-                        });
+                        // fs.writeFile(path, sqlQuery, function (error) {
+                        //     if (error) {
+                        //         console.log("write error:  " + error.message);
+                        //     } else {
+                        //         console.log("Successful Write to " + path);
+                        //     }
+                        // });
 
                         return Promise.all(command)
                             .then((results) => {
