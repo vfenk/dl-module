@@ -89,7 +89,7 @@ module.exports = class KanbanManager extends BaseManager {
                         else{
                             var currentQty = 0;
                             if (_kanbanListByColor[0] && _kanbanListByColor[0].data.length > 0){
-                                for (var item of _kanbanListByColor){
+                                for (var item of  _kanbanListByColor[0].data){
                                     currentQty += item.cart.qty;
                                 }
                             }
@@ -111,7 +111,6 @@ module.exports = class KanbanManager extends BaseManager {
 
                         if (_instruction) {
                             valid.instructionId = _instruction._id;
-                            valid.instruction = _instruction;
                         }
                         if (_productionOrder) {
                             valid.productionOrderId = _productionOrder._id;
@@ -158,7 +157,7 @@ module.exports = class KanbanManager extends BaseManager {
                 productionOrderFilter = { 'productionOrder.orderNo': productionOrder.orderNo };
             }
             if (productionOrderDetail && productionOrderDetail.code != '') {
-                productionOrderDetailFilter = { 'productionOrderDetail.code': productionOrderDetail.code };
+                productionOrderDetailFilter = { 'selectedProductionOrderDetail.code': productionOrderDetail.code };
             }
 
             query = { '$and': [_defaultFilter, productionOrderFilter, productionOrderDetailFilter] };
