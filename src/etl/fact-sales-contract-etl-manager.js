@@ -82,6 +82,7 @@ module.exports = class FactSalesContractEtlManager extends BaseManager {
     transform(data) {
         var result = data.map((salesContracts) => {
             var salesContract = salesContracts;
+            if (salesContract.productionOrders)
             var results = salesContract.productionOrders.map((productionOrder) => {
                 var orderUom = productionOrder.uom.unit;
                 var orderQuantity = productionOrder.orderQuantity;
