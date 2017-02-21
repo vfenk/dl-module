@@ -2,6 +2,7 @@
 
 var ObjectId = require("mongodb").ObjectId;
 require("mongodb-toolkit");
+var assert = require('assert');
 var DLModels = require("dl-models");
 var map = DLModels.map;
 var StepManager = require('../../master/step-manager');
@@ -216,65 +217,5 @@ module.exports = class KanbanManager extends BaseManager {
         }
 
         return this.collection.createIndexes([dateIndex]);
-    }
-
-    getDataReport(query){
-        return new Promise((resolve, reject) => {
-        var deletedQuery = {
-                _deleted: false
-            };
-        var orderQuery = {};
-        if(query.orderNo != ''){
-            orderQuery = {
-                "productionOrder.orderNo" : {
-                    "$regex" : (new RegExp(query.orderNo, "i"))
-                }
-            };
-        }
-        var orderTypeQuery = {};
-        if(query.orderTypeId){
-            orderTypeQuery = {
-                "productionOrder.orderTypeId" : (new ObjectId(query.orderTypeId))
-            };
-        }
-        var processTypeQuery = {};
-        if(query.processTypeId){
-            processTypeQuery ={
-                "productionOrder.processTypeId" : (new ObjectId(query.processTypeId))
-            };
-        }
-        var date = {
-            "_createdDate" : {
-                "$gte" : (!query || !query.sdate ? (new Date("1900-01-01")) : (new Date(`${query.sdate} 00:00:00`))),
-                "$lte" : (!query || !query.edate ? (new Date()) : (new Date(`${query.edate} 23:59:59`)))
-            }
-        };
-        var Query = {"$and" : [date,processTypeQuery,orderTypeQuery,orderQuery,deletedQuery]};
-        this.collection
-                .aggregate([ 
-                    {$unwind: "$partitions"},
-                    {$match : Query},
-                    {$project :{
-                        "_createdDate" : 1,
-                        "orderNo" : "productionOrder.orderNo",
-                        "orderType" : "$productionOrder.orderType.name",
-                        "processType" : "$productionOrder.processType.name",
-                        "color" : "$color",
-                        "handfeelStandard" : "$productionOrder.handlingStandard",
-                        "finishWidth" : "$productionOrder.finishWidth",
-                        "material" : "$productionOrder.material.name",
-                        "construction" : "$productionOrder.materialConstruction.name",
-                        "yarnNumber" : "$productionOrder.yarnMaterial.name",
-                        "grade" : "$grade",
-                        "cartNumber" : "$partitions.no",
-                        "length" : "$partitions.lengthFabric",
-                        "uom" : "$partitions.uom.unit"
-                    }},
-                    {$sort : {"_createdDate" : -1}}
-                ])
-                .toArray(function(err, result) {
-                    resolve(result);
-                })
-        });
     }
 };
