@@ -42,6 +42,21 @@ module.exports = function (productionOrder) {
     var tbody=[];
     var tfoot=[];
     var table=[];
+    var remark=productionOrder.remark;
+    var remarks=productionOrder.remark.split(" ");
+    for(var i=0; i<remarks.length; i++){
+        if(remarks[i].length>21)
+            remarks[i]=remarks[i].replace(/(.{21})/g,"$&" + '\n');
+    }
+    remark=remarks.toString().replace(/,/g, " ");
+
+    var packing=productionOrder.packingInstruction;
+    var packings=productionOrder.packingInstruction.split(" ");
+    for(var i=0; i<packings.length; i++){
+        if(packings[i].length>21)
+            packings[i]=packings[i].replace(/(.{21})/g,"$&" + '\n');
+    }
+    packing=packings.toString().replace(/,/g, " ");
 
     if(productionOrder.orderType.name.trim().toLowerCase()=="printing" || productionOrder.orderType.name.toLowerCase()=="yarn dyed")
     {
@@ -68,11 +83,18 @@ module.exports = function (productionOrder) {
         tbody = details.map(function (detail, index) {
             var colorReq=detail.colorRequest;
             var colorTemplate=detail.colorTemplate;
-            if(detail.colorRequest.indexOf(' ')>10 || detail.colorRequest.indexOf(' ')<0)
-                colorReq=detail.colorRequest.length>10?detail.colorRequest.replace(/(.{10})/g,"$&" + " "):detail.colorRequest;
-            if(detail.colorTemplate.indexOf(' ')>10 || detail.colorTemplate.indexOf(' ')<0)
-                colorTemplate=detail.colorTemplate.length>10?detail.colorTemplate.replace(/(.{10})/g,"$&" + " "):detail.colorTemplate;
-            
+            var words=detail.colorRequest.split(" ");
+            var words2=detail.colorTemplate.split(" ");
+            for(var i=0; i<words.length; i++){
+                if(words[i].length>9)
+                    words[i]=words[i].replace(/(.{9})/g,"$&" + '\n');
+            }
+            for(var i=0; i<words2.length; i++){
+                if(words2[i].length>9)
+                    words2[i]=words2[i].replace(/(.{9})/g,"$&" + '\n');
+            }
+            colorReq=words.toString().replace(/,/g, " ");
+            colorTemplate=words2.toString().replace(/,/g, " ")
             return [{
                 text: colorTemplate ,
                 style: ['size07', 'center']
@@ -130,10 +152,18 @@ module.exports = function (productionOrder) {
         tbody = details.map(function (detail, index) {
             var colorReq=detail.colorRequest;
             var colorTemplate=detail.colorTemplate;
-            if(detail.colorRequest.indexOf(' ')>8 || detail.colorRequest.indexOf(' ')<0)
-                colorReq=detail.colorRequest.length>8?detail.colorRequest.replace(/(.{8})/g,"$&" + " "):detail.colorRequest;
-            if(detail.colorTemplate.indexOf(' ')>8 || detail.colorTemplate.indexOf(' ')<0)
-                colorTemplate=detail.colorTemplate.length>8?detail.colorTemplate.replace(/(.{8})/g,"$&" + " "):detail.colorTemplate;
+            var words=detail.colorRequest.split(" ");
+            var words2=detail.colorTemplate.split(" ");
+            for(var i=0; i<words.length; i++){
+                if(words[i].length>7)
+                    words[i]=words[i].replace(/(.{7})/g,"$&" + '\n');
+            }
+            for(var i=0; i<words2.length; i++){
+                if(words2[i].length>7)
+                    words2[i]=words2[i].replace(/(.{7})/g,"$&" + '\n');
+            }
+            colorReq=words.toString().replace(/,/g, " ");
+            colorTemplate=words2.toString().replace(/,/g, " ")
             
             return [{
                 text: colorTemplate ,
@@ -480,7 +510,7 @@ module.exports = function (productionOrder) {
                     },
                     {
                         width: '*',
-                        text:productionOrder.packingInstruction
+                        text:packing
                     }]
             },{
                 columns: [
@@ -506,7 +536,7 @@ module.exports = function (productionOrder) {
                     },
                     {
                         width: '*',
-                        text:productionOrder.remark
+                        text:remark
                     }]
             },{
                 columns: [
@@ -534,7 +564,7 @@ module.exports = function (productionOrder) {
                         width: '*',
                         text:`${moment(productionOrder._createdDate).format(locale.date.format)}`
                     }]
-            }, '\n'
+            }
         ];
     }
     else{ //jika jenis order != PRINTING
@@ -784,7 +814,7 @@ module.exports = function (productionOrder) {
                     },
                     {
                         width: '*',
-                        text:productionOrder.packingInstruction
+                        text:packing
                     }]
             },{
                 columns: [
@@ -810,7 +840,7 @@ module.exports = function (productionOrder) {
                     },
                     {
                         width: '*',
-                        text:productionOrder.remark
+                        text:remark
                     }]
             },{
                 columns: [
@@ -838,7 +868,7 @@ module.exports = function (productionOrder) {
                         width: '*',
                         text:`${moment(productionOrder._createdDate).format(locale.date.format)}`
                     }]
-            }, '\n'
+            }
         ];
     }
     var lampList=[];
@@ -867,26 +897,7 @@ module.exports = function (productionOrder) {
             }
         }];
     
-    
-
-    var body = [
-        '\n', {
-            stack: [{
-                columns: [{
-                    width: '55%',
-                    stack:[datas]
-                },
-                {
-                    width:'*',
-                    stack:[Lamptable,'\n',table]
-                }]
-            }
-            ],
-            style: ['size08']
-        }, '\n'
-    ];
-
-    var thead2 = [{
+     var thead2 = [{
         text: 'DIBUAT OLEH',
         style: 'tableHeader'
     }, {
@@ -924,11 +935,34 @@ module.exports = function (productionOrder) {
             body: [].concat([thead2], tbody2,tfoot2)
         }
     }];
+
+    var Table=[{
+        table:{
+            widths: ['55%', '45%'],
+            body:[
+                [{
+                    stack:[datas],
+                    style: ['size08']
+                    },
+                    {stack:[Lamptable,'\n',table]}
+                ],
+                [
+                    {
+                        colSpan:2,
+                        stack:['\n','\n',table2]
+                    },''
+                ]
+            ]
+        },
+        layout: 'noBorders'
+    }];
+
+   
     var pr = {
         pageSize: 'A5',
         pageOrientation: 'portrait',
         pageMargins: 20,
-        content: [].concat(header,body,table2),
+        content: [].concat(header, Table),
         styles: {
             size06: {
                 fontSize: 6
