@@ -18,21 +18,22 @@ module.exports = class DimUnitEtlManager extends BaseManager {
         this.unitManager = new UnitManager(db, user);
         this.migrationLog = this.db.collection("migration-log");
     }
-    
+
     run() {
         var startedDate = new Date();
         this.migrationLog.insert({
-            description: "Fact Pembelian from MongoDB to Azure DWH",
+            description: "Dim Unit from MongoDB to Azure DWH",
             start: startedDate,
         })
-        return this.extract()
+        return this.getTimeStamp()
+            .then((time) => this.extract(time))
             .then((data) => this.transform(data))
             .then((data) => this.load(data))
             .then((result) => {
                 var finishedDate = new Date();
                 var spentTime = moment(finishedDate).diff(moment(startedDate), "minutes");
                 var updateLog = {
-                    description: "Fact Pembelian from MongoDB to Azure DWH",
+                    description: "Dim Unit from MongoDB to Azure DWH",
                     start: startedDate,
                     finish: finishedDate,
                     executionTime: spentTime + " minutes",
@@ -44,7 +45,7 @@ module.exports = class DimUnitEtlManager extends BaseManager {
                 var finishedDate = new Date();
                 var spentTime = moment(finishedDate).diff(moment(startedDate), "minutes");
                 var updateLog = {
-                    description: "Fact Pembelian from MongoDB to Azure DWH",
+                    description: "Dim Unit from MongoDB to Azure DWH",
                     start: startedDate,
                     finish: finishedDate,
                     executionTime: spentTime + " minutes",
@@ -54,8 +55,17 @@ module.exports = class DimUnitEtlManager extends BaseManager {
             });
     }
 
-    extract() {
-        var timestamp = new Date(1970, 1, 1);
+    getTimeStamp() {
+        return this.migrationLog.find({
+            description: "Dim Unit from MongoDB to Azure DWH",
+            status: "Successful"
+        }).sort({
+            finishedDate: -1
+        }).limit(1).toArray()
+    }
+
+    extract(time) {
+        var timestamp = new Date(time[0].finish);
         return this.unitManager.collection.find({
             _deleted: false
         }).toArray();

@@ -57,7 +57,7 @@ module.exports = class FactMonitoringEventEtlManager extends BaseManager {
 
     timestamp() {
         return this.migrationLog.find({
-            description: "Fact Pembelian from MongoDB to Azure DWH",
+            description: "Fact Monitoring Event from MongoDB to Azure DWH",
             status: "Successful"
         }).sort({ finish: -1 }).limit(1).toArray()
     }
