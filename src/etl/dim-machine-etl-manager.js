@@ -61,7 +61,7 @@ module.exports = class DimMachineEtlManager extends BaseManager {
     }
 
     extract(time) {
-        var timestamp = new Date(1970, 1, 1);
+        var timestamp = new Date(time[0].finish);
         return this.machineManager.collection.find({
             _deleted: false
 
@@ -131,16 +131,16 @@ module.exports = class DimMachineEtlManager extends BaseManager {
 
                         this.sql.multiple = true;
 
-                        var fs = require("fs");
-                        var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
+                        // var fs = require("fs");
+                        // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
 
-                        fs.writeFile(path, sqlQuery, function (error) {
-                            if (error) {
-                                console.log("write error:  " + error.message);
-                            } else {
-                                console.log("Successful Write to " + path);
-                            }
-                        });
+                        // fs.writeFile(path, sqlQuery, function (error) {
+                        //     if (error) {
+                        //         console.log("write error:  " + error.message);
+                        //     } else {
+                        //         console.log("Successful Write to " + path);
+                        //     }
+                        // });
 
                         return Promise.all(command)
                             .then((results) => {
