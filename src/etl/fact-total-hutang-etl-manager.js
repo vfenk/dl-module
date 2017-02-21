@@ -119,6 +119,8 @@ module.exports = class FactTotalHutang extends BaseManager {
             var unitPaymentOrder = item.unitPaymentOrder;
             var unitReceiptNote = item.unitReceiptNote;
 
+            if (unitReceiptNote)
+
             var results = unitReceiptNote.items.map((unitReceiptNoteItem) => {
 
                 return {
