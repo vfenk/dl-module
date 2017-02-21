@@ -80,8 +80,8 @@ module.exports = class DimSupplierEtlManager extends BaseManager {
         var result = data.map((item) => {
 
             return {
-                supplierCode: `'${item.code}'`,
-                supplierName: `'${item.name.replace(/'/g, '"')}'`
+                supplierCode: item.code ? `'${item.code}'` : null,
+                supplierName: item.name ? `'${item.name.replace(/'/g, '"')}'` : null
             };
         });
         return Promise.resolve([].concat.apply([], result));
