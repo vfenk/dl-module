@@ -33,6 +33,7 @@ it("#01. should success when create etl fact-monitoring-event", function (done) 
         });
 });
 
+var data = [{}, {}]
 
 it("#02. should success when transforming data", function (done) {
     instanceManager.transform(data)

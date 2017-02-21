@@ -31,17 +31,17 @@ it("#01. should success when create etl for dim-supplier", function (done) {
         });
 });
 
-var data = [{}, {}];
+// var data = [{}, {}];
 
-it("#02. should success when transforming data", function (done) {
-    instanceManager.transform(data)
-        .then(() => {
-            done();
-        })
-        .catch((e) => {
-            done(e);
-        });
-});
+// it("#02. should success when transforming data", function (done) {
+//     instanceManager.transform(data)
+//         .then(() => {
+//             done();
+//         })
+//         .catch((e) => {
+//             done(e);
+//         });
+// });
 
 it("#03. should error when load empty data", function (done) {
     instanceManager.load({})
