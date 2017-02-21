@@ -2,6 +2,7 @@
 
 var ObjectId = require("mongodb").ObjectId;
 require("mongodb-toolkit");
+var assert = require('assert');
 var DLModels = require("dl-models");
 var map = DLModels.map;
 var generateCode = require("../../../utils/code-generator");
