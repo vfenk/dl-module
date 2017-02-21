@@ -23,8 +23,7 @@ before("#00. connect db", function (done) {
 
 it("#01. should success when create etl dim machine", function (done) {
     instanceManager.run()
-        .then((a) => {
-            console.log(a);
+        .then(() => {
             done();
         })
         .catch((e) => {
