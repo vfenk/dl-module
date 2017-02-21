@@ -21,21 +21,9 @@ before("#00. connect db", function (done) {
         });
 });
 
-it("#01. should success when create etl for dim-unit", function (done) {
-    instanceManager.run()
-        .then((a) => {
-            done();
-        })
-        .catch((e) => {
-            done(e);
-        });
-});
-
-// var data = [{}, {}];
-
-// it("#02. should success when transforming data", function (done) {
-//     instanceManager.transform(data)
-//         .then(() => {
+// it("#01. should success when create etl for dim-unit", function (done) {
+//     instanceManager.run()
+//         .then((a) => {
 //             done();
 //         })
 //         .catch((e) => {
@@ -43,17 +31,28 @@ it("#01. should success when create etl for dim-unit", function (done) {
 //         });
 // });
 
-it("#03. should error when load empty data", function (done) {
-    instanceManager.load({})
-        .then(id => {
-            done("should error when create with empty data");
+it("#02. should success when transforming data for dim-category", function (done) {
+    var data = [{}, {}];
+    instanceManager.transform(data)
+        .then(() => {
+            done();
         })
-        .catch(e => {
-            try {                
-                done();
-            }
-            catch (ex) {
-                done(ex);
-            }
+        .catch((e) => {
+            done(e);
         });
 });
+
+// it("#03. should error when load empty data", function (done) {
+//     instanceManager.load({})
+//         .then(id => {
+//             done("should error when create with empty data");
+//         })
+//         .catch(e => {
+//             try {                
+//                 done();
+//             }
+//             catch (ex) {
+//                 done(ex);
+//             }
+//         });
+// });

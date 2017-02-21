@@ -75,9 +75,9 @@ module.exports = class DimUnitEtlManager extends BaseManager {
         var result = data.map((item) => {
 
             return {
-                unitCode: item.code,
-                divisionName: item.division.name,
-                unitName: item.name
+                unitCode: item.code ? item.code : null,
+                divisionName: item.division ? item.division.name : null,
+                unitName: item.name ? item.name : null
             };
         });
         return Promise.resolve([].concat.apply([], result));
