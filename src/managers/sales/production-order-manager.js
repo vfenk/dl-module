@@ -429,9 +429,11 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         for (var detail of valid.details) {
                             if(detail.colorType){
                                 for (var _color of _colors) {
-                                    if (detail.colorTypeId.toString() === _color._id.toString()) {
-                                        detail.colorTypeId = _color._id;
-                                        detail.colorType = _color;
+                                    if(_color){
+                                        if (detail.colorTypeId.toString() === _color._id.toString()) {
+                                            detail.colorTypeId = _color._id;
+                                            detail.colorType = _color;
+                                        }
                                     }
                                 }
                             }
