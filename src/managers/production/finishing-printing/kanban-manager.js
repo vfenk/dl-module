@@ -71,7 +71,7 @@ module.exports = class KanbanManager extends BaseManager {
                 var _productionOrderDetail = results[2];
                 var _instruction = results[3];
 
-                return Promise.all([this.getKanbanListByColorAndOrderNumber(_productionOrder, _productionOrderDetail)])
+                return Promise.all([this.getKanbanListByColorAndOrderNumber(valid._id, _productionOrder, _productionOrderDetail)])
                     .then(_kanbanListByColor => {
 
                         if (_kanban)
@@ -89,13 +89,13 @@ module.exports = class KanbanManager extends BaseManager {
                         else{
                             var currentQty = 0;
                             if (_kanbanListByColor[0] && _kanbanListByColor[0].data.length > 0){
-                                for (var item of  _kanbanListByColor[0].data){
-                                    currentQty += item.cart.qty;
+                                for (var item of _kanbanListByColor[0].data){
+                                    currentQty += Number(item.cart.qty);
                                 }
                             }
-                            currentQty += valid.cart.qty;
+                            currentQty += Number(valid.cart.qty);
                             if (currentQty > _productionOrderDetail.quantity)
-                                errors["cart"] = i18n.__("Kanban.cart.qtyOverlimit:%s overlimit", i18n.__("Kanban.cart._:Total Qty Overlimit")); //"Total Qty in cart over limit";
+                                errors["cart"] = i18n.__("Kanban.cart.qtyOverlimit:%s overlimit", i18n.__("Kanban.cart._:Total Qty")); //"Total Qty in cart over limit";
                         }
                         
 
@@ -144,14 +144,19 @@ module.exports = class KanbanManager extends BaseManager {
         return this.collection.createIndexes([dateIndex, codeIndex]);
     }
 
-    getKanbanListByColorAndOrderNumber(productionOrder, productionOrderDetail) {
+    getKanbanListByColorAndOrderNumber(kanbanId, productionOrder, productionOrderDetail) {
 
         if (productionOrder && productionOrderDetail) {
             var _defaultFilter = {
                 _deleted: false
-            }, productionOrderFilter = {},
+            }, kanbanFilter = {},
+                productionOrderFilter = {},
                 productionOrderDetailFilter = {},
                 query = {};
+
+            if (kanbanId){
+                kanbanFilter = { _id: {'$ne': new ObjectId(kanbanId)}};
+            }
 
             if (productionOrder && productionOrder.orderNo != '') {
                 productionOrderFilter = { 'productionOrder.orderNo': productionOrder.orderNo };
@@ -160,7 +165,7 @@ module.exports = class KanbanManager extends BaseManager {
                 productionOrderDetailFilter = { 'selectedProductionOrderDetail.code': productionOrderDetail.code };
             }
 
-            query = { '$and': [_defaultFilter, productionOrderFilter, productionOrderDetailFilter] };
+            query = { '$and': [_defaultFilter, kanbanFilter, productionOrderFilter, productionOrderDetailFilter] };
 
             return this.collection.where(query).execute();
         }
