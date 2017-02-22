@@ -399,7 +399,6 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 
                 if(valid.lampStandards.length>0){
                     for(var lamp of valid.lampStandards){
-                        lamp.lampStandardId=new ObjectId(lamp.lampStandardId);
                         for (var _lampStandard of _lampStandards) {
                             if(_lampStandard){
                                 if (lamp.lampStandardId.toString() === _lampStandard._id.toString()) {
