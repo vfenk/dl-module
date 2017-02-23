@@ -13,8 +13,14 @@ class AccountDataUtil {
         });
     }
 
-    getNewData() {
-        return Role.getTestData()
+    getNewData(pRole) {
+        var getRole;
+        if (pRole)
+            getRole = Promise.resolve(pRole);
+        else
+            getRole = Role.getTestData();
+
+        return getRole
             .then((role) => {
 
                 var Model = require("dl-models").auth.Account;
@@ -41,10 +47,15 @@ class AccountDataUtil {
             });
     }
 
+    getNewTestData(role) {
+        return this.getNewData(role)
+            .then(this.getSert);
+    }
+
     getTestData() {
         return this.getNewData()
             .then((data) => {
-                data.username = "dev";
+                data.username = "dev2";
                 data.email = "dev@unit.test";
                 data.profile.firstname = "Test";
                 data.profile.lastname = "Unit";
