@@ -399,7 +399,6 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 
                 if(valid.lampStandards.length>0){
                     for(var lamp of valid.lampStandards){
-                        lamp.lampStandardId=new ObjectId(lamp.lampStandardId);
                         for (var _lampStandard of _lampStandards) {
                             if(_lampStandard){
                                 if (lamp.lampStandardId.toString() === _lampStandard._id.toString()) {
@@ -430,9 +429,11 @@ module.exports = class ProductionOrderManager extends BaseManager {
                         for (var detail of valid.details) {
                             if(detail.colorType){
                                 for (var _color of _colors) {
-                                    if (detail.colorTypeId.toString() === _color._id.toString()) {
-                                        detail.colorTypeId = _color._id;
-                                        detail.colorType = _color;
+                                    if(_color){
+                                        if (detail.colorTypeId.toString() === _color._id.toString()) {
+                                            detail.colorTypeId = _color._id;
+                                            detail.colorType = _color;
+                                        }
                                     }
                                 }
                             }
