@@ -267,7 +267,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                 var _vat = results[3];
                 var _poInternals = results.slice(4, results.length);
 
-                var _products = poInternals.map((poInternal) => {
+                var _products = _poInternals.map((poInternal) => {
                     return poInternal.items.map((item) => { return item.product })
                 });
                 _products = [].concat.apply([], _products);
@@ -367,7 +367,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                                 var poItemError = {};
                                                 var dealUomId = new ObjectId(poItem.dealUom._id);
                                                 var defaultUomId = new ObjectId(poItem.defaultUom._id);
-                                                var product = listProduct.find((_product)=> _product._id.toString()===poItem.product._id.toString());
+                                                var product = listProduct.find((_product) => _product._id.toString() === poItem.product._id.toString());
 
                                                 if (!poItem.dealQuantity || poItem.dealQuantity === 0) {
                                                     poItemHasError = true;
@@ -384,9 +384,11 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                                 if (!poItem.priceBeforeTax || poItem.priceBeforeTax === 0) {
                                                     poItemHasError = true;
                                                     poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
-                                                } else if (poItem.priceBeforeTax > product.price) {
-                                                    poItemHasError = true;
-                                                    poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isGreater:%s must not be greater than default price", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
+                                                } else if (product) {
+                                                    if (poItem.priceBeforeTax > product.price) {
+                                                        poItemHasError = true;
+                                                        poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isGreater:%s must not be greater than default price", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
+                                                    }
                                                 }
                                                 var price = (poItem.priceBeforeTax.toString()).split(",");
                                                 if (price[1] != undefined || price[1] !== "" || price[1] !== " ") {
