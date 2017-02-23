@@ -441,7 +441,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 if (unitPaymentOrder.useIncomeTax) {
                                     fulfillment.ppnNo = unitPaymentOrder.incomeTaxNo;
                                     fulfillment.ppnDate = unitPaymentOrder.incomeTaxDate
-                                    fulfillment.ppnValue = 0.1 * crealization.pricePerDealUnit * realization.currency.rate;
+                                    fulfillment.ppnValue = 0.1 * realization.pricePerDealUnit * realization.currency.rate;
                                 }
                                 if (unitPaymentOrder.useVat) {
                                     fulfillment.pphNo = unitPaymentOrder.vatNo;
