@@ -278,7 +278,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
 
                 var getProducts = _listProducts.map((product) => {
                     if (ObjectId.isValid(product._id)) {
-                        return this.ProductManager.getSingleByIdOrDefault(product._id)
+                        return this.productManager.getSingleByIdOrDefault(product._id)
                     } else {
                         return Promise.resolve(null)
                     }
