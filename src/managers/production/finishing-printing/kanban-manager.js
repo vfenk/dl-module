@@ -98,6 +98,8 @@ module.exports = class KanbanManager extends BaseManager {
                                 errors["cart"] = i18n.__("Kanban.cart.qtyOverlimit:%s overlimit", i18n.__("Kanban.cart._:Total Qty")); //"Total Qty in cart over limit";
                         }
                         
+                        if (!valid.grade || valid.grade == '')
+                            errors["grade"] = i18n.__("Kanban.grade.isRequired:%s is required", i18n.__("Kanban.grade._:Grade")); //"Grade harus diisi";   
 
                         if (!valid.instruction)
                             errors["instruction"] = i18n.__("Kanban.instruction.isRequired:%s is required", i18n.__("Kanban.instruction._:Instruction")); //"Instruction harus diisi";
@@ -171,5 +173,29 @@ module.exports = class KanbanManager extends BaseManager {
         }
         else
             Promise.resolve(null);
+    }
+
+    pdf(id) {
+        return new Promise((resolve, reject) => {
+
+            this.getSingleById(id)
+                .then(kanban => {
+                    var getDefinition = require("../../../pdf/definitions/kanban");
+                    var definition = getDefinition(kanban);
+
+                    var generatePdf = require("../../pdf/pdf-generator");
+                    generatePdf(definition)
+                        .then(binary => {
+                            resolve(binary);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+
+        });
     }
 };
