@@ -19,7 +19,7 @@ class MachineTypeDataUtil {
         data.indicators =
             [{
                 indicator: `Tekanan Press Mangle[${code}]`,
-                dataType: "number",
+                dataType: "numeric",
                 defaultValue: 10,
             },
                 {
