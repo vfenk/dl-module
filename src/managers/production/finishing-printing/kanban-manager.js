@@ -183,7 +183,7 @@ module.exports = class KanbanManager extends BaseManager {
                     var getDefinition = require("../../../pdf/definitions/kanban");
                     var definition = getDefinition(kanban);
 
-                    var generatePdf = require("../../pdf/pdf-generator");
+                    var generatePdf = require("../../../pdf/pdf-generator");
                     generatePdf(definition)
                         .then(binary => {
                             resolve(binary);
