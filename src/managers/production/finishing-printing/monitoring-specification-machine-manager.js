@@ -112,8 +112,10 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                 if (!valid.cartNumber || valid.cartNumber == '')
                     errors["cartNumber"] = i18n.__("MonitoringSpecificationMachine.cartNumber.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.cartNumber._:Cart Number")); //"Nomor Kereta tidak boleh kosong";
 
-
-                if (valid.items) {
+                if (!valid.items) {
+                    errors["items"] = i18n.__("MonitoringSpecificationMachine.items.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items._:Items")); //"items tidak boleh kosong";
+                }
+                else if (valid.items) {
                     var itemErrors = [];
                     for (var item of valid.items) {
                         var itemError = {};
@@ -215,7 +217,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
             }
         };
 
-        query = { '$and': [_defaultFilter, machineFilter,productionOrderFilter, filterDate] };
+        query = { '$and': [_defaultFilter, machineFilter, productionOrderFilter, filterDate] };
 
         return this._createIndexes()
             .then((createIndexResults) => {
