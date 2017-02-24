@@ -114,7 +114,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                 if (!valid.items) {
                     errors["items"] = i18n.__("MonitoringSpecificationMachine.items.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items._:Items")); //"items tidak boleh kosong";
                 }
-                else if (valid.items || !valid.items) {
+                else if (valid.items) {
                     var itemErrors = [];
                     for (var item of valid.items) {
                         var itemError = {};
