@@ -118,27 +118,27 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                     var itemErrors = [];
                     for (var item of valid.items) {
                         var itemError = {};
-                        if (!item.satuan || item.satuan == "" || item.satuan == {}) {
+                        if (!item.satuan || item.satuan == "" ) {
                             itemError["satuan"] = i18n.__("MonitoringSpecificationMachine.items.satuan.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.satuan._:Satuan")); //"Satuan tidak boleh kosong";
                         }
 
                         if (item.dataType == "range (use '-' as delimiter)") {
                             var range = item.defaultValue.split("-");
-                            if (item.value < parseInt(range[0]) || item.value > parseInt(range[1]) || item.value == {}) {
+                            if (item.value < parseInt(range[0]) || item.value > parseInt(range[1]) ||item.value=="") {
                                 itemError["value"] = i18n.__("MonitoringSpecificationMachine.items.value.isIncorrect:%s range is incorrect", i18n.__("MonitoringSpecificationMachine.items.value._:value")); //"range incorrect";                       
                             }
                         }
 
                         if (item.dataType == "string") {
 
-                            if (!item.value || item.value == "" || item.value == {}) {
+                            if (!item.value || item.value == "" ) {
                                 itemError["value"] = i18n.__("MonitoringSpecificationMachine.items.value.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.value._:value")); //"is required";                       
                             }
                         }
 
                         if (item.dataType == "numeric") {
 
-                            if (!item.value || item.value == "" || item.value == 0 || item.value == {}) {
+                            if (!item.value || item.value == "" || item.value == 0 ) {
                                 itemError["value"] = i18n.__("MonitoringSpecificationMachine.items.value.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.value._:value")); //"is required";                       
                             }
                         }
