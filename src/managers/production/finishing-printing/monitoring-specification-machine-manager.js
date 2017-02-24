@@ -114,17 +114,17 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                 if (!valid.items) {
                     errors["items"] = i18n.__("MonitoringSpecificationMachine.items.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items._:Items")); //"items tidak boleh kosong";
                 }
-                else if (valid.items) {
+                else if (valid.items || !valid.items) {
                     var itemErrors = [];
                     for (var item of valid.items) {
                         var itemError = {};
-                        if (!item.satuan || item.satuan == ""||item.satuan=={}) {
+                        if (!item.satuan || item.satuan == "" || item.satuan == {}) {
                             itemError["satuan"] = i18n.__("MonitoringSpecificationMachine.items.satuan.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.satuan._:Satuan")); //"Satuan tidak boleh kosong";
                         }
 
                         if (item.dataType == "range (use '-' as delimiter)") {
                             var range = item.defaultValue.split("-");
-                            if (item.value < parseInt(range[0]) || item.value > parseInt(range[1])||item.value=={}) {
+                            if (item.value < parseInt(range[0]) || item.value > parseInt(range[1]) || item.value == {}) {
                                 itemError["value"] = i18n.__("MonitoringSpecificationMachine.items.value.isIncorrect:%s range is incorrect", i18n.__("MonitoringSpecificationMachine.items.value._:value")); //"range incorrect";                       
                             }
                         }
