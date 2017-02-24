@@ -104,8 +104,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
 
                 if (!_machine)
                     errors["machine"] = i18n.__("MonitoringSpecificationMachine.machine.name.isRequired:%s is not exists", i18n.__("MonitoringSpecificationMachine.machine.name._:Machine")); //"machine tidak boleh kosong";
-                // else if (!valid.machine._id)
-                //     errors["machine"] = i18n.__("MonitoringSpecificationMachine.machine.name.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.machine.name._:Machine")); //"machine tidak boleh kosong";
+               
                 if (!_productionOrder)
                     errors["productionOrder"] = i18n.__("MonitoringSpecificationMachine.productionOrder.orderNo.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.productionOrder.orderNo_:Production Order Number")); //"ProductionOrder tidak boleh kosong";
 
@@ -119,9 +118,6 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                     var itemErrors = [];
                     for (var item of valid.items) {
                         var itemError = {};
-                        if (!item.satuan || item.satuan == "") {
-                            itemError["satuan"] = i18n.__("MonitoringSpecificationMachine.items.satuan.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.satuan._:Satuan")); //"Satuan tidak boleh kosong";
-                        }
                         if (!item.satuan || item.satuan == "") {
                             itemError["satuan"] = i18n.__("MonitoringSpecificationMachine.items.satuan.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.satuan._:Satuan")); //"Satuan tidak boleh kosong";
                         }

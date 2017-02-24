@@ -18,9 +18,9 @@ class MonitoringSpecificationMachineDataUtil {
                 for (var machine of _machine.machineType.indicators) {
                     var item = {};
                     item = {
-                        indicator: machine.indicator,
-                        dataType: machine.dataType,
-                        defaultValue: machine.defaultValue,
+                        indicator: machine.indicator ? machine.indicator:"",
+                        dataType: machine.dataType ? machine.dataType:"",
+                        defaultValue: machine.defaultValue?machine.defaultValue:"",
                         value: machine.dataType == "range (use '-' as delimiter)" ? 5 : "a",
                         satuan:"test satuan",
 
