@@ -84,7 +84,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
 
 
         var getMachine = ObjectId.isValid(valid.machineId) ? this.machineManager.getSingleByIdOrDefault(new ObjectId(valid.machineId)) : Promise.resolve(null);
-        var getProductionOrder = ObjectId.isValid(valid.productionOrderId) ? this.productionOrderManager.getSingleByIdOrDefault(valid.productionOrderId) : Promise.resolve(null);
+        var getProductionOrder = ObjectId.isValid(valid.productionOrderId) ? this.productionOrderManager.getSingleByIdOrDefault(new ObjectId(valid.productionOrderId)) : Promise.resolve(null);
 
         return Promise.all([getMonitoringSpecificationMachinePromise, getMachine, getProductionOrder])
             .then(results => {
@@ -107,7 +107,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                 // else if (!valid.machine._id)
                 //     errors["machine"] = i18n.__("MonitoringSpecificationMachine.machine.name.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.machine.name._:Machine")); //"machine tidak boleh kosong";
                 if (!_productionOrder)
-                    errors["productionOrder"] = i18n.__("MonitoringSpecificationMachine.productionOrder.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.productionOrder._:Production Order Number")); //"ProductionOrder tidak boleh kosong";
+                    errors["productionOrder"] = i18n.__("MonitoringSpecificationMachine.productionOrder.orderNo.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.productionOrder.orderNo_:Production Order Number")); //"ProductionOrder tidak boleh kosong";
 
                 if (!valid.cartNumber || valid.cartNumber == '')
                     errors["cartNumber"] = i18n.__("MonitoringSpecificationMachine.cartNumber.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.cartNumber._:Cart Number")); //"Nomor Kereta tidak boleh kosong";
@@ -116,16 +116,36 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                 if (valid.items) {
                     var itemErrors = [];
                     for (var item of valid.items) {
+                        var itemError = {};
                         if (!item.satuan || item.satuan == "") {
-                            errors["satuan"] = i18n.__("MonitoringSpecificationMachine.satuan.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.satuan._:Satuan")); //"Satuan tidak boleh kosong";
+                            itemError["satuan"] = i18n.__("MonitoringSpecificationMachine.items.satuan.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.satuan._:Satuan")); //"Satuan tidak boleh kosong";
                         }
-                        var itemError = {}
+                        if (!item.satuan || item.satuan == "") {
+                            itemError["satuan"] = i18n.__("MonitoringSpecificationMachine.items.satuan.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.satuan._:Satuan")); //"Satuan tidak boleh kosong";
+                        }
+
                         if (item.dataType == "range (use '-' as delimiter)") {
                             var range = item.defaultValue.split("-");
                             if (item.value < parseInt(range[0]) || item.value > parseInt(range[1])) {
                                 itemError["value"] = i18n.__("MonitoringSpecificationMachine.items.value.isIncorrect:%s range is incorrect", i18n.__("MonitoringSpecificationMachine.items.value._:value")); //"range incorrect";                       
                             }
                         }
+
+                        if (item.dataType == "string") {
+
+                            if (!item.value || item.value == "") {
+                                itemError["value"] = i18n.__("MonitoringSpecificationMachine.items.value.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.value._:value")); //"is required";                       
+                            }
+                        }
+
+                        if (item.dataType == "numeric") {
+
+                            if (!item.value || item.value == "" || item.value == 0) {
+                                itemError["value"] = i18n.__("MonitoringSpecificationMachine.items.value.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.value._:value")); //"is required";                       
+                            }
+                        }
+
+
                         itemErrors.push(itemError);
 
                     }
@@ -168,6 +188,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
         var _defaultFilter = {
             _deleted: false
         }, machineFilter = {},
+            productionOrderFilter = {},
             monitoringSpecificationMachineFilter = {},
             dateFromFilter = {},
             dateToFilter = {},
@@ -182,6 +203,11 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
             machineFilter = { 'machine._id': machineId };
         }
 
+        if (info.productionOrderId && info.productionOrderId != '') {
+            var productionOrderId = ObjectId.isValid(info.productionOrderId) ? new ObjectId(info.productionOrderId) : {};
+            productionOrderFilter = { 'productionOrder._id': productionOrderId };
+        }
+
         var filterDate = {
             "date": {
                 $gte: new Date(dateFrom),
@@ -189,7 +215,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
             }
         };
 
-        query = { '$and': [_defaultFilter, machineFilter, filterDate] };
+        query = { '$and': [_defaultFilter, machineFilter,productionOrderFilter, filterDate] };
 
         return this._createIndexes()
             .then((createIndexResults) => {

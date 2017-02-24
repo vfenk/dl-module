@@ -21,7 +21,7 @@ class MonitoringSpecificationMachineDataUtil {
                         indicator: machine.indicator,
                         dataType: machine.dataType,
                         defaultValue: machine.defaultValue,
-                        value: machine.dataType == "range (use '-' as delimiter)" ? 5 : "",
+                        value: machine.dataType == "range (use '-' as delimiter)" ? 5 : "a",
                         satuan:"test satuan",
 
                     }
