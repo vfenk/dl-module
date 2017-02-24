@@ -75,7 +75,7 @@ module.exports = class MonitoringEventManager extends BaseManager {
         });
 
         var getMachine = ObjectId.isValid(valid.machineId) ? this.machineManager.getSingleByIdOrDefault(new ObjectId(valid.machineId)) : Promise.resolve(null);
-        var getProductionOrder = (valid.productionOrder && valid.productionOrder.orderNo) ? this.productionOrderManager.getSingleProductionOrder(valid.productionOrder.orderNo) : Promise.resolve(null);
+        var getProductionOrder = ObjectId.isValid(valid.productionOrderId) ? this.productionOrderManager.getSingleByIdOrDefault(valid.productionOrderId) : Promise.resolve(null);
         var getProductionOrderDetail = (valid.selectedProductionOrderDetail && valid.selectedProductionOrderDetail.code) ? this.productionOrderManager.getSingleProductionOrderDetail(valid.selectedProductionOrderDetail.code) : Promise.resolve(null);
 
         return Promise.all([getMonitoringEventPromise, getMachine, getProductionOrder, getProductionOrderDetail])
@@ -110,10 +110,10 @@ module.exports = class MonitoringEventManager extends BaseManager {
                     }
                 }
 
-                if (!valid.timeInMillisStart || valid.timeInMillisStart === 0)
+                if (valid.timeInMillisStart === undefined)
                     errors["timeInMillisStart"] = i18n.__("MonitoringEvent.timeInMillisStart.isRequired:%s is required", i18n.__("MonitoringEvent.timeInMillisStart._:Time Start")); //"Time Mulai tidak boleh kosong";
 
-                if (!valid.timeInMillisEnd || valid.timeInMillisEnd === 0)
+                if (valid.timeInMillisEnd === undefined)
                     errors["timeInMillisEnd"] = i18n.__("MonitoringEvent.timeInMillisEnd.isRequired:%s is required", i18n.__("MonitoringEvent.timeInMillisEnd._:Time End")); //"Time Mulai tidak boleh kosong";
 
                 if (valid.dateStart && valid.dateStart != '' && valid.dateEnd && valid.dateEnd != '' && valid.dateStart === valid.dateEnd){
@@ -156,6 +156,7 @@ module.exports = class MonitoringEventManager extends BaseManager {
                 }
 
                 if (_productionOrder){
+                    valid.productionOrderId = _productionOrder._id;
                     valid.productionOrder = _productionOrder;
                 }
 
