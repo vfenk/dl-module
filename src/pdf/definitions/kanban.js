@@ -153,7 +153,7 @@ module.exports = function (kanban) {
     }
 
     function getStepIndicatorCell(name, value, uom){
-        var valueInUom = uom ? value + " " + uom.unit : value;
+        var valueInUom = uom && uom.unit ? value + " " + uom.unit : value;
         return {
             width:'100%',
             columns: [{
