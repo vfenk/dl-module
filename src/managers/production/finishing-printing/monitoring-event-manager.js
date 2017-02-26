@@ -148,15 +148,15 @@ module.exports = class MonitoringEventManager extends BaseManager {
                 if (valid.dateStart)
                     valid.dateStart = new Date(valid.dateStart);
                 
-                if (valid.dateEnd)
+                if (valid.dateEnd){
                     valid.dateEnd = new Date(valid.dateEnd);
+                    if (!valid.timeInMillisEnd)
+                        valid.timeInMillisEnd = valid.timeInMillisStart;
+                }
                 else{
                     valid.dateEnd = new Date(valid.dateStart);
                     valid.timeInMillisEnd = valid.timeInMillisStart;
                 }
-
-                 if (!valid.timeInMillisEnd)
-                    valid.timeInMillisEnd = valid.timeInMillisStart;
 
                 if (_machine){
                     valid.machineId = _machine._id;
