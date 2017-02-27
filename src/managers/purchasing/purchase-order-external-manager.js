@@ -100,11 +100,25 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     _afterInsert(id) {
         return this.getSingleById(id)
             .then((purchaseOrderExternal) => {
-                var jobsUpdatePO = purchaseOrderExternal.items.map((purchaseOrder) => {
-                    purchaseOrder.isPosted = true;
-                    purchaseOrder.status = poStatusEnum.PROCESSING;
-                    return this.purchaseOrderManager.update(purchaseOrder)
-                        .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                var jobsUpdatePO = purchaseOrderExternal.items.map((poeItem) => {
+                    return this.purchaseOrderManager.getSingleByIdOrDefault(poeItem._id)
+                        .then((purchaseOrder) => {
+                            purchaseOrder.isPosted = true;
+                            purchaseOrder.status = poStatusEnum.PROCESSING;
+
+                            for (var item of poeItem.items) {
+                                var poItem = purchaseOrder.items.find((_poItem) => _poItem.product._id.toString() === item.product._id.toString());
+                                if (poItem) {
+                                    poItem.priceBeforeTax = item.priceBeforeTax;
+                                    poItem.dealQuantity = item.dealQuantity;
+                                    poItem.dealUom = item.dealUom;
+                                    poItem.conversion = item.conversion;
+                                }
+                            }
+
+                            return this.purchaseOrderManager.update(purchaseOrder)
+                                .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                        })
                 })
                 return Promise.all(jobsUpdatePO)
                     .then((purchaseOrders) => {
@@ -208,6 +222,12 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                             }
                                             purchaseOrder.isPosted = false;
                                             purchaseOrder.status = poStatusEnum.CREATED;
+                                            for (var poItem of purchaseOrder.items) {
+                                                poItem.priceBeforeTax = 0;
+                                                poItem.dealQuantity = 0;
+                                                poItem.dealUom = {};
+                                                poItem.conversion = 1;
+                                            }
                                             return this.purchaseOrderManager.update(purchaseOrder)
                                                 .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
                                         })
