@@ -9,6 +9,7 @@ var DLModels = require('dl-models');
 var map = DLModels.map;
 var PurchaseOrderExternal = DLModels.purchasing.PurchaseOrderExternal;
 var PurchaseOrder = DLModels.purchasing.PurchaseOrder;
+var uom = DLModels.master.Uom;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var PurchaseRequestManager = require('./purchase-request-manager');
 var CurrencyManager = require('../master/currency-manager');
@@ -225,7 +226,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                             for (var poItem of purchaseOrder.items) {
                                                 poItem.priceBeforeTax = 0;
                                                 poItem.dealQuantity = 0;
-                                                poItem.dealUom = {};
+                                                poItem.dealUom = new uom();
                                                 poItem.conversion = 1;
                                             }
                                             return this.purchaseOrderManager.update(purchaseOrder)
