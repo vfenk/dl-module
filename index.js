@@ -32,7 +32,8 @@ module.exports = {
             MaterialConstructionManager: require('./src/managers/master/material-construction-manager'),
             FinishTypeManager: require('./src/managers/master/finish-type-manager'),
             StandardTestManager: require('./src/managers/master/standard-test-manager'),
-            YarnMaterialManager: require('./src/managers/master/yarn-material-manager')
+            YarnMaterialManager: require('./src/managers/master/yarn-material-manager'),
+            ComodityManager: require('./src/managers/master/comodity-manager')
         },
         purchasing: {
             PurchaseOrderManager: require('./src/managers/purchasing/purchase-order-manager'),
@@ -97,7 +98,8 @@ module.exports = {
                 yarnMaterial: require('./test/data-util/master/yarn-material-data-util'),
                 finishType: require('./test/data-util/master/finish-type-data-util'),
                 standardTest: require('./test/data-util/master/standard-test-data-util'),
-                colorType: require('./test/data-util/master/color-type-data-util')
+                colorType: require('./test/data-util/master/color-type-data-util'),
+                comodity: require('./test/data-util/master/comodity-data-util')
             },
             purchasing: {
                 purchaseRequest: require("./test/data-util/purchasing/purchase-request-data-util")
