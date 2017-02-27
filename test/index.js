@@ -54,6 +54,7 @@ describe('#dl-module', function (done) {
     test('@MASTER/YARN-MATERIAL', './master/yarn-material');
     test('@MASTER/STANDARD-TEST', './master/standard-test');
     test('@MASTER/FINISH-TYPE', './master/finish-type');
+    test('@MASTER/COMODITY', './master/comodity');
 
     //Purchasing 
     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
