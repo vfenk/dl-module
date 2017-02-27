@@ -173,7 +173,7 @@ module.exports = function (kanban) {
 
     var table = [{
         table: {
-            widths: ['2%', '4%', '4%', '25%', '4%', '4%', '*'],
+            widths: ['3%', '6%', '6%', '15%', '6%', '6%', '*'],
             headerRows: 1,
             body: [].concat([thead], tbody)
         }
@@ -273,8 +273,8 @@ module.exports = function (kanban) {
     var pageBreak = [{text:'', pageBreak: 'after'}];	
 
     var kanbanPDFDefinition = {
-            pageSize: 'A5',
-            pageOrientation: 'landscape',
+            pageSize: 'A4',
+            pageOrientation: 'portrait',
             pageMargins: 20,
             content: [].concat(header, subheader, subheader2, table, pageBreak, table2),
             styles: {
