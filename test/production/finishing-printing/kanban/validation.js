@@ -30,6 +30,7 @@ it('#01. should error when create with empty data ', function (done) {
                 e.errors.should.have.property('productionOrder');
                 e.errors.should.have.property('selectedProductionOrderDetail');
                 e.errors.should.have.property('cart');
+                e.errors.should.have.property('grade');
                 e.errors.should.have.property('instruction');
                 done();
             }
