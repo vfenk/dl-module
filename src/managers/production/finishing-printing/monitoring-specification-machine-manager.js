@@ -118,9 +118,6 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
                     var itemErrors = [];
                     for (var item of valid.items) {
                         var itemError = {};
-                        if (!item.satuan || item.satuan == "" ) {
-                            itemError["satuan"] = i18n.__("MonitoringSpecificationMachine.items.satuan.isRequired:%s is required", i18n.__("MonitoringSpecificationMachine.items.satuan._:Satuan")); //"Satuan tidak boleh kosong";
-                        }
 
                         if (item.dataType == "range (use '-' as delimiter)") {
                             var range = item.defaultValue.split("-");
