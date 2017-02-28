@@ -21,20 +21,45 @@ class MachineTypeDataUtil {
                 indicator: `Tekanan Press Mangle[${code}]`,
                 dataType: "numeric",
                 defaultValue: 10,
+                satuan: "a",
             },
                 {
                     indicator: `Tekanan Press Mangl[${code}]`,
                     dataType: "string",
                     defaultValue: "10",
+                    satuan: "a",
                 }, {
                     indicator: `range`,
                     dataType: "range (use '-' as delimiter)",
                     defaultValue: "1-10",
-                },{
+                    satuan: "a",
+                }, {
                     indicator: `option`,
                     dataType: "option (use ',' as delimiter)",
                     defaultValue: "a,b",
+                    satuan: "a",
                 }];
+
+        return Promise.resolve(data);
+    }
+
+    getNewDataIndicators() {
+        var Model = require("dl-models").master.MachineType;
+        var data = new Model();
+
+        var code = generateCode();
+
+
+        data.code = code;
+        data.name = `Ordername [${code}]`;
+        data.description = `decription [${code}]`;
+        data.indicators =
+            [{
+                indicator: "",
+                dataType: "",
+                defaultValue: "",
+                satuan: "",
+            }];
 
         return Promise.resolve(data);
     }

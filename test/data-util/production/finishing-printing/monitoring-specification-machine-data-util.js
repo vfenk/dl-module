@@ -21,8 +21,8 @@ class MonitoringSpecificationMachineDataUtil {
                         indicator: machine.indicator ? machine.indicator : "",
                         dataType: machine.dataType ? machine.dataType : "",
                         defaultValue: machine.defaultValue ? machine.defaultValue : "",
+                        satuan: machine.satuan ? machine.satuan : "",
                         value: machine.dataType == "range (use '-' as delimiter)" ? 5 : "a",
-                        satuan: "test satuan",
 
                     }
                     itemsArr.push(item);
@@ -58,9 +58,8 @@ class MonitoringSpecificationMachineDataUtil {
                         indicator: machine.indicator ? machine.indicator : "",
                         dataType: machine.dataType ? machine.dataType : "",
                         defaultValue: machine.defaultValue ? machine.defaultValue : "",
+                        satuan: machine.satuan ? machine.satuan : "",
                         value: "",
-                        satuan: "",
-
                     }
                     itemsArr.push(item);
                 }
