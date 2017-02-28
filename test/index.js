@@ -68,7 +68,7 @@ describe('#dl-module', function (done) {
     test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
     //Production
 
-    //test('@PRODUCTION/DAILY OPERATION', './production/finishing-printing/daily-operation');
+    test('@PRODUCTION/DAILY OPERATION', './production/finishing-printing/daily-operation');
     test('@production/finishing-printing/monitoring-specification-machine', './production/finishing-printing/monitoring-specification-machine');
     test('@PRODUCTION/FINISHING-PRINTING/KANBAN', './production/finishing-printing/kanban');
     test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
