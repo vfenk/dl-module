@@ -22,7 +22,7 @@ class MonitoringSpecificationMachineDataUtil {
                         dataType: machine.dataType ? machine.dataType : "",
                         defaultValue: machine.defaultValue ? machine.defaultValue : "",
                         satuan: machine.satuan ? machine.satuan : "",
-                        value: machine.dataType == "range (use '-' as delimiter)" ? 5 : "a",
+                        value: machine.dataType == "input skala angka" ? 5 : "a",
 
                     }
                     itemsArr.push(item);
