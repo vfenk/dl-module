@@ -19,23 +19,23 @@ class MachineTypeDataUtil {
         data.indicators =
             [{
                 indicator: `Tekanan Press Mangle[${code}]`,
-                dataType: "numeric",
+                dataType: "input angka",
                 defaultValue: 10,
                 satuan: "a",
             },
                 {
                     indicator: `Tekanan Press Mangl[${code}]`,
-                    dataType: "string",
+                    dataType: "input teks",
                     defaultValue: "10",
                     satuan: "a",
                 }, {
                     indicator: `range`,
-                    dataType: "range (use '-' as delimiter)",
+                    dataType: "input skala angka",
                     defaultValue: "1-10",
                     satuan: "a",
                 }, {
                     indicator: `option`,
-                    dataType: "option (use ',' as delimiter)",
+                    dataType: "input pilihan",
                     defaultValue: "a,b",
                     satuan: "a",
                 }];
