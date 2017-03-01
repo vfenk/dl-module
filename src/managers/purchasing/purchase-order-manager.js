@@ -241,15 +241,16 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                 return this.purchaseRequestManager.getSingleById(purchaseOrder.purchaseRequestId)
                     .then((purchaseRequest) => {
                         var purchaseOrderError = {};
-                        if (purchaseRequest.isUsed) {
-                            purchaseOrderError["purchaseRequestId"] = i18n.__("purchaseRequest.isUsed:%s is already used", i18n.__("purchaseRequest.isUsed._:Used"));
-                        }
-                        if (purchaseRequest.purchaseOrderIds.length > 1) {
+
+                        if (purchaseRequest.purchaseOrderIds.length > 0) {
                             var poId = purchaseRequest.purchaseOrderIds.find((_poId) => _poId.toString() === id.toString());
                             if (poId) {
                                 purchaseOrderError["purchaseRequestId"] = i18n.__("purchaseRequest.purchaseOrderIds:%s is already used", i18n.__("purchaseRequest.purchaseOrderIds._:Used"));
                             }
+                        } else if (purchaseRequest.isUsed) {
+                            purchaseOrderError["purchaseRequestId"] = i18n.__("purchaseRequest.isUsed:%s is already used", i18n.__("purchaseRequest.isUsed._:Used"));
                         }
+
                         if (Object.getOwnPropertyNames(purchaseOrderError).length > 0) {
                             var ValidationError = require("module-toolkit").ValidationError;
                             return Promise.reject(new ValidationError("data does not pass validation", purchaseOrderError));
@@ -328,51 +329,37 @@ module.exports = class PurchaseOrderManager extends BaseManager {
             });
     }
 
-    split(purchaseOrder) {
+    split(splittedPurchaseOrder) {
         return new Promise((resolve, reject) => {
-            this.getSingleById(purchaseOrder.sourcePurchaseOrderId)
-                .then(_purchaseOrder => {
-                    delete purchaseOrder._id;
-                    delete purchaseOrder.no;
-                    purchaseOrder.sourcePurchaseOrder = _purchaseOrder;
-                    purchaseOrder.sourcePurchaseOrderId = _purchaseOrder._id;
-                    this._validate(purchaseOrder)
-                        .then(validPurchaseOrder => {
-                            this.create(validPurchaseOrder)
-                                .then(id => {
-                                    this.getSingleById(validPurchaseOrder.sourcePurchaseOrder._id)
-                                        .then(sourcePo => {
-                                            for (var item of validPurchaseOrder.items) {
-                                                for (var sourceItem of sourcePo.items) {
-                                                    if (item.product.code === sourceItem.product.code) {
-                                                        sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            sourcePo.items = sourcePo.items.filter((item, index) => {
-                                                return item.defaultQuantity > 0;
-                                            })
-
-                                            this.update(sourcePo)
-                                                .then(results => {
-                                                    resolve(id);
-                                                })
-                                                .catch(e => {
-                                                    reject(e);
-                                                });
-                                        })
-                                        .catch(e => {
-                                            reject(e);
-                                        });
+            this.getSingleById(splittedPurchaseOrder.sourcePurchaseOrderId)
+                .then(sourcePurchaseOrder => {
+                    delete splittedPurchaseOrder._id;
+                    delete splittedPurchaseOrder.no;
+                    splittedPurchaseOrder.sourcePurchaseOrder = sourcePurchaseOrder;
+                    splittedPurchaseOrder.sourcePurchaseOrderId = sourcePurchaseOrder._id;
+                    this.create(splittedPurchaseOrder)
+                        .then(id => {
+                            for (var item of splittedPurchaseOrder.items) {
+                                var sourceItem = sourcePurchaseOrder.items.find((_sourceItem) => item.product._id.toString() === _sourceItem.product._id.toString());
+                                if (sourceItem) {
+                                    sourceItem.defaultQuantity = sourceItem.defaultQuantity - item.defaultQuantity;
+                                }
+                            }
+                            sourcePurchaseOrder.items = sourcePurchaseOrder.items.filter((item, index) => {
+                                return item.defaultQuantity > 0;
+                            })
+                            this.update(sourcePurchaseOrder)
+                                .then(results => {
+                                    resolve(id);
                                 })
                                 .catch(e => {
                                     reject(e);
                                 });
+
                         })
                         .catch(e => {
                             reject(e);
-                        })
+                        });
                 })
                 .catch(e => {
                     reject(e);
