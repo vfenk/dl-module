@@ -263,13 +263,15 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                         return Promise.resolve(purchaseRequest)
                     })
                     .then((purchaseRequest) => {
+                        purchaseRequest.isUsed = true;
+                        purchaseRequest.status = prStatusEnum.PROCESSING;
                         purchaseRequest.purchaseOrderIds = purchaseRequest.purchaseOrderIds || [];
                         purchaseRequest.purchaseOrderIds.push(id);
                         return this.purchaseRequestManager.collection
                             .updateOne({
                                 _id: purchaseRequest._id
                             }, {
-                                $set: { "isUsed": true, "status": prStatusEnum.PROCESSING, "purchaseOrderIds": purchaseRequest.purchaseOrderIds }
+                                $set: purchaseRequest
                             })
                             .then((result) => { return this.purchaseRequestManager.getSingleById(purchaseRequest._id) })
                     })
@@ -310,11 +312,15 @@ module.exports = class PurchaseOrderManager extends BaseManager {
                                             purchaseRequest.isUsed = false;
                                             purchaseRequest.status = prStatusEnum.POSTED;
                                         }
+                                        if (!purchaseRequest.stamp) {
+                                            purchaseRequest = new PurchaseRequest(purchaseRequest);
+                                        }
+                                        purchaseRequest.stamp(this.user.username, 'manager');
                                         return this.purchaseRequestManager.collection
                                             .updateOne({
                                                 _id: purchaseRequest._id
                                             }, {
-                                                $set: { "isUsed": purchaseRequest.isUsed, "status": purchaseRequest.status, "purchaseOrderIds": purchaseRequest.purchaseOrderIds }
+                                                $set: purchaseRequest
                                             })
                                             .then((result) => Promise.resolve(purchaseOrderId))
                                     })

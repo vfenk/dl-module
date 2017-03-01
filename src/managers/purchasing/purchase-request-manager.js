@@ -254,13 +254,16 @@ module.exports = class PurchaseRequestManager extends BaseManager {
             purchaseRequest = new PurchaseRequest(purchaseRequest);
         }
         purchaseRequest.stamp(this.user.username, 'manager');
+
         return Promise.resolve(purchaseRequest)
             .then((purchaseRequest) => {
+                purchaseRequest.isPosted = true;
+                purchaseRequest.status = prStatusEnum.POSTED;
                 return this.collection
                     .updateOne({
                         _id: purchaseRequest._id
                     }, {
-                        $set: { "isPosted": true, "status": prStatusEnum.POSTED }
+                        $set: purchaseRequest
                     })
                     .then((result) => Promise.resolve(purchaseRequest._id));
             })
