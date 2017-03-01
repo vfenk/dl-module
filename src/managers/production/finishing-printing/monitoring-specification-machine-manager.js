@@ -240,7 +240,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
             item["Nomor Kereta"] = monitoringSpecificationMachine.cartNumber;
             //dinamic items
             for (var indicator of monitoringSpecificationMachine.items) {
-                item[indicator.indicator + " " +"("+indicator.satuan+")"] = indicator ? indicator.value : '';
+                item[indicator.indicator + " " +"("+indicator.uom+")"] = indicator ? indicator.value : '';
                 xls.options[indicator.indicator] = "string";
             }
 
