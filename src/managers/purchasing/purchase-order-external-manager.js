@@ -9,6 +9,7 @@ var DLModels = require('dl-models');
 var map = DLModels.map;
 var PurchaseOrderExternal = DLModels.purchasing.PurchaseOrderExternal;
 var PurchaseOrder = DLModels.purchasing.PurchaseOrder;
+var uom = DLModels.master.Uom;
 var PurchaseOrderManager = require('./purchase-order-manager');
 var PurchaseRequestManager = require('./purchase-request-manager');
 var CurrencyManager = require('../master/currency-manager');
@@ -100,11 +101,25 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
     _afterInsert(id) {
         return this.getSingleById(id)
             .then((purchaseOrderExternal) => {
-                var jobsUpdatePO = purchaseOrderExternal.items.map((purchaseOrder) => {
-                    purchaseOrder.isPosted = true;
-                    purchaseOrder.status = poStatusEnum.PROCESSING;
-                    return this.purchaseOrderManager.update(purchaseOrder)
-                        .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                var jobsUpdatePO = purchaseOrderExternal.items.map((poeItem) => {
+                    return this.purchaseOrderManager.getSingleByIdOrDefault(poeItem._id)
+                        .then((purchaseOrder) => {
+                            purchaseOrder.isPosted = true;
+                            purchaseOrder.status = poStatusEnum.PROCESSING;
+
+                            for (var item of poeItem.items) {
+                                var poItem = purchaseOrder.items.find((_poItem) => _poItem.product._id.toString() === item.product._id.toString());
+                                if (poItem) {
+                                    poItem.priceBeforeTax = item.priceBeforeTax;
+                                    poItem.dealQuantity = item.dealQuantity;
+                                    poItem.dealUom = item.dealUom;
+                                    poItem.conversion = item.conversion;
+                                }
+                            }
+
+                            return this.purchaseOrderManager.update(purchaseOrder)
+                                .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
+                        })
                 })
                 return Promise.all(jobsUpdatePO)
                     .then((purchaseOrders) => {
@@ -208,6 +223,12 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                             }
                                             purchaseOrder.isPosted = false;
                                             purchaseOrder.status = poStatusEnum.CREATED;
+                                            for (var poItem of purchaseOrder.items) {
+                                                poItem.priceBeforeTax = 0;
+                                                poItem.dealQuantity = 0;
+                                                poItem.dealUom = new uom();
+                                                poItem.conversion = 1;
+                                            }
                                             return this.purchaseOrderManager.update(purchaseOrder)
                                                 .then((id) => { return this.purchaseOrderManager.getSingleByIdOrDefault(id) });
                                         })
@@ -384,7 +405,7 @@ module.exports = class PurchaseOrderExternalManager extends BaseManager {
                                                 if (!poItem.priceBeforeTax || poItem.priceBeforeTax === 0) {
                                                     poItemHasError = true;
                                                     poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isRequired:%s is required", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
-                                                } else if (product) {
+                                                } else if (!ObjectId.isValid(valid._id) && product) {
                                                     if (poItem.priceBeforeTax > product.price) {
                                                         poItemHasError = true;
                                                         poItemError["priceBeforeTax"] = i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax.isGreater:%s must not be greater than default price", i18n.__("PurchaseOrderExternal.items.items.priceBeforeTax._:Price Per Deal Unit")); //"Harga tidak boleh kosong";
