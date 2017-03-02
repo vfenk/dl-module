@@ -197,9 +197,8 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
             machineFilter = { 'machine._id': machineId };
         }
 
-        if (info.productionOrderId && info.productionOrderId != '') {
-            var productionOrderId = ObjectId.isValid(info.productionOrderId) ? new ObjectId(info.productionOrderId) : {};
-            productionOrderFilter = { 'productionOrder._id': productionOrderId };
+        if (info.productionOrderNumber && info.productionOrderNumber != ''){
+            productionOrderFilter = {'productionOrder.orderNo': info.productionOrderNumber};
         }
 
         var filterDate = {
