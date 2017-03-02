@@ -21,6 +21,7 @@ class KanbanDataUtil {
                             cart: { code : "cartUnitTestCode", cartNumber : "unitTestCartNumber", qty : 1, pcs : 1},
                             instructionId : _instruction._id,
                             instruction : _instruction,
+                            grade : 'unitTestGrade'
                         };
 
                         return data;
