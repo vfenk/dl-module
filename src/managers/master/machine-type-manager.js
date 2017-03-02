@@ -115,11 +115,6 @@ module.exports = class MachineTypeManager extends BaseManager {
                                 itemError["indicator"] = i18n.__("MachineType.indicators.indicator.isRequired:%s is required", i18n.__("MachineType.indicators.indicator._:indicator")); //"indicator tidak boleh kosong";
                             }
 
-                            if (!indicator.uom || indicator.uom == "") {
-                                itemError["uom"] = i18n.__("MachineType.indicators.uom.isRequired:%s is required", i18n.__("MachineType.indicators.uom._:satuan")); //"satuan tidak boleh kosong";
-                            }
-
-                            //data type validation: option and range  
                             if (indicator.dataType) {
                                 if (indicator.dataType == "input pilihan") {
                                     if (indicator.defaultValue) {
