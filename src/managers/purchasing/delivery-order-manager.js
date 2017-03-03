@@ -941,4 +941,18 @@ module.exports = class DeliveryOrderManager extends BaseManager {
                 });
             });
     }
+
+    updateCollectionDeliveryOrder(deliveryOrder) {
+        if (!deliveryOrder.stamp) {
+            deliveryOrder = new DeliveryOrder(deliveryOrder);
+        }
+        deliveryOrder.stamp(this.user.username, 'manager');
+        return this.collection
+            .updateOne({
+                _id: deliveryOrder._id
+            }, {
+                $set: deliveryOrder
+            })
+            .then((result) => Promise.resolve(deliveryOrder._id));
+    }
 };
