@@ -23,7 +23,7 @@ module.exports = class DimBuyerEtlManager extends BaseManager {
         var startedDate = new Date();
         this.migrationLog.insert({
             description: "Dim Buyer from MongoDB to Azure DWH",
-            start: startedDate,
+            start: startedDate
         })
         return this.getTimeStamp()
             .then((time) => this.extract(time))
@@ -76,7 +76,6 @@ module.exports = class DimBuyerEtlManager extends BaseManager {
 
     transform(data) {
         var result = data.map((item) => {
-
             return {
                 buyerAddress: item.address ? `'${item.address.replace(/'/g, '"')}'` : null,
                 buyerCity: item.city ? `'${item.city.replace(/'/g, '"')}'` : null,
@@ -124,7 +123,7 @@ module.exports = class DimBuyerEtlManager extends BaseManager {
                             if (item) {
                                 var queryString = `INSERT INTO [DL_Dim_Buyer_Temp]([Nama Buyer], [Kode Buyer], [Jenis Buyer], [Kontak Buyer], [NPWP Buyer], [Alamat Buyer], [Negara Buyer], [Kota Buyer]) VALUES(${item.buyerName}, ${item.buyerCode}, ${item.buyerType}, ${item.buyerContact}, ${item.buyerNPWP}, ${item.buyerAddress}, ${item.buyerCountry}, ${item.buyerCity}) ;\n`;
                                 sqlQuery = sqlQuery.concat(queryString);
-                                if (count % 1000 == 0) {
+                                if (count % 1000 === 0) {
                                     command.push(this.insertQuery(request, sqlQuery));
                                     sqlQuery = "";
                                 }
@@ -140,16 +139,16 @@ module.exports = class DimBuyerEtlManager extends BaseManager {
 
                         this.sql.multiple = true;
                         
-                        var fs = require("fs");
-                        var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
+                        // var fs = require("fs");
+                        // var path = "C:\\Users\\leslie.aula\\Desktop\\tttt.txt";
 
-                        fs.writeFile(path, sqlQuery, function (error) {
-                            if (error) {
-                                console.log("write error:  " + error.message);
-                            } else {
-                                console.log("Successful Write to " + path);
-                            }
-                        });
+                        // fs.writeFile(path, sqlQuery, function (error) {
+                        //     if (error) {
+                        //         console.log("write error:  " + error.message);
+                        //     } else {
+                        //         console.log("Successful Write to " + path);
+                        //     }
+                        // });
 
 
                         return Promise.all(command)
