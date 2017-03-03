@@ -89,9 +89,9 @@ module.exports = class FactSalesContractEtlManager extends BaseManager {
 
     transform(data) {
         var result = data.map((item) => {
-            var orderUom = item.uom.unit;
-            var orderQuantity = item.orderQuantity;
-            var material = item.material.name ? item.material.name.replace(/'/g, '"') : null;
+            var orderUom = item.uom ? item.uom.unit : null;
+            var orderQuantity = item.orderQuantity ? item.orderQuantity : null;
+            var material = item.material ? item.material.name.replace(/'/g, '"') : null;
             var materialConstruction = item.materialConstruction ? item.materialConstruction.name.replace(/'/g, '"') : null;
             var yarnMaterialNo = item.yarnMaterial ? item.yarnMaterial.name.replace(/'/g, '"') : null;
             var materialWidth = item.materialWidth ? item.materialWidth : null;
@@ -99,21 +99,21 @@ module.exports = class FactSalesContractEtlManager extends BaseManager {
             return {
                 salesContractNo: item.salesContractNo ? `'${item.salesContractNo}'` : null,
                 productionOrderNo: item.orderNo ? `'${item.orderNo}'` : null,
-                orderType: item.orderType.name ? `'${item.orderType.name}'` : null,
-                processType: item.processType.name ? `'${item.processType.name.replace(/'/g, '"')}'` : null,
-                material: item.material.name ? `'${item.material.name.replace(/'/g, '"')}'` : null,
+                orderType: item.orderType ? `'${item.orderType.name}'` : null,
+                processType: item.processType ? `'${item.processType.name.replace(/'/g, '"')}'` : null,
+                material: item.material ? `'${item.material.name.replace(/'/g, '"')}'` : null,
                 materialConstruction: item.materialConstruction ? `'${item.materialConstruction.name.replace(/'/g, '"')}'` : null,
                 yarnMaterialNo: item.yarnMaterial ? `'${item.yarnMaterial.name.replace(/'/g, '"')}'` : null,
                 materialWidth: item.materialWidth ? `'${item.materialWidth}'` : null,
                 orderQuantity: item.orderQuantity ? `${item.orderQuantity}` : null,
                 orderUom: item.uom ? `'${item.uom.unit.replace(/'/g, '"')}'` : null,
-                buyer: item.buyer.name ? `'${item.buyer.name.replace(/'/g, '"')}'` : null,
-                buyerType: item.buyer.type ? `'${item.buyer.type.replace(/'/g, '"')}'` : null,
+                buyer: item.buyer ? `'${item.buyer.name.replace(/'/g, '"')}'` : null,
+                buyerType: item.buyer ? `'${item.buyer.type.replace(/'/g, '"')}'` : null,
                 deliveryDate: item.deliveryDate ? `'${moment(item.deliveryDate).format("L")}'` : null,
                 createdDate: item._createdDate ? `'${moment(item._createdDate).format("L")}'` : null,
                 totalOrderConvertion: item.orderQuantity ? `${this.orderQuantityConvertion(orderUom, orderQuantity)}` : null,
                 construction: this.joinConstructionString(material, materialConstruction, yarnMaterialNo, materialWidth),
-                buyerCode: item.buyer.code ? `'${item.buyer.code}'` : null
+                buyerCode: item.buyer ? `'${item.buyer.code}'` : null
             }
         });
         return Promise.resolve([].concat.apply([], result));
