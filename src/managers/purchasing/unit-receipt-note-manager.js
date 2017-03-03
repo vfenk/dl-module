@@ -812,4 +812,19 @@ module.exports = class UnitReceiptNoteManager extends BaseManager {
                 });
             });
     }
+
+    updateCollectionUnitReceiptNote(unitReceiptNote) {
+        if (!unitReceiptNote.stamp) {
+            unitReceiptNote = new UnitReceiptNote(unitReceiptNote);
+        }
+
+        unitReceiptNote.stamp(this.user.username, 'manager');
+        return this.collection
+            .updateOne({
+                _id: unitReceiptNote._id
+            }, {
+                $set: unitReceiptNote
+            })
+            .then((result) => Promise.resolve(unitReceiptNote._id));
+    }
 };
