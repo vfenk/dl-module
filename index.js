@@ -63,7 +63,9 @@ module.exports = {
         },
         sales:{
             ProductionOrderManager: require('./src/managers/sales/production-order-manager'),
-            FinishingPrintingSalesContract: require('./test/data-util/sales/finishing-printing-sales-contract-manager')
+            FinishingPrintingSalesContract: require('./test/data-util/sales/finishing-printing-sales-contract-manager'),
+            SpinningSalesContract: require('./test/data-util/sales/spinning-sales-contract-manager'),
+            WeavingSalesContract: require('./test/data-util/sales/weaving-sales-contract-manager')
         }
 
     },
