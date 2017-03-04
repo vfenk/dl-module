@@ -55,6 +55,7 @@ describe('#dl-module', function (done) {
     test('@MASTER/STANDARD-TEST', './master/standard-test');
     test('@MASTER/FINISH-TYPE', './master/finish-type');
     test('@MASTER/COMODITY', './master/comodity');
+    test('@MASTER/QUALITY', './master/quality');
 
     //Purchasing 
     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
@@ -77,5 +78,8 @@ describe('#dl-module', function (done) {
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
     //Sales
-    test('@production/production-order', './sales/production-order');
+    test('@SALES/production-order', './sales/production-order');
+    test('@SALES/FINISHING PRINTING SALES CONTRACT', './sales/finishing-printing-sales-contract');
+    test('@SALES/SPINNING SALES CONTRACT', './sales/spinning-sales-contract');
+    test('@SALES/WEAVING SALES CONTRACT', './sales/weaving-sales-contract');
 });
