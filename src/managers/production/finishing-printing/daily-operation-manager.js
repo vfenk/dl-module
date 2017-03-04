@@ -80,7 +80,13 @@ module.exports = class DailyOperationManager extends BaseManager {
             var valid = dailyOperation;
             var dateNow = new Date();
             var dateNowString = moment(dateNow).format('YYYY-MM-DD');
-            var timeInMillisNow = dateNow.getTime() % 86400000;
+            var timeInMillisNow = (function(){
+                var setupMoment = moment();
+                setupMoment.set('year', 1970);
+                setupMoment.set('month', 0);
+                setupMoment.set('date', 1);  
+                return Number(setupMoment.format('x'));
+            })();
             var dateInput = new Date(valid.dateInput);
 
             //1. begin: Declare promises.
@@ -95,19 +101,19 @@ module.exports = class DailyOperationManager extends BaseManager {
                     if(!valid.kanbanId || valid.kanbanId.toString() === "")
                         errors["kanban"] = i18n.__("DailyOperation.kanban.isRequired:%s is required", i18n.__("DailyOperation.kanban._:Kanban")); //"kanban tidak ditemukan";
                     else if(!_kanban)
-                        errors["kanban"] = i18n.__("DailyOperation.kanban.isRequired:%s is required", i18n.__("DailyOperation.kanban._:Kanban")); //"kanban tidak ditemukan";
+                        errors["kanban"] = i18n.__("DailyOperation.kanban.isNotExists:%s is not exists", i18n.__("DailyOperation.kanban._:Kanban")); //"kanban tidak ditemukan";
 
                     if(!valid.machineId || valid.machineId.toString() === ""){
-                        errors["machine"] = i18n.__("DailyOperation.machine.isRequired:%s not required", i18n.__("DailyOperation.machine._:Machine")); //"Machine tidak ditemukan";
+                        errors["machine"] = i18n.__("DailyOperation.machine.isRequired:%s is required", i18n.__("DailyOperation.machine._:Machine")); //"Machine tidak ditemukan";
                     }else if(!_machine){
-                        errors["machine"] = i18n.__("DailyOperation.machine.isRequired:%s not required", i18n.__("DailyOperation.machine._:Machine")); //"Machine tidak ditemukan";
+                        errors["machine"] = i18n.__("DailyOperation.machine.isNotExists:%s is not exists", i18n.__("DailyOperation.machine._:Machine")); //"Machine tidak ditemukan";
                     }
 
                     if (!valid.dateInput || valid.dateInput == '')
                         errors["dateInput"] = i18n.__("DailyOperation.dateInput.isRequired:%s is required", i18n.__("DailyOperation.dateStart._:Date Input")); //"Tanggal Mulai tidak boleh kosong";
                     else if (dateInput > dateNow)
                         errors["dateInput"] = i18n.__("DailyOperation.dateInput.isGreater:%s is greater than today", i18n.__("DailyOperation.dateInput._:Date Input"));//"Tanggal Mulai tidak boleh lebih besar dari tanggal hari ini";
-                    else if (valid.dateStart === dateNowString && valid.timeInput > timeInMillisNow)
+                    else if (valid.dateInput === dateNowString && valid.timeInput > timeInMillisNow)
                         errors["timeInput"] = i18n.__("DailyOperation.timeInput.isGreater:%s is greater than today", i18n.__("DailyOperation.timeInput._:Time Input"));//"Time Mulai tidak boleh lebih besar dari time hari ini";
 
                     if (!valid.timeInput || valid.timeInput === 0)
@@ -149,28 +155,26 @@ module.exports = class DailyOperationManager extends BaseManager {
                             }
                         }
 
-                        if(!valid.goodOutput || valid.goodOutput === '')
+                        var badOutput = valid.badOutput && valid.badOutput !== '' ? valid.badOutput : 0;
+                        var goodOutput = valid.goodOutput && valid.goodOutput !== '' ? valid.goodOutput : 0; 
+
+                        if((!valid.goodOutput || valid.goodOutput === '') && (!valid.badOutput || valid.badOutput === '')){
                             errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isRequired:%s is required", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output tidak boleh kosong";
-                        else if(valid.input && valid.input != '' && valid.goodOutput && valid.goodOutput != ''){
-                            if(valid.goodOutput > valid.input){
+                            errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s is required", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai bad output tidak boleh kosong";
+                        }
+                        else if(valid.input && valid.input != ''){
+                            if(goodOutput > valid.input){
                                 errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isNotBeMore:%s should not be more than input value", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output tidak boleh lebih besar dari nilai input";
                             }
-                        }
-
-                        if(!valid.badOutput || valid.badOutput === '')
-                            errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s is required", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai bad output tidak boleh kosong";
-                        if(valid.input && valid.input != '' && valid.badOutput && valid.badOutput != ''){
-                            if(valid.badOutput > valid.input){
+                            if(badOutput > valid.input){
                                 errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s should not be more than input value", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai good output harus tidak boleh besar dari nilai input";
                             }
-                            if(valid.goodOutput && valid.goodOutput != ''){
-                                if((valid.goodOutput + valid.badOutput) > valid.input){
-                                    errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s plus Good Output should not be more than input value", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
-                                    errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isNotBeMore:%s plus bad Output should not be more than input value", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
-                                    errors["input"] = i18n.__("DailyOperation.input.isNotBeLess:%s should not be less then good output plus bad output", i18n.__("DailyOperation.kanban.partitions.input._:Input")); //"nilai input harus lebih besar dari good output + bad output";
-                                }
+                            if((goodOutput + badOutput) > valid.input){
+                                errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s plus Good Output should not be more than input value", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
+                                errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isNotBeMore:%s plus bad Output should not be more than input value", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
+                                errors["input"] = i18n.__("DailyOperation.input.isNotBeLess:%s should not be less then good output plus bad output", i18n.__("DailyOperation.kanban.partitions.input._:Input")); //"nilai input harus lebih besar dari good output + bad output";
                             }
-                        } 
+                        }
                     }else{
                         delete valid.goodOutput;
                         delete valid.timeOutput;
@@ -209,34 +213,104 @@ module.exports = class DailyOperationManager extends BaseManager {
             });
     }
 
-    getDailyOperationReport(sdate, edate, machine){
-        return new Promise((resolve, reject) => {
-            var date = {
-                "dateInput" : {
-                    "$gte" : (!query || !query.sdate ? (new Date("1900-01-01")) : (new Date(`${query.sdate} 00:00:00`))),
-                    "$lte" : (!query || !query.edate ? (new Date()) : (new Date(`${query.edate} 23:59:59`)))
-                },
-                "_deleted" : false
-            };
-            var machineQuery = {};
-            if(machine)
-            {
-                machineQuery = {
-                    "machineId" : new ObjectId(machine)
-                }
+    getDailyOperationReport(query){
+        var date = {
+            "dateInput" : {
+                "$gte" : (!query || !query.dateFrom ? (new Date("1900-01-01")) : (new Date(`${query.dateFrom} 00:00:00`))),
+                "$lte" : (!query || !query.dateTo ? (new Date()) : (new Date(`${query.dateTo} 23:59:59`)))
+            },
+            "_deleted" : false
+        };
+        var kanbanQuery = {};
+        if(query.kanban)
+        {
+            kanbanQuery = {
+                "kanbanId" : new ObjectId(query.kanban)
             }
-            var order = {
-                "dateInput" : -1
-            };
-            var Query = {"$and" : [date, machineQuery]};
+        }
+        var machineQuery = {};
+        if(query.machine)
+        {
+            machineQuery = {
+                "machineId" : new ObjectId(query.machine)
+            }
+        }
+        var order = {
+            "dateInput" : -1
+        };
+        var Query = {"$and" : [date, machineQuery, kanbanQuery]};
 
-            this.collection
-                .find(Query)
-                .sort(order)
-                .toArray(function(err, result) {
-                    resolve(result);
-                });
-        });
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return this.collection
+                    .where(Query)
+                    .order(order)
+                    .execute();
+            });
+    }
+
+    getXls(result, query){
+        var xls = {};
+        xls.data = [];
+        xls.options = [];
+        xls.name = '';
+
+        var index = 0;
+        var dateFormat = "DD/MM/YYYY";
+
+        for(var daily of result.data){
+            index++;
+            var item = {};
+            item["No"] = index;
+            item["No Order"] = daily.kanban.productionOrder ? daily.kanban.productionOrder.orderNo : '';
+            item["Mesin"] = daily.machine ? daily.machine.name : '';
+            item["Material"] = daily.kanban.productionOrder ? daily.kanban.productionOrder.material.name : '';
+            item["Warna"] = daily.kanban.selectedProductionOrderDetail ? daily.kanban.selectedProductionOrderDetail.colorType ? `${daily.kanban.selectedProductionOrderDetail.colorType.name} ${daily.kanban.selectedProductionOrderDetail.colorRequest}` : daily.kanban.selectedProductionOrderDetail.colorRequest : '';
+            item["Lebar Kain (inch)"] = daily.kanban.productionOrder ? daily.kanban.productionOrder.materialWidth : '';
+            item["No Kereta"] = daily.kanban ? daily.kanban.cart.cartNumber : '';
+            item["Jenis Proses"] = daily.kanban.productionOrder ? daily.kanban.productionOrder.processType.name : '';
+            item["Tgl Input"] = daily.dateInput ? moment(new Date(daily.dateInput)).format(dateFormat) : '';
+            item["Jam Input"] = daily.timeInput ? moment(daily.timeInput).format('HH:mm') : '';
+            item["input"] = daily.input ? daily.input : 0;
+            item["Tgl Output"] = daily.dateOutput ? moment(new Date(daily.dateOutput)).format(dateFormat) : '';
+            item["Jam Output"] = daily.timeOutput ? moment(daily.timeOutput).format('HH:mm') : '';
+            item["BQ"] = daily.goodOutput ? daily.goodOutput : 0;
+            item["BS"] = daily.badOutput ? daily.badOutput : 0;
+            item["Keterangan BQ"] = daily.badOutputDescription ? daily.badOutputDescription : '';
+            
+            xls.data.push(item);
+        }
+
+        xls.options["No"] = "number";
+        xls.options["No Order"] = "string";
+        xls.options["Mesin"] = "string";
+        xls.options["Material"] = "string";
+        xls.options["Warna"] = "string";
+        xls.options["Lebar Kain (inch)"] = "string";
+        xls.options["No Kereta"] = "string";
+        xls.options["Jenis Proses"] = "string";
+        xls.options["Tgl Input"] = "string";
+        xls.options["Jam Input"] = "string";
+        xls.options["input"] = "number";
+        xls.options["Tgl Output"] = "string";
+        xls.options["Jam Output"] = "string";
+        xls.options["BQ"] = "number";
+        xls.options["BS"] = "number";
+        xls.options["Keterangan BQ"] = "string";
+
+        if(query.sdate && query.dateTo){
+            xls.name = `Daily Operation Report ${moment(new Date(query.sdate)).format(dateFormat)} - ${moment(new Date(query.edate)).format(dateFormat)}.xlsx`;
+        }
+        else if(!query.sdate && query.edate){
+            xls.name = `Daily Operation Report ${moment(new Date(query.edate)).format(dateFormat)}.xlsx`;
+        }
+        else if(query.sdate && !query.edate){
+            xls.name = `Daily Operation Report ${moment(new Date(query.sdate)).format(dateFormat)}.xlsx`;
+        }
+        else
+            xls.name = `Daily Operation Report.xlsx`;
+
+        return Promise.resolve(xls);
     }
 
     _createIndexes() {

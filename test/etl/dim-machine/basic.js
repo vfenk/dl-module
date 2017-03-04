@@ -21,21 +21,20 @@ before("#00. connect db", function (done) {
         });
 });
 
-// it("#01. should success when create etl dim machine", function (done) {
-//     instanceManager.run()
-//         .then((a) => {
-//             console.log(a);
-//             done();
-//         })
-//         .catch((e) => {
-//             console.log(e);
-//             done(e);
-//         });
-// });
+it("#01. should success when create etl dim machine", function (done) {
+    instanceManager.run()
+        .then(() => {
+            done();
+        })
+        .catch((e) => {
+            console.log(e);
+            done(e);
+        });
+});
 
 var data = [{}, {}];
 
-it("#01. should success when transforming data", function (done) {
+it("#02. should success when transforming data", function (done) {
     instanceManager.transform(data)
         .then(() => {
             done();
@@ -45,12 +44,27 @@ it("#01. should success when transforming data", function (done) {
         });
 });
 
-it("#02. should error when load empty data", function (done) {
+it("#03. should error when load empty data", function (done) {
     instanceManager.load({})
         .then(id => {
             done("should error when create with empty data");
         })
         .catch(e => {
+            try {                
+                done();
+            }
+            catch (ex) {
+                done(ex);
+            }
+        });
+});
+
+it("#04. should error when insert empty data", function (done) {
+    instanceManager.insertQuery(this.sql, "")
+        .then((id) => {
+            done("should error when create with empty data");
+        })
+        .catch((e) => {
             try {                
                 done();
             }
