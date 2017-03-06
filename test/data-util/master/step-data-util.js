@@ -14,8 +14,6 @@ class StepDataUtil {
     }
 
     getNewData() {
-        return UomDataUtil.getTestData()
-            .then(uom => {
                 var Model = require("dl-models").master.Step;
                 var data = new Model();
 
@@ -41,12 +39,9 @@ class StepDataUtil {
                 data.stepIndicators.push(process2); 
 
                 return Promise.resolve(data);
-            });
     }
 
     getTestData(data, items, indicator) {
-        return UomDataUtil.getTestData()
-            .then(uom => {
                 var _process = data ? data : "GAS SINGEING DAN DESIZING";
                 var _itemMonitoring = items ? items : [
                         'Speed (m/mnt)', 'Pressure Burner (mBar)', 'Titik Api', 'Pressure Saturator (Bar)', 'Hasil Bakar Bulu (baik/tidak)'
@@ -78,7 +73,7 @@ class StepDataUtil {
                     {
                         name : 'LEBAR KAIN',
                         value : '',
-                        uom : "METER"
+                        uom : 'inchi'
                     },
                     {
                         name : 'COUNTER',
@@ -91,7 +86,6 @@ class StepDataUtil {
                     stepIndicators:_stepIndicator
                 };
                 return this.getSert(data);
-            });
     }
 }
 module.exports = new StepDataUtil();
