@@ -226,14 +226,14 @@ module.exports = class DailyOperationManager extends BaseManager {
         {
             kanbanQuery = {
                 "kanbanId" : new ObjectId(query.kanban)
-            }
+            };
         }
         var machineQuery = {};
         if(query.machine)
         {
             machineQuery = {
                 "machineId" : new ObjectId(query.machine)
-            }
+            };
         }
         var order = {
             "dateInput" : -1
