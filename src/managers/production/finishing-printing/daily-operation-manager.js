@@ -109,7 +109,7 @@ module.exports = class DailyOperationManager extends BaseManager {
                         errors["machine"] = i18n.__("DailyOperation.machine.isNotExists:%s is not exists", i18n.__("DailyOperation.machine._:Machine")); //"Machine tidak ditemukan";
                     }
 
-                    if (!valid.dateInput || valid.dateInput == '')
+                    if (!valid.dateInput || valid.dateInput === '')
                         errors["dateInput"] = i18n.__("DailyOperation.dateInput.isRequired:%s is required", i18n.__("DailyOperation.dateStart._:Date Input")); //"Tanggal Mulai tidak boleh kosong";
                     else if (dateInput > dateNow)
                         errors["dateInput"] = i18n.__("DailyOperation.dateInput.isGreater:%s is greater than today", i18n.__("DailyOperation.dateInput._:Date Input"));//"Tanggal Mulai tidak boleh lebih besar dari tanggal hari ini";
@@ -119,7 +119,7 @@ module.exports = class DailyOperationManager extends BaseManager {
                     if (!valid.timeInput || valid.timeInput === 0)
                         errors["timeInput"] = i18n.__("DailyOperation.timeInput.isRequired:%s is required", i18n.__("DailyOperation.timeInput._:Time Input")); //"Time Input tidak boleh kosong";
 
-                    if(!valid.input || valid.input == ''){
+                    if(!valid.input || valid.input === ''){
                         errors["input"] = i18n.__("DailyOperation.input.isRequired:%s is must be more than 0", i18n.__("DailyOperation.input._:Input")); //"nilai input harus lebih besar dari 0";
                     }else if(valid.input < 1){
                         errors["input"] = i18n.__("DailyOperation.input.isRequired:%s is must be more than 0", i18n.__("DailyOperation.input._:Input")); //"nilai input harus lebih besar dari 0";
@@ -136,7 +136,7 @@ module.exports = class DailyOperationManager extends BaseManager {
                                 errors["timeOutput"] = i18n.__("DailyOperation.timeOutput.isGreater:%s is greater than today", i18n.__("DailyOperation.timeOutput._:Time Output"));//"Time Selesai tidak boleh lebih besar dari time hari ini";
                         }
 
-                        if (valid.dateInput && valid.dateInput != '' && valid.dateOutput && valid.dateOutput != ''){
+                        if (valid.dateInput && valid.dateInput !== '' && valid.dateOutput && valid.dateOutput !== ''){
                             if (dateInput > dateOutput){
                                 var errorMessage = i18n.__("DailyOperation.dateInput.isGreaterThanDateEnd:%s is greater than Date End", i18n.__("DailyOperation.dateInput._:Date Input")); //"Tanggal Mulai tidak boleh lebih besar dari Tanggal Selesai";
                                 errors["dateInput"] = errorMessage;
@@ -147,7 +147,7 @@ module.exports = class DailyOperationManager extends BaseManager {
                         if (!valid.timeOutput || valid.timeOutput === 0)
                             errors["timeOutput"] = i18n.__("DailyOperation.timeOutput.isRequired:%s is required", i18n.__("DailyOperation.timeOutput._:Time Output")); //"Time Output tidak boleh kosong";
 
-                        if (valid.dateInput && valid.dateInput != '' && valid.dateOutput && valid.dateOutput != '' && valid.dateInput === valid.dateOutput){
+                        if (valid.dateInput && valid.dateInput !== '' && valid.dateOutput && valid.dateOutput !== '' && valid.dateInput === valid.dateOutput){
                             if (valid.timeInput > valid.timeOutput){
                                 var errorMessage = i18n.__("DailyOperation.timeInput.isGreaterThanTimeInMillisEnd:%s is greater than Time End", i18n.__("DailyOperation.timeInput._:Time Input")); //"Time Mulai tidak boleh lebih besar dari Time Selesai";
                                 errors["timeInput"] = errorMessage;
@@ -162,7 +162,7 @@ module.exports = class DailyOperationManager extends BaseManager {
                             errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isRequired:%s is required", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output tidak boleh kosong";
                             errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s is required", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai bad output tidak boleh kosong";
                         }
-                        else if(valid.input && valid.input != ''){
+                        else if(valid.input && valid.input !== ''){
                             if(goodOutput > valid.input){
                                 errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isNotBeMore:%s should not be more than input value", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output tidak boleh lebih besar dari nilai input";
                             }

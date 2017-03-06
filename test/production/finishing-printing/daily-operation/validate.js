@@ -68,7 +68,7 @@ it("#02. should error when create new and no document kanban on collection datab
                             itemDes.should.equal(true);
                             dailyOperationManager.create(data)
                                     .then((item) => {
-                                        done("should error when create new and no document kanban on collection database")
+                                        done("should error when create new and no document kanban on collection database");
                                     })
                                     .catch((e) => {
                                         try {
@@ -98,7 +98,7 @@ it("#03. should error when create new and no document machine on collection data
                             itemDes.should.equal(true);
                             dailyOperationManager.create(data)
                                     .then((item) => {
-                                        done("should error when create new and no document machine on collection database")
+                                        done("should error when create new and no document machine on collection database");
                                     })
                                     .catch((e) => {
                                         try {
@@ -131,11 +131,11 @@ it("#04. should success when create new without output data", function(done) {
                     .then((item) => {
                         dailyOperationManager.getSingleById(item)
                             .then(daily => {
-                                validate(daily)
-                                done()
+                                validate(daily);
+                                done();
                             })
                             .catch((e) => {
-                                done(e)
+                                done(e);
                             });
                     })
                     .catch((e) => {
@@ -153,7 +153,7 @@ it("#05. should error when create new with 0 input qty", function(done) {
                 data.input  = 0;
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new with 0 input qty")
+                        done("should error when create new with 0 input qty");
                     })
                     .catch((e) => {
                         try {
@@ -177,7 +177,7 @@ it("#06. should error when create new data with dateStart greater than today", f
                 data.dateInput = moment(dateTomorrow).format('YYYY-MM-DD');
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data with dateStart greater than today")
+                        done("should error when create new data with dateStart greater than today");
                     })
                     .catch((e) => {
                         try {
@@ -203,7 +203,7 @@ it("#07. should error when create new data with time input greater than today", 
                 data.timeInput = timeInMillisNow + 60000;
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data with time input greater than today")
+                        done("should error when create new data with time input greater than today");
                     })
                     .catch((e) => {
                         try {
@@ -226,7 +226,7 @@ it("#08. should error when create new data without date output", function(done) 
                 delete data.dateOutput;
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data without date output")
+                        done("should error when create new data without date output");
                     })
                     .catch((e) => {
                         try {
@@ -251,7 +251,7 @@ it("#09. should error when create new data without date output", function(done) 
                 delete data.badOutput;
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data without date output")
+                        done("should error when create new data without date output");
                     })
                     .catch((e) => {
                         try {
@@ -277,7 +277,7 @@ it("#10. should error when create new data with date output greater than today",
                 data.dateOutput = moment(dateTomorrow).format('YYYY-MM-DD');
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data with date output greater than today")
+                        done("should error when create new data with date output greater than today");
                     })
                     .catch((e) => {
                         try {
@@ -303,7 +303,7 @@ it("#11. should error when create new data with time output greater than today",
                 data.timeOutput = timeInMillisNow + 60000;
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data with time output greater than today")
+                        done("should error when create new data with time output greater than today");
                     })
                     .catch((e) => {
                         try {
@@ -327,7 +327,7 @@ it("#12. should error when create new data with date input greater than date out
                 data.dateOutput = '2017-01-01';
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data with date input greater than date output")
+                        done("should error when create new data with date input greater than date output");
                     })
                     .catch((e) => {
                         try {
@@ -354,7 +354,7 @@ it("#13. should error when create new data with time input greater time date out
                 data.timeOutput = 5000;
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data with time input greater time date output")
+                        done("should error when create new data with time input greater time date output");
                     })
                     .catch((e) => {
                         try {
@@ -378,7 +378,7 @@ it("#14. should error when create new data with goodOutput greater than input", 
                 data.goodOutput = data.input + 10;
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data with goodOutput greater than input")
+                        done("should error when create new data with goodOutput greater than input");
                     })
                     .catch((e) => {
                         try {
@@ -401,7 +401,7 @@ it("#15. should error when create new data with badOutput greater than input", f
                 data.badOutput = data.input + 10;
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data with badOutput greater than input")
+                        done("should error when create new data with badOutput greater than input");
                     })
                     .catch((e) => {
                         try {
@@ -425,7 +425,7 @@ it("#16. should error when create new data with sum between badOutput and goodOu
                 data.goodOutput += 1;
                 dailyOperationManager.create(data)
                     .then((item) => {
-                        done("should error when create new data with sum between badOutput and goodOutput greater than inputy")
+                        done("should error when create new data with sum between badOutput and goodOutput greater than inputy");
                     })
                     .catch((e) => {
                         try {
