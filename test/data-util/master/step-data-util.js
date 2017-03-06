@@ -54,17 +54,17 @@ class StepDataUtil {
                     {
                         name : 'PRESS. BURNER',
                         value : '14',
-                        uom : "mBar"
+                        uom : 'mBar'
                     },
                     {
                         name : 'TEMP. SATURATOR',
                         value : '65',
-                        uom : "C"
+                        uom : 'C'
                     },
                     {
                         name : 'SPEED',
                         value : '90',
-                        uom : "m/mnt"
+                        uom : 'm/mnt'
                     },
                     {
                         name : 'TITIK API',
