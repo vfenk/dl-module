@@ -63,9 +63,9 @@ module.exports = {
         },
         sales:{
             ProductionOrderManager: require('./src/managers/sales/production-order-manager'),
-            FinishingPrintingSalesContract: require('./test/data-util/sales/finishing-printing-sales-contract-manager'),
-            SpinningSalesContract: require('./test/data-util/sales/spinning-sales-contract-manager'),
-            WeavingSalesContract: require('./test/data-util/sales/weaving-sales-contract-manager')
+            FinishingPrintingSalesContractManager: require('./src/managers/sales/finishing-printing-sales-contract-manager'),
+            SpinningSalesContractManager: require('./src/managers/sales/spinning-sales-contract-manager'),
+            WeavingSalesContractManager: require('./src/managers/sales/weaving-sales-contract-manager')
         }
 
     },
@@ -117,7 +117,9 @@ module.exports = {
             },
             sales:{
                 productionOrder: require('./test/data-util/sales/production-order-data-util'),
-                finishingPrintingSalesContract: require('./test/data-util/sales/finishing-printing-sales-contract-data-util')
+                finishingPrintingSalesContract: require('./test/data-util/sales/finishing-printing-sales-contract-data-util'),
+                weavingSalesContract: require('./test/data-util/sales/weaving-sales-contract-data-util'),
+                spinningSalesContract: require('./test/data-util/sales/spinning-sales-contract-data-util')
             }
         }
     },

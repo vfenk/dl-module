@@ -36,11 +36,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
         var query = {};
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterType={
-                _type:{
-                    '$regex': regex
-                }
-            };
+            
             var filterSalesContract = {
                 'salesContractNo': {
                     '$regex': regex

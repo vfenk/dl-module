@@ -47,11 +47,7 @@ module.exports = class FinishingPrintingSalesContractManager extends BaseManager
         var query = {};
         if (paging.keyword) {
             var regex = new RegExp(paging.keyword, "i");
-            var filterType={
-                _type:{
-                    '$regex': regex
-                }
-            };
+            
             var filterSalesContract = {
                 'salesContractNo': {
                     '$regex': regex
@@ -71,7 +67,7 @@ module.exports = class FinishingPrintingSalesContractManager extends BaseManager
             };
 
             keywordFilter = {
-                '$or': [filterSalesContract, filterBuyerName, filterBuyerType,filterType]
+                '$or': [filterSalesContract, filterBuyerName, filterBuyerType]
             };
         }
         query = { '$and': [deletedFilter, paging.filter, keywordFilter] }
