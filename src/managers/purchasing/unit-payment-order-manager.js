@@ -343,7 +343,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 fulfillment.invoiceNo = unitPaymentOrder.invoceNo;
                                 fulfillment.interNoteDate = unitPaymentOrder.date;
                                 fulfillment.interNoteNo = unitPaymentOrder.no;
-                                fulfillment.interNoteValue = realization.pricePerDealUnit * realization.currency.rate;
+                                fulfillment.interNoteValue = realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
                                 fulfillment.interNoteDueDate = unitPaymentOrder.dueDate;
                                 if (unitPaymentOrder.useIncomeTax) {
                                     fulfillment.ppnNo = unitPaymentOrder.incomeTaxNo;
@@ -352,7 +352,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 }
                                 if (unitPaymentOrder.useVat) {
                                     fulfillment.pphNo = unitPaymentOrder.vatNo;
-                                    fulfillment.pphValue = (unitPaymentOrder.vatRate/100) * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
+                                    fulfillment.pphValue = (unitPaymentOrder.vatRate / 100) * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
                                     fulfillment.pphDate = unitPaymentOrder.vatDate;
                                 }
                             }
@@ -403,7 +403,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     } else {
                         purchaseOrder.status = poStatusEnum.PAYMENT;
                     }
-                    return this.purchaseOrderManager.update(purchaseOrder);
+                    return this.purchaseOrderManager.updateCollectionPurchaseOrder(purchaseOrder);
                 })
             jobs.push(job);
         })
@@ -436,16 +436,16 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 fulfillment.invoiceNo = unitPaymentOrder.invoceNo;
                                 fulfillment.interNoteDate = unitPaymentOrder.date;
                                 fulfillment.interNoteNo = unitPaymentOrder.no;
-                                fulfillment.interNoteValue = realization.pricePerDealUnit * realization.currency.rate;
+                                fulfillment.interNoteValue = realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
                                 fulfillment.interNoteDueDate = unitPaymentOrder.dueDate;
                                 if (unitPaymentOrder.useIncomeTax) {
                                     fulfillment.ppnNo = unitPaymentOrder.incomeTaxNo;
                                     fulfillment.ppnDate = unitPaymentOrder.incomeTaxDate
-                                    fulfillment.ppnValue = 0.1 * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
+                                    fulfillment.ppnValue = 0.1 * realization.pricePerDealUnit * realization.currency.rate;
                                 }
                                 if (unitPaymentOrder.useVat) {
                                     fulfillment.pphNo = unitPaymentOrder.vatNo;
-                                    fulfillment.pphValue = (unitPaymentOrder.vatRate/100) * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
+                                    fulfillment.pphValue = (unitPaymentOrder.vatRate / 100) * realization.deliveredQuantity * realization.pricePerDealUnit * realization.currency.rate;
                                     fulfillment.pphDate = unitPaymentOrder.vatDate;
                                 }
                             }
@@ -496,7 +496,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     } else {
                         purchaseOrder.status = poStatusEnum.PAYMENT;
                     }
-                    return this.purchaseOrderManager.update(purchaseOrder);
+                    return this.purchaseOrderManager.updateCollectionPurchaseOrder(purchaseOrder);
                 })
             jobs.push(job);
         })
@@ -560,7 +560,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                     purchaseOrder.status = isPaid && purchaseOrder.isClosed ? poStatusEnum.PAYMENT : (purchaseOrder.isClosed ? poStatusEnum.RECEIVED : poStatusEnum.RECEIVING);
                     purchaseOrder.status = purchaseOrder.status.value === 7 && fulfillment.unitReceiptNoteDeliveredQuantity < fulfillment.deliveryOrderDeliveredQuantity ? poStatusEnum.RECEIVING : poStatusEnum.RECEIVED;
 
-                    return this.purchaseOrderManager.update(purchaseOrder);
+                    return this.purchaseOrderManager.updateCollectionPurchaseOrder(purchaseOrder);
                 })
             jobs.push(job);
         })
@@ -594,7 +594,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 }
                             }
                             unitReceiptNote.isPaid = true;
-                            return this.unitReceiptNoteManager.update(unitReceiptNote);
+                            return this.unitReceiptNoteManager.updateCollectionUnitReceiptNote(unitReceiptNote);
                         })
                 })
             jobs.push(job);
@@ -630,7 +630,7 @@ module.exports = class UnitPaymentOrderManager extends BaseManager {
                                 }
                             }
                             unitReceiptNote.isPaid = false;
-                            return this.unitReceiptNoteManager.update(unitReceiptNote);
+                            return this.unitReceiptNoteManager.updateCollectionUnitReceiptNote(unitReceiptNote);
                         })
                 })
             jobs.push(job);

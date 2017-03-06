@@ -7,12 +7,13 @@ var map = DLModels.map;
 var i18n = require('dl-i18n');
 var PurchaseOrderManager = require('./purchase-order-manager');
 var UnitPaymentCorrectionNote = DLModels.purchasing.UnitPaymentCorrectionNote;
+var UnitPaymentOrder = DLModels.purchasing.UnitPaymentOrder;
 var UnitPaymentOrderManager = require('./unit-payment-order-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var generateCode = require('../../utils/code-generator');
 var UnitReceiptNoteManager = require('./unit-receipt-note-manager');
 
-module.exports = class unitPaymentQuantityCorrectionNoteManager extends BaseManager {
+module.exports = class unitPaymentPriceCorrectionNoteManager extends BaseManager {
     constructor(db, user) {
         super(db, user);
         this.collection = this.db.use(map.purchasing.collection.UnitPaymentCorrectionNote);
@@ -388,7 +389,7 @@ module.exports = class unitPaymentQuantityCorrectionNoteManager extends BaseMana
                             fulfillment.correction.push(_correction);
                         }
                     }
-                    return this.purchaseOrderManager.update(purchaseOrder);
+                    return this.purchaseOrderManager.updateCollectionPurchaseOrder(purchaseOrder);
                 })
             jobs.push(job);
         })
@@ -439,7 +440,7 @@ module.exports = class unitPaymentQuantityCorrectionNoteManager extends BaseMana
                                     item.purchaseOrder = purchaseOrder;
                                 }
                             }
-                            return this.unitReceiptNoteManager.update(unitReceiptNote);
+                            return this.unitReceiptNoteManager.updateCollectionUnitReceiptNote(unitReceiptNote);
                         })
                 })
             jobs.push(job);
@@ -465,6 +466,10 @@ module.exports = class unitPaymentQuantityCorrectionNoteManager extends BaseMana
                                 unitPaymentOrderItem.unitReceiptNote = _unitReceiptNote;
                             }
                         }
+                        if (!_unitPaymentOrder.stamp) {
+                            _unitPaymentOrder = new UnitPaymentOrder(_unitPaymentOrder);
+                        }
+                        _unitPaymentOrder.stamp(this.user.username, 'manager');
                         return this.unitPaymentOrderManager.collection.update(_unitPaymentOrder)
                     })
                     .then((results) => {
