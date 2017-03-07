@@ -21,23 +21,23 @@ class MachineTypeDataUtil {
                 indicator: `Tekanan Press Mangle[${code}]`,
                 dataType: "input angka",
                 defaultValue: 10,
-                satuan: "a",
+                uom: "a",
             },
                 {
                     indicator: `Tekanan Press Mangl[${code}]`,
                     dataType: "input teks",
                     defaultValue: "10",
-                    satuan: "a",
+                    uom: "a",
                 }, {
                     indicator: `range`,
                     dataType: "input skala angka",
                     defaultValue: "1-10",
-                    satuan: "a",
+                    uom: "a",
                 }, {
                     indicator: `option`,
                     dataType: "input pilihan",
                     defaultValue: "a,b",
-                    satuan: "a",
+                    uom: "a",
                 }];
 
         return Promise.resolve(data);
@@ -58,7 +58,7 @@ class MachineTypeDataUtil {
                 indicator: "",
                 dataType: "",
                 defaultValue: "",
-                satuan: "",
+                uom: "",
             }];
 
         return Promise.resolve(data);

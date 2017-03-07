@@ -197,9 +197,8 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
             machineFilter = { 'machine._id': machineId };
         }
 
-        if (info.productionOrderId && info.productionOrderId != '') {
-            var productionOrderId = ObjectId.isValid(info.productionOrderId) ? new ObjectId(info.productionOrderId) : {};
-            productionOrderFilter = { 'productionOrder._id': productionOrderId };
+        if (info.productionOrderNumber && info.productionOrderNumber != ''){
+            productionOrderFilter = {'productionOrder.orderNo': info.productionOrderNumber};
         }
 
         var filterDate = {
@@ -240,7 +239,7 @@ module.exports = class MonitoringSpecificationMachineManager extends BaseManager
             item["Nomor Kereta"] = monitoringSpecificationMachine.cartNumber;
             //dinamic items
             for (var indicator of monitoringSpecificationMachine.items) {
-                item[indicator.indicator + " " +"("+indicator.satuan+")"] = indicator ? indicator.value : '';
+                item[indicator.indicator + " " +"("+indicator.uom+")"] = indicator ? indicator.value : '';
                 xls.options[indicator.indicator] = "string";
             }
 

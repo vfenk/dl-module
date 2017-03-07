@@ -44,7 +44,7 @@ describe('#dl-module', function (done) {
     test('@MASTER/ORDER-TYPE', './master/order-type');
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
-    test('@MASTER/INSTRUCTION', './master/instruction');
+    // test('@MASTER/INSTRUCTION', './master/instruction');
 
     // test('@MASTER/MONITORING-EVENT-TYPE', './master/monitoring-event-type');
     test('@MASTER/STEP', './master/step');
@@ -55,6 +55,7 @@ describe('#dl-module', function (done) {
     test('@MASTER/STANDARD-TEST', './master/standard-test');
     test('@MASTER/FINISH-TYPE', './master/finish-type');
     test('@MASTER/COMODITY', './master/comodity');
+    test('@MASTER/QUALITY', './master/quality');
 
     //Purchasing 
     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
@@ -65,17 +66,20 @@ describe('#dl-module', function (done) {
     test('@PURCHASING/UNIT PAYMENT ORDER', './purchasing/unit-payment-order'); 
     test('@PURCHASING/UNIT PAYMENT PRICE CORRECTION', './purchasing/unit-payment-price-correction-note');
     test('@PURCHASING/UNIT PAYMENT QUANTITY CORRECTION', './purchasing/unit-payment-quantity-correction-note');
+    test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');	
+
+    //Sales
+    test('@SALES/PRODUCTION-ORDER', './sales/production-order');	
+    test('@SALES/FINISHING PRINTING SALES CONTRACT', './sales/finishing-printing-sales-contract');
+    test('@SALES/SPINNING SALES CONTRACT', './sales/spinning-sales-contract');
+    test('@SALES/WEAVING SALES CONTRACT', './sales/weaving-sales-contract');
     
-    test('@purchasing/purchase-order/report', './purchasing/purchase-order/report/report');		
     //Production
-    
-    //test('@PRODUCTION/DAILY OPERATION', './production/finishing-printing/daily-operation');
-    test('@production/finishing-printing/monitoring-specification-machine', './production/finishing-printing/monitoring-specification-machine');
     test('@PRODUCTION/FINISHING-PRINTING/KANBAN', './production/finishing-printing/kanban');
-    test('@PRODUCTION/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
+    test('@PRODUCTION/DAILY OPERATION', './production/finishing-printing/daily-operation');
+    test('@PRODUCTION/FINISHING-PRINTING/MONITORING-SPECIFICATION-MACHINE', './production/finishing-printing/monitoring-specification-machine');
+    test('@PRODUCTION/FINISHING-PRINTING/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
-    //Sales
-    test('@production/production-order', './sales/production-order');
 });
