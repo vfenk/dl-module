@@ -138,10 +138,6 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                     errors["paymentMethod"]=i18n.__("WeavingSalesContract.paymentMethod.isRequired:%s is required", i18n.__("WeavingSalesContract.paymentMethod._:PaymentMethod")); //"paymentMethod tidak boleh kosong";
                 }
 
-                if(!valid.paymentRequirement || valid.paymentRequirement===''){
-                    errors["paymentRequirement"]=i18n.__("WeavingSalesContract.paymentRequirement.isRequired:%s is required", i18n.__("WeavingSalesContract.paymentRequirement._:PaymentRequirement")); //"paymentRequirement tidak boleh kosong";
-                }
-
                 if(!_quality){
                     errors["quality"]=i18n.__("WeavingSalesContract.quality.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
                 }
@@ -162,10 +158,6 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                     errors["comodity"] = i18n.__("WeavingSalesContract.comodity.isRequired:%s is not exists", i18n.__("WeavingSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
                 else if (!valid.comodityId)
                     errors["comodity"] = i18n.__("WeavingSalesContract.comodity.isRequired:%s is required", i18n.__("WeavingSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
-
-                if(!valid.rollLength || valid.rollLength===''){
-                    errors["rollLength"]=i18n.__("WeavingSalesContract.rollLength.isRequired:%s is required", i18n.__("WeavingSalesContract.rollLength._:RollLength")); //"rollLength tidak boleh kosong";
-                }
 
                 if(!valid.condition || valid.condition===''){
                     errors["condition"]=i18n.__("WeavingSalesContract.condition.isRequired:%s is required", i18n.__("WeavingSalesContract.condition._:Condition")); //"condition tidak boleh kosong";
@@ -192,8 +184,9 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                 }
 
                 if(!valid.deliveredTo || valid.deliveredTo===''){
-                    errors["deliveredTo"]=i18n.__("WeavingSalesContract.deliveredTo.isRequired:%s is required", i18n.__("WeavingSalesContract.deliveredTo._:deliveredTo")); //"deliveredTo tidak boleh kosong";
+                    errors["deliveredTo"]=i18n.__("WeavingSalesContract.deliveredTo.isRequired:%s is required", i18n.__("WeavingSalesContract.deliveredTo._:DeliveredTo")); //"deliveredTo tidak boleh kosong";
                 }
+
                 if (!valid.deliverySchedule || valid.deliverySchedule === "") {
                      errors["deliverySchedule"] = i18n.__("WeavingSalesContract.deliverySchedule.isRequired:%s is required", i18n.__("WeavingSalesContract.deliverySchedule._:deliverySchedule")); //"deliverySchedule tidak boleh kosong";
                 }
