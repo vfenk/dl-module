@@ -60,6 +60,7 @@ class FinishingPrintingSalesContractDataUtil {
                     rollLength:`length`,
                     packing:`pack`,
                     deliverySchedule:new Date(),
+                    deliveredTo:'City-Country',
                     remark:`desc`,
                     useIncomeTax:true,
                     transportFee:'Fee',
