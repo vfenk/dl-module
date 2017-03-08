@@ -113,10 +113,6 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     errors["paymentMethod"]=i18n.__("SpinningSalesContract.paymentMethod.isRequired:%s is required", i18n.__("SpinningSalesContract.paymentMethod._:PaymentMethod")); //"paymentMethod tidak boleh kosong";
                 }
 
-                if(!valid.paymentRequirement || valid.paymentRequirement===''){
-                    errors["paymentRequirement"]=i18n.__("SpinningSalesContract.paymentRequirement.isRequired:%s is required", i18n.__("SpinningSalesContract.paymentRequirement._:PaymentRequirement")); //"paymentRequirement tidak boleh kosong";
-                }
-
                 if(!_quality){
                     errors["quality"]=i18n.__("SpinningSalesContract.quality.isRequired:%s is not exsist", i18n.__("SpinningSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
                 }
@@ -129,9 +125,6 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                 else if (!valid.comodityId)
                     errors["comodity"] = i18n.__("SpinningSalesContract.comodity.isRequired:%s is required", i18n.__("SpinningSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
 
-                if(!valid.rollLength || valid.rollLength===''){
-                    errors["rollLength"]=i18n.__("SpinningSalesContract.rollLength.isRequired:%s is required", i18n.__("SpinningSalesContract.rollLength._:RollLength")); //"rollLength tidak boleh kosong";
-                }
 
                 if(!valid.condition || valid.condition===''){
                     errors["condition"]=i18n.__("SpinningSalesContract.condition.isRequired:%s is required", i18n.__("SpinningSalesContract.condition._:Condition")); //"condition tidak boleh kosong";
@@ -164,6 +157,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                 if(!valid.deliveredTo || valid.deliveredTo===''){
                     errors["deliveredTo"]=i18n.__("SpinningSalesContract.deliveredTo.isRequired:%s is required", i18n.__("SpinningSalesContract.deliveredTo._:DeliveredTo")); //"deliveredTo tidak boleh kosong";
                 }
+
                 if (!valid.deliverySchedule || valid.deliverySchedule === "") {
                      errors["deliverySchedule"] = i18n.__("SpinningSalesContract.deliverySchedule.isRequired:%s is required", i18n.__("SpinningSalesContract.deliverySchedule._:DeliverySchedule")); //"deliverySchedule tidak boleh kosong";
                 }
