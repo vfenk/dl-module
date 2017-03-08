@@ -93,12 +93,13 @@ it('#04. should error when create new data with non existent quality, comodity, 
     WeavingSalesContractDataUtil.getNewData()
         .then(sc => {
 
-            sc.qualityId = 'randomId';
-            sc.comodityId = 'randomId';
-            sc.buyerId = 'randomId';
-            sc.accountBankId = 'randomId';
-            sc.materialConstructionId = 'randomId';
-            sc.yarnMaterialId = 'randomId';
+            sc.qualityId = '';
+            sc.comodityId = '';
+            sc.buyerId = '';
+            sc.accountBankId = '';
+            sc.materialConstructionId = '';
+            sc.yarnMaterialId = '';
+            sc.uom.unit = '';
 
             weavingSalesContractManager.create(sc)
                 .then(id => {
@@ -112,6 +113,7 @@ it('#04. should error when create new data with non existent quality, comodity, 
                         e.errors.should.have.property('accountBank');
                         e.errors.should.have.property('materialConstruction');
                         e.errors.should.have.property('yarnMaterial');
+                        e.errors.should.have.property('uom');
                         done();
                     }
                     catch (ex) {

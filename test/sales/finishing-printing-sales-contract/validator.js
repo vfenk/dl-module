@@ -89,20 +89,23 @@ it('#03. should error when create new data with shippingQuantityTolerance more t
         });
 });
 
-it('#04. should error when create new data with non existent quality, comodity, buyer, accountBank, uom, materialConstruction, yarnMaterial', function (done) {
+it('#04. should error when create new data with non existent quality, comodity, buyer, accountBank, uom, materialConstruction, yarnMaterial, processType, orderType', function (done) {
     FinishingPrintingSalesContractDataUtil.getNewData()
         .then(sc => {
 
-            sc.qualityId = 'randomId';
-            sc.comodityId = 'randomId';
-            sc.buyerId = 'randomId';
-            sc.accountBankId = 'randomId';
-            sc.materialConstructionId = 'randomId';
-            sc.yarnMaterialId = 'randomId';
+            sc.qualityId = '';
+            sc.comodityId = '';
+            sc.buyerId = '';
+            sc.accountBankId = '';
+            sc.materialConstructionId = '';
+            sc.yarnMaterialId = '';
+            sc.uom.unit = '';
+            sc.orderTypeId = '';
+            sc.processTypeId = '';
 
             finishingPrintingSalesContractManager.create(sc)
                 .then(id => {
-                    done("should error when create new data with non existent quality, comodity, buyer, accountBank, uom, materialConstruction, yarnMaterial");
+                    done("should error when create new data with non existent quality, comodity, buyer, accountBank, uom, materialConstruction, yarnMaterial, processType, orderType");
                 })
                 .catch(e => {
                     try {
@@ -111,6 +114,9 @@ it('#04. should error when create new data with non existent quality, comodity, 
                         e.errors.should.have.property('buyer');
                         e.errors.should.have.property('materialConstruction');
                         e.errors.should.have.property('yarnMaterial');
+                        e.errors.should.have.property('uom');
+                        e.errors.should.have.property('orderType');
+                        e.errors.should.have.property('processType');
                         done();
                     }
                     catch (ex) {

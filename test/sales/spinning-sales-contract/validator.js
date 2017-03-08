@@ -93,10 +93,11 @@ it('#04. should error when create new data with non existent quality, comodity, 
     SpinningSalesContractDataUtil.getNewData()
         .then(sc => {
 
-            sc.qualityId = 'randomId';
-            sc.comodityId = 'randomId';
-            sc.buyerId = 'randomId';
-            sc.accountBankId = 'randomId';
+            sc.qualityId = '';
+            sc.comodityId = '';
+            sc.buyerId = '';
+            sc.accountBankId = '';
+            sc.uom.unit = '';
 
             spinningSalesContractManager.create(sc)
                 .then(id => {
@@ -108,6 +109,7 @@ it('#04. should error when create new data with non existent quality, comodity, 
                         e.errors.should.have.property('comodity');
                         e.errors.should.have.property('buyer');
                         e.errors.should.have.property('accountBank');
+                        e.errors.should.have.property('uom');
                         done();
                     }
                     catch (ex) {
