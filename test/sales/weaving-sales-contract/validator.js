@@ -97,7 +97,6 @@ it('#04. should error when create new data with non existent quality, comodity, 
             sc.comodityId = 'randomId';
             sc.buyerId = 'randomId';
             sc.accountBankId = 'randomId';
-            sc.uomId = 'randomId';
             sc.materialConstructionId = 'randomId';
             sc.yarnMaterialId = 'randomId';
 
@@ -111,7 +110,6 @@ it('#04. should error when create new data with non existent quality, comodity, 
                         e.errors.should.have.property('comodity');
                         e.errors.should.have.property('buyer');
                         e.errors.should.have.property('accountBank');
-                        e.errors.should.have.property('uom');
                         e.errors.should.have.property('materialConstruction');
                         e.errors.should.have.property('yarnMaterial');
                         done();
