@@ -179,7 +179,7 @@ module.exports = class ProductionOrderManager extends BaseManager {
                 
                 if (!_order)
                     errors["orderType"] = i18n.__("ProductionOrder.orderType.isRequired:%s is not exists", i18n.__("ProductionOrder.orderType._:OrderType")); //"orderType tidak boleh kosong";
-                else if (!valid.processTypeId)
+                else if (!valid.orderTypeId)
                     errors["orderType"] = i18n.__("ProductionOrder.orderType.isRequired:%s is required", i18n.__("ProductionOrder.orderType._:OrderType")); //"orderType tidak boleh kosong";
                 
                 if (!_yarn)
