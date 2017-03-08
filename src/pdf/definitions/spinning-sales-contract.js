@@ -276,7 +276,7 @@ module.exports = function (salesContract) {
             
             var subheader2=[{
                         stack: ['\n',{
-                            text: 'This is to confirm that your order for ' + salesContract.buyer.name + ' concerning ' + parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + ' '+salesContract.uom.unit +' of' +'\n' +  salesContract.comodity.name + comoDesc+ '\n' + 'CONSTRUCTION : '+ salesContract.material.name + ' ' + salesContract.materialConstruction.name + ' ' + salesContract.yarnMaterial.name + ' ' + salesContract.materialWidth,
+                            text: 'This is to confirm that your order for ' + salesContract.buyer.name + ' concerning ' + parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + ' '+salesContract.uom.unit +' of' +'\n' +  salesContract.comodity.name + comoDesc,
                             style: ['size09'],
                             alignment: "left"
                         },'\n',{
@@ -426,22 +426,6 @@ module.exports = function (salesContract) {
                     {
                         width: '*',
                         text:salesContract.comodity.name + comoDesc,
-                        style: ['size09']
-                    }]
-            },{
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Konstruksi / Material',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text:':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text:salesContract.material.name + ' ' + salesContract.materialConstruction.name + ' ' + salesContract.yarnMaterial.name + ' ' + salesContract.materialWidth,
                         style: ['size09']
                     }]
             },{
