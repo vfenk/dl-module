@@ -89,7 +89,7 @@ it('#03. should error when create new data with shippingQuantityTolerance more t
         });
 });
 
-it('#04. should error when create new data with non existent quality, comodity, buyer, accountBank', function (done) {
+it('#04. should error when create new data with non existent quality, comodity, buyer, accountBank, uom, materialConstruction, yarnMaterial', function (done) {
     FinishingPrintingSalesContractDataUtil.getNewData()
         .then(sc => {
 
@@ -97,17 +97,22 @@ it('#04. should error when create new data with non existent quality, comodity, 
             sc.comodityId = 'randomId';
             sc.buyerId = 'randomId';
             sc.accountBankId = 'randomId';
+            sc.uomId = 'randomId';
+            sc.materialConstructionId = 'randomId';
+            sc.yarnMaterialId = 'randomId';
 
             finishingPrintingSalesContractManager.create(sc)
                 .then(id => {
-                    done("should error when create new data with non existent quality, comodity, buyer, accountBank");
+                    done("should error when create new data with non existent quality, comodity, buyer, accountBank, uom, materialConstruction, yarnMaterial");
                 })
                 .catch(e => {
                     try {
                         e.errors.should.have.property('quality');
                         e.errors.should.have.property('comodity');
                         e.errors.should.have.property('buyer');
-                        e.errors.should.have.property('accountBank');
+                        e.errors.should.have.property('uom');
+                        e.errors.should.have.property('materialConstruction');
+                        e.errors.should.have.property('yarnMaterial');
                         done();
                     }
                     catch (ex) {

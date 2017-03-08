@@ -89,7 +89,7 @@ it('#03. should error when create new data with shippingQuantityTolerance more t
         });
 });
 
-it('#04. should error when create new data with non existent quality, comodity, buyer, accountBank', function (done) {
+it('#04. should error when create new data with non existent quality, comodity, buyer, accountBank,uom', function (done) {
     SpinningSalesContractDataUtil.getNewData()
         .then(sc => {
 
@@ -97,10 +97,11 @@ it('#04. should error when create new data with non existent quality, comodity, 
             sc.comodityId = 'randomId';
             sc.buyerId = 'randomId';
             sc.accountBankId = 'randomId';
+            sc.uomId = 'randomId';
 
             spinningSalesContractManager.create(sc)
                 .then(id => {
-                    done("should error when create new data with non existent quality, comodity, buyer, accountBank");
+                    done("should error when create new data with non existent quality, comodity, buyer, accountBank, uom");
                 })
                 .catch(e => {
                     try {
@@ -108,6 +109,7 @@ it('#04. should error when create new data with non existent quality, comodity, 
                         e.errors.should.have.property('comodity');
                         e.errors.should.have.property('buyer');
                         e.errors.should.have.property('accountBank');
+                        e.errors.should.have.property('uom');
                         done();
                     }
                     catch (ex) {

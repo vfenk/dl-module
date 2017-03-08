@@ -87,7 +87,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text:salesContract.comodity.name + comoDesc + '\n' + 'CONSTRUCTION : '+ salesContract.material.name + ' ' + salesContract.materialConstruction.name + ' ' + salesContract.yarnMaterial.name + ' ' + salesContract.materialWidth,
+                        text:salesContract.comodity.name + comoDesc,
                         style: ['size09']
                     }]
             },{
