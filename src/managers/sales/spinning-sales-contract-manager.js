@@ -232,27 +232,27 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
         return this.collection.createIndexes([dateIndex, noIndex]);
     }
     
-//    pdf(id) {
-//         return new Promise((resolve, reject) => {
+   pdf(id) {
+        return new Promise((resolve, reject) => {
 
-//             this.getSingleById(id)
-//                 .then(productionOrder => {
+            this.getSingleById(id)
+                .then(salesContract => {
                     
-//                     var getDefinition = require("../../pdf/definitions/production-order");
-//                     var definition = getDefinition(productionOrder);
+                    var getDefinition = require("../../pdf/definitions/finishing-printing-sales-contract");
+                    var definition = getDefinition(salesContract);
 
-//                     var generatePdf = require("../../pdf/pdf-generator");
-//                     generatePdf(definition)
-//                         .then(binary => {
-//                             resolve(binary);
-//                         })
-//                         .catch(e => {
-//                             reject(e);
-//                         });
-//                 })
-//                 .catch(e => {
-//                     reject(e);
-//                 });
-//         });
-//     }
+                    var generatePdf = require("../../pdf/pdf-generator");
+                    generatePdf(definition)
+                        .then(binary => {
+                            resolve(binary);
+                        })
+                        .catch(e => {
+                            reject(e);
+                        });
+                })
+                .catch(e => {
+                    reject(e);
+                });
+        });
+    }
 }
