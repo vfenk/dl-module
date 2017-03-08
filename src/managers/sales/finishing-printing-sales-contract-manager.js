@@ -133,16 +133,12 @@ module.exports = class FinishingPrintingSalesContractManager extends BaseManager
                 if(!_construction){
                     errors["materialConstruction"]=i18n.__("FinishingPrintingSalesContract.materialConstruction.isRequired:%s is not exsist", i18n.__("FinishingPrintingSalesContract.materialConstruction._:MaterialConstruction")); //"materialConstruction tidak boleh kosong";
                 }
-                else if(!valid.materialConstructionId){
-                    errors["materialConstruction"]=i18n.__("FinishingPrintingSalesContract.materialConstruction.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.materialConstruction._:MaterialConstruction")); //"materialConstruction tidak boleh kosong";
-                }
+                
 
                 if(!_yarn){
                     errors["yarnMaterial"]=i18n.__("FinishingPrintingSalesContract.yarnMaterial.isRequired:%s is not exsist", i18n.__("FinishingPrintingSalesContract.yarnMaterial._:YarnMaterial")); //"yarnMaterial tidak boleh kosong";
                 }
-                else if(!valid.yarnMaterialId){
-                    errors["yarnMaterial"]=i18n.__("FinishingPrintingSalesContract.yarnMaterial.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.yarnMaterial._:YarnMaterial")); //"yarnMaterial tidak boleh kosong";
-                }
+                
 
                 if(!valid.paymentMethod || valid.paymentMethod===''){
                     errors["paymentMethod"]=i18n.__("FinishingPrintingSalesContract.paymentMethod.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.paymentMethod._:PaymentMethod")); //"paymentMethod tidak boleh kosong";
@@ -166,18 +162,12 @@ module.exports = class FinishingPrintingSalesContractManager extends BaseManager
 
                 if (!_comodity)
                     errors["comodity"] = i18n.__("FinishingPrintingSalesContract.comodity.isRequired:%s is not exists", i18n.__("FinishingPrintingSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
-                else if (!valid.comodityId)
-                    errors["comodity"] = i18n.__("FinishingPrintingSalesContract.comodity.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
-
+                
                 if (!_process)
                     errors["processType"] = i18n.__("FinishingPrintingSalesContract.processType.isRequired:%s is not exists", i18n.__("FinishingPrintingSalesContract.processType._:ProcessType")); //"processType tidak boleh kosong";
-                else if (!valid.processTypeId)
-                    errors["processType"] = i18n.__("FinishingPrintingSalesContract.processType.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.processType._:ProcessType")); //"processType tidak boleh kosong";
                 
                 if (!_order)
                     errors["orderType"] = i18n.__("FinishingPrintingSalesContract.orderType.isRequired:%s is not exists", i18n.__("FinishingPrintingSalesContract.orderType._:OrderType")); //"orderType tidak boleh kosong";
-                else if (!valid.processTypeId)
-                    errors["orderType"] = i18n.__("FinishingPrintingSalesContract.orderType.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.orderType._:OrderType")); //"orderType tidak boleh kosong";
                 
                 if(!valid.condition || valid.condition===''){
                     errors["condition"]=i18n.__("FinishingPrintingSalesContract.condition.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.condition._:Condition")); //"condition tidak boleh kosong";
@@ -193,8 +183,6 @@ module.exports = class FinishingPrintingSalesContractManager extends BaseManager
 
                 if (!_buyer)
                     errors["buyer"] = i18n.__("FinishingPrintingSalesContract.buyer.isRequired:%s is not exists", i18n.__("FinishingPrintingSalesContract.buyer._:Buyer")); //"Buyer tidak boleh kosong";
-                else if (!valid.buyerId)
-                    errors["buyer"] = i18n.__("FinishingPrintingSalesContract.buyer.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.buyer._:Buyer")); //"Buyer tidak boleh kosong";
                 
                 if(valid.buyer){
                     if(valid.buyer.type.toLowerCase()=="ekspor"||valid.buyer.type.toLowerCase()=="export"){
@@ -213,9 +201,7 @@ module.exports = class FinishingPrintingSalesContractManager extends BaseManager
                 }
                 if (!_bank)
                     errors["accountBank"] = i18n.__("FinishingPrintingSalesContract.accountBank.isRequired:%s is not exists", i18n.__("FinishingPrintingSalesContract.accountBank._:AccountBank")); //"accountBank tidak boleh kosong";
-                else if (!valid.accountBankId)
-                    errors["accountBank"] = i18n.__("FinishingPrintingSalesContract.accountBank.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.accountBank._:AccountBank")); //"accountBank tidak boleh kosong";
-                
+                 
                 if (!valid.shippingQuantityTolerance || valid.shippingQuantityTolerance === 0)
                     errors["shippingQuantityTolerance"] = i18n.__("FinishingPrintingSalesContract.shippingQuantityTolerance.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.shippingQuantityTolerance._:ShippingQuantityTolerance")); //"shippingQuantityTolerance tidak boleh kosong";
                 else if(valid.shippingQuantityTolerance>100){

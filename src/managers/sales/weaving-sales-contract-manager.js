@@ -123,17 +123,12 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                 if(!_construction){
                     errors["materialConstruction"]=i18n.__("WeavingSalesContract.materialConstruction.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.materialConstruction._:MaterialConstruction")); //"materialConstruction tidak boleh kosong";
                 }
-                else if(!valid.materialConstructionId){
-                    errors["materialConstruction"]=i18n.__("WeavingSalesContract.materialConstruction.isRequired:%s is required", i18n.__("WeavingSalesContract.materialConstruction._:MaterialConstruction")); //"materialConstruction tidak boleh kosong";
-                }
+                
 
                 if(!_yarn){
                     errors["yarnMaterial"]=i18n.__("WeavingSalesContract.yarnMaterial.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.yarnMaterial._:YarnMaterial")); //"yarnMaterial tidak boleh kosong";
                 }
-                else if(!valid.yarnMaterialId){
-                    errors["yarnMaterial"]=i18n.__("WeavingSalesContract.yarnMaterial.isRequired:%s is required", i18n.__("WeavingSalesContract.yarnMaterial._:YarnMaterial")); //"yarnMaterial tidak boleh kosong";
-                }
-
+                
                 if(!valid.paymentMethod || valid.paymentMethod===''){
                     errors["paymentMethod"]=i18n.__("WeavingSalesContract.paymentMethod.isRequired:%s is required", i18n.__("WeavingSalesContract.paymentMethod._:PaymentMethod")); //"paymentMethod tidak boleh kosong";
                 }
@@ -141,14 +136,9 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                 if(!_quality){
                     errors["quality"]=i18n.__("WeavingSalesContract.quality.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
                 }
-                else if(!valid.qualityId){
-                    errors["quality"]=i18n.__("WeavingSalesContract.quality.isRequired:%s is required", i18n.__("WeavingSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
-                }
-
+                
                 if (!_material)
                     errors["material"] = i18n.__("WeavingSalesContract.material.isRequired:%s is not exists", i18n.__("WeavingSalesContract.material._:Material")); //"material tidak boleh kosong";
-                else if (!valid.materialId)
-                    errors["material"] = i18n.__("WeavingSalesContract.material.isRequired:%s is required", i18n.__("WeavingSalesContract.material._:Material")); //"material tidak boleh kosong";
                 
                 if(!valid.materialWidth||valid.materialWidth===''){
                     errors["materialWidth"] = i18n.__("WeavingSalesContract.materialWidth.isRequired:%s is required", i18n.__("WeavingSalesContract.materialWidth._:MaterialWidth")); //"lebar material tidak boleh kosong";
@@ -156,9 +146,7 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
 
                 if (!_comodity)
                     errors["comodity"] = i18n.__("WeavingSalesContract.comodity.isRequired:%s is not exists", i18n.__("WeavingSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
-                else if (!valid.comodityId)
-                    errors["comodity"] = i18n.__("WeavingSalesContract.comodity.isRequired:%s is required", i18n.__("WeavingSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
-
+                
                 if(!valid.condition || valid.condition===''){
                     errors["condition"]=i18n.__("WeavingSalesContract.condition.isRequired:%s is required", i18n.__("WeavingSalesContract.condition._:Condition")); //"condition tidak boleh kosong";
                 }
@@ -169,13 +157,9 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
 
                 if (!_buyer)
                     errors["buyer"] = i18n.__("WeavingSalesContract.buyer.isRequired:%s is not exists", i18n.__("WeavingSalesContract.buyer._:Buyer")); //"Buyer tidak boleh kosong";
-                else if (!valid.buyerId)
-                    errors["buyer"] = i18n.__("WeavingSalesContract.buyer.isRequired:%s is required", i18n.__("WeavingSalesContract.buyer._:Buyer")); //"Buyer tidak boleh kosong";
                 
                 if (!_bank)
                     errors["accountBank"] = i18n.__("WeavingSalesContract.accountBank.isRequired:%s is not exists", i18n.__("WeavingSalesContract.accountBank._:Buyer")); //"accountBank tidak boleh kosong";
-                else if (!valid.accountBankId)
-                    errors["accountBank"] = i18n.__("WeavingSalesContract.accountBank.isRequired:%s is required", i18n.__("WeavingSalesContract.accountBank._:Buyer")); //"accountBank tidak boleh kosong";
                 
                 if (!valid.shippingQuantityTolerance || valid.shippingQuantityTolerance === 0)
                     errors["shippingQuantityTolerance"] = i18n.__("WeavingSalesContract.shippingQuantityTolerance.isRequired:%s is required", i18n.__("WeavingSalesContract.shippingQuantityTolerance._:ShippingQuantityTolerance")); //"shippingQuantityTolerance tidak boleh kosong";

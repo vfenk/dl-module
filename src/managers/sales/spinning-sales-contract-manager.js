@@ -116,9 +116,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                 if(!_quality){
                     errors["quality"]=i18n.__("SpinningSalesContract.quality.isRequired:%s is not exsist", i18n.__("SpinningSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
                 }
-                else if(!valid.qualityId){
-                    errors["quality"]=i18n.__("SpinningSalesContract.quality.isRequired:%s is required", i18n.__("SpinningSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
-                }
+                
 
                 if (!_comodity)
                     errors["comodity"] = i18n.__("SpinningSalesContract.comodity.isRequired:%s is not exists", i18n.__("SpinningSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
@@ -140,14 +138,10 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
 
                 if (!_buyer)
                     errors["buyer"] = i18n.__("SpinningSalesContract.buyer.isRequired:%s is not exists", i18n.__("SpinningSalesContract.buyer._:Buyer")); //"Buyer tidak boleh kosong";
-                else if (!valid.buyerId)
-                    errors["buyer"] = i18n.__("SpinningSalesContract.buyer.isRequired:%s is required", i18n.__("SpinningSalesContract.buyer._:Buyer")); //"Buyer tidak boleh kosong";
                 
                 if (!_bank)
                     errors["accountBank"] = i18n.__("SpinningSalesContract.accountBank.isRequired:%s is not exists", i18n.__("SpinningSalesContract.accountBank._:Buyer")); //"accountBank tidak boleh kosong";
-                else if (!valid.accountBankId)
-                    errors["accountBank"] = i18n.__("SpinningSalesContract.accountBank.isRequired:%s is required", i18n.__("SpinningSalesContract.accountBank._:Buyer")); //"accountBank tidak boleh kosong";
-                
+               
                 if (!valid.shippingQuantityTolerance || valid.shippingQuantityTolerance === 0)
                     errors["shippingQuantityTolerance"] = i18n.__("SpinningSalesContract.shippingQuantityTolerance.isRequired:%s is required", i18n.__("SpinningSalesContract.shippingQuantityTolerance._:ShippingQuantityTolerance")); //"shippingQuantityTolerance tidak boleh kosong";
                 else if(valid.shippingQuantityTolerance>100){
