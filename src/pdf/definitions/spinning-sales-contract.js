@@ -573,6 +573,22 @@ module.exports = function (salesContract) {
                         style: ['size09']
                     }]
         },{
+                columns: [
+                    {
+                        width: '25%',
+                        text: 'Keterangan',
+                        style: ['size09']
+                    }, {
+                        width: '3%',
+                        text:':',
+                        style: ['size09']
+                    },
+                    {
+                        width: '*',
+                        text:salesContract.remark,
+                        style: ['size09']
+                    }]
+        },{
                 text:'Demikian konfirmasi order ini kami sampaikan untuk diketahui dan dipergunakan seperlunya. tembusan surat ini mohon dikirim kembali setelah ditanda tangani dan dibubuhi cap perusahaan.',
                 style: ['size09'],
                 alignment: "left"
