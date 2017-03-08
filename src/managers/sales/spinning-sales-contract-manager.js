@@ -154,6 +154,9 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     errors["shippingQuantityTolerance"] =i18n.__("SpinningSalesContract.shippingQuantityTolerance.shouldNot:%s should not more than 100", i18n.__("SpinningSalesContract.shippingQuantityTolerance._:ShippingQuantityTolerance")); //"shippingQuantityTolerance tidak boleh lebih dari 100";
                 }
 
+                if (!valid.price || valid.price === 0)
+                    errors["price"] = i18n.__("SpinningSalesContract.price.isRequired:%s is required", i18n.__("SpinningSalesContract.price._:Price")); //"price tidak boleh kosong";
+                
                 if(!valid.deliveredTo || valid.deliveredTo===''){
                     errors["deliveredTo"]=i18n.__("SpinningSalesContract.deliveredTo.isRequired:%s is required", i18n.__("SpinningSalesContract.deliveredTo._:DeliveredTo")); //"deliveredTo tidak boleh kosong";
                 }
