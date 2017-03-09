@@ -4,7 +4,7 @@ var instanceManager = null;
 var should = require("should");
 var sqlHelper = require("../../sql-helper");
 
-before("#00. connect db", function (done) {
+before("#00. connect db", function(done) {
     Promise.all([helper, sqlHelper])
         .then((result) => {
             var db = result[0];
@@ -21,7 +21,7 @@ before("#00. connect db", function (done) {
         });
 });
 
-it("#01. should success when create etl fact-spinning-sales-contract", function (done) {
+it("#01. should success when create etl fact-spinning-sales-contract", function(done) {
     instanceManager.run()
         .then((a) => {
             console.log(a);
@@ -33,11 +33,31 @@ it("#01. should success when create etl fact-spinning-sales-contract", function 
         });
 });
 
-
-
-var data = [{}, {}];
-
-it("#02. should success when transforming data", function (done) {
+it("#02. should success when transforming data", function(done) {
+    var data = [
+        {
+            uom: {
+                unit: "yds"
+            },
+            orderQuantity: 1,
+            material: {
+                name: ""
+            },
+            materialConstruction: {
+                name: ""
+            },
+            yarnMaterial: {
+                name: ""
+            },
+            materialWidth: 0
+        },
+        {
+            uom: {
+                unit: "mtr"
+            },
+            orderQuantity: 1
+        }
+    ];
     instanceManager.transform(data)
         .then(() => {
             done();
@@ -47,13 +67,13 @@ it("#02. should success when transforming data", function (done) {
         });
 });
 
-it("#03. should error when load empty data", function (done) {
+it("#03. should error when load empty data", function(done) {
     instanceManager.load({})
         .then(id => {
             done("should error when create with empty data");
         })
         .catch(e => {
-            try {                
+            try {
                 done();
             }
             catch (ex) {
@@ -62,13 +82,13 @@ it("#03. should error when load empty data", function (done) {
         });
 });
 
-it("#04. should error when insert empty data", function (done) {
+it("#04. should error when insert empty data", function(done) {
     instanceManager.insertQuery(this.sql, "")
         .then((id) => {
             done("should error when create with empty data");
         })
         .catch((e) => {
-            try {                
+            try {
                 done();
             }
             catch (ex) {

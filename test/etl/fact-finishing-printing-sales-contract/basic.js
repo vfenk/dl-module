@@ -33,11 +33,31 @@ it("#01. should success when create etl fact-finishing-printing-sales-contract",
         });
 });
 
-
-
-var data = [{}, {}];
-
 it("#02. should success when transforming data", function (done) {
+    var data = [
+        {
+            uom: {
+                unit: "yds"
+            },
+            orderQuantity: 1,
+            material: {
+                name: ""
+            },
+            materialConstruction: {
+                name: ""
+            },
+            yarnMaterial: {
+                name: ""
+            },
+            materialWidth: 0
+        },
+        {
+            uom: {
+                unit: "mtr"
+            },
+            orderQuantity: 1
+        }
+    ];
     instanceManager.transform(data)
         .then(() => {
             done();
