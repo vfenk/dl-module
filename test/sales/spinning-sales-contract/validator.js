@@ -93,10 +93,10 @@ it('#04. should error when create new data with non existent quality, comodity, 
     SpinningSalesContractDataUtil.getNewData()
         .then(sc => {
 
-            sc.quality._id = '';
-            sc.comodity._id = '';
-            sc.buyer._id = '';
-            sc.accountBank._id = '';
+            sc.qualityId = '';
+            sc.comodityId = '';
+            sc.buyerId = '';
+            sc.accountBankId = '';
             sc.uom.unit = '';
 
             spinningSalesContractManager.create(sc)
