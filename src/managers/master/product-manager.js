@@ -99,8 +99,6 @@ module.exports = class ProductManager extends BaseManager {
                 }
 
                 valid.uom = _uom;
-                valid.price = parseInt(valid.price);
-                valid.currency.rate = parseInt(valid.currency.rate);
                 valid.uomId = new ObjectId(valid.uom._id);
                 if (!valid.stamp)
                     valid = new Product(valid);
@@ -296,6 +294,23 @@ module.exports = class ProductManager extends BaseManager {
     }
 
     readById(paging) {
+        var _paging = Object.assign({
+            order: {},
+            filter: {},
+            select: []
+        }, paging);
+
+        return this._createIndexes()
+            .then((createIndexResults) => {
+                return this.collection
+                    .where(_paging.filter)
+                    .select(_paging.select)
+                    .order(_paging.order)
+                    .execute();
+            });
+    }
+
+     readById(paging) {
         var _paging = Object.assign({
             order: {},
             filter: {},
