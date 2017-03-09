@@ -21,7 +21,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
         super(db, user);
 
         this.collection = this.db.collection(map.sales.collection.SpinningSalesContract);
-        this.BuyerManager = new BuyerManager(db, user);
+        this.buyerManager = new BuyerManager(db, user);
         this.UomManager = new UomManager(db, user);
         this.ComodityManager = new ComodityManager(db, user);
         this.QualityManager = new QualityManager(db, user);
@@ -81,7 +81,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
         });
 
         //get Object from ...
-        var getBuyer = valid.buyer && ObjectId.isValid(valid.buyer._id) ? this.BuyerManager.getSingleByIdOrDefault(valid.buyer._id) : Promise.resolve(null);
+        var getBuyer = valid.buyer && ObjectId.isValid(valid.buyer._id) ? this.buyerManager.getSingleByIdOrDefault(valid.buyer._id) : Promise.resolve(null);
         var getUom = valid.uom && ObjectId.isValid(valid.uom._id) ? this.UomManager.getSingleByIdOrDefault(valid.uom._id) : Promise.resolve(null);
         var getComodity = valid.comodity && ObjectId.isValid(valid.comodity._id) ? this.ComodityManager.getSingleByIdOrDefault(valid.comodity._id) : Promise.resolve(null);
         var getQuality = valid.quality && ObjectId.isValid(valid.quality._id) ? this.QualityManager.getSingleByIdOrDefault(valid.quality._id) : Promise.resolve(null);
