@@ -21,7 +21,8 @@ describe('#dl-module', function (done) {
     test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
     test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
     test('@ETL/FACT-MONITORING-EVENT', './etl/fact-monitoring-event');    
-    test('@ETL/FACT-SALES-CONTRACT', './etl/fact-sales-contract');    
+    test('@ETL/FACT-SALES-CONTRACT', './etl/fact-sales-contract');   
+    test('@ETL/DIM-BUYER', './etl/dim-buyer'); 
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
@@ -44,11 +45,11 @@ describe('#dl-module', function (done) {
     test('@MASTER/ORDER-TYPE', './master/order-type');
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
-    // test('@MASTER/INSTRUCTION', './master/instruction');
+    test('@MASTER/INSTRUCTION', './master/instruction');
 
     // test('@MASTER/MONITORING-EVENT-TYPE', './master/monitoring-event-type');
     test('@MASTER/STEP', './master/step');
-    // test('@MASTER/MACHINE-TYPE', './master/machine-type');
+    //test('@MASTER/MACHINE-TYPE', './master/machine-type');
     test('@MASTER/MACHINE-SPESIFICATION-STANDARD', './master/machine-spesification-standard');
     test('@MASTER/MATERIAL-CONSTRUCTION', './master/material-construction');
     test('@MASTER/YARN-MATERIAL', './master/yarn-material');
@@ -79,6 +80,7 @@ describe('#dl-module', function (done) {
     test('@PRODUCTION/DAILY OPERATION', './production/finishing-printing/daily-operation');
     test('@PRODUCTION/FINISHING-PRINTING/MONITORING-SPECIFICATION-MACHINE', './production/finishing-printing/monitoring-specification-machine');
     test('@PRODUCTION/FINISHING-PRINTING/MONITORING-EVENT', './production/finishing-printing/monitoring-event');
+
     // test('@production/winding-quality-sampling-manager', './production/spinning/winding/winding-quality-sampling-manager-test');
     // test('@production/winding-production-output-manager', './production/spinning/winding/winding-production-output-manager-test');
 
