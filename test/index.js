@@ -20,19 +20,12 @@ describe('#dl-module', function (done) {
     test('@ETL/DIM-MACHINE', './etl/dim-machine');
     test('@ETL/DIM-UNIT', './etl/dim-unit');
     test('@ETL/FACT-TOTAL-HUTANG', './etl/fact-total-hutang');
-<<<<<<< HEAD
     test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');
     test('@ETL/FACT-MONITORING-EVENT', './etl/fact-monitoring-event');
     test('@ETL/FACT-PRODUCTION-ORDER', './etl/fact-production-order');
     test('@ETL/FACT-WEAVING-SALES-CONTRACT', './etl/fact-weaving-sales-contract');
     test('@ETL/FACT-FINISHING-PRINTING-SALES-CONTRACT', './etl/fact-finishing-printing-sales-contract');
     test('@ETL/FACT-SPINNING-SALES-CONTRACT', './etl/fact-spinning-sales-contract');
-=======
-    test('@ETL/FACT-PURCHASING', './etl/fact-purchasing');    
-    test('@ETL/FACT-MONITORING-EVENT', './etl/fact-monitoring-event');    
-    test('@ETL/FACT-SALES-CONTRACT', './etl/fact-sales-contract');   
-    test('@ETL/DIM-BUYER', './etl/dim-buyer'); 
->>>>>>> refs/remotes/danliris/dev
 
     // Master
     test('@MASTER/ACCOUNT-BANK', './master/account-bank');
