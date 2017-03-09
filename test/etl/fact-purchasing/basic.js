@@ -94,7 +94,11 @@ it("#02. should success when transforming data", function (done) {
 
 
 it("#03. should success when extracting PR from PO", function (done) {
-    var data = [];
+    var data = [
+        {
+            purchaseRequest: {}
+        }
+        ];
     instanceManager.getPRFromPO(data)
         .then(() => {
             done();
