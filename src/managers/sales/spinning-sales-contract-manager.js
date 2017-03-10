@@ -111,7 +111,6 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     errors["salesContractNo"] = i18n.__("SpinningSalesContract.salesContractNo.isExist:%s is Exist", i18n.__("SpinningSalesContract.salesContractNo._:SalesContractNo")); //"no Sales Contract tidak boleh kosong";
                 }
 
-<<<<<<< HEAD
                 if(!_payment){
                     errors["termOfPayment"]=i18n.__("FinishingPrintingSalesContract.termOfPayment.isRequired:%s is not exsist", i18n.__("FinishingPrintingSalesContract.termOfPayment._:TermOfPayment")); //"termOfPayment tidak boleh kosong";
                 }
