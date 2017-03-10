@@ -60,6 +60,7 @@ describe('#dl-module', function (done) {
     test('@MASTER/FINISH-TYPE', './master/finish-type');
     test('@MASTER/COMODITY', './master/comodity');
     test('@MASTER/QUALITY', './master/quality');
+    test('@MASTER/TERM OF PAYMENT', './master/term-of-payment');
 
     //Purchasing 
     test('@PURCHASING/PURCHASE REQUEST', './purchasing/purchase-request');
