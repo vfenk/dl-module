@@ -167,7 +167,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text:`${moment(salesContract._createdDate).format('MMMM YYYY')}`,
+                        text:`${moment(salesContract.deliverySchedule).format('MMMM YYYY')}`,
                         style: ['size09']
                     }]
         },{
@@ -553,7 +553,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text:`${moment(salesContract._createdDate).format('MMMM YYYY')}`,
+                        text:`${moment(salesContract.deliverySchedule).format('MMMM YYYY')}`,
                         style: ['size09']
                     }]
         },{
