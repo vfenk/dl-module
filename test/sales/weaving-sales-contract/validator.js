@@ -93,12 +93,12 @@ it('#04. should error when create new data with non existent quality, comodity, 
     WeavingSalesContractDataUtil.getNewData()
         .then(sc => {
 
-            sc.qualityId = '';
-            sc.comodityId = '';
-            sc.buyerId = '';
-            sc.accountBankId = '';
-            sc.materialConstructionId = '';
-            sc.yarnMaterialId = '';
+            sc.quality._id = '';
+            sc.comodity._id = '';
+            sc.buyer._id = '';
+            sc.accountBank._id = '';
+            sc.materialConstruction._id = '';
+            sc.yarnMaterial._id = '';
             sc.uom.unit = '';
 
             weavingSalesContractManager.create(sc)
