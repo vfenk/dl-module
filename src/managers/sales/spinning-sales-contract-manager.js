@@ -123,7 +123,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
 
                 if (!_comodity)
                     errors["comodity"] = i18n.__("SpinningSalesContract.comodity.isRequired:%s is not exists", i18n.__("SpinningSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
-                else if (!valid.comodityId)
+                else if (!valid.comodity)
                     errors["comodity"] = i18n.__("SpinningSalesContract.comodity.isRequired:%s is required", i18n.__("SpinningSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
 
 
