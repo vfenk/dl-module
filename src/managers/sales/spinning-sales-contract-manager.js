@@ -11,6 +11,7 @@ var UomManager = require('../master/uom-manager');
 var AccountBankManager = require ('../master/account-bank-manager');
 var ComodityManager = require ('../master/comodity-manager');
 var QualityManager = require ('../master/quality-manager');
+var TermOfPaymentManager = require ('../master/term-of-payment-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var generateCode = require("../../utils/code-generator");
@@ -26,6 +27,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
         this.ComodityManager=new ComodityManager(db,user);
         this.QualityManager=new QualityManager(db,user);
         this.AccountBankManager=new AccountBankManager(db,user);
+        this.TermOfPaymentManager=new TermOfPaymentManager(db,user);
     }
 
     _getQuery(paging) {
@@ -85,10 +87,10 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
         var getComodity= ObjectId.isValid(valid.comodityId) ? this.ComodityManager.getSingleByIdOrDefault(valid.comodityId) : Promise.resolve(null);
         var getQuality= ObjectId.isValid(valid.qualityId) ? this.QualityManager.getSingleByIdOrDefault(valid.qualityId) : Promise.resolve(null);
         var getBankAccount= ObjectId.isValid(valid.accountBankId) ? this.AccountBankManager.getSingleByIdOrDefault(valid.accountBankId) : Promise.resolve(null);
-
+        var getTermOfPayment=ObjectId.isValid(valid.termOfPaymentId) ? this.TermOfPaymentManager.getSingleByIdOrDefault(valid.termOfPaymentId) : Promise.resolve(null);
         
 
-        return Promise.all([getSalesContractPromise, getBuyer, getUom, getComodity, getQuality, getBankAccount])
+        return Promise.all([getSalesContractPromise, getBuyer, getUom, getComodity, getQuality, getBankAccount,getTermOfPayment])
             .then(results => {
                 var _salesContract = results[0];
                 var _buyer = results[1];
@@ -96,6 +98,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                 var _comodity=results[3];
                 var _quality=results[4];
                 var _bank=results[5];
+                var _payment=results[6];
 
                 if (valid.uom) {
                     if (!valid.uom.unit || valid.uom.unit == '')
@@ -108,11 +111,10 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     errors["salesContractNo"]=i18n.__("SpinningSalesContract.salesContractNo.isExist:%s is Exist", i18n.__("SpinningSalesContract.salesContractNo._:SalesContractNo")); //"no Sales Contract tidak boleh kosong";
                 }
 
-                
-                if(!valid.paymentMethod || valid.paymentMethod===''){
-                    errors["paymentMethod"]=i18n.__("SpinningSalesContract.paymentMethod.isRequired:%s is required", i18n.__("SpinningSalesContract.paymentMethod._:PaymentMethod")); //"paymentMethod tidak boleh kosong";
+                if(!_payment){
+                    errors["termOfPayment"]=i18n.__("FinishingPrintingSalesContract.termOfPayment.isRequired:%s is not exsist", i18n.__("FinishingPrintingSalesContract.termOfPayment._:TermOfPayment")); //"termOfPayment tidak boleh kosong";
                 }
-
+                
                 if(!_quality){
                     errors["quality"]=i18n.__("SpinningSalesContract.quality.isRequired:%s is not exsist", i18n.__("SpinningSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
                 }

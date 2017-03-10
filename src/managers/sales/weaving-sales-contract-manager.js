@@ -14,6 +14,7 @@ var YarnMaterialManager = require ('../master/yarn-material-manager');
 var AccountBankManager = require ('../master/account-bank-manager');
 var ComodityManager = require ('../master/comodity-manager');
 var QualityManager = require ('../master/quality-manager');
+var TermOfPaymentManager = require ('../master/term-of-payment-manager');
 var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var generateCode = require("../../utils/code-generator");
@@ -32,6 +33,7 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
         this.ComodityManager=new ComodityManager(db,user);
         this.QualityManager=new QualityManager(db,user);
         this.AccountBankManager=new AccountBankManager(db,user);
+        this.TermOfPaymentManager=new TermOfPaymentManager(db,user);
     }
 
     _getQuery(paging) {
@@ -94,10 +96,10 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
         var getComodity= ObjectId.isValid(valid.comodityId) ? this.ComodityManager.getSingleByIdOrDefault(valid.comodityId) : Promise.resolve(null);
         var getQuality= ObjectId.isValid(valid.qualityId) ? this.QualityManager.getSingleByIdOrDefault(valid.qualityId) : Promise.resolve(null);
         var getBankAccount= ObjectId.isValid(valid.accountBankId) ? this.AccountBankManager.getSingleByIdOrDefault(valid.accountBankId) : Promise.resolve(null);
-
+        var getTermOfPayment=ObjectId.isValid(valid.termOfPaymentId) ? this.TermOfPaymentManager.getSingleByIdOrDefault(valid.termOfPaymentId) : Promise.resolve(null);
         
 
-        return Promise.all([getSalesContractPromise, getBuyer, getUom,  getProduct, getYarnMaterial, getMaterialConstruction, getComodity, getQuality, getBankAccount])
+        return Promise.all([getSalesContractPromise, getBuyer, getUom,  getProduct, getYarnMaterial, getMaterialConstruction, getComodity, getQuality, getBankAccount,getTermOfPayment])
             .then(results => {
                 var _salesContract = results[0];
                 var _buyer = results[1];
@@ -108,6 +110,7 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                 var _comodity=results[6];
                 var _quality=results[7];
                 var _bank=results[8];
+                var _payment=results[9];
 
                 if (valid.uom) {
                     if (!valid.uom.unit || valid.uom.unit == '')
@@ -124,15 +127,15 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                     errors["materialConstruction"]=i18n.__("WeavingSalesContract.materialConstruction.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.materialConstruction._:MaterialConstruction")); //"materialConstruction tidak boleh kosong";
                 }
                 
+                
+                if(!_payment){
+                    errors["termOfPayment"]=i18n.__("FinishingPrintingSalesContract.termOfPayment.isRequired:%s is not exsist", i18n.__("FinishingPrintingSalesContract.termOfPayment._:TermOfPayment")); //"termOfPayment tidak boleh kosong";
+                }
 
                 if(!_yarn){
                     errors["yarnMaterial"]=i18n.__("WeavingSalesContract.yarnMaterial.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.yarnMaterial._:YarnMaterial")); //"yarnMaterial tidak boleh kosong";
                 }
                 
-                if(!valid.paymentMethod || valid.paymentMethod===''){
-                    errors["paymentMethod"]=i18n.__("WeavingSalesContract.paymentMethod.isRequired:%s is required", i18n.__("WeavingSalesContract.paymentMethod._:PaymentMethod")); //"paymentMethod tidak boleh kosong";
-                }
-
                 if(!_quality){
                     errors["quality"]=i18n.__("WeavingSalesContract.quality.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
                 }
