@@ -9,6 +9,7 @@ var WeavingSalesContract = DLModels.sales.WeavingSalesContract;
 var BuyerManager = require('../master/buyer-manager');
 var UomManager = require('../master/uom-manager');
 var ProductManager = require('../master/product-manager');
+var TermOfPaymentManager = require ('../master/term-of-payment-manager');
 var MaterialConstructionManager = require('../master/material-construction-manager');
 var YarnMaterialManager = require('../master/yarn-material-manager');
 var AccountBankManager = require('../master/account-bank-manager');
@@ -27,6 +28,7 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
         this.buyerManager = new BuyerManager(db, user);
         this.UomManager = new UomManager(db, user);
         this.ProductManager = new ProductManager(db, user);
+        this.TermOfPaymentManager=new TermOfPaymentManager(db,user);
         this.YarnMaterialManager = new YarnMaterialManager(db, user);
         this.MaterialConstructionManager = new MaterialConstructionManager(db, user);
         this.ComodityManager = new ComodityManager(db, user);
@@ -95,10 +97,10 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
         var getComodity = valid.comodity && ObjectId.isValid(valid.comodity._id) ? this.ComodityManager.getSingleByIdOrDefault(valid.comodity._id) : Promise.resolve(null);
         var getQuality = valid.quality && ObjectId.isValid(valid.quality._id) ? this.QualityManager.getSingleByIdOrDefault(valid.quality._id) : Promise.resolve(null);
         var getBankAccount = valid.accountBank && ObjectId.isValid(valid.accountBank._id) ? this.AccountBankManager.getSingleByIdOrDefault(valid.accountBank._id) : Promise.resolve(null);
+        var getTermOfPayment=ObjectId.isValid(valid.termOfPaymentId) ? this.TermOfPaymentManager.getSingleByIdOrDefault(valid.termOfPaymentId) : Promise.resolve(null);
 
 
-
-        return Promise.all([getSalesContractPromise, getBuyer, getUom, getProduct, getYarnMaterial, getMaterialConstruction, getComodity, getQuality, getBankAccount])
+        return Promise.all([getSalesContractPromise, getBuyer, getUom, getProduct, getYarnMaterial, getMaterialConstruction, getComodity, getQuality, getBankAccount,getTermOfPayment])
             .then(results => {
                 var _salesContract = results[0];
                 var _buyer = results[1];
@@ -109,6 +111,7 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                 var _comodity = results[6];
                 var _quality = results[7];
                 var _bank = results[8];
+                var _payment=results[9];
 
                 if (valid.uom) {
                     if (!valid.uom.unit || valid.uom.unit == '')
@@ -124,18 +127,19 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                 if (!_construction) {
                     errors["materialConstruction"] = i18n.__("WeavingSalesContract.materialConstruction.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.materialConstruction._:MaterialConstruction")); //"materialConstruction tidak boleh kosong";
                 }
+                
+                
+                if(!_payment){
+                    errors["termOfPayment"]=i18n.__("FinishingPrintingSalesContract.termOfPayment.isRequired:%s is not exsist", i18n.__("FinishingPrintingSalesContract.termOfPayment._:TermOfPayment")); //"termOfPayment tidak boleh kosong";
+                }
 
 
                 if (!_yarn) {
                     errors["yarnMaterial"] = i18n.__("WeavingSalesContract.yarnMaterial.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.yarnMaterial._:YarnMaterial")); //"yarnMaterial tidak boleh kosong";
                 }
-
-                if (!valid.paymentMethod || valid.paymentMethod === '') {
-                    errors["paymentMethod"] = i18n.__("WeavingSalesContract.paymentMethod.isRequired:%s is required", i18n.__("WeavingSalesContract.paymentMethod._:PaymentMethod")); //"paymentMethod tidak boleh kosong";
-                }
-
-                if (!_quality) {
-                    errors["quality"] = i18n.__("WeavingSalesContract.quality.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
+                
+                if(!_quality){
+                    errors["quality"]=i18n.__("WeavingSalesContract.quality.isRequired:%s is not exsist", i18n.__("WeavingSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
                 }
 
                 if (!_material)

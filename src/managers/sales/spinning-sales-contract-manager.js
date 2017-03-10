@@ -8,6 +8,7 @@ var map = DLModels.map;
 var SpinningSalesContract = DLModels.sales.SpinningSalesContract;
 var BuyerManager = require('../master/buyer-manager');
 var UomManager = require('../master/uom-manager');
+var TermOfPaymentManager = require ('../master/term-of-payment-manager');
 var AccountBankManager = require('../master/account-bank-manager');
 var ComodityManager = require('../master/comodity-manager');
 var QualityManager = require('../master/quality-manager');
@@ -23,6 +24,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
         this.collection = this.db.collection(map.sales.collection.SpinningSalesContract);
         this.buyerManager = new BuyerManager(db, user);
         this.UomManager = new UomManager(db, user);
+        this.TermOfPaymentManager=new TermOfPaymentManager(db,user);
         this.ComodityManager = new ComodityManager(db, user);
         this.QualityManager = new QualityManager(db, user);
         this.AccountBankManager = new AccountBankManager(db, user);
@@ -86,10 +88,9 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
         var getComodity = valid.comodity && ObjectId.isValid(valid.comodity._id) ? this.ComodityManager.getSingleByIdOrDefault(valid.comodity._id) : Promise.resolve(null);
         var getQuality = valid.quality && ObjectId.isValid(valid.quality._id) ? this.QualityManager.getSingleByIdOrDefault(valid.quality._id) : Promise.resolve(null);
         var getBankAccount = valid.accountBank && ObjectId.isValid(valid.accountBank._id) ? this.AccountBankManager.getSingleByIdOrDefault(valid.accountBank._id) : Promise.resolve(null);
+        var getTermOfPayment=ObjectId.isValid(valid.termOfPaymentId) ? this.TermOfPaymentManager.getSingleByIdOrDefault(valid.termOfPaymentId) : Promise.resolve(null);
 
-
-
-        return Promise.all([getSalesContractPromise, getBuyer, getUom, getComodity, getQuality, getBankAccount])
+        return Promise.all([getSalesContractPromise, getBuyer, getUom, getComodity, getQuality, getBankAccount,getTermOfPayment])
             .then(results => {
                 var _salesContract = results[0];
                 var _buyer = results[1];
@@ -97,6 +98,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                 var _comodity = results[3];
                 var _quality = results[4];
                 var _bank = results[5];
+                var _payment=results[6];
 
                 if (valid.uom) {
                     if (!valid.uom.unit || valid.uom.unit == '')
@@ -109,13 +111,13 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     errors["salesContractNo"] = i18n.__("SpinningSalesContract.salesContractNo.isExist:%s is Exist", i18n.__("SpinningSalesContract.salesContractNo._:SalesContractNo")); //"no Sales Contract tidak boleh kosong";
                 }
 
-
-                if (!valid.paymentMethod || valid.paymentMethod === '') {
-                    errors["paymentMethod"] = i18n.__("SpinningSalesContract.paymentMethod.isRequired:%s is required", i18n.__("SpinningSalesContract.paymentMethod._:PaymentMethod")); //"paymentMethod tidak boleh kosong";
+                if(!_payment){
+                    errors["termOfPayment"]=i18n.__("FinishingPrintingSalesContract.termOfPayment.isRequired:%s is not exsist", i18n.__("FinishingPrintingSalesContract.termOfPayment._:TermOfPayment")); //"termOfPayment tidak boleh kosong";
                 }
+                
+                if(!_quality){
+                    errors["quality"]=i18n.__("SpinningSalesContract.quality.isRequired:%s is not exsist", i18n.__("SpinningSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
 
-                if (!_quality) {
-                    errors["quality"] = i18n.__("SpinningSalesContract.quality.isRequired:%s is not exsist", i18n.__("SpinningSalesContract.quality._:Quality")); //"quality tidak boleh kosong";
                 }
 
 
