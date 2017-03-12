@@ -44,7 +44,7 @@ describe('#dl-module', function (done) {
     test('@MASTER/ORDER-TYPE', './master/order-type');
     test('@MASTER/PROCESS-TYPE', './master/process-type');
     test('@MASTER/COLOR-TYPE', './master/color-type');
-    // test('@MASTER/INSTRUCTION', './master/instruction');
+    test('@MASTER/INSTRUCTION', './master/instruction');
 
     // test('@MASTER/MONITORING-EVENT-TYPE', './master/monitoring-event-type');
     test('@MASTER/STEP', './master/step');
@@ -74,7 +74,7 @@ describe('#dl-module', function (done) {
     test('@SALES/SPINNING SALES CONTRACT', './sales/spinning-sales-contract');
     test('@SALES/WEAVING SALES CONTRACT', './sales/weaving-sales-contract');
     
-    //Production
+    Production
     test('@PRODUCTION/FINISHING-PRINTING/KANBAN', './production/finishing-printing/kanban');
     test('@PRODUCTION/DAILY OPERATION', './production/finishing-printing/daily-operation');
     test('@PRODUCTION/FINISHING-PRINTING/MONITORING-SPECIFICATION-MACHINE', './production/finishing-printing/monitoring-specification-machine');
