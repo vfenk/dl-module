@@ -1,5 +1,6 @@
 require("should");
 var dataUtil = require("../../../data-util/production/finishing-printing/daily-operation-data-util");
+var stepDataUtil = require("../../../data-util/master/step-data-util");
 var helper = require("../../../helper");
 var validate = require("dl-models").validator.production.finishingPrinting.dailyOperation;
 var codeGenerator = require('../../../../src/utils/code-generator');
@@ -125,33 +126,41 @@ it("#03. should error when create new and no document machine on collection data
 });
 
 it("#04. should error when create new and no document step on collection database", function(done) {
-    dataUtil.getNewData()
-            .then(data => {
-                stepManager.destroy(data.stepId)
-                        .then(itemDes => {
-                            itemDes.should.be.Boolean();
-                            itemDes.should.equal(true);
-                            dailyOperationManager.create(data)
-                                    .then((item) => {
-                                        done("should error when create new and no document step on collection database");
-                                    })
-                                    .catch((e) => {
-                                        try {
-                                            e.errors.should.have.property('step');
-                                            done();
-                                        }
-                                        catch (ex) {
-                                            done(ex);
-                                        }
-                                    });
-                        })
-                        .catch((e) => {
-                            done(e);
-                        });
-            })
-            .catch((e) => {
-                done(e);
-            });
+    stepDataUtil.getTestData('Test Data', null, null)
+        .then(dataStep => {
+            dataUtil.getNewData()
+                    .then(data => {
+                        data.stepId = dataStep._id;
+                        data.step = dataStep;
+                        stepManager.destroy(data.stepId)
+                                .then(itemDes => {
+                                    itemDes.should.be.Boolean();
+                                    itemDes.should.equal(true);
+                                    dailyOperationManager.create(data)
+                                            .then((item) => {
+                                                done("should error when create new and no document step on collection database");
+                                            })
+                                            .catch((e) => {
+                                                try {
+                                                    e.errors.should.have.property('step');
+                                                    done();
+                                                }
+                                                catch (ex) {
+                                                    done(ex);
+                                                }
+                                            });
+                                })
+                                .catch((e) => {
+                                    done(e);
+                                });
+                    })
+                    .catch((e) => {
+                        done(e);
+                    });
+                    })
+    .catch((e) => {
+        done(e);
+    });
 });
 
 it("#05. should success when create new without output data", function(done) {
