@@ -174,6 +174,11 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                 if (_buyer) {
                     valid.buyerId = new ObjectId(_buyer._id);
                     valid.buyer = _buyer;
+                    if (valid.buyer.type.trim().toLowerCase() == "ekspor") {
+                        if (!valid.termOfShipment || valid.termOfShipment == "") {
+                            errors["termOfShipment"] = i18n.__("SpinningSalesContract.termOfShipment.isRequired:%s is required", i18n.__("SpinningSalesContract.termOfShipment._:termOfShipment")); //"termOfShipment tidak boleh kosong";
+                        }
+                    }
                 }
                 if (_quality) {
                     valid.qualityId = new ObjectId(_quality._id);
@@ -235,7 +240,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
             this.getSingleById(id)
                 .then(salesContract => {
 
-                    var getDefinition = require("../../pdf/definitions/finishing-printing-sales-contract");
+                    var getDefinition = require("../../pdf/definitions/spinning-sales-contract");
                     var definition = getDefinition(salesContract);
 
                     var generatePdf = require("../../pdf/pdf-generator");
