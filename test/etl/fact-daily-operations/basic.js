@@ -36,27 +36,25 @@ it("#01. should success when create etl fact-weaving-sales-contract", function (
 it("#02. should success when transforming data", function (done) {
     var data = [
         {
-            uom: {
-                unit: "yds"
+            kanban: {
+                selectedProductionOrderDetail: {
+                    uom: {
+                        unit: "yds"
+                    }
+                }
             },
-            orderQuantity: 1,
-            material: {
-                name: ""
-            },
-            materialConstruction: {
-                name: ""
-            },
-            yarnMaterial: {
-                name: ""
-            },
-            materialWidth: 0
+            input: 1
         },
         {
-            uom: {
-                unit: "mtr"
+            kanban: {
+                selectedProductionOrderDetail: {
+                    uom: {
+                        unit: "mtr"
+                    }
+                }
             },
-            orderQuantity: 1
-        }
+            input: 1
+        },
     ];
     instanceManager.transform(data)
         .then(() => {
