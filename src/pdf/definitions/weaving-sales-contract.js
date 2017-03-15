@@ -29,7 +29,7 @@ module.exports = function (salesContract) {
     var code = generateCode();
 
     if (salesContract.buyer.type.toLowerCase() == "export" || salesContract.buyer.type.toLowerCase() == "ekspor") {
-        moment.locale();
+        
         header = [{
             columns: [{
                 width: '*',
