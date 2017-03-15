@@ -23,10 +23,10 @@ module.exports = function (salesContract) {
     for(var i of details){
         var ppn="";
         if(i.useIncomeTax){
-            ppn='INCLUDING PPN';
+            ppn='INCLUDING PPN 10%';
         }
         else{
-            ppn='EXCLUDING PPN';
+            ppn='EXCLUDING PPN 10%';
         }
         detail+= i.color + " " + i.currency.symbol + " " + `${parseFloat(i.price).toLocaleString(locale, locale.currency)}` + ' / ' + salesContract.uom.unit +"\n";
         detailprice+= i.currency.symbol + " " + `${parseFloat(i.price).toLocaleString(locale, locale.currency)}` + ' / ' + salesContract.uom.unit + ' ' + ppn + ' ' + '( ' + i.color + ' )' + "\n";
