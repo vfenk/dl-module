@@ -16,17 +16,17 @@ module.exports = function (salesContract) {
     var footer = [];
 
     var detailprice = "";
-    var amount=0;
+    var amount = 0;
     var ppn = "";
     if (salesContract.useIncomeTax) {
-        ppn = 'INCLUDING PPN';
+        ppn = 'INCLUDING PPN 10%';
     }
     else {
-        ppn = 'EXCLUDING PPN';
+        ppn = 'EXCLUDING PPN 10%';
     }
-    var detail = salesContract.accountBank.currency.code + " " + `${parseFloat(salesContract.price).toLocaleString(locale, locale.currency)}` + ' / ' + salesContract.uom.unit + "\n";
-    detailprice += salesContract.accountBank.currency.code + " " + `${parseFloat(salesContract.price).toLocaleString(locale, locale.currency)}` + ' / ' + salesContract.uom.unit + ' ' + ppn;
-    amount += salesContract.price;
+    var detail = salesContract.accountBank.currency.symbol + " " + `${parseFloat(salesContract.price).toLocaleString(locale, locale.currency)}` + ' / ' + salesContract.uom.unit + "\n";
+    detailprice += salesContract.accountBank.currency.symbol + " " + `${parseFloat(salesContract.price).toLocaleString(locale, locale.currency)}` + ' / ' + salesContract.uom.unit + ' ' + ppn;
+    amount = salesContract.price;
 
     var comoDesc = "";
     if (salesContract.comodityDescription != "") {
@@ -44,18 +44,18 @@ module.exports = function (salesContract) {
                     style: ['size09'],
                     alignment: "right"
                 }, {
-                        text: 'Date, ' + `${moment(salesContract._createdDate).format('MMMM DD,YYYY')}`,
-                        style: ['size09'],
-                        alignment: "right"
-                    }, {
-                        text: 'MESSRS,\n' + salesContract.buyer.name + '\n' + salesContract.buyer.address,
-                        style: ['size09'],
-                        alignment: "left"
-                    }, {
-                        text: 'SALES CONTRACT NO ' + no,
-                        style: ['size11', 'bold'],
-                        alignment: "center"
-                    }]
+                    text: 'Date, ' + `${moment(salesContract._createdDate).format('MMMM DD,YYYY')}`,
+                    style: ['size09'],
+                    alignment: "right"
+                }, {
+                    text: 'MESSRS,\n' + salesContract.buyer.name + '\n' + salesContract.buyer.address + '\n' + salesContract.buyer.country + '\n' + salesContract.buyer.contact,
+                    style: ['size09'],
+                    alignment: "left"
+                }, {
+                    text: 'SALES CONTRACT NO: ' + no,
+                    style: ['size11', 'bold'],
+                    alignment: "center"
+                }]
             }]
         }, '\n'];
 
@@ -67,10 +67,10 @@ module.exports = function (salesContract) {
                     style: ['size09'],
                     alignment: "left"
                 }, {
-                        text: 'P.T. DAN LIRIS KELURAHAN BANARAN, KECAMATAN GROGOL SUKOHARJO - INDONESIA, we confirm the order under the following terms and conditions as mentioned below :',
-                        style: ['size09'],
-                        alignment: "left"
-                    }]
+                    text: 'P.T. DAN LIRIS KELURAHAN BANARAN, KECAMATAN GROGOL SUKOHARJO - INDONESIA, we confirm the order under the following terms and conditions as mentioned below :',
+                    style: ['size09'],
+                    alignment: "left"
+                }]
             }]
         }, '\n'];
 
@@ -89,7 +89,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text: salesContract.comodity.name + comoDesc + '\n' + 'CONSTRUCTION : ' + salesContract.material.name + ' ' + salesContract.materialConstruction.name + ' ' + salesContract.yarnMaterial.name + ' ' + salesContract.materialWidth,
+                        text: salesContract.comodity.name + comoDesc + '\n' + 'CONSTRUCTION : ' + salesContract.material.name + ' ' + salesContract.materialConstruction.name + ' / ' + salesContract.yarnMaterial.name + ' WIDTH: ' + salesContract.materialWidth,
                         style: ['size09']
                     }]
             }, {
@@ -137,7 +137,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text: detail + salesContract.paymentMethod,
+                        text: detail + salesContract.termOfShipment + '\n' + salesContract.termOfPayment.termOfPayment,
                         style: ['size09']
                     }]
             }, {
@@ -153,7 +153,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text: salesContract.accountBank.currency.code + " " + `${parseFloat(amount).toLocaleString(locale, locale.currency)}`,
+                        text: salesContract.accountBank.currency.symbol + " " + `${parseFloat(amount).toLocaleString(locale, locale.currency)}`,
                         style: ['size09']
                     }]
             }, {
@@ -228,14 +228,14 @@ module.exports = function (salesContract) {
                 stack: ['Accepted and confirmed : ', '\n\n\n\n', '(                                  )', 'Authorized signature'],
                 style: ['center']
             }, {
-                    width: '50%',
-                    stack: ['PT DANLIRIS', '\n\n\n\n', '(    RUDY KURNIAWAN   )', 'Marketing Manager'],
-                    style: ['center']
-                }],
+                width: '50%',
+                stack: ['PT DANLIRIS', '\n\n\n\n', '(    RUDY KURNIAWAN   )', 'Marketing Manager'],
+                style: ['center']
+            }],
             style: ['size09']
         }];
 
-        remark = [{
+        var re = [{
             columns: [{
                 width: '*',
                 stack: ['\n', {
@@ -243,7 +243,7 @@ module.exports = function (salesContract) {
                     style: ['size09'],
                     alignment: "left"
                 }, {
-                        text: '- Beneficiary : P.T. DAN LIRIS KELURAHAN BANARAN, KECAMATAN GROGOL SUKOHARJO - INDONESIA (Phone No. 0271-740888 / 714400). \n' + 'Payment Transferred to: \n' + 'PAYMENT TO BE TRANSFERRED TO BANK ' + salesContract.accountBank.bankName + '\n' + salesContract.accountBank.bankAddress + 'ACCOUNT NAME : ' + salesContract.accountBank.accountName + '\n' + 'ACCOUNT NO : ' + salesContract.accountBank.accountNumber + ' SWIFT CODE : ' + salesContract.accountBank.swiftCode,
+                        text: '- Beneficiary : P.T. DAN LIRIS KELURAHAN BANARAN, KECAMATAN GROGOL SUKOHARJO - INDONESIA (Phone No. 0271-740888 / 714400). \n' + 'Payment Transferred to: \n' + 'PAYMENT TO BE TRANSFERRED TO BANK ' + salesContract.accountBank.bankName + '\n' + salesContract.accountBank.bankAddress + '\n' + 'ACCOUNT NAME : ' + salesContract.accountBank.accountName + '\n' + 'ACCOUNT NO : ' + salesContract.accountBank.accountNumber + ' SWIFT CODE : ' + salesContract.accountBank.swiftCode,
                         style: ['size09'],
                         alignment: "left"
                     }, {
@@ -258,7 +258,23 @@ module.exports = function (salesContract) {
             }]
         }];
 
-        if (salesContract.agentId) {
+        remark = [{
+            table: {
+                widths: ['100%'],
+                body: [
+                    [{
+                        stack: [re],
+                        style: ['size09']
+                    }
+                    ]
+                ]
+            },
+            layout: 'noBorders',
+            dontBreakRows: true
+        }];
+
+        //AGENT COMMISSION AGREEMENT
+        if (salesContract.agent.name) {
             var header2 = [{
                 width: '*',
                 stack: [{
@@ -266,23 +282,23 @@ module.exports = function (salesContract) {
                     style: ['size09'],
                     alignment: "right"
                 }, {
-                        text: 'MESSRS,\n' + salesContract.agent.name + '\n' + salesContract.agent.address,
-                        style: ['size09'],
-                        alignment: "left"
-                    }, '\n', {
-                        text: 'COMMISSION AGREEMENT ' + code + '\n' + 'FOR SALES CONTRACT NO ' + no,
-                        style: ['size11', 'bold'],
-                        alignment: "center"
-                    }]
+                    text: 'MESSRS,\n' + salesContract.agent.name + '\n' + salesContract.agent.address + '\n' + salesContract.agent.country + '\n' + salesContract.agent.contact,
+                    style: ['size09'],
+                    alignment: "left"
+                }, '\n', {
+                    text: 'COMMISSION AGREEMENT NO: ' + code + '\n' + 'FOR SALES CONTRACT NO: ' + no,
+                    style: ['size11', 'bold'],
+                    alignment: "center"
+                }]
             }, '\n'];
 
             var subheader2 = [{
                 stack: ['\n', {
-                    text: 'This is to confirm that your order for ' + salesContract.buyer.name + ' concerning ' + parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + ' ' + salesContract.uom.unit + ' of' + '\n' + salesContract.comodity.name + comoDesc + '\n' + 'CONSTRUCTION : ' + salesContract.material.name + ' ' + salesContract.materialConstruction.name + ' ' + salesContract.yarnMaterial.name + ' ' + salesContract.materialWidth,
+                    text: 'This is to confirm that your order for ' + salesContract.buyer.name + ' concerning ' + parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + ' ' + salesContract.uom.unit + ' of' + '\n' + salesContract.comodity.name + comoDesc + '\n' + 'CONSTRUCTION : ' + salesContract.material.name + ' ' + salesContract.materialConstruction.name + ' / ' + salesContract.yarnMaterial.name + ' WIDTH: ' + salesContract.materialWidth,
                     style: ['size09'],
                     alignment: "left"
                 }, '\n', {
-                        text: 'Placed with us, P.T. DAN LIRIS - SOLO INDONESIA, is inclusive of ' + salesContract.comission + ' sales commission' + '\n' + 'each ' + salesContract.uom.unit + ' on the FOB - SEMARANG value, payable to you upon final negotiation and clearance of ' + salesContract.paymentMethod + '.',
+                        text: 'Placed with us, P.T. DAN LIRIS - SOLO INDONESIA, is inclusive of ' + salesContract.comission + ' sales commission' + '\n' + 'each ' + salesContract.uom.unit + ' on ' + salesContract.termOfShipment + ' value, payable to you upon final negotiation and clearance of ' + salesContract.termOfPayment.termOfPayment + '.',
                         style: ['size09'],
                         alignment: "left"
                     }, '\n', '\n', {
@@ -298,10 +314,10 @@ module.exports = function (salesContract) {
                     stack: ['Accepted and confirmed : ', '\n\n\n\n', '(                                  )', 'Authorized signature'],
                     style: ['center']
                 }, {
-                        width: '50%',
-                        stack: ['PT DANLIRIS', '\n\n\n\n', '(    RUDY KURNIAWAN   )', 'Marketing Manager'],
-                        style: ['center']
-                    }],
+                    width: '50%',
+                    stack: ['PT DANLIRIS', '\n\n\n\n', '(    RUDY KURNIAWAN   )', 'Marketing Manager'],
+                    style: ['center']
+                }],
                 style: ['size09']
             }];
 
@@ -323,12 +339,12 @@ module.exports = function (salesContract) {
                     style: ['size09', 'bold'],
                     alignment: "right"
                 }, {
-                        text: 'SALES CONTRACT ',
-                        style: ['size11', 'bold'],
-                        alignment: "center"
-                    }]
+                    text: 'SALES CONTRACT ',
+                    style: ['size11', 'bold'],
+                    alignment: "center"
+                }]
             }]
-        }];
+        }, '\n'];
         var left = [
             {
 
@@ -360,7 +376,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text: 'KONFIRMASI PESANAN ' + salesContract.orderType.name,
+                        text: 'KONFIRMASI ORDER GREY ',
                         style: ['size09']
                     }]
             }];
@@ -372,14 +388,14 @@ module.exports = function (salesContract) {
                     style: ['size09'],
                     alignment: "left"
                 }, {
-                        text: 'Kepada Yth. :',
-                        style: ['size09'],
-                        alignment: "left"
-                    }, {
-                        text: salesContract.buyer.name + '\n' + salesContract.buyer.address,
-                        style: ['size09'],
-                        alignment: "left"
-                    }]
+                    text: 'Kepada Yth. :',
+                    style: ['size09'],
+                    alignment: "left"
+                }, {
+                    text: salesContract.buyer.name + '\n' + salesContract.buyer.address,
+                    style: ['size09'],
+                    alignment: "left"
+                }]
             }]
         }]
 
@@ -388,9 +404,9 @@ module.exports = function (salesContract) {
                 width: '60%',
                 stack: [left]
             }, {
-                    width: '40%',
-                    stack: [right]
-                }]
+                width: '40%',
+                stack: [right]
+            }]
         }];
 
         body = [{
@@ -398,203 +414,219 @@ module.exports = function (salesContract) {
             style: ['size09'],
             alignment: "left"
         },
-            {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'No. Order',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: salesContract.dispositionNumber,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Jenis',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: salesContract.comodity.name + comoDesc,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Konstruksi / Material',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: salesContract.material.name + ' ' + salesContract.materialConstruction.name + ' ' + salesContract.yarnMaterial.name + ' ' + salesContract.materialWidth,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Jumlah',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + " " + salesContract.uom.unit,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Kwalitas',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: salesContract.quality.name,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Harga',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: detailprice,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Syarat Pembayaran',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: salesContract.paymentMethod,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Pembayaran ke Alamat',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: "BANK " + salesContract.accountBank.bankName + '\n' + salesContract.accountBank.bankAddress + '\n' + 'A/C.' + salesContract.accountBank.accountNumber + '\n' + 'A/N.' + salesContract.accountBank.accountName,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Ongkos Angkut',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: salesContract.transportFee,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Dikirim ke',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: salesContract.deliveredTo,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Jadwal Pengiriman',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: `${moment(salesContract.deliverySchedule).format('MMMM YYYY')}`,
-                        style: ['size09']
-                    }]
-            }, {
-                columns: [
-                    {
-                        width: '25%',
-                        text: 'Kondisi',
-                        style: ['size09']
-                    }, {
-                        width: '3%',
-                        text: ':',
-                        style: ['size09']
-                    },
-                    {
-                        width: '*',
-                        text: salesContract.condition,
-                        style: ['size09']
-                    }]
-            }, {
-                text: 'Demikian konfirmasi order ini kami sampaikan untuk diketahui dan dipergunakan seperlunya. tembusan surat ini mohon dikirim kembali setelah ditanda tangani dan dibubuhi cap perusahaan.',
-                style: ['size09'],
-                alignment: "left"
-            }];
+        {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'No. Order',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: salesContract.dispositionNumber,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Jenis',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: salesContract.comodity.name + comoDesc,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Konstruksi / Material',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: salesContract.material.name + ' ' + salesContract.materialConstruction.name + ' ' + salesContract.yarnMaterial.name + ' ' + salesContract.materialWidth,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Jumlah',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + " " + salesContract.uom.unit,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Kwalitas',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: salesContract.quality.name,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Harga',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: detailprice,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Syarat Pembayaran',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: salesContract.termOfPayment.termOfPayment,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Pembayaran ke Alamat',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: "BANK " + salesContract.accountBank.bankName + '\n' + salesContract.accountBank.bankAddress + '\n' + 'A/C.' + salesContract.accountBank.accountNumber + '\n' + 'A/N.' + salesContract.accountBank.accountName,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Ongkos Angkut',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: salesContract.transportFee,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Dikirim ke',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: salesContract.deliveredTo,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Jadwal Pengiriman',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: `${moment(salesContract.deliverySchedule).format('MMMM YYYY')}`,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Kondisi',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: salesContract.condition,
+                    style: ['size09']
+                }]
+        }, {
+            columns: [
+                {
+                    width: '25%',
+                    text: 'Keterangan',
+                    style: ['size09']
+                }, {
+                    width: '3%',
+                    text: ':',
+                    style: ['size09']
+                },
+                {
+                    width: '*',
+                    text: salesContract.remark,
+                    style: ['size09']
+                }]
+        }, {
+            text: 'Demikian konfirmasi order ini kami sampaikan untuk diketahui dan dipergunakan seperlunya. tembusan surat ini mohon dikirim kembali setelah ditanda tangani dan dibubuhi cap perusahaan.',
+            style: ['size09'],
+            alignment: "left"
+        }];
 
 
 
@@ -604,11 +636,42 @@ module.exports = function (salesContract) {
                 stack: ['Pembeli, ', '\n\n\n\n', '(                                  )'],
                 style: ['center']
             }, {
-                    width: '50%',
-                    stack: ['Hormat Kami,', '\n\n\n\n', '(    SURATMI   )', 'Kabag. Penj. F/P'],
-                    style: ['center']
-                }],
+                width: '50%',
+                stack: ['Hormat Kami,', '\n\n\n\n', '(   RUDY KURNIAWAN  )', 'Kadiv. Penjualan'],
+                style: ['center']
+            }],
             style: ['size09']
+        }];
+
+        footer = [{
+            lineHeight: 1.5,
+            pageBreak: 'before',
+            columns: [{
+                width: '*',
+                stack: [{
+                    text: 'KONDISI :',
+                    style: ['size12'],
+                    alignment: "left"
+                }, '\n', {
+                    ul: [
+                        'Keterlambatan pembayaran dikenakan denda 3.00 % per bulan.',
+                        'Pembayaran maju mendapat potongan 00.00 % per bulan, potongan pembayaran maju tersebut dapat berubah sewaktu-waktu baik dengan atau tanpa pemberitahuan terlebih dahulu dari pihak PT. DANLIRIS.',
+                        'Bila terjadi kebijaksanaan pemerintah dalam bidang moneter, untuk barang yang belum terkirim harga akan dibicarakan lagi.',
+                        'Kain/Benang yang telah diproses/dipotong tidak dapat dikembalikan kecuali ada persetujuan tertulis dari kedua belah pihak sebelumnya.',
+                        'Semua klaim atas cacat Kain / Benang harus diinformasikan kepada penjual secara tertulis, berikut contoh atau bukti yang menunjang (memadai), maksimum 2 minggu setelah tanggal penerimaan barang.',
+                        'Klaim yang diajukan akan diselesaikan secara terpisah dan tidak dapat dihubungkan atau dikompensasikan dengan pembayaran Kain Grey / Benang.',
+                        'Penjual mempunyai hak dengan pemberitahuan sebelumnya untuk membatalkan Konfirmasi ini seluruhnya atau sebagian bilamana :',
+                        {
+                            ol: [
+                                'Pembeli tidak dapat memenuhi / menyelesaikan jadwal pengiriman/pengambilan barang yang telah ditetapkan dan disetujui kedua belah pihak.',
+                                'Pembeli belum / tidak dapat menyelesaikan pembayaran yang sudah jatuh tempo dari pengambilan / order-order yang telah terkirim sebelumnya.'
+                            ]
+                        }
+                    ],
+                    style: ['size10'],
+                    alignment: "left"
+                }]
+            }]
         }];
     }
 
@@ -632,6 +695,9 @@ module.exports = function (salesContract) {
             },
             size10: {
                 fontSize: 10
+            },
+            size11: {
+                fontSize: 11
             },
             size12: {
                 fontSize: 12
