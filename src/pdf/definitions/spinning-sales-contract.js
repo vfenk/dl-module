@@ -15,13 +15,8 @@ module.exports = function (salesContract) {
     var remark=[];
     var footer=[];
 
-    var ppn="";
-    if(salesContract.useIncomeTax){
-        ppn='INCLUDING PPN 10%';
-    }
-    else{
-        ppn='EXCLUDING PPN 10%';
-    }
+    var ppn=salesContract.incomeTax;
+    
     var detail= salesContract.accountBank.currency.symbol + " " + `${parseFloat(salesContract.price).toLocaleString(locale, locale.currency)}` + ' / ' + salesContract.uom.unit +"\n";
     detailprice+= salesContract.accountBank.currency.symbol + " " + `${parseFloat(salesContract.price).toLocaleString(locale, locale.currency)}` + ' / ' + salesContract.uom.unit + ' ' + ppn;
     amount=salesContract.price;
