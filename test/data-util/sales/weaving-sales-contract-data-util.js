@@ -34,6 +34,7 @@ class WeavingSalesContractDataUtil {
                     uom: _uom,
                     buyerId: _buyer._id,
                     buyer: _buyer,
+                    
                     qualityId: _quality._id,
                     quality: _quality,
                     materialConstructionId:_construction._id,
@@ -54,9 +55,10 @@ class WeavingSalesContractDataUtil {
                     incomeTax:'Exclude PPn',
                     price:8000,
 
-                    paymentMethod:`Telegraphic Transfer (TT)`,
+                    // paymentMethod:`Telegraphic Transfer (TT)`,
                     paymentRequirement:`Payment Requirement`,
-                    rollLength:`length`,
+                    // rollLength:`length`,
+                    termOfShipment:"test",
                     packing:`pack`,
                     deliverySchedule:new Date(),
                     remark:`desc`,
