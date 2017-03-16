@@ -287,7 +287,7 @@ it("#09. should error when create new data without date output", function(done) 
             });
 });
 
-it("#10. should error when create new data without date output", function(done) {
+it("#10. should error when create new data without time output", function(done) {
     dataUtil.getNewData()
             .then(data => {
                 delete data.timeOutput;
@@ -416,74 +416,74 @@ it("#14. should error when create new data with time input greater time date out
             });
 });
 
-it("#15. should error when create new data with goodOutput greater than input", function(done) {
-    dataUtil.getNewData()
-            .then(data => {
-                data.goodOutput = data.input + 10;
-                dailyOperationManager.create(data)
-                    .then((item) => {
-                        done("should error when create new data with goodOutput greater than input");
-                    })
-                    .catch((e) => {
-                        try {
-                            e.errors.should.have.property('goodOutput');
-                            done();
-                        }
-                        catch (ex) {
-                            done(ex);
-                        }
-                    });
-            })
-            .catch((e) => {
-                done(e);
-            });
-});
+// it("#15. should error when create new data with goodOutput greater than input", function(done) {
+//     dataUtil.getNewData()
+//             .then(data => {
+//                 data.goodOutput = data.input + 10;
+//                 dailyOperationManager.create(data)
+//                     .then((item) => {
+//                         done("should error when create new data with goodOutput greater than input");
+//                     })
+//                     .catch((e) => {
+//                         try {
+//                             e.errors.should.have.property('goodOutput');
+//                             done();
+//                         }
+//                         catch (ex) {
+//                             done(ex);
+//                         }
+//                     });
+//             })
+//             .catch((e) => {
+//                 done(e);
+//             });
+// });
 
-it("#16. should error when create new data with badOutput greater than input", function(done) {
-    dataUtil.getNewData()
-            .then(data => {
-                data.badOutput = data.input + 10;
-                dailyOperationManager.create(data)
-                    .then((item) => {
-                        done("should error when create new data with badOutput greater than input");
-                    })
-                    .catch((e) => {
-                        try {
-                            e.errors.should.have.property('badOutput');
-                            done();
-                        }
-                        catch (ex) {
-                            done(ex);
-                        }
-                    });
-            })
-            .catch((e) => {
-                done(e);
-            });
-});
+// it("#16. should error when create new data with badOutput greater than input", function(done) {
+//     dataUtil.getNewData()
+//             .then(data => {
+//                 data.badOutput = data.input + 10;
+//                 dailyOperationManager.create(data)
+//                     .then((item) => {
+//                         done("should error when create new data with badOutput greater than input");
+//                     })
+//                     .catch((e) => {
+//                         try {
+//                             e.errors.should.have.property('badOutput');
+//                             done();
+//                         }
+//                         catch (ex) {
+//                             done(ex);
+//                         }
+//                     });
+//             })
+//             .catch((e) => {
+//                 done(e);
+//             });
+// });
 
-it("#17. should error when create new data with sum between badOutput and goodOutput greater than input", function(done) {
-    dataUtil.getNewData()
-            .then(data => {
-                data.badOutput += 1;
-                data.goodOutput += 1;
-                dailyOperationManager.create(data)
-                    .then((item) => {
-                        done("should error when create new data with sum between badOutput and goodOutput greater than inputy");
-                    })
-                    .catch((e) => {
-                        try {
-                            e.errors.should.have.property('badOutput');
-                            e.errors.should.have.property('goodOutput');
-                            e.errors.should.have.property('input');
-                            done();
-                        }
-                        catch (ex) {
-                            done(ex);
-                        }
-                    });
-            })
-            .catch((e) => {
-                done(e);
-            });
-});
+// it("#17. should error when create new data with sum between badOutput and goodOutput greater than input", function(done) {
+//     dataUtil.getNewData()
+//             .then(data => {
+//                 data.badOutput += 1;
+//                 data.goodOutput += 1;
+//                 dailyOperationManager.create(data)
+//                     .then((item) => {
+//                         done("should error when create new data with sum between badOutput and goodOutput greater than inputy");
+//                     })
+//                     .catch((e) => {
+//                         try {
+//                             e.errors.should.have.property('badOutput');
+//                             e.errors.should.have.property('goodOutput');
+//                             e.errors.should.have.property('input');
+//                             done();
+//                         }
+//                         catch (ex) {
+//                             done(ex);
+//                         }
+//                     });
+//             })
+//             .catch((e) => {
+//                 done(e);
+//             });
+// });

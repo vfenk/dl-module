@@ -170,19 +170,19 @@ module.exports = class DailyOperationManager extends BaseManager {
                             errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isRequired:%s is required", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output tidak boleh kosong";
                             errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s is required", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai bad output tidak boleh kosong";
                         }
-                        else if(valid.input && valid.input !== ''){
-                            if(goodOutput > valid.input){
-                                errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isNotBeMore:%s should not be more than input value", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output tidak boleh lebih besar dari nilai input";
-                            }
-                            if(badOutput > valid.input){
-                                errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s should not be more than input value", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai good output harus tidak boleh besar dari nilai input";
-                            }
-                            if((goodOutput + badOutput) > valid.input){
-                                errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s plus Good Output should not be more than input value", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
-                                errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isNotBeMore:%s plus bad Output should not be more than input value", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
-                                errors["input"] = i18n.__("DailyOperation.input.isNotBeLess:%s should not be less then good output plus bad output", i18n.__("DailyOperation.kanban.partitions.input._:Input")); //"nilai input harus lebih besar dari good output + bad output";
-                            }
-                        }
+                        // else if(valid.input && valid.input !== ''){
+                        //     if(goodOutput > valid.input){
+                        //         errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isNotBeMore:%s should not be more than input value", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output tidak boleh lebih besar dari nilai input";
+                        //     }
+                        //     if(badOutput > valid.input){
+                        //         errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s should not be more than input value", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai good output harus tidak boleh besar dari nilai input";
+                        //     }
+                        //     if((goodOutput + badOutput) > valid.input){
+                        //         errors["badOutput"] = i18n.__("DailyOperation.badOutput.isNotBeMore:%s plus Good Output should not be more than input value", i18n.__("DailyOperation.badOutput._:Bad Output")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
+                        //         errors["goodOutput"] = i18n.__("DailyOperation.goodOutput.isNotBeMore:%s plus bad Output should not be more than input value", i18n.__("DailyOperation.goodOutput._:Good Output")); //"nilai good output + bad output tidak boleh lebih besar dari nilai input";
+                        //         errors["input"] = i18n.__("DailyOperation.input.isNotBeLess:%s should not be less then good output plus bad output", i18n.__("DailyOperation.kanban.partitions.input._:Input")); //"nilai input harus lebih besar dari good output + bad output";
+                        //     }
+                        // }
                     }else{
                         delete valid.goodOutput;
                         delete valid.timeOutput;
