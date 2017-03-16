@@ -171,8 +171,8 @@ module.exports = class AccountManager extends BaseManager {
                         '$ne': new ObjectId(valid._id)
                     }
                 }, {
-                    username: {
-                        '$regex': new RegExp((valid.username || '').trim(), "i")
+                    username:{ 
+                        $regex: new RegExp("^" + valid.username.trim() + "$", "i") 
                     }
                 }]
             });
