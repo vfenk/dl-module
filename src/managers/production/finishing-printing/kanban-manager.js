@@ -35,7 +35,17 @@ module.exports = class KanbanManager extends BaseManager {
                     "$regex": regex
                 }
             };
-            keywordFilter["$or"] = [orderNoFilter];
+            var cartFilter = {
+                "cart.cartNumber": {
+                    "$regex": regex
+                }
+            };
+            var codeFilter = {
+                "code": {
+                    "$regex": regex
+                }
+            };
+            keywordFilter["$or"] = [orderNoFilter, cartFilter, codeFilter];
         }
         query["$and"] = [_default, keywordFilter, pagingFilter];
         return query;
