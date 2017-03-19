@@ -146,7 +146,7 @@ module.exports = class KanbanManager extends BaseManager {
             }
         }
         var codeIndex = {
-            name: `ix_${map.production.finishingPrinting.collection.MonitoringEvent}_code`,
+            name: `ix_${map.production.finishingPrinting.collection.Kanban}_code`,
             key: {
                 code: 1
             },
