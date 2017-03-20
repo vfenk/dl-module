@@ -56,10 +56,12 @@ class MachineDataUtil {
                         code: _machineEvent1.code,
                         no: _machineEvent1.no,
                         name: _machineEvent1.name,
+                        category : _machineEvent1.category
                     }, {
                             code: _machineEvent2.code,
                             no: _machineEvent2.no,
                             name: _machineEvent2.name,
+                            category : _machineEvent1.category
                         }],
                     monthlyCapacity : 1000
 
@@ -100,10 +102,12 @@ class MachineDataUtil {
                         code: 'unitTestCode01',
                         no: '1',
                         name: 'unitTestName1',
+                        category : 'categoryTest1'
                     }, {
                             code: 'unitTestCode02',
                             no: '2',
                             name: 'unitTestName2',
+                            category : 'categoryTest2'
                         }],
                     monthlyCapacity : 1000
 

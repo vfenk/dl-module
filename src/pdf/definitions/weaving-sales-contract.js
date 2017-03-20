@@ -26,7 +26,7 @@ module.exports = function (salesContract) {
     if (salesContract.comodityDescription != "") {
         comoDesc = '\n' + salesContract.comodityDescription;
     }
-    var code = generateCode();
+    var code = salesContract.salesContractNo;
 
     if (salesContract.buyer.type.toLowerCase() == "export" || salesContract.buyer.type.toLowerCase() == "ekspor") {
         

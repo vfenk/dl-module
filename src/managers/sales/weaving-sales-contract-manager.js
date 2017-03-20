@@ -152,13 +152,13 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                 if (!_comodity)
                     errors["comodity"] = i18n.__("WeavingSalesContract.comodity.isRequired:%s is not exists", i18n.__("WeavingSalesContract.comodity._:Comodity")); //"comodity tidak boleh kosong";
 
-                if (!valid.condition || valid.condition === '') {
-                    errors["condition"] = i18n.__("WeavingSalesContract.condition.isRequired:%s is required", i18n.__("WeavingSalesContract.condition._:Condition")); //"condition tidak boleh kosong";
-                }
+                // if (!valid.condition || valid.condition === '') {
+                //     errors["condition"] = i18n.__("WeavingSalesContract.condition.isRequired:%s is required", i18n.__("WeavingSalesContract.condition._:Condition")); //"condition tidak boleh kosong";
+                // }
 
-                if (!valid.packing || valid.packing === '') {
-                    errors["packing"] = i18n.__("WeavingSalesContract.packing.isRequired:%s is required", i18n.__("WeavingSalesContract.packing._:Packing")); //"packing tidak boleh kosong";
-                }
+                // if (!valid.packing || valid.packing === '') {
+                //     errors["packing"] = i18n.__("WeavingSalesContract.packing.isRequired:%s is required", i18n.__("WeavingSalesContract.packing._:Packing")); //"packing tidak boleh kosong";
+                // }
 
                 if (!_buyer)
                     errors["buyer"] = i18n.__("WeavingSalesContract.buyer.isRequired:%s is not exists", i18n.__("WeavingSalesContract.buyer._:Buyer")); //"Buyer tidak boleh kosong";
@@ -182,16 +182,19 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                 if (!valid.deliverySchedule || valid.deliverySchedule === "") {
                     errors["deliverySchedule"] = i18n.__("WeavingSalesContract.deliverySchedule.isRequired:%s is required", i18n.__("WeavingSalesContract.deliverySchedule._:deliverySchedule")); //"deliverySchedule tidak boleh kosong";
                 }
+
                 if (!valid.incomeTax || valid.incomeTax === '') {
                     errors["incomeTax"] = i18n.__("WeavingSalesContract.incomeTax.isRequired:%s is required", i18n.__("WeavingSalesContract.incomeTax._:IncomeTax")); //"incomeTax tidak boleh kosong";
                 }
                 else {
+
                     valid.deliverySchedule = new Date(valid.deliverySchedule);
                     var today = new Date();
                     today.setHours(0, 0, 0, 0);
                     if (today > valid.deliverySchedule) {
                         errors["deliverySchedule"] = i18n.__("WeavingSalesContract.deliverySchedule.shouldNot:%s should not be less than today's date", i18n.__("WeavingSalesContract.deliverySchedule._:deliverySchedule")); //"deliverySchedule tidak boleh kurang dari tanggal hari ini";
                     }
+
                 }
 
 
@@ -201,10 +204,24 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                     valid.buyer = _buyer;
                     if (valid.buyer.type.trim().toLowerCase() == "ekspor") {
                         if (!valid.termOfShipment || valid.termOfShipment == "") {
-                            errors["termOfShipment"] = i18n.__("WeavingSalesContract.termOfShipment.isRequired:%s is required", i18n.__("WeavingSalesContract.termOfShipment._:termOfShipment")); //"termOfShipment tidak boleh kosong";
+                            errors["termOfShipment"] = i18n.__("WeavingSalesContract.termOfShipment.isRequired:%s is required", i18n.__("WeavingSalesContract.termOfShipment._:termOfShipment")); //"termOfShipment tidak boleh kosong jika buyer type ekspor";
                         }
+
+                        valid.agentId = new ObjectId(_buyer._id);
+                        valid.agent = _buyer;
+                        if (!valid.agent) {
+                            errors["agent"] = i18n.__("WeavingSalesContract.agent.isRequired:%s is required", i18n.__("WeavingSalesContract.agent._:agent")); //"agent tidak boleh kosong jika type buyer ekspor";
+                        }
+
+                        if (valid.agent) {
+                            if (!valid.comission) {
+                                errors["comission"] = i18n.__("WeavingSalesContract.comission.isRequired:%s is required", i18n.__("WeavingSalesContract.comission._:comission")); //"comission tidak boleh kosong jika agent valid";
+                            }
+                        }
+
                     }
                 }
+
                 if (_quality) {
                     valid.qualityId = new ObjectId(_quality._id);
                     valid.quality = _quality;
@@ -234,6 +251,9 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                     valid.materialConstructionId = new ObjectId(_construction._id);
                     valid.materialConstruction = _construction;
                 }
+
+
+
                 valid.deliverySchedule = new Date(valid.deliverySchedule);
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
