@@ -64,7 +64,6 @@ module.exports = class FactFinishingPrintingSalesContractManager extends BaseMan
     extract(time) {
         var timestamp = new Date(1970, 1, 1);
         return this.finishingPrintingSalesContractManager.collection.find({
-            _deleted: false,
             _updatedDate: {
                 $gt: timestamp
             }
@@ -75,6 +74,8 @@ module.exports = class FactFinishingPrintingSalesContractManager extends BaseMan
         if (uom.toLowerCase() === "met" || uom.toLowerCase() === "mtr" || uom.toLowerCase() === "pcs") {
             return quantity * 109361 / 100000;
         } else if (uom.toLowerCase() === "yard" || uom.toLowerCase() === "yds") {
+            return quantity;
+        } else {
             return quantity;
         }
     }
@@ -111,7 +112,7 @@ module.exports = class FactFinishingPrintingSalesContractManager extends BaseMan
                 materialConstruction: item.materialConstruction ? `'${item.materialConstruction.name.replace(/'/g, '"')}'` : null,
                 materialWidth: item.materialWidth ? `'${item.materialWidth}'` : null,
                 material: item.material ? `'${item.material.name.replace(/'/g, '"')}'` : null,
-                deleted: item._deleted ? `'${item._deleted}'` : null
+                deleted: `'${item._deleted}'`
             }
         });
         return Promise.resolve([].concat.apply([], result));
@@ -163,6 +164,17 @@ module.exports = class FactFinishingPrintingSalesContractManager extends BaseMan
                             command.push(this.insertQuery(request, `${sqlQuery}`));
 
                         this.sql.multiple = true;
+
+                        var fs = require("fs");
+                        var path = "C:\\Users\\leslie.aula\\Desktop\\printing.txt";
+
+                        fs.writeFile(path, sqlQuery, function (error) {
+                            if (error) {
+                                console.log("write error:  " + error.message);
+                            } else {
+                                console.log("Successful Write to " + path);
+                            }
+                        });
 
                         return Promise.all(command)
                             .then((results) => {
