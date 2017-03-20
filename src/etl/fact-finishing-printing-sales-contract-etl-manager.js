@@ -110,7 +110,8 @@ module.exports = class FactFinishingPrintingSalesContractManager extends BaseMan
                 construction: this.joinConstructionString(material, materialConstruction, yarnMaterialNo, materialWidth),
                 materialConstruction: item.materialConstruction ? `'${item.materialConstruction.name.replace(/'/g, '"')}'` : null,
                 materialWidth: item.materialWidth ? `'${item.materialWidth}'` : null,
-                material: item.material ? `'${item.material.name.replace(/'/g, '"')}'` : null
+                material: item.material ? `'${item.material.name.replace(/'/g, '"')}'` : null,
+                deleted: item._deleted ? `'${item._deleted}'` : null
             }
         });
         return Promise.resolve([].concat.apply([], result));
@@ -147,7 +148,7 @@ module.exports = class FactFinishingPrintingSalesContractManager extends BaseMan
 
                         for (var item of data) {
                             if (item) {
-                                var queryString = `INSERT INTO [DL_Fact_Sales_Contract_Temp]([Nomor Sales Contract], [Tanggal Sales Contract], [Buyer], [Jenis Buyer], [Jenis Order], [Jumlah Order], [Satuan], [Jumlah Order Konversi], [Kode Buyer], [Jenis Produksi], [Konstruksi], [Konstruksi Material], [Lebar Material], [Material]) VALUES(${item.salesContractNo}, ${item.salesContractDate}, ${item.buyer}, ${item.buyerType}, ${item.orderType}, ${item.orderQuantity}, ${item.orderUom}, ${item.totalOrderConvertion}, ${item.buyerCode}, ${item.productionType}, ${item.construction}, ${item.materialConstruction}, ${item.materialWidth}, ${item.material});\n`;
+                                var queryString = `INSERT INTO [DL_Fact_Sales_Contract_Temp]([Nomor Sales Contract], [Tanggal Sales Contract], [Buyer], [Jenis Buyer], [Jenis Order], [Jumlah Order], [Satuan], [Jumlah Order Konversi], [Kode Buyer], [Jenis Produksi], [Konstruksi], [Konstruksi Material], [Lebar Material], [Material], [_deleted]) VALUES(${item.salesContractNo}, ${item.salesContractDate}, ${item.buyer}, ${item.buyerType}, ${item.orderType}, ${item.orderQuantity}, ${item.orderUom}, ${item.totalOrderConvertion}, ${item.buyerCode}, ${item.productionType}, ${item.construction}, ${item.materialConstruction}, ${item.materialWidth}, ${item.material}, ${item.deleted});\n`;
                                 sqlQuery = sqlQuery.concat(queryString);
                                 if (count % 1000 === 0) {
                                     command.push(this.insertQuery(request, sqlQuery));
