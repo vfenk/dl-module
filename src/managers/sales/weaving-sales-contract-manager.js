@@ -183,23 +183,18 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                     errors["deliverySchedule"] = i18n.__("WeavingSalesContract.deliverySchedule.isRequired:%s is required", i18n.__("WeavingSalesContract.deliverySchedule._:deliverySchedule")); //"deliverySchedule tidak boleh kosong";
                 }
 
-                // if (!valid.shipmentSchedule || valid.shipmentSchedule === "") {
-                //     errors["shipmentSchedule"] = i18n.__("WeavingSalesContract.shipmentSchedule.isRequired:%s is required", i18n.__("WeavingSalesContract.shipmentSchedule._:shipmentSchedule")); //"shipmentSchedule tidak boleh kosong";
-                // }
                 if (!valid.incomeTax || valid.incomeTax === '') {
                     errors["incomeTax"] = i18n.__("WeavingSalesContract.incomeTax.isRequired:%s is required", i18n.__("WeavingSalesContract.incomeTax._:IncomeTax")); //"incomeTax tidak boleh kosong";
                 }
                 else {
-                    valid.shipmentSchedule = new Date(valid.shipmentSchedule);
-                    // valid.deliverySchedule = new Date(valid.deliverySchedule);
+
+                    valid.deliverySchedule = new Date(valid.deliverySchedule);
                     var today = new Date();
                     today.setHours(0, 0, 0, 0);
                     if (today > valid.deliverySchedule) {
                         errors["deliverySchedule"] = i18n.__("WeavingSalesContract.deliverySchedule.shouldNot:%s should not be less than today's date", i18n.__("WeavingSalesContract.deliverySchedule._:deliverySchedule")); //"deliverySchedule tidak boleh kurang dari tanggal hari ini";
                     }
-                    // if (today > valid.shipmentSchedule) {
-                    //     errors["shipmentSchedule"] = i18n.__("WeavingSalesContract.shipmentSchedule.shouldNot:%s should not be less than today's date", i18n.__("WeavingSalesContract.shipmentSchedule._:shipmentSchedule")); //"shipmentSchedule tidak boleh kurang dari tanggal hari ini";
-                    // }
+
                 }
 
 
@@ -260,7 +255,6 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
 
 
                 valid.deliverySchedule = new Date(valid.deliverySchedule);
-                // valid.shipmentSchedule = new Date(valid.shipmentSchedule);
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require('module-toolkit').ValidationError;
