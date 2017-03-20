@@ -62,6 +62,7 @@ class WeavingSalesContractDataUtil {
                     // rollLength:`length`,
                     termOfShipment:"test",
                     packing:`pack`,
+                    shipmentSchedule:new Date(),
                     deliverySchedule:new Date(),
                     // remark:`desc`,
                     useIncomeTax:false,
