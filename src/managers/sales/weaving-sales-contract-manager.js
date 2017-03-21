@@ -100,7 +100,7 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
         var getTermOfPayment = valid.termOfPayment && ObjectId.isValid(valid.termOfPayment._id) ? this.TermOfPaymentManager.getSingleByIdOrDefault(valid.termOfPayment._id) : Promise.resolve(null);
         var getAgent = valid.agent && ObjectId.isValid(valid.agent._id) ? this.buyerManager.getSingleByIdOrDefault(valid.agent._id) : Promise.resolve(null);
 
-        return Promise.all([getSalesContractPromise, getBuyer, getUom, getProduct, getYarnMaterial, getMaterialConstruction, getComodity, getQuality, getBankAccount, getTermOfPayment,getAgent])
+        return Promise.all([getSalesContractPromise, getBuyer, getUom, getProduct, getYarnMaterial, getMaterialConstruction, getComodity, getQuality, getBankAccount, getTermOfPayment, getAgent])
             .then(results => {
                 var _salesContract = results[0];
                 var _buyer = results[1];
@@ -202,7 +202,10 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                     errors["orderQuantity"] = i18n.__("WeavingSalesContract.orderQuantity.isRequired:%s should greater than 0", i18n.__("WeavingSalesContract.orderQuantity._:orderQuantity")); //"orderQuantity tidak boleh kosong";
                 }
 
-
+                if (_agent) {
+                    valid.agentId = new ObjectId(_agent._id);
+                    valid.agent = _agent;
+                }
 
                 if (_buyer) {
                     valid.buyerId = new ObjectId(_buyer._id);
@@ -212,17 +215,17 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                             errors["termOfShipment"] = i18n.__("WeavingSalesContract.termOfShipment.isRequired:%s is required", i18n.__("WeavingSalesContract.termOfShipment._:termOfShipment")); //"termOfShipment tidak boleh kosong jika buyer type ekspor";
                         }
 
-                        valid.agentId = new ObjectId(_agent._id);
-                        valid.agent = _agent;
-                        if (!valid.agent) {
-                            errors["agent"] = i18n.__("WeavingSalesContract.agent.isRequired:%s is required", i18n.__("WeavingSalesContract.agent._:agent")); //"agent tidak boleh kosong jika type buyer ekspor";
-                        }
-
-                        // if (valid.agent) {
-                        //     if (!valid.comission) {
-                        //         errors["comission"] = i18n.__("WeavingSalesContract.comission.isRequired:%s is required", i18n.__("WeavingSalesContract.comission._:comission")); //"comission tidak boleh kosong jika agent valid";
-                        //     }
+                        // valid.agentId = new ObjectId(_agent._id);
+                        // valid.agent = _agent;
+                        // if (!valid.agent) {
+                        //     errors["agent"] = i18n.__("WeavingSalesContract.agent.isRequired:%s is required", i18n.__("WeavingSalesContract.agent._:agent")); //"agent tidak boleh kosong jika type buyer ekspor";
                         // }
+
+                        if (valid.agent) {
+                            if (!valid.comission) {
+                                errors["comission"] = i18n.__("WeavingSalesContract.comission.isRequired:%s is required", i18n.__("WeavingSalesContract.comission._:comission")); //"comission tidak boleh kosong jika agent valid";
+                            }
+                        }
 
                     }
                 }
