@@ -164,18 +164,7 @@ module.exports = class FactWeavingSalesContractEtlManager extends BaseManager {
                             command.push(this.insertQuery(request, `${sqlQuery}`));
 
                         this.sql.multiple = true;
-
-                        var fs = require("fs");
-                        var path = "C:\\Users\\leslie.aula\\Desktop\\weaving.txt";
-
-                        fs.writeFile(path, sqlQuery, function (error) {
-                            if (error) {
-                                console.log("write error:  " + error.message);
-                            } else {
-                                console.log("Successful Write to " + path);
-                            }
-                        });
-
+                        
                         return Promise.all(command)
                             .then((results) => {
                                 request.execute("DL_UPSERT_FACT_Sales_Contract").then((execResult) => {

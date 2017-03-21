@@ -178,15 +178,21 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                         }
                     }
                 }
+
+                if(!valid.orderQuantity|| valid.orderQuantity <= 0){
+                    errors["orderQuantity"] = i18n.__("FinishingPrintingSalesContract.orderQuantity.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.orderQuantity._:OrderQuantity")); //"orderQuantity tidak boleh kosong";
+                }
+
                 if (_quality) {
                     valid.qualityId = new ObjectId(_quality._id);
                     valid.quality = _quality;
                 }
+
                 if (_uom) {
                     valid.uom_id = new ObjectId(_uom._id);
                     valid.uom = _uom;
                 }
-
+                
                 if (_comodity) {
                     valid.comodityId = new ObjectId(_comodity._id);
                     valid.comodity = _comodity;
@@ -206,7 +212,6 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                 if (!valid.stamp) {
                     valid = new SpinningSalesContract(valid);
                 }
-
                 valid.stamp(this.user.username, "manager");
 
                 return Promise.resolve(valid);
