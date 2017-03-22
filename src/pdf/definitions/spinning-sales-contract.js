@@ -15,7 +15,6 @@ module.exports = function (salesContract) {
     var remark = [];
     var footer = [];
     var detailprice = "";
-    var deliverySchedule = moment(salesContract.deliverySchedule);
 
     var ppn = salesContract.incomeTax;
 
@@ -27,7 +26,7 @@ module.exports = function (salesContract) {
     if (salesContract.comodityDescription != "") {
         comoDesc = '\n' + salesContract.comodityDescription;
     }
-    var code=salesContract.salesContractNo;
+    var code = salesContract.salesContractNo;
 
     if (salesContract.buyer.type.toLowerCase() == "export" || salesContract.buyer.type.toLowerCase() == "ekspor") {
         moment.locale();
@@ -164,7 +163,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text: `${deliverySchedule.format('MMMM YYYY')}`,
+                        text: `${moment(salesContract.deliverySchedule).format('MMMM YYYY')}`,
                         style: ['size09']
                     }]
             }, {
@@ -566,7 +565,7 @@ module.exports = function (salesContract) {
                 },
                 {
                     width: '*',
-                    text: `${deliverySchedule.format('MMMM YYYY')}`,
+                    text: `${moment(salesContract.deliverySchedule).format('MMMM YYYY')}`,
                     style: ['size09']
                 }]
         }, {
