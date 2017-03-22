@@ -16,6 +16,7 @@ var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var generateCode = require("../../utils/code-generator");
 var assert = require('assert');
+var moment = require("moment");
 
 module.exports = class SpinningSalesContractManager extends BaseManager {
     constructor(db, user) {
@@ -101,6 +102,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                 var _bank = results[5];
                 var _payment = results[6];
                 var _agent = results[7];
+                var deliverySchedule = moment(valid.deliverySchedule).format("YYYY-MM-DD");
 
                 if (valid.uom) {
                     if (!valid.uom.unit || valid.uom.unit == '')
@@ -203,10 +205,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     valid.accountBank = _bank;
                 }
 
-                //set GMT+7
-                var date = new Date(valid.deliverySchedule);
-                date.setHours(new Date(valid.deliverySchedule).getHours() + 7);
-                valid.deliverySchedule = new Date(date);
+                valid.deliverySchedule = new Date(deliverySchedule);
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require('module-toolkit').ValidationError;
