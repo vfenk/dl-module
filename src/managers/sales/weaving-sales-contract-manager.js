@@ -260,9 +260,10 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                     valid.materialConstruction = _construction;
                 }
 
-
-
-                valid.deliverySchedule = new Date(valid.deliverySchedule);
+                //set GMT+7
+                var date = new Date(valid.deliverySchedule);
+                date.setHours(new Date(valid.deliverySchedule).getHours() + 7);
+                valid.deliverySchedule = new Date(date);
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require('module-toolkit').ValidationError;
