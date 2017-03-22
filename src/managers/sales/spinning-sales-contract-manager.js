@@ -179,7 +179,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     }
                 }
 
-                if(!valid.orderQuantity|| valid.orderQuantity <= 0){
+                if (!valid.orderQuantity || valid.orderQuantity <= 0) {
                     errors["orderQuantity"] = i18n.__("FinishingPrintingSalesContract.orderQuantity.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.orderQuantity._:OrderQuantity")); //"orderQuantity tidak boleh kosong";
                 }
 
@@ -192,7 +192,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     valid.uom_id = new ObjectId(_uom._id);
                     valid.uom = _uom;
                 }
-                
+
                 if (_comodity) {
                     valid.comodityId = new ObjectId(_comodity._id);
                     valid.comodity = _comodity;
@@ -202,7 +202,11 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     valid.accountBankId = new ObjectId(_bank._id);
                     valid.accountBank = _bank;
                 }
-                valid.deliverySchedule = new Date(valid.deliverySchedule);
+
+                //set GMT+7
+                var date = new Date(valid.deliverySchedule);
+                date.setHours(new Date(valid.deliverySchedule).getHours() + 7);
+                valid.deliverySchedule = new Date(date);
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require('module-toolkit').ValidationError;
