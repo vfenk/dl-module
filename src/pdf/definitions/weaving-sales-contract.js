@@ -29,7 +29,7 @@ module.exports = function (salesContract) {
     var code = salesContract.salesContractNo;
 
     if (salesContract.buyer.type.toLowerCase() == "export" || salesContract.buyer.type.toLowerCase() == "ekspor") {
-
+        moment.locale();
         header = [{
             columns: [{
                 width: '*',
@@ -163,7 +163,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text: `${deliverySchedule.format('MMMM YYYY')}`,
+                        text: `${moment(salesContract.deliverySchedule).format('MMMM YYYY')}`,
                         style: ['size09']
                     }]
             }, {
@@ -581,7 +581,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text: `${deliverySchedule.format('MMMM YYYY')}`,
+                        text:`${moment(salesContract.deliverySchedule).format('MMMM YYYY')}`,
                         style: ['size09']
                     }]
             }, {

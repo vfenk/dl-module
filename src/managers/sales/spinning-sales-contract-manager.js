@@ -16,6 +16,7 @@ var BaseManager = require('module-toolkit').BaseManager;
 var i18n = require('dl-i18n');
 var generateCode = require("../../utils/code-generator");
 var assert = require('assert');
+var moment = require("moment");
 
 module.exports = class SpinningSalesContractManager extends BaseManager {
     constructor(db, user) {
@@ -101,6 +102,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                 var _bank = results[5];
                 var _payment = results[6];
                 var _agent = results[7];
+                var deliverySchedule = moment(valid.deliverySchedule).format("YYYY-MM-DD");
 
                 if (valid.uom) {
                     if (!valid.uom.unit || valid.uom.unit == '')
@@ -179,7 +181,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     }
                 }
 
-                if(!valid.orderQuantity|| valid.orderQuantity <= 0){
+                if (!valid.orderQuantity || valid.orderQuantity <= 0) {
                     errors["orderQuantity"] = i18n.__("FinishingPrintingSalesContract.orderQuantity.isRequired:%s is required", i18n.__("FinishingPrintingSalesContract.orderQuantity._:OrderQuantity")); //"orderQuantity tidak boleh kosong";
                 }
 
@@ -192,7 +194,7 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     valid.uom_id = new ObjectId(_uom._id);
                     valid.uom = _uom;
                 }
-                
+
                 if (_comodity) {
                     valid.comodityId = new ObjectId(_comodity._id);
                     valid.comodity = _comodity;
@@ -202,7 +204,8 @@ module.exports = class SpinningSalesContractManager extends BaseManager {
                     valid.accountBankId = new ObjectId(_bank._id);
                     valid.accountBank = _bank;
                 }
-                valid.deliverySchedule = new Date(valid.deliverySchedule);
+
+                valid.deliverySchedule = new Date(deliverySchedule);
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
                     var ValidationError = require('module-toolkit').ValidationError;
