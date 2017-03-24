@@ -100,9 +100,8 @@ it('#04. should error when set isComplete true with incomplete steps', function 
                 .then(id => {
                     kanbanManager.getSingleById(id)
                         .then(toBeCompletedKanban =>{
-                            // toBeCompletedKanban.isComplete = true;
+                            toBeCompletedKanban.isComplete = true;
                             toBeCompletedKanban.currentStepIndex = toBeCompletedKanban.instruction.steps.length - 1;
-                            toBeCompletedKanban.currentQty = 5; 
                             kanbanManager.update(toBeCompletedKanban)
                                 .then(completeKanbanId => {
                                     done("should error when set isComplete true with incomplete steps");
