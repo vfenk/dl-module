@@ -64,7 +64,7 @@ module.exports = class KanbanManager extends BaseManager {
         var errors = {};
         var valid = kanban;
 
-        var getKanbanPromise = this.collection.singleOrDefault({
+        var getDuplicateKanbanPromise = this.collection.singleOrDefault({
             _id: {
                 '$ne': new ObjectId(valid._id)
             },
@@ -73,19 +73,26 @@ module.exports = class KanbanManager extends BaseManager {
         var getProductionOrder = valid.productionOrderId && ObjectId.isValid(valid.productionOrderId) ? this.productionOrderManager.getSingleByIdOrDefault(new ObjectId(valid.productionOrderId)) : Promise.resolve(null);
         var getProductionOrderDetail = (valid.selectedProductionOrderDetail && valid.selectedProductionOrderDetail.code) ? this.productionOrderManager.getSingleProductionOrderDetail(valid.selectedProductionOrderDetail.code) : Promise.resolve(null);
         var getInstruction = valid.instructionId && ObjectId.isValid(valid.instructionId) ? this.instructionManager.getSingleByIdOrDefault(new ObjectId(valid.instructionId)) : Promise.resolve(null);
+        var getKanban = valid._id && ObjectId.isValid(valid._id) ? this.getSingleById(valid._id) : Promise.resolve(null);
 
-        return Promise.all([getKanbanPromise, getProductionOrder, getProductionOrderDetail, getInstruction])
+        return Promise.all([getDuplicateKanbanPromise, getProductionOrder, getProductionOrderDetail, getInstruction, getKanban])
             .then(results => {
-                var _kanban = results[0];
+                var _kanbanDuplicate = results[0];
                 var _productionOrder = results[1];
                 var _productionOrderDetail = results[2];
                 var _instruction = results[3];
+                var _kanban = results[4];
 
                 return Promise.all([this.getKanbanListByColorAndOrderNumber(valid._id, _productionOrder, _productionOrderDetail)])
                     .then(_kanbanListByColor => {
 
-                        if (_kanban)
+                        if (_kanbanDuplicate)
                             errors["code"] = i18n.__("Kanban.code.isExists:%s is exists", i18n.__("Kanban.code._:Code"));
+
+                        if (_kanban && !_kanban.isComplete && valid.isComplete && _kanban.currentStepIndex < _kanban.instruction.steps.length){
+                            errors["isComplete"] = i18n.__("Kanban.isComplete.incompleteSteps:%s steps are incomplete", i18n.__("Kanban.code._:Code"));
+                        }
+
                         if (!valid.productionOrder)
                             errors["productionOrder"] = i18n.__("Kanban.productionOrder.isRequired:%s is required", i18n.__("Kanban.productionOrder._:ProductionOrder")); //"Production Order harus diisi";
                         else if (!_productionOrder)
@@ -97,14 +104,14 @@ module.exports = class KanbanManager extends BaseManager {
                         if (!valid.cart)
                             errors["cart"] = i18n.__("Kanban.cart.isRequired:%s is required", i18n.__("Kanban.cart._:Cart")); //"Cart harus diisi";                        
                         else{
-                            var currentQty = 0;
+                            var cartCurrentQty = 0;
                             if (_kanbanListByColor[0] && _kanbanListByColor[0].data.length > 0){
                                 for (var item of _kanbanListByColor[0].data){
-                                    currentQty += Number(item.cart.qty);
+                                    cartCurrentQty += Number(item.cart.qty);
                                 }
                             }
-                            currentQty += Number(valid.cart.qty);
-                            if (currentQty > _productionOrderDetail.quantity)
+                            cartCurrentQty += Number(valid.cart.qty);
+                            if (cartCurrentQty > _productionOrderDetail.quantity)
                                 errors["cart"] = i18n.__("Kanban.cart.qtyOverlimit:%s overlimit", i18n.__("Kanban.cart._:Total Qty")); //"Total Qty in cart over limit";
                         }
                         
