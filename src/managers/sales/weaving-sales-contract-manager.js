@@ -260,8 +260,10 @@ module.exports = class WeavingSalesContractManager extends BaseManager {
                     valid.materialConstruction = _construction;
                 }
 
-
-
+                //set GMT+7
+                // var date = new Date(valid.deliverySchedule);
+                // date.setHours(new Date(valid.deliverySchedule).getHours() + 7);
+                // valid.deliverySchedule = new Date(date);
                 valid.deliverySchedule = new Date(valid.deliverySchedule);
 
                 if (Object.getOwnPropertyNames(errors).length > 0) {
