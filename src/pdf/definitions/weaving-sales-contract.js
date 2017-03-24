@@ -14,7 +14,7 @@ module.exports = function (salesContract) {
     var sign = [];
     var remark = [];
     var footer = [];
-    var deliverySchedule = moment(salesContract.deliverySchedule);
+
     var detailprice = "";
     var amount = 0;
     var ppn = salesContract.incomeTax;
