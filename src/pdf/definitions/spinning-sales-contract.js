@@ -135,7 +135,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text: parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + " ("+`${numSpell(salesContract.orderQuantity)}`  +" )" + salesContract.uom.unit,
+                        text: parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + " ( "+`${numSpell(salesContract.orderQuantity)}`  +" ) " + salesContract.uom.unit,
                         style: ['size09']
                     }]
             }, {
@@ -167,7 +167,7 @@ module.exports = function (salesContract) {
                     },
                     {
                         width: '*',
-                        text: salesContract.accountBank.currency.symbol + " " + `${parseFloat(amount).toLocaleString(locale, locale.currency)}`+" ("+ `${numSpell(amount)}`+" "+ salesContract.accountBank.currency.description+" )" ,
+                        text: salesContract.accountBank.currency.symbol + " " + `${parseFloat(amount).toLocaleString(locale, locale.currency)}`+" ( "+ `${numSpell(amount)}`+" "+ salesContract.accountBank.currency.description+" )" ,
                         style: ['size09']
                     }]
             }, {
@@ -305,7 +305,7 @@ module.exports = function (salesContract) {
 
             var subheader2 = [{
                 stack: ['\n', {
-                    text: 'This is to confirm that your order for ' + salesContract.buyer.name + ' concerning ' + parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal)+" ("+`${numSpell(salesContract.orderQuantity)}` +")" + ' ' + salesContract.uom.unit + ' of' + '\n' + salesContract.comodity.name + comoDesc,
+                    text: 'This is to confirm that your order for ' + salesContract.buyer.name + ' concerning ' + parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal)+" ( "+`${numSpell(salesContract.orderQuantity)}` +" )" + ' ' + salesContract.uom.unit + ' of' + '\n' + salesContract.comodity.name + comoDesc,
                     style: ['size09'],
                     alignment: "justify"
                 }, '\n', {
@@ -470,7 +470,7 @@ module.exports = function (salesContract) {
                 },
                 {
                     width: '*',
-                    text: parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + " (" +`${say(salesContract.orderQuantity," )")}` + salesContract.uom.unit,
+                    text: parseFloat(salesContract.orderQuantity).toLocaleString(locale, locale.decimal) + " ( " +`${say(salesContract.orderQuantity," )")}` +" "+ salesContract.uom.unit,
                     style: ['size09']
                 }]
         }, {
