@@ -82,7 +82,8 @@ module.exports = class KanbanManager extends BaseManager {
                 var _productionOrderDetail = results[2];
                 var _instruction = results[3];
                 var _kanban = results[4];
-                _kanban.currentStepIndex = _kanban.currentStepIndex || 0; // old kanban data does not have currentStepIndex
+                if (_kanban)
+                    _kanban.currentStepIndex = _kanban.currentStepIndex || 0; // old kanban data does not have currentStepIndex
 
                 return Promise.all([this.getKanbanListByColorAndOrderNumber(valid._id, _productionOrder, _productionOrderDetail)])
                     .then(_kanbanListByColor => {
